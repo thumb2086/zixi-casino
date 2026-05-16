@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export type AmountDisplayFormat = 'compact' | 'full';
 
@@ -29,10 +30,15 @@ interface PreferenceState extends UserPreferences {
   resetPrefs: () => void;
 }
 
-export const usePreferencesStore = create<PreferenceState>((set) => ({
-  ...DEFAULT_PREFERENCES,
-  hydrated: false,
-  setPrefs: (prefs) => set((state) => ({ ...state, ...prefs })),
-  replacePrefs: (prefs) => set(() => ({ ...DEFAULT_PREFERENCES, ...prefs, hydrated: true })),
-  resetPrefs: () => set(() => ({ ...DEFAULT_PREFERENCES, hydrated: false })),
-}));
+export const usePreferencesStore = create<PreferenceState>()(
+  persist(
+    (set) => ({
+      ...DEFAULT_PREFERENCES,
+      hydrated: false,
+      setPrefs: (prefs) => set((state) => ({ ...state, ...prefs })),
+      replacePrefs: (prefs) => set(() => ({ ...DEFAULT_PREFERENCES, ...prefs, hydrated: true })),
+      resetPrefs: () => set(() => ({ ...DEFAULT_PREFERENCES, hydrated: false })),
+    }),
+    { name: 'preferences-storage' }
+  )
+);

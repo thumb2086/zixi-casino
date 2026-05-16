@@ -78,6 +78,7 @@ export default function SettingsView() {
     sfxVolume,
     replacePrefs,
     setPrefs,
+    hydrated,
   } = usePreferencesStore();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -126,6 +127,11 @@ export default function SettingsView() {
 
   useEffect(() => {
     if (!sessionId) {
+      setLoading(false);
+      return;
+    }
+
+    if (hydrated) {
       setLoading(false);
       return;
     }

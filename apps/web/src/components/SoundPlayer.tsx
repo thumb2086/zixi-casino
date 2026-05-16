@@ -9,6 +9,7 @@ export default function SoundPlayer() {
   const { sessionId, isAuthorized } = useAuthStore();
   const location = useLocation();
   const { init, playBGM, setPreferences } = useAudio();
+  const hydrated = usePreferencesStore((state) => state.hydrated);
   const replacePrefs = usePreferencesStore((state) => state.replacePrefs);
   const masterVolume = usePreferencesStore((state) => state.masterVolume);
   const bgmEnabled = usePreferencesStore((state) => state.bgmEnabled);
@@ -22,6 +23,7 @@ export default function SoundPlayer() {
 
   useEffect(() => {
     if (!isAuthorized || !sessionId) return;
+    if (hydrated) return;
 
     api.get('/api/v1/profile/prefs', { params: { sessionId } })
       .then((res) => {
@@ -41,7 +43,7 @@ export default function SoundPlayer() {
         console.warn('[SoundPlayer] Failed to load prefs, using defaults:', err);
         replacePrefs({});
       });
-  }, [sessionId, isAuthorized, replacePrefs]);
+  }, [sessionId, isAuthorized, replacePrefs, hydrated]);
 
   useEffect(() => {
     setPreferences({
