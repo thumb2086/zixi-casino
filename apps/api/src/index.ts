@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 import { authRoutes } from "./routes/v1/auth.js";
 import { walletRoutes } from "./routes/v1/wallet.js";
@@ -42,6 +43,14 @@ const fastify = Fastify({
 
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
+
+fastify.register(cors, {
+  origin: [
+    "https://zixi-casino.vercel.app",
+    "http://localhost:5173",
+  ],
+  credentials: true,
+});
 
 // Global Error Handler
 fastify.setErrorHandler((error, request, reply) => {
