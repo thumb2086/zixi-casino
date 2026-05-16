@@ -1,6 +1,7 @@
 {
   "name": "zixi-wallet-frontend",
   "private": true,
+  "packageManager": "pnpm@10.33.0",
   "type": "module",
   "scripts": {
     "start": "node apps/api/dist/index.js",
