@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
+import { api } from '../../store/api';
 import './HorseRacing.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
@@ -41,18 +42,14 @@ export const HorseRacingView: React.FC = () => {
     mutationFn: async () => {
       if (!session) throw new Error('No session');
 
-      const res = await fetch('/api/v1/games/horse/play', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: session.id,
-          betAmount: Number(betAmount),
-          horseId: selectedHorseId,
-        }),
+      const res = await api.post('/api/v1/games/horse/play', {
+        sessionId: session.id,
+        betAmount: Number(betAmount),
+        horseId: selectedHorseId,
       });
 
-      const payload = await res.json();
-      if (!res.ok || payload?.success === false) {
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
         throw new Error(extractGameError(payload));
       }
 

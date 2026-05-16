@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { User, ArrowRight, ShieldCheck, Fingerprint } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { api } from '../../store/api';
 
 export default function ProfileSetup({ onComplete }: { onComplete: () => void }) {
   const { sessionId } = useAuthStore();
@@ -18,12 +19,8 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/v1/profile/set-username', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, username })
-      });
-      const data = await res.json();
+      const res = await api.post('/api/v1/profile/set-username', { sessionId, username });
+      const data = res.data;
       if (data.success) {
         onComplete();
       } else {

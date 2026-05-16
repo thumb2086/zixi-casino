@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
+import { api } from '../../store/api';
 import './Sicbo.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
@@ -22,18 +23,14 @@ export const SicboView: React.FC = () => {
     mutationFn: async () => {
       if (!session) throw new Error('未登入');
 
-      const res = await fetch('/api/v1/games/sicbo/play', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: session.id,
-          betAmount: Number(betAmount),
-          bets: [{ type: selectedBet }],
-        }),
+      const res = await api.post('/api/v1/games/sicbo/play', {
+        sessionId: session.id,
+        betAmount: Number(betAmount),
+        bets: [{ type: selectedBet }],
       });
 
-      const payload = await res.json();
-      if (!res.ok || payload?.success === false) {
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
         throw new Error(extractGameError(payload));
       }
 

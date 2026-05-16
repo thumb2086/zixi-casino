@@ -3,7 +3,7 @@ import { ChevronRight, Flame, LayoutGrid, Lock, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { api } from '../../store/api';
 import AppBottomNav from '../../components/AppBottomNav';
 import { useAuth } from '../auth/useAuth';
 
@@ -54,7 +54,7 @@ export default function RoomLobbyView() {
   const roomsQuery = useQuery({
     queryKey: ['game-rooms'],
     queryFn: async () => {
-      const res = await axios.get('/api/v1/games/rooms');
+      const res = await api.get('/api/v1/games/rooms');
       return (res.data?.data?.rooms || []) as RoomState[];
     },
     refetchInterval: 15000,
@@ -64,7 +64,7 @@ export default function RoomLobbyView() {
     queryKey: ['vip-me', session?.id],
     enabled: Boolean(session?.id),
     queryFn: async () => {
-      const res = await axios.get('/api/v1/vip/me', { params: { sessionId: session?.id } });
+      const res = await api.get('/api/v1/vip/me', { params: { sessionId: session?.id } });
       return res.data?.data;
     },
   });
@@ -74,7 +74,7 @@ export default function RoomLobbyView() {
   const joinRoomMutation = useMutation({
     mutationFn: async ({ roomId }: { roomId: string }) => {
       if (!session?.id) throw new Error('NO_SESSION');
-      const res = await axios.post('/api/v1/games/rooms/join', { sessionId: session.id, roomId });
+      const res = await api.post('/api/v1/games/rooms/join', { sessionId: session.id, roomId });
       return res.data;
     },
   });

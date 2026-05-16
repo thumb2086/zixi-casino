@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { api } from '../../store/api';
 import { Activity, HeartPulse } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -27,8 +27,8 @@ export default function PublicTransactionsView() {
     queryKey: ['public-transactions'],
     queryFn: async () => {
       const [txRes, summaryRes] = await Promise.all([
-        axios.get('/api/v1/dashboard/transactions', { params: { limit: 40, page: 1 } }),
-        axios.get('/api/v1/dashboard/summary'),
+        api.get('/api/v1/dashboard/transactions', { params: { limit: 40, page: 1 } }),
+        api.get('/api/v1/dashboard/summary'),
       ]);
       return {
         items: txRes.data.data.items as DashboardTransaction[],
@@ -47,7 +47,7 @@ export default function PublicTransactionsView() {
   const { data: healthData } = useQuery({
     queryKey: ['health-stats-inline'],
     queryFn: async () => {
-      const res = await axios.get('/api/v1/stats/health');
+      const res = await api.get('/api/v1/stats/health');
       return res.data.data as {
         stats?: {
           uptime?: string;

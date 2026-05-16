@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { api } from './store/api';
 import CasinoView from './features/casino/CasinoView';
 import { RouletteView } from './features/casino/RouletteView';
 import WalletView from './features/wallet/WalletView';
@@ -48,8 +49,8 @@ function useFastLogin() {
       }
 
       try {
-        const res = await fetch(`/api/v1/auth/status?sessionId=${encodeURIComponent(sessionId)}`);
-        const data = await res.json();
+        const res = await api.get('/api/v1/auth/status', { params: { sessionId } });
+        const data = res.data;
         const payload = data?.data;
 
         if (data.success && payload?.status === 'authorized' && payload?.address) {

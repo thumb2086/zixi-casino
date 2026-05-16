@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
+import { api } from '../../store/api';
 import { useUserStore } from '../../store/useUserStore';
 import { ChipAnimation } from '../../components/ChipAnimation';
 import './Coinflip.css';
@@ -85,17 +86,13 @@ export const CoinflipView: React.FC = () => {
   const betMutation = useMutation({
     mutationFn: async () => {
       if (!session) throw new Error('未登入');
-      const res = await fetch('/api/v1/games/coinflip/play', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: session.id,
-          betAmount: parseFloat(betAmount),
-          selection
-        })
+      const res = await api.post('/api/v1/games/coinflip/play', {
+        sessionId: session.id,
+        betAmount: parseFloat(betAmount),
+        selection
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '下注失敗');
+      const data = res.data;
+      if (!res.status) throw new Error(data.error || '下注失敗');
       if (!data.success) throw new Error(data.error || '下注失敗');
       return data.data;
     },

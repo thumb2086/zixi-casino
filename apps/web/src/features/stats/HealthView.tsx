@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { api } from '../../store/api';
 import AppBottomNav from '../../components/AppBottomNav';
 
 export default function HealthView() {
@@ -14,9 +15,8 @@ export default function HealthView() {
   const { data: healthData, isLoading } = useQuery({
     queryKey: ['health-stats'],
     queryFn: async () => {
-      const res = await fetch('/api/v1/stats/health');
-      const data = await res.json();
-      return data.data;
+      const res = await api.get('/api/v1/stats/health');
+      return res.data.data;
     },
     refetchInterval: 30000,
   });
@@ -24,9 +24,8 @@ export default function HealthView() {
   const { data: txData } = useQuery({
       queryKey: ['recent-txs'],
       queryFn: async () => {
-        const res = await fetch('/api/v1/stats/recent-txs');
-        const data = await res.json();
-        return data.data;
+        const res = await api.get('/api/v1/stats/recent-txs');
+        return res.data.data;
       },
       refetchInterval: 10000,
   });

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { api } from '../../store/api';
 import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 
@@ -50,7 +50,7 @@ export default function TransactionsDashboardView() {
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard-transactions', queryParams],
     queryFn: async () => {
-      const res = await axios.get('/api/v1/dashboard/transactions', { params: queryParams });
+      const res = await api.get('/api/v1/dashboard/transactions', { params: queryParams });
       return res.data?.data as { items: TxRow[]; total: number };
     },
     refetchInterval: 10000,
@@ -59,7 +59,7 @@ export default function TransactionsDashboardView() {
   const { data: summary } = useQuery({
     queryKey: ['dashboard-summary', address],
     queryFn: async () => {
-      const res = await axios.get('/api/v1/dashboard/summary', {
+      const res = await api.get('/api/v1/dashboard/summary', {
         params: { address: address || undefined },
       });
       return res.data?.data as {

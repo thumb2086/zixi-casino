@@ -9,6 +9,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { api } from '../../store/api';
 import AppBottomNav from '../../components/AppBottomNav';
 
 const DAILY_REWARDS = [
@@ -29,20 +30,15 @@ export default function RewardsView() {
   const rewardsQuery = useQuery({
     queryKey: ['rewards-summary'],
     queryFn: async () => {
-      const res = await fetch('/api/v1/rewards/summary');
-      const data = await res.json();
-      return data.data;
+      const res = await api.get('/api/v1/rewards/summary');
+      return res.data.data;
     },
   });
 
   const claimMutation = useMutation({
     mutationFn: async (campaignId: string) => {
-      const res = await fetch('/api/v1/rewards/claim', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ campaignId }),
-      });
-      return res.json();
+      const res = await api.post('/api/v1/rewards/claim', { campaignId });
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rewards-summary'] });
