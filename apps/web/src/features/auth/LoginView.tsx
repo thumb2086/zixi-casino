@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { api } from '../../store/api';
 import { RefreshCw, ShieldCheck, Globe, LogIn, Fingerprint, QrCode, Monitor, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,12 +41,8 @@ export default function LoginView() {
     setQrCodeUrl(null);
     setDeepLinkUrl(null);
     try {
-      const res = await fetch('/api/v1/auth/create-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ platform: 'web', clientType: 'web' })
-      });
-      const data = await res.json();
+      const res = await api.post('/api/v1/auth/create-session', { platform: 'web', clientType: 'web' });
+      const data = res.data;
       const payload = data?.data;
       const loginLink = payload?.deepLink || payload?.legacyDeepLink;
 
@@ -69,9 +66,9 @@ export default function LoginView() {
     if (tab !== 'qr' || !sessionId) return;
 
     const interval = setInterval(() => {
-      fetch(`/api/v1/auth/status?sessionId=${encodeURIComponent(sessionId)}`)
-        .then(res => res.json())
-        .then(data => {
+      api.get('/api/v1/auth/status', { params: { sessionId } })
+        .then(res => {
+          const data = res.data;
           const payload = data?.data;
           if (data.success && payload?.status === 'authorized' && payload?.address) {
             setAuth(payload.address, sessionId, payload.publicKey || '0x');
@@ -88,12 +85,8 @@ export default function LoginView() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/v1/auth/custody/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, platform: 'web', clientType: 'web' })
-      });
-      const data = await res.json();
+      const res = await api.post('/api/v1/auth/custody/login', { username, password, platform: 'web', clientType: 'web' });
+      const data = res.data;
       const payload = data?.data;
       if (!data.success || !payload?.success || !payload?.sessionId || !payload?.address) {
         setError(data.error || 'LOGIN_FAILED');
@@ -128,12 +121,8 @@ export default function LoginView() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/v1/auth/custody/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, platform: 'web', clientType: 'web', bonusAmount: '1000' })
-      });
-      const data = await res.json();
+      const res = await api.post('/api/v1/auth/custody/register', { username, password, platform: 'web', clientType: 'web', bonusAmount: '1000' });
+      const data = res.data;
       const payload = data?.data;
       if (!data.success || !payload?.success || !payload?.sessionId || !payload?.address) {
         setError(data.error || 'REGISTER_FAILED');
