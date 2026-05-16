@@ -52,6 +52,7 @@ export function useSyncUser() {
       } as SyncUserData;
     },
     enabled: !!sessionId,
+    staleTime: 30000,
     refetchInterval: 30000,
   });
 

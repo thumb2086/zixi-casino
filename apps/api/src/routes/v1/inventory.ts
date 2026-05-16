@@ -5,9 +5,10 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope, ITEM_DROP_TABLES, RARITY_NAMES, type ItemDefinition, type Rarity } from "@repo/shared";
-import { SessionRepository, OpsRepository } from "@repo/infrastructure";
+import { SessionRepository, OpsRepository, RewardCatalogRepository } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
-import { loadInventoryState, useItem, rollbackUseItem } from "../../utils/inventory.js";
+import { getSessionContext } from "../../utils/auth.js";
+import { loadInventoryState, useItem, creditItemValue, grantBundleToUser } from "../../utils/inventory.js";
 
 function buildItemIndex(): Record<string, ItemDefinition & { rarity: Rarity }> {
   const out: Record<string, ItemDefinition & { rarity: Rarity }> = {};
@@ -25,15 +26,9 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const sessionRepo = new SessionRepository();
   const opsRepo = new OpsRepository();
+  const rewardCatalogRepo = new RewardCatalogRepository();
 
-  const getContext = async (req: any) => {
-    const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
-    if (!sessionId) return null;
-    const session = await sessionRepo.getSessionById(String(sessionId));
-    if (!session || session.status !== "authorized") return null;
-    if (!session.userId || !session.address) return null;
-    return { userId: String(session.userId), address: String(session.address).toLowerCase() };
-  };
+  const getContext = (req: any) => getSessionContext(req, sessionRepo);
 
   typedFastify.get("/", async (request: any) => {
     const ctx = await getContext(request);
@@ -98,51 +93,15 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       }
 
       let newBalance: string | null = null;
-      if (outcome.currencyGranted && outcome.currencyGranted > 0) {
-        try {
-          const current = parseFloat(await gameSettlement.getBalance(ctx.address, "zhixi")) || 0;
-          const updated = (current + outcome.currencyGranted).toString();
-          await gameSettlement.setBalance(ctx.address, "zhixi", updated);
-          newBalance = updated;
-        } catch (err: any) {
-          // Crediting the wallet failed after the item was already consumed.
-          // Restore the pre-use snapshot so the user does not permanently lose
-          // the item for a credit that never landed.
-          try {
-            await rollbackUseItem(ctx.userId, outcome.preUseState);
-          } catch (rollbackErr: any) {
-            await opsRepo.logEvent({
-              channel: "rewards",
-              severity: "error",
-              source: "inventory",
-              kind: "item_use_rollback_failed",
-              userId: ctx.userId,
-              address: ctx.address,
-              message: `Failed to restore item ${itemId} after credit failure: ${rollbackErr?.message || "unknown"}`,
-              meta: { itemId, creditError: err?.message || String(err) },
-            });
-          }
-          await opsRepo.logEvent({
-            channel: "rewards",
-            severity: "error",
-            source: "inventory",
-            kind: "item_use_credit_failed",
-            userId: ctx.userId,
-            address: ctx.address,
-            message: `Credit for item ${itemId} failed; inventory restored`,
-            meta: {
-              itemId,
-              amount: outcome.currencyGranted,
-              error: err?.message || String(err),
-            },
-          });
-          return createApiEnvelope(
-            { success: false },
-            request.id,
-            false,
-            "CREDIT_FAILED",
-          );
-        }
+      try {
+        newBalance = await creditItemValue(ctx.userId, ctx.address, outcome, opsRepo);
+      } catch (err: any) {
+        return createApiEnvelope(
+          { success: false },
+          request.id,
+          false,
+          "CREDIT_FAILED",
+        );
       }
 
       await opsRepo.logEvent({
@@ -174,6 +133,71 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           activeTitle: outcome.state.activeTitle,
           remainingQuantity: outcome.state.inventory[itemId] || 0,
         },
+        request.id,
+      );
+    },
+  );
+
+  // ─── Buy item from shop ──────────────────────────────────────────────────
+
+  typedFastify.post(
+    "/buy",
+    {
+      schema: {
+        body: z.object({
+          sessionId: z.string().optional(),
+          itemId: z.string(),
+        }),
+      },
+    },
+    async (request: any) => {
+      const ctx = await getContext(request);
+      if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
+
+      const { itemId } = request.body as { itemId: string };
+
+      const allCatalog = await rewardCatalogRepo.listItems({ includeInactive: false });
+      const catalogItem = allCatalog.find(
+        (i: any) => i.itemId === itemId && i.source === "shop" && i.isActive !== false,
+      );
+      if (!catalogItem) {
+        return createApiEnvelope({ success: false }, request.id, false, "ITEM_NOT_FOUND");
+      }
+
+      const price = Number(catalogItem.price);
+      if (!price || price <= 0) {
+        return createApiEnvelope({ success: false }, request.id, false, "ITEM_NOT_PURCHASABLE");
+      }
+
+      const balanceStr = await gameSettlement.getBalance(ctx.address, "zhixi");
+      const balance = parseFloat(balanceStr) || 0;
+      if (balance < price) {
+        return createApiEnvelope({ success: false }, request.id, false, "INSUFFICIENT_BALANCE");
+      }
+
+      await gameSettlement.setBalance(ctx.address, "zhixi", (balance - price).toString());
+
+      const bundle = { items: [{ id: itemId, qty: 1 }] };
+      try {
+        await grantBundleToUser(ctx.userId, bundle, ctx.address);
+      } catch (err: any) {
+        await gameSettlement.setBalance(ctx.address, "zhixi", balanceStr);
+        return createApiEnvelope({ success: false }, request.id, false, "GRANT_FAILED");
+      }
+
+      await opsRepo.logEvent({
+        channel: "rewards",
+        severity: "info",
+        source: "inventory",
+        kind: "item_purchased",
+        userId: ctx.userId,
+        address: ctx.address,
+        message: `Purchased item ${itemId} for ${price} ZXC`,
+        meta: { itemId, price },
+      });
+
+      return createApiEnvelope(
+        { success: true, itemId, name: catalogItem.name, price, balanceAfter: (balance - price).toString() },
         request.id,
       );
     },

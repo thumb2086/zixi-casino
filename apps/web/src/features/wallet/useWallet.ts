@@ -14,6 +14,7 @@ export const useWallet = () => {
       const res = await api.get(`${API_BASE}/summary`, { params: { sessionId } });
       return res.data.data;
     },
+    staleTime: 15000,
     refetchInterval: 15000,
   });
 

@@ -126,26 +126,8 @@ export default function SettingsView() {
   }, [username]);
 
   useEffect(() => {
-    if (!sessionId) {
-      setLoading(false);
-      return;
-    }
-
-    if (hydrated) {
-      setLoading(false);
-      return;
-    }
-
-    api.get('/api/v1/profile/prefs', { params: { sessionId } })
-      .then((res) => {
-        const payload = res.data;
-        if (payload?.success !== false && payload?.data?.prefs) {
-          replacePrefs(payload.data.prefs);
-          if (payload.data.displayName) setUsername(payload.data.displayName);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [sessionId, replacePrefs, setUsername]);
+    setLoading(!hydrated);
+  }, [hydrated]);
 
   const persistPrefs = async (updates: Partial<{
     amountDisplay: 'compact' | 'full';

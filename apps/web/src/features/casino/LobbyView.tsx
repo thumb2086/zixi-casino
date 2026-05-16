@@ -12,8 +12,6 @@ import {
   Package,
   Settings as SettingsIcon,
   Trophy,
-  TrendingUp,
-  Wallet as WalletIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
@@ -169,20 +167,6 @@ export default function LobbyView() {
 
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           <GlassCard
-            to="/app/casino/lobby"
-            icon={LayoutGrid}
-            title={isZh ? zh.casinoFloor : 'Casino Floor'}
-            value="12 Units"
-            subtitle={isZh ? zh.activeSimulation : 'Active Simulation'}
-          />
-          <GlassCard
-            to="/app/market"
-            icon={TrendingUp}
-            title={isZh ? zh.marketTerminal : 'Market Terminal'}
-            value="BTC/USD +2.4%"
-            subtitle={isZh ? zh.liveFeed : 'Live Feed'}
-          />
-          <GlassCard
             to="/app/announcement"
             icon={Megaphone}
             title={isZh ? zh.announcements : 'Announcements'}
@@ -201,14 +185,6 @@ export default function LobbyView() {
             title={isZh ? zh.rankings : 'Rankings'}
             value={selfRank ? `#${selfRank}` : '-'}
             subtitle={isZh ? zh.globalSector : 'Global Sector'}
-          />
-          <GlassCard
-            to="/app/wallet"
-            icon={WalletIcon}
-            title={isZh ? zh.wallet : 'Wallet'}
-            value={`${formatNumber(liveBalance || 0)} ZXC`}
-            subtitle={isZh ? zh.secured : 'Secured'}
-            border
           />
           <GlassCard
             to="/app/transactions"

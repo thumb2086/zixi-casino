@@ -18,6 +18,7 @@ import {
 } from "@repo/shared";
 import { SessionRepository, OpsRepository, kv } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
+import { getSessionContext } from "../../utils/auth.js";
 import {
   isDailyFreeChestReady,
   loadInventoryState,
@@ -37,14 +38,7 @@ export async function chestRoutes(fastify: FastifyInstance) {
   const sessionRepo = new SessionRepository();
   const opsRepo = new OpsRepository();
 
-  const getContext = async (req: any) => {
-    const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
-    if (!sessionId) return null;
-    const session = await sessionRepo.getSessionById(String(sessionId));
-    if (!session || session.status !== "authorized") return null;
-    if (!session.userId || !session.address) return null;
-    return { sessionId: String(sessionId), userId: String(session.userId), address: String(session.address).toLowerCase() };
-  };
+  const getContext = (req: any) => getSessionContext(req, sessionRepo);
 
   // Catalog of chest types with drop-rate breakdown and pity rules
   typedFastify.get("/", async (request: any) => {

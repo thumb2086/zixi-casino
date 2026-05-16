@@ -29,6 +29,7 @@ export interface ItemDefinition {
     type: string;
     value: number;
     duration?: number; // in hours
+    currency?: "zhixi" | "yjc"; // token type for currency items (defaults to zhixi)
   };
 }
 
@@ -131,11 +132,13 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "token_5000", name: "5000 ZXC", nameEn: "5000 ZXC", type: "token", rarity: "legendary", description: "5000 子熙幣", icon: "🏆", tradable: false, consumable: true, effect: { type: "currency", value: 5000 } },
     { id: "buff_permanent", name: "永久幸運", nameEn: "Permanent Luck", type: "buff", rarity: "legendary", description: "永久小幅提升遊戲勝率", icon: "✨", tradable: false, consumable: true, effect: { type: "luck_boost", value: 0.02 } },
     { id: "buff_prevent_loss_10", name: "免輸護符 (10 次)", nameEn: "Loss Shield (10 uses)", type: "buff", rarity: "legendary", description: "使用後下 10 次輸的下注將全額退回", icon: "🛡️", tradable: false, consumable: true, effect: { type: "prevent_loss", value: 10 } },
+    { id: "token_yjc_shard", name: "YJC 碎片", nameEn: "YJC Shard", type: "token", rarity: "legendary", description: "0.0001 YJC，可在兌換商店使用", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.0001, currency: "yjc" } },
     { id: "avatar_legend", name: "傳奇", nameEn: "Legend", type: "avatar", rarity: "legendary", description: "傳奇玩家的專屬頭像", icon: "🌟", tradable: true, consumable: false },
     { id: "title_legend", name: "傳奇", nameEn: "The Legend", type: "title", rarity: "legendary", description: "真正的傳奇人物", icon: "🌟", tradable: false, consumable: false },
   ],
   mythic: [
     { id: "token_10000", name: "10000 ZXC", nameEn: "10000 ZXC", type: "token", rarity: "mythic", description: "10000 子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 10000 } },
+    { id: "token_yjc", name: "YJC 幣", nameEn: "YJC Coin", type: "token", rarity: "mythic", description: "0.001 YJC，稀有加密資產", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 0.001, currency: "yjc" } },
     { id: "avatar_mythic", name: "神話", nameEn: "Mythic", type: "avatar", rarity: "mythic", description: "超越傳奇的神話頭像", icon: "🔱", tradable: true, consumable: false },
     { id: "title_immortal", name: "不朽者", nameEn: "Immortal", type: "title", rarity: "mythic", description: "淩駕於時間之上的不朽者", icon: "👑", tradable: false, consumable: false },
   ],

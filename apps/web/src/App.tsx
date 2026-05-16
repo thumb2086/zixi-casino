@@ -25,6 +25,7 @@ import SettingsView from './features/settings/SettingsView';
 import PublicTransactionsView from './features/transactions/PublicTransactionsView';
 import TransactionsDashboardView from './features/dashboard/TransactionsDashboardView';
 import SoundPlayer from './components/SoundPlayer';
+import TransactionQueueIndicator from './components/TransactionQueueIndicator';
 import { useSyncUser } from './hooks/useSyncUser';
 import Layout from './components/Layout';
 import VIPLevelsView from './features/info/VIPLevelsView';
@@ -96,6 +97,7 @@ function AppContent() {
   return (
     <div className="relative min-h-screen bg-[#0e0e0e]">
       <SoundPlayer />
+      {isAuthorized && <TransactionQueueIndicator />}
       <Routes>
         {!isAuthorized ? (
           <Route path="*" element={<LoginView />} />

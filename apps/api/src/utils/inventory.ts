@@ -248,6 +248,7 @@ export interface UseItemOutcome {
   preUseState: ProfileInventoryState;
   effectSummary: string;
   currencyGranted?: number;
+  currencyType?: "zhixi" | "yjc";
   buffActivated?: ActiveBuff;
 }
 
@@ -291,7 +292,9 @@ export async function useItem(
       const value = Number(def.effect?.value || 0);
       if (value > 0) {
         currencyGranted = value;
-        effectSummary = `已領取 ${value.toLocaleString()} ZXC`;
+        currencyType = def.effect?.currency || "zhixi";
+        const label = currencyType === "yjc" ? "YJC" : "ZXC";
+        effectSummary = `已領取 ${value.toLocaleString()} ${label}`;
       }
       break;
     }
@@ -338,6 +341,7 @@ export async function useItem(
     preUseState: state,
     effectSummary,
     currencyGranted,
+    currencyType,
     buffActivated,
   };
 }
@@ -545,4 +549,63 @@ export async function rollbackGrantBundle(
 
 export function listAllItems(): ItemDefinition[] {
   return Object.values(ALL_ITEMS);
+}
+
+/**
+ * Credit a user's wallet after using a token item. Handles both ZXC and YJC.
+ * Call this after `useItem()` succeeds. If crediting fails, the item is
+ * automatically rolled back (restored to inventory).
+ *
+ * Returns the new balance string, or throws if both credit and rollback fail.
+ */
+export async function creditItemValue(
+  userId: string,
+  address: string,
+  outcome: UseItemOutcome,
+  opsRepo: import("@repo/infrastructure").OpsRepository,
+): Promise<string | null> {
+  if (!outcome.currencyGranted || outcome.currencyGranted <= 0) return null;
+  const token = outcome.currencyType || "zhixi";
+  // lazy-import to avoid circular dependency
+  const { gameSettlement } = await import("../../utils/game-settlement.js");
+
+  try {
+    const current = parseFloat(await gameSettlement.getBalance(address, token)) || 0;
+    const updated = (current + outcome.currencyGranted).toString();
+    await gameSettlement.setBalance(address, token, updated);
+    return updated;
+  } catch (err: any) {
+    // Credit failed — restore the pre-use inventory snapshot
+    try {
+      await rollbackUseItem(userId, outcome.preUseState);
+    } catch (rollbackErr: any) {
+      await opsRepo.logEvent({
+        channel: "rewards",
+        severity: "error",
+        source: "inventory",
+        kind: "item_use_rollback_failed",
+        userId,
+        address,
+        message: `Failed to restore item ${outcome.item.id} after credit failure: ${rollbackErr?.message || "unknown"}`,
+        meta: { itemId: outcome.item.id, creditError: err?.message || String(err) },
+      });
+    }
+    // Always report the original credit error
+    await opsRepo.logEvent({
+      channel: "rewards",
+      severity: "error",
+      source: "inventory",
+      kind: "item_use_credit_failed",
+      userId,
+      address,
+      message: `Credit for item ${outcome.item.id} failed; inventory restored`,
+      meta: {
+        itemId: outcome.item.id,
+        amount: outcome.currencyGranted,
+        token,
+        error: err?.message || String(err),
+      },
+    });
+    throw err;
+  }
 }
