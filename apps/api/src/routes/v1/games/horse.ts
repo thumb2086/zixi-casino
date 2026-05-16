@@ -9,13 +9,15 @@ import { GameManager } from "@repo/domain/games/game-manager.js";
 import { getRoundInfo, hashInt, pickWeighted } from "@repo/domain/games/auto-round.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
 
+const RTP_SCALE = 2.0;
+
 const HORSES = [
-  { id: 1, name: "赤焰", multiplier: 1.8 },
-  { id: 2, name: "雷霆", multiplier: 2.2 },
-  { id: 3, name: "幻影", multiplier: 2.9 },
-  { id: 4, name: "夜刃", multiplier: 4.0 },
-  { id: 5, name: "霜牙", multiplier: 5.8 },
-  { id: 6, name: "流星", multiplier: 8.5 }
+  { id: 1, name: "赤焰", multiplier: 1.8 * RTP_SCALE },
+  { id: 2, name: "雷霆", multiplier: 2.2 * RTP_SCALE },
+  { id: 3, name: "幻影", multiplier: 2.9 * RTP_SCALE },
+  { id: 4, name: "夜刃", multiplier: 4.0 * RTP_SCALE },
+  { id: 5, name: "霜牙", multiplier: 5.8 * RTP_SCALE },
+  { id: 6, name: "流星", multiplier: 8.5 * RTP_SCALE }
 ];
 
 export async function horseRoutes(fastify: FastifyInstance) {
@@ -113,7 +115,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
       // 2. Resolve game using deterministic hash based on roundId
       const winner = pickWeighted(
         `horse:${roundInfo.roundId}`,
-        HORSES.map(h => ({ ...h, weight: h.multiplier })),
+        HORSES.map(h => ({ ...h, weight: 1 / h.multiplier })),
         'weight'
       );
       const isWin = winner.id === horseId;

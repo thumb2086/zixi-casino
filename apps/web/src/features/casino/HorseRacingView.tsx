@@ -7,12 +7,12 @@ import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 
 const HORSES = [
-  { id: 1, name: '烈焰奔馳', multiplier: 1.8 },
-  { id: 2, name: '暴風衝刺', multiplier: 2.2 },
-  { id: 3, name: '銀翼疾風', multiplier: 2.9 },
-  { id: 4, name: '鐵蹄', multiplier: 4.0 },
-  { id: 5, name: '皇家彗星', multiplier: 5.8 },
-  { id: 6, name: '夜空火箭', multiplier: 8.5 },
+  { id: 1, name: '赤焰', multiplier: 3.6 },
+  { id: 2, name: '雷霆', multiplier: 4.4 },
+  { id: 3, name: '幻影', multiplier: 5.8 },
+  { id: 4, name: '夜刃', multiplier: 8.0 },
+  { id: 5, name: '霜牙', multiplier: 11.6 },
+  { id: 6, name: '流星', multiplier: 17.0 },
 ];
 
 type HorseResult = {

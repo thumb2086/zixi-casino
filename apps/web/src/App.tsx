@@ -27,7 +27,6 @@ import SoundPlayer from './components/SoundPlayer';
 import { useSyncUser } from './hooks/useSyncUser';
 import Layout from './components/Layout';
 import VIPLevelsView from './features/info/VIPLevelsView';
-import OddsView from './features/info/OddsView';
 import InfoView from './features/info/InfoView';
 import { Loader2 } from 'lucide-react';
 
@@ -123,7 +122,7 @@ function AppContent() {
             <Route path="dashboard/transactions" element={<TransactionsDashboardView />} />
             <Route path="health" element={<HealthView />} />
             <Route path="info/vip-levels" element={<VIPLevelsView />} />
-            <Route path="info/odds" element={<OddsView />} />
+            <Route path="info/odds" element={<Navigate to="/app/info?tab=odds" replace />} />
             <Route path="info" element={<InfoView />} />
           </Route>
         )}

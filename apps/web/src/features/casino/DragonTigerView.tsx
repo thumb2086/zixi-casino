@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./DragonTiger.css";
@@ -39,12 +39,7 @@ export const DragonTigerView: React.FC = () => {
   const [isOpening, setIsOpening] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const multiplier = useMemo(() => {
-    if (openGate) return openGate.multiplier;
-    if (!result) return 0;
-    const diff = Math.abs((result.hi ?? 0) - (result.lo ?? 0));
-    return diff === 0 ? 0 : Number((12 / diff).toFixed(2));
-  }, [openGate, result]);
+  const multiplier = 2;
 
   const renderCard = (card?: Card) => (
     <div className="card">
