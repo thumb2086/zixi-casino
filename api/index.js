@@ -297,7 +297,10 @@ export default async function handler(req, res) {
     if (path.startsWith('/api/v1/market/')) {
       const act = path.replace('/api/v1/market', '') || '/';
       if (act === '/snapshot' && req.method === 'GET') {
-        json(res, 200, env({ snapshot: { marketIndex: 50000, marketTrendPct: 1.23, fearGreedIndex: 55, symbols: { 'BTC/USD': { symbol: 'BTC/USD', name: 'Bitcoin', price: 51234.56, type: 'crypto', sector: 'Crypto', changePct: 2.34 }, 'ETH/USD': { symbol: 'ETH/USD', name: 'Ethereum', price: 3123.45, type: 'crypto', sector: 'Crypto', changePct: 1.56 }, 'SOL/USD': { symbol: 'SOL/USD', name: 'Solana', price: 105.67, type: 'crypto', sector: 'Crypto', changePct: -0.78 }, 'YJC/USD': { symbol: 'YJC/USD', name: 'YJC Token', price: 0.1023, type: 'token', sector: 'DeFi', changePct: 5.67 } }, history: { 'BTC/USD': [50000, 50100, 50250, 50500, 51000, 51234] } }));
+        const snapshot = { marketIndex: 50000, marketTrendPct: 1.23, fearGreedIndex: 55 };
+        snapshot.symbols = { 'BTC/USD': { symbol: 'BTC/USD', name: 'Bitcoin', price: 51234.56, type: 'crypto', sector: 'Crypto', changePct: 2.34 }, 'ETH/USD': { symbol: 'ETH/USD', name: 'Ethereum', price: 3123.45, type: 'crypto', sector: 'Crypto', changePct: 1.56 }, 'SOL/USD': { symbol: 'SOL/USD', name: 'Solana', price: 105.67, type: 'crypto', sector: 'Crypto', changePct: -0.78 }, 'YJC/USD': { symbol: 'YJC/USD', name: 'YJC Token', price: 0.1023, type: 'token', sector: 'DeFi', changePct: 5.67 } };
+        snapshot.history = { 'BTC/USD': [50000, 50100, 50250, 50500, 51000, 51234] };
+        json(res, 200, env({ snapshot: snapshot }));
         return;
       }
       if (!session) { json(res, 401, err('UNAUTHORIZED')); return; }
