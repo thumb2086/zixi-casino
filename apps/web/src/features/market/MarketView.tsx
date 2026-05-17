@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   BarChart3,
   CircleDollarSign,
+  Landmark,
   LineChart,
   TrendingDown,
   TrendingUp,
@@ -68,6 +69,7 @@ export default function MarketView() {
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL');
   const selectedQuote = stockSymbols.find((q) => q.symbol === selectedSymbol) || null;
   const [tradeQuantity, setTradeQuantity] = useState('1');
+  const [cashMoveAmount, setCashMoveAmount] = useState('1000');
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
@@ -231,8 +233,39 @@ export default function MarketView() {
                 </button>
               </div>
 
-              <div className="mt-4 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
-                銀行存款 / 提款已移至主控台
+              <div className="mt-6 border-t border-[#494847]/10 pt-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Landmark size={16} className="text-[#fcc025]" />
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+                    銀行存款 / 提款
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min="1"
+                    value={cashMoveAmount}
+                    onChange={(event) => setCashMoveAmount(event.target.value)}
+                    placeholder="金額"
+                    className="flex-1 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={execute.isPending}
+                    onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
+                    className="rounded-xl bg-emerald-600 px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-emerald-500"
+                  >
+                    存入
+                  </button>
+                  <button
+                    type="button"
+                    disabled={execute.isPending}
+                    onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
+                    className="rounded-xl bg-amber-600 px-5 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500"
+                  >
+                    提款
+                  </button>
+                </div>
               </div>
             </div>
 
