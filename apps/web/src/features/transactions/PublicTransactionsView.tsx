@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../store/api';
-import { Activity, HeartPulse, User, Coins, Sparkles, ChevronRight } from 'lucide-react';
+import { Activity, HeartPulse, User, Coins, Sparkles, ChevronRight, Terminal, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ITEM_DROP_TABLES } from '@repo/shared';
@@ -68,6 +68,15 @@ export default function PublicTransactionsView() {
     refetchInterval: 30000,
   });
 
+  const { data: txData } = useQuery({
+    queryKey: ['recent-txs'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/stats/recent-txs');
+      return res.data.data;
+    },
+    refetchInterval: 10000,
+  });
+
   const zh = {
     title: '\u516c\u958b\u4ea4\u6613\u52d5\u614b',
     overallSuccessRate: '\u6574\u9ad4\u6210\u529f\u7387',
@@ -96,6 +105,7 @@ export default function PublicTransactionsView() {
     item.extensionMetadata?.reason === 'register_bonus'
   ).slice(0, 8);
   const serviceStats = healthData?.stats;
+  const events = txData?.events || [];
 
   const { address, username, balance, activeAvatar, activeTitle } = useUserStore();
   const avatarItem = avatarMap[activeAvatar];
@@ -162,46 +172,99 @@ export default function PublicTransactionsView() {
           </Link>
         </section>
 
-        <section className="mb-6 grid gap-4 md:grid-cols-3">
-          <Link
-            to="/app/health"
-            className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl transition-colors hover:bg-[#222121] md:col-span-3"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
+        <section className="mb-10 space-y-6">
+          <div className="flex items-center gap-2">
+            <HeartPulse size={16} className="text-[#fcc025]" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+              {isZh ? zh.serviceStatus : 'Service Status'}
+            </h2>
+          </div>
+
+          {/* Core Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
+              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">UPTIME</span>
+              <span className="text-xl font-black italic text-emerald-500">{serviceStats?.uptime ?? (isLoading ? '...' : '--')}</span>
+            </div>
+            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
+              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">FAILURE RATE</span>
+              <span className="text-xl font-black italic text-[#fcc025]">{serviceStats?.failureRate ?? (isLoading ? '...' : '--')}</span>
+            </div>
+            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
+              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">NODES</span>
+              <span className="text-xl font-black italic text-white">{serviceStats?.nodes ?? (isLoading ? '...' : '--')}</span>
+            </div>
+            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
+              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">SECURE LAYER</span>
+              <span className="text-xl font-black italic text-[#fcc025]">{serviceStats?.secureLayer ?? '--'}</span>
+            </div>
+          </div>
+
+          {/* Traffic Graph + Event Log */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/10 space-y-6">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <HeartPulse size={16} className="text-[#fcc025]" />
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                    {isZh ? zh.serviceStatus : 'Service Status'}
-                  </p>
+                  <Activity size={14} className="text-[#fcc025]" />
+                  <h3 className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SIMULATION THROUGHPUT</h3>
                 </div>
-                <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-                  {isZh ? zh.serviceStatusSummary : 'System health and chain execution traces'}
-                </p>
+                <div className="flex items-center gap-3 text-[7px] font-black uppercase">
+                  <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 border border-emerald-500" /> SUCCESS</div>
+                  <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-red-500/60 border border-red-500" /> FAILURE</div>
+                </div>
               </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#fcc025]">
-                {isZh ? zh.viewDetails : 'View Details'}
-              </p>
+              <div className="flex items-end gap-1 h-40">
+                {serviceStats?.last24h?.success?.length > 0 ? (
+                  serviceStats.last24h.success.map((val: number, i: number) => (
+                    <div key={i} className="flex-1 group relative">
+                      <div className="bg-emerald-500/10 w-full rounded-t-sm" style={{ height: `${(val / 50) * 100}%` }} />
+                      <div className="bg-red-500/40 w-full rounded-t-sm -mt-1" style={{ height: `${(serviceStats.last24h.failure[i] / 50) * 100}%` }} />
+                    </div>
+                  ))
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center opacity-30">
+                    <Activity size={24} className="text-[#494847]" />
+                    <span className="text-[#494847] text-[9px] font-bold uppercase ml-2">No Data</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-between text-[7px] font-black text-[#494847] uppercase tracking-[0.3em]">
+                <span>24 HOURS AGO</span>
+                <span>NOW</span>
+              </div>
             </div>
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#adaaaa]">
-                  {isZh ? zh.uptime : 'Uptime'}
-                </p>
-                <p className="mt-2 text-2xl font-black italic tracking-tight text-emerald-400">
-                  {serviceStats?.uptime ?? (isLoading ? '...' : '--')}
-                </p>
+
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/10 space-y-4">
+              <div className="flex items-center gap-2">
+                <Terminal size={14} className="text-[#fcc025]" />
+                <h3 className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SYSTEM PROTOCOL LOGS</h3>
               </div>
-              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#adaaaa]">
-                  {isZh ? zh.failureRate : 'Failure Rate'}
-                </p>
-                <p className="mt-2 text-2xl font-black italic tracking-tight text-[#fcc025]">
-                  {serviceStats?.failureRate ?? (isLoading ? '...' : '--')}
-                </p>
+              <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 hide-scrollbar">
+                {events.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-12 opacity-20">
+                    <Database size={32} />
+                    <p className="text-[8px] font-black uppercase tracking-[0.5em] mt-3">No recent traces</p>
+                  </div>
+                )}
+                {events.map((ev: any, i: number) => (
+                  <div key={i} className="bg-[#0e0e0e] rounded-xl p-3 border border-[#494847]/5 space-y-1.5 hover:border-[#fcc025]/30 transition-all">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-sm ${ev.severity === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-[#fcc025]/10 text-[#fcc025]'}`}>
+                        [{ev.kind}]
+                      </span>
+                      <span className="text-[7px] font-bold text-[#494847]">
+                        {new Date(ev.createdAt).toLocaleTimeString([], { hour12: false })}
+                      </span>
+                    </div>
+                    <p className="text-[9px] font-bold text-white leading-relaxed uppercase italic tracking-tight">{ev.message}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          </Link>
+          </div>
+        </section>
+
+        <section className="mb-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {isZh ? zh.overallSuccessRate : 'Overall Success Rate'}
