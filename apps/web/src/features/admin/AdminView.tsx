@@ -70,7 +70,7 @@ interface CatalogItem {
   isActive?: boolean;
 }
 
-type TabId = 'dashboard' | 'maintenance' | 'usermgr' | 'catalog' | 'submissions' | 'campaigns' | 'tickets' | 'events';
+type TabId = 'dashboard' | 'maintenance' | 'usermgr' | 'catalog' | 'submissions' | 'campaigns' | 'tickets';
 
 const TABS: { id: TabId; label: string; icon: typeof ShieldAlert }[] = [
   { id: 'dashboard', label: '儀表板', icon: Activity },
@@ -80,7 +80,6 @@ const TABS: { id: TabId; label: string; icon: typeof ShieldAlert }[] = [
   { id: 'submissions', label: '投稿審核', icon: Inbox },
   { id: 'campaigns', label: '活動', icon: CalendarClock },
   { id: 'tickets', label: '工單', icon: MessageCircle },
-  { id: 'events', label: '事件紀錄', icon: ScrollText },
 ];
 
 const RARITY_LABEL: Record<string, string> = {
@@ -788,31 +787,65 @@ export default function AdminView() {
         )}
 
         {activeTab === 'dashboard' && (
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 px-2">
-              <Activity size={16} className="text-[#adaaaa]" />
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">系統狀態</h3>
+          <section className="space-y-6">
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+              <div className="flex items-center gap-2 mb-4">
+                <Activity size={18} className="text-[#fcc025]" />
+                <h3 className="text-sm font-black tracking-wide text-white">系統狀態</h3>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {healthCards.map((s) => (
+                  <div key={s.label} className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
+                    <p className="text-[10px] font-black tracking-wide text-[#adaaaa]">{s.label}</p>
+                    <p className="text-2xl font-black italic tracking-tighter text-[#fcc025] mt-2">{s.value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {healthCards.map((s) => (
-                <div key={s.label} className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
-                  <p className="text-[10px] font-black tracking-wide text-[#adaaaa]">{s.label}</p>
-                  <p className="text-2xl font-black italic tracking-tighter text-[#fcc025] mt-2">{s.value}</p>
+
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <ScrollText size={18} className="text-[#fcc025]" />
+                  <h3 className="text-sm font-black tracking-wide text-white">事件紀錄（{events.length}）</h3>
                 </div>
-              ))}
-            </div>
-            <div className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
-              <p className="text-[10px] font-black tracking-wide text-[#adaaaa] mb-2">最近 5 筆事件</p>
-              {events.length === 0 ? (
+                <button type="button" onClick={refresh} className="text-[10px] text-[#fcc025] hover:underline">重新整理</button>
+              </div>
+              {loading && events.length === 0 ? (
+                <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> 載入中...</div>
+              ) : events.length === 0 ? (
                 <p className="text-xs text-[#adaaaa]">沒有事件</p>
               ) : (
-                <ul className="space-y-2 text-xs">
-                  {events.slice(0, 5).map((evt, i) => (
-                    <li key={evt.id || i} className="border-l-2 border-[#fcc025]/40 pl-3">
-                      <span className="text-[9px] font-black uppercase text-[#adaaaa]">
-                        {evt.severity || 'info'} · {evt.channel}/{evt.kind}
-                      </span>
-                      <p className="text-white mt-0.5">{evt.message}</p>
+                <ul className="space-y-2 text-xs max-h-96 overflow-y-auto">
+                  {events.map((evt, i) => (
+                    <li key={evt.id || i} className="border-l-2 border-[#fcc025]/40 pl-3 py-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-[9px] font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-[#fcc025]/10 text-[#fcc025]' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                          {({ error: '錯誤', warn: '警告', info: '資訊', important: '重要' } as Record<string, string>)[evt.severity] || evt.severity || '資訊'}
+                        </span>
+                        <span className="text-[9px] font-bold text-[#adaaaa]">
+                          {({
+                            'rewards/item_pawned': '道具典當',
+                            'rewards/chests_opened_bulk': '大量開箱',
+                            'rewards/chests_opened': '開箱',
+                            'wallet/airdrop_claimed': '空投領取',
+                            'wallet/zxc_to_yjc_confirmed': 'ZXC→YJC 兌換',
+                            'wallet/transfer': '轉帳',
+                            'game/play_completed': '遊戲結算',
+                            'admin/campaign_upsert': '活動異動',
+                            'admin/grant': '管理員贈送',
+                            'admin/maintenance': '維護模式變更',
+                            'admin/blacklist': '黑名單變更',
+                            'admin/announcement': '公告異動',
+                            'admin/reward_catalog': '獎勵目錄變更',
+                            'admin/submission': '投稿審核',
+                            'support/ticket_created': '工單建立',
+                            'support/ticket_updated': '工單更新',
+                          })[`${evt.channel}/${evt.kind}`] || `${evt.channel}/${evt.kind}`}
+                        </span>
+                      </div>
+                      <p className="text-white mt-1 text-xs break-words">{evt.message}</p>
+                      <p className="text-[10px] text-[#494847] mt-0.5">{evt.createdAt ? new Date(evt.createdAt).toLocaleString() : ''}</p>
                     </li>
                   ))}
                 </ul>
@@ -1941,68 +1974,6 @@ export default function AdminView() {
           </section>
         )}
 
-        {activeTab === 'events' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-            <h3 className="text-sm font-black tracking-wide text-white mb-4">最近事件（{events.length}）</h3>
-            {loading && events.length === 0 ? (
-              <div className="flex items-center gap-2 text-[#adaaaa] text-xs">
-                <Loader2 size={12} className="animate-spin" /> 載入中...
-              </div>
-            ) : events.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">沒有事件</p>
-            ) : (
-              <ul className="space-y-2 text-xs">
-                {events.map((evt, i) => (
-                  <li key={evt.id || i} className="border-l-2 border-[#fcc025]/40 pl-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className={`text-[9px] font-black uppercase ${
-                          evt.severity === 'error'
-                            ? 'text-red-400'
-                            : evt.severity === 'warn' || evt.severity === 'important'
-                            ? 'text-[#fcc025]'
-                            : 'text-emerald-400'
-                        }`}
-                      >
-                        {(() => {
-                          const labels: Record<string, string> = { error: '錯誤', warn: '警告', info: '資訊', important: '重要' };
-                          return labels[evt.severity] || evt.severity || 'info';
-                        })()}
-                      </span>
-                      <span className="text-[9px] font-bold uppercase text-[#adaaaa]">
-                        {(() => {
-                          const labels: Record<string, string> = {
-                            'rewards/item_pawned': '道具典當',
-                            'rewards/chests_opened_bulk': '大量開箱',
-                            'wallet/airdrop_claimed': '空投領取',
-                            'wallet/zxc_to_yjc_confirmed': 'ZXC→YJC 兌換',
-                            'wallet/transfer': '轉帳',
-                            'game/play_completed': '遊戲結算',
-                            'admin/campaign_upsert': '活動異動',
-                            'admin/grant': '管理員贈送',
-                            'admin/maintenance': '維護模式',
-                            'admin/blacklist': '黑名單變更',
-                            'admin/announcement': '公告異動',
-                            'admin/reward_catalog': '獎勵目錄變更',
-                            'admin/submission': '投稿審核',
-                            'support/ticket_created': '工單建立',
-                            'support/ticket_updated': '工單更新',
-                          };
-                          const key = `${evt.channel}/${evt.kind}`;
-                          return labels[key] || key;
-                        })()}
-                      </span>
-                    </div>
-                    <p className="text-white mt-1 break-words">{evt.message}</p>
-                    {evt.createdAt && (
-                      <p className="text-[9px] text-[#494847] mt-1">{new Date(evt.createdAt).toLocaleString()}</p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        )}
       </main>
 
       <AppBottomNav current="none" />
