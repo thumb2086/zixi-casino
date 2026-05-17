@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import compress from "@fastify/compress";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod";
 import { authRoutes } from "./routes/v1/auth.js";
 import { walletRoutes } from "./routes/v1/wallet.js";
@@ -52,6 +53,8 @@ fastify.register(cors, {
   ],
   credentials: true,
 });
+
+fastify.register(compress, { global: true, threshold: 1024 });
 
 // Global Error Handler
 fastify.setErrorHandler((error, request, reply) => {

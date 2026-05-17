@@ -4,6 +4,7 @@ import { api } from '../../store/api';
 import { RefreshCw, ShieldCheck, Globe, LogIn, Fingerprint, QrCode, Monitor, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { QRCode } from 'qrcode.react';
 
 export default function LoginView() {
   const { setAuth } = useAuthStore();
@@ -18,7 +19,6 @@ export default function LoginView() {
       .catch(() => {});
   }, []);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [deepLinkUrl, setDeepLinkUrl] = useState<string | null>(null);
 
   const [username, setUsername] = useState('');
@@ -56,7 +56,6 @@ export default function LoginView() {
       if (data.success && payload?.sessionId && loginLink) {
         setSessionId(payload.sessionId);
         setDeepLinkUrl(loginLink);
-        setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(loginLink)}`);
       } else {
         setError(data.error || "SESSION_CREATION_FAILED");
       }
@@ -72,19 +71,31 @@ export default function LoginView() {
   useEffect(() => {
     if (tab !== 'qr' || !sessionId) return;
 
-    const interval = setInterval(() => {
-      api.get('/api/v1/auth/status', { params: { sessionId } })
-        .then(res => {
-          const data = res.data;
-          const payload = data?.data;
-          if (data.success && payload?.status === 'authorized' && payload?.address) {
-            setAuth(payload.address, sessionId, payload.publicKey || '0x');
-          }
-        })
-        .catch(err => console.error("Poll error:", err));
-    }, 2000);
-
-    return () => clearInterval(interval);
+    let delay = 3000;
+    const poll = () => {
+      const timer = setTimeout(() => {
+        api.get('/api/v1/auth/status', { params: { sessionId } })
+          .then(res => {
+            delay = 3000;
+            const data = res.data;
+            const payload = data?.data;
+            if (data.success && payload?.status === 'authorized' && payload?.address) {
+              setAuth(payload.address, sessionId, payload.publicKey || '0x');
+            } else {
+              poll();
+            }
+          })
+          .catch(err => {
+            console.error("Poll error:", err);
+            delay = Math.min(delay * 2, 10000);
+            poll();
+          });
+      }, delay);
+      cleanup = () => clearTimeout(timer);
+    };
+    let cleanup: (() => void) | null = null;
+    poll();
+    return () => { if (cleanup) cleanup(); };
   }, [tab, sessionId, setAuth]);
 
   const handleCustodyLogin = async (e: React.FormEvent) => {
@@ -285,15 +296,15 @@ export default function LoginView() {
               className="flex flex-col items-center space-y-8"
             >
               <div className="relative p-6 bg-gradient-to-br from-[#fcc025] to-[#e6ad03] rounded-3xl shadow-[0_20px_50px_rgba(252,192,37,0.15)] group">
-                 {qrCodeUrl ? (
-                   <div className="p-3 bg-white rounded-xl group-hover:scale-105 transition-transform duration-500">
-                      <img src={qrCodeUrl} alt="QR Code" className="w-44 h-44" />
-                   </div>
-                 ) : (
-                   <div className="w-44 h-44 flex items-center justify-center">
-                      <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
-                   </div>
-                 )}
+                 {deepLinkUrl ? (
+                    <div className="p-3 bg-white rounded-xl group-hover:scale-105 transition-transform duration-500">
+                       <QRCode value={deepLinkUrl} size={176} level="M" />
+                    </div>
+                  ) : (
+                    <div className="w-44 h-44 flex items-center justify-center">
+                       <div className="w-10 h-10 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
               </div>
               <div className="text-center space-y-2 px-4">
                  <p className="text-[#adaaaa] text-[11px] leading-relaxed font-bold uppercase tracking-tight">
