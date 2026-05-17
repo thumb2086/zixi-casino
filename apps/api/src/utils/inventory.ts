@@ -473,6 +473,9 @@ export async function grantBundleToUser(
   const nextAvatars = [...preState.ownedAvatars];
   const nextTitles = [...preState.ownedTitles];
 
+  const addedAvatars: string[] = [];
+  const addedTitles: string[] = [];
+
   for (const it of bundle.items ?? []) {
     const id = String(it?.id || "").trim();
     if (!id) continue;
@@ -492,7 +495,6 @@ export async function grantBundleToUser(
       nextInventory[id] = (nextInventory[id] || 0) + qty;
     }
   }
-  const addedAvatars: string[] = [];
   for (const avId of bundle.avatars ?? []) {
     const id = String(avId || "").trim();
     if (id && !nextAvatars.includes(id)) {
@@ -500,7 +502,6 @@ export async function grantBundleToUser(
       addedAvatars.push(id);
     }
   }
-  const addedTitles: string[] = [];
   for (const ttId of bundle.titles ?? []) {
     const id = String(ttId || "").trim();
     if (id && !nextTitles.includes(id)) {
