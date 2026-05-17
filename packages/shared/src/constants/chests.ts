@@ -242,7 +242,7 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "title_invincible", name: "無敵", nameEn: "Invincible", type: "title", rarity: "mythic", description: "無人能敵的至高存在", icon: "💫", tradable: false, consumable: false },
     { id: "title_architect", name: "建築師", nameEn: "Architect", type: "title", rarity: "mythic", description: "構築世界的建築師", icon: "🏛️", tradable: false, consumable: false },
     { id: "title_void", name: "虛空", nameEn: "Void", type: "title", rarity: "mythic", description: "來自虛空深處的存在", icon: "🕳️", tradable: false, consumable: false },
-    { id: "title_trillionaire", name: "兆", nameEn: "Trillion", type: "title", rarity: "mythic", description: "資產突破兆級的終極富豪", icon: "💎", tradable: false, consumable: false },
+    { id: "title_trillionaire", name: "上兆富翁", nameEn: "Trillionaire", type: "title", rarity: "mythic", description: "資產突破兆級的終極富豪", icon: "💎", tradable: false, consumable: false },
     { id: "collectible_star", name: "星塵瓶", nameEn: "Stardust Vial", type: "collectible", rarity: "mythic", description: "裝載著星辰碎片的魔法瓶", icon: "✨", tradable: false, consumable: false },
     { id: "collectible_heart", name: "龍之心", nameEn: "Dragon Heart", type: "collectible", rarity: "mythic", description: "遠古巨龍跳動的心臟", icon: "❤️‍🔥", tradable: false, consumable: false },
     { id: "collectible_egg", name: "鳳凰蛋", nameEn: "Phoenix Egg", type: "collectible", rarity: "mythic", description: "蘊含重生之火的鳳凰蛋", icon: "🥚", tradable: false, consumable: false },
