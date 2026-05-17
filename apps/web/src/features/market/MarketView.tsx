@@ -56,41 +56,13 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
 }
 
 export default function MarketView() {
-  const { t, i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
+  const { t } = useTranslation();
   const { amountDisplay } = usePreferencesStore();
   const { snapshot, account, execute } = useMarket();
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL');
   const [tradeQuantity, setTradeQuantity] = useState('1');
   const [cashMoveAmount, setCashMoveAmount] = useState('1000');
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
-  const zh = {
-    publicFeed: '\u516c\u958b\u52d5\u614b',
-    marketPulse: '\u5e02\u5834\u8108\u52d5',
-    marketIndex: '\u5e02\u5834\u6307\u6578',
-    trend: '\u8d70\u52e2',
-    fearGreed: '\u6062\u61fc\u6307\u6578',
-    account: '\u5e33\u6236',
-    netWorth: '\u6de8\u503c',
-    cash: '\u73fe\u91d1',
-    bank: '\u9280\u884c',
-    symbols: '\u6a19\u7684\u5217\u8868',
-    executionPanel: '\u57f7\u884c\u9762\u677f',
-    quantityPlaceholder: '\u4ea4\u6613\u6578\u91cf',
-    buy: '\u8cb7\u5165',
-    sell: '\u8ce3\u51fa',
-    cashMovePlaceholder: '\u8f38\u5165\u91d1\u984d',
-    bankDeposit: '\u5b58\u5165\u9280\u884c',
-    bankWithdraw: '\u63d0\u9818\u9280\u884c',
-    noPositions: '\u5c1a\u7121\u6301\u5009\u7d00\u9304',
-    recentActivity: '\u6700\u65b0\u64cd\u4f5c',
-    noActivity: '\u5c1a\u7121\u5e02\u5834\u64cd\u4f5c\u7d00\u9304',
-    units: '\u80a1',
-    quantity: '\u6578\u91cf',
-    type: '\u985e\u578b',
-    sector: '\u677f\u584a',
-  };
 
   const numberMode = amountDisplay === 'full' ? 'full' : 'short';
   const marketSnapshot = snapshot.data;
@@ -104,7 +76,7 @@ export default function MarketView() {
     execute.mutate(params, {
       onSuccess: () => setActionNotice({ type: 'success', message: successMessage }),
       onError: (error: unknown) => {
-        const message = error instanceof Error ? error.message : (isZh ? '交易失敗' : 'Action failed');
+        const message = error instanceof Error ? error.message : t('market.action_failed');
         setActionNotice({ type: 'error', message });
       },
     });
@@ -119,7 +91,7 @@ export default function MarketView() {
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">{t('market.title')}</h1>
           </div>
           <Link to="/app/transactions" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-            {isZh ? zh.publicFeed : 'Public Feed'}
+            {t('market.public_feed')}
           </Link>
         </div>
       </header>
@@ -141,13 +113,13 @@ export default function MarketView() {
             <div className="flex items-center gap-3">
               <CircleDollarSign className="text-[#fcc025]" size={18} />
               <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                {isZh ? zh.marketPulse : 'Market Pulse'}
+                {t('market.market_pulse')}
               </h2>
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-3">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
-                  {isZh ? zh.marketIndex : 'Market Index'}
+                  {t('market.market_index')}
                 </p>
                 <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">
                   {formatNumber(marketSnapshot?.marketIndex || 0, numberMode)}
@@ -155,7 +127,7 @@ export default function MarketView() {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
-                  {isZh ? zh.trend : 'Trend'}
+                  {t('market.trend')}
                 </p>
                 <p
                   className={`mt-2 text-2xl font-black italic tracking-tight ${
@@ -168,7 +140,7 @@ export default function MarketView() {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
-                  {isZh ? zh.fearGreed : 'Fear & Greed'}
+                  {t('market.fear_greed')}
                 </p>
                 <p className="mt-2 text-2xl font-black italic tracking-tight text-white">
                   {marketSnapshot?.fearGreedIndex ?? 0}
@@ -181,13 +153,13 @@ export default function MarketView() {
             <div className="flex items-center gap-3">
               <Wallet className="text-[#fcc025]" size={18} />
               <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                {isZh ? zh.account : 'Account'}
+                {t('market.account')}
               </h2>
             </div>
             <div className="mt-4 space-y-3">
               <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                 <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#adaaaa]">
-                  {isZh ? zh.netWorth : 'Net Worth'}
+                  {t('market.net_worth')}
                 </p>
                 <p className="mt-1 text-2xl font-black italic tracking-tight text-[#fcc025]">
                   {formatNumber(summary?.netWorth || 0, numberMode)}
@@ -196,13 +168,13 @@ export default function MarketView() {
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#adaaaa]">
-                    {isZh ? zh.cash : 'Cash'}
+                    {t('market.cash')}
                   </p>
                   <p className="mt-1 text-lg font-black text-white">{formatNumber(summary?.cash || 0, numberMode)}</p>
                 </div>
                 <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#adaaaa]">
-                    {isZh ? zh.bank : 'Bank'}
+                    {t('market.bank')}
                   </p>
                   <p className="mt-1 text-lg font-black text-white">{formatNumber(summary?.bankBalance || 0, numberMode)}</p>
                 </div>
@@ -217,7 +189,7 @@ export default function MarketView() {
               <div className="flex items-center gap-3">
                 <LineChart className="text-[#fcc025]" size={18} />
                 <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                  {isZh ? zh.executionPanel : 'Execution Panel'}
+                  {t('market.execution_panel')}
                 </h2>
               </div>
 
@@ -236,7 +208,7 @@ export default function MarketView() {
                 <input
                   value={tradeQuantity}
                   onChange={(event) => setTradeQuantity(event.target.value)}
-                  placeholder={isZh ? zh.quantityPlaceholder : 'Trade quantity'}
+                  placeholder={t('market.quantity_placeholder')}
                   className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none"
                 />
               </div>
@@ -245,18 +217,18 @@ export default function MarketView() {
                 <button
                   type="button"
                   disabled={execute.isPending}
-                  onClick={() => runAction({ type: 'stock_buy', symbol: selectedSymbol, quantity: tradeQuantity }, isZh ? '買入成功' : 'Buy order completed')}
+                  onClick={() => runAction({ type: 'stock_buy', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.buy_success'))}
                   className="rounded-2xl bg-[#fcc025] px-5 py-4 text-sm font-black uppercase tracking-[0.15em] text-black disabled:opacity-50"
                 >
-                  {isZh ? zh.buy : 'Buy'} {selectedQuote?.symbol || selectedSymbol}
+                  {t('market.buy')} {selectedQuote?.symbol || selectedSymbol}
                 </button>
                 <button
                   type="button"
                   disabled={execute.isPending}
-                  onClick={() => runAction({ type: 'stock_sell', symbol: selectedSymbol, quantity: tradeQuantity }, isZh ? '賣出成功' : 'Sell order completed')}
+                  onClick={() => runAction({ type: 'stock_sell', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.sell_success'))}
                   className="rounded-2xl bg-[#ff7351] px-5 py-4 text-sm font-black uppercase tracking-[0.15em] text-white disabled:opacity-50"
                 >
-                  {isZh ? zh.sell : 'Sell'} {selectedQuote?.symbol || selectedSymbol}
+                  {t('market.sell')} {selectedQuote?.symbol || selectedSymbol}
                 </button>
               </div>
 
@@ -264,24 +236,24 @@ export default function MarketView() {
                 <input
                   value={cashMoveAmount}
                   onChange={(event) => setCashMoveAmount(event.target.value)}
-                  placeholder={isZh ? zh.cashMovePlaceholder : 'Amount'}
+                  placeholder={t('market.amount')}
                   className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none"
                 />
                 <button
                   type="button"
                   disabled={execute.isPending}
-                  onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, isZh ? '存入成功' : 'Deposit completed')}
+                  onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
                   className="rounded-2xl border border-[#494847]/20 bg-white px-4 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:opacity-50"
                 >
-                  {isZh ? zh.bankDeposit : 'Deposit to Bank'}
+                  {t('market.bank_deposit')}
                 </button>
                 <button
                   type="button"
                   disabled={execute.isPending}
-                  onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, isZh ? '提領成功' : 'Withdraw completed')}
+                  onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
                   className="rounded-2xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white disabled:opacity-50"
                 >
-                  {isZh ? zh.bankWithdraw : 'Withdraw from Bank'}
+                  {t('market.bank_withdraw')}
                 </button>
               </div>
             </div>
@@ -290,7 +262,7 @@ export default function MarketView() {
               <div className="flex items-center gap-3">
                 <BarChart3 className="text-[#fcc025]" size={18} />
                 <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                  {isZh ? zh.symbols : 'Symbols'}
+                  {t('market.symbols')}
                 </h2>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -332,10 +304,10 @@ export default function MarketView() {
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="rounded-full bg-[#232323] px-3 py-1 text-[10px] font-bold text-[#aeb7c9]">
-                        {isZh ? zh.type : 'Type'} <span className="ml-1 text-white">{quote.type}</span>
+                        {t('market.type')} <span className="ml-1 text-white">{quote.type}</span>
                       </span>
                       <span className="rounded-full bg-[#232323] px-3 py-1 text-[10px] font-bold text-[#aeb7c9]">
-                        {isZh ? zh.sector : 'Sector'} <span className="ml-1 text-white">{quote.sector}</span>
+                        {t('market.sector')} <span className="ml-1 text-white">{quote.sector}</span>
                       </span>
                     </div>
                     <div className="mt-5 overflow-hidden rounded-xl border border-[#494847]/10 bg-[#101010] px-3 py-2">
@@ -362,7 +334,7 @@ export default function MarketView() {
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white">{position.symbol}</p>
                           <p className="text-[10px] font-bold text-[#adaaaa]">
-                            {isZh ? zh.quantity : 'Qty'} {position.quantity} {isZh ? zh.units : ''}
+                            {t('market.quantity')} {position.quantity} {t('market.units')}
                           </p>
                         </div>
                         <div className="text-right">
@@ -381,7 +353,7 @@ export default function MarketView() {
                   ))
                 ) : (
                   <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
-                    {isZh ? zh.noPositions : 'No open positions'}
+                    {t('market.no_positions')}
                   </div>
                 )}
               </div>
@@ -389,7 +361,7 @@ export default function MarketView() {
 
             <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                {isZh ? zh.recentActivity : 'Recent Activity'}
+                {t('market.recent_activity')}
               </h2>
               <div className="mt-4 space-y-3">
                 {summary?.history?.length ? (
@@ -401,7 +373,7 @@ export default function MarketView() {
                   ))
                 ) : (
                   <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
-                    {isZh ? zh.noActivity : 'No market activity yet'}
+                    {t('market.no_activity')}
                   </div>
                 )}
               </div>

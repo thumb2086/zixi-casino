@@ -129,11 +129,11 @@ export default function LoginView() {
   const handleCustodyRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError(isZh ? '密碼不匹配' : 'PASSWORD_MISMATCH');
+      setError(t('auth.error_password_mismatch'));
       return;
     }
     if (password.length < 6) {
-      setError(isZh ? '密碼至少需要6個字元' : 'PASSWORD_TOO_SHORT');
+      setError(t('auth.error_password_too_short'));
       return;
     }
     setLoading(true);
@@ -175,7 +175,7 @@ export default function LoginView() {
           className="flex items-center gap-3 px-5 py-2.5 bg-[#1a1919] hover:bg-[#262626] text-[#fcc025] rounded-xl transition-all border border-[#fcc025]/20 shadow-lg"
         >
           <Globe size={16} />
-          <span className="text-[10px] font-bold uppercase tracking-widest">{isZh ? 'English' : '\u4e2d\u6587'}</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest">{isZh ? t('common.english') : t('common.chinese')}</span>
         </motion.button>
       </div>
 
@@ -190,25 +190,21 @@ export default function LoginView() {
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-[#fcc025] rounded-full animate-pulse" />
               <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#fcc025]">
-                {isZh ? '最新公告' : 'Announcements'}
+                {t('nav.announcements')}
               </h2>
             </div>
             {announcements.length === 0 ? (
               <div className="space-y-4">
                 <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
-                  <p className="text-xs font-bold text-white">🎉 {isZh ? '歡迎來到子嘻！' : 'Welcome to Zixi!'}</p>
+                  <p className="text-xs font-bold text-white">🎉 {t('announcement.welcome')}</p>
                   <p className="text-[10px] text-[#adaaaa] mt-1 leading-relaxed">
-                    {isZh
-                      ? '一個模擬博弈平台，體驗遊戲樂趣。使用 ZXC 代幣參與各類遊戲。'
-                      : 'A simulation gambling platform. Use ZXC tokens to play various games.'}
+                    {t('announcement.welcome_desc')}
                   </p>
                 </div>
                 <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
-                  <p className="text-xs font-bold text-white">💡 {isZh ? '新手提示' : 'Quick Tips'}</p>
+                  <p className="text-xs font-bold text-white">💡 {t('announcement.quick_tips')}</p>
                   <p className="text-[10px] text-[#adaaaa] mt-1 leading-relaxed">
-                    {isZh
-                      ? '先到商店購買組合包獲得初始道具，再到寶箱頁面開啟獲取更多獎勵！'
-                      : 'Visit the shop for starter packs, then open chests for rewards!'}
+                    {t('announcement.tips_desc')}
                   </p>
                 </div>
               </div>
@@ -217,7 +213,7 @@ export default function LoginView() {
                 {announcements.filter(a => a.isPinned).map((a: any) => (
                   <div key={a.id} className="rounded-xl bg-[#fcc025]/5 border border-[#fcc025]/20 p-4">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded">置頂</span>
+                      <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded">{t('announcement.type_urgent')}</span>
                       <p className="text-xs font-bold text-white truncate">{a.title}</p>
                     </div>
                     <p className="text-[10px] text-[#adaaaa] leading-relaxed">{a.content}</p>
@@ -233,7 +229,7 @@ export default function LoginView() {
             )}
             <div className="pt-2 border-t border-[#494847]/10">
               <p className="text-[8px] font-bold text-[#494847] uppercase tracking-[0.3em]">
-                {isZh ? '更多資訊請至支援頁面' : 'More info in Support'}
+                {t('announcement.more_info')}
               </p>
             </div>
           </div>
@@ -243,7 +239,7 @@ export default function LoginView() {
         {announcements.filter(a => a.isPinned).length > 0 && (
           <div className="lg:hidden w-full max-w-md">
             <div className="bg-[#fcc025]/5 rounded-xl border border-[#fcc025]/20 p-3 flex items-start gap-2">
-              <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded shrink-0 mt-0.5">公告</span>
+              <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded shrink-0 mt-0.5">{t('announcement.type_urgent')}</span>
               <p className="text-[10px] text-[#adaaaa] leading-relaxed">
                 {announcements.filter(a => a.isPinned)[0].title}
               </p>
@@ -267,8 +263,8 @@ export default function LoginView() {
             >
                 <Fingerprint size={42} className="text-[#fcc025]" />
             </motion.div>
-            <h1 className="text-4xl font-extrabold text-[#fcc025] tracking-tighter uppercase italic">{isZh ? '子熙身分認證' : 'ZiXi Identity'}</h1>
-            <p className="text-[#adaaaa] text-[10px] font-bold uppercase tracking-[0.4em] leading-relaxed">{isZh ? '安全模擬存取協定' : 'Secured Simulation Access Protocol'}</p>
+            <h1 className="text-4xl font-extrabold text-[#fcc025] tracking-tighter uppercase italic">{t('auth.identity_title')}</h1>
+            <p className="text-[#adaaaa] text-[10px] font-bold uppercase tracking-[0.4em] leading-relaxed">{t('auth.identity_subtitle')}</p>
         </header>
 
         <div className="flex bg-[#0e0e0e] p-1.5 rounded-xl border border-[#494847]/20">
@@ -315,12 +311,12 @@ export default function LoginView() {
                      href={deepLinkUrl}
                      className="inline-flex items-center justify-center mt-2 px-4 py-2 rounded-lg bg-[#262626] border border-[#fcc025]/20 text-[#fcc025] text-[10px] font-black uppercase tracking-widest hover:bg-[#2c2c2c] transition-all"
                    >
-                     {isZh ? '開啟 App' : 'Open App'}
+                     {t('auth.open_app')}
                    </a>
                  )}
                  <div className="flex items-center justify-center gap-2 pt-2">
                      <QrCode size={12} className="text-[#fcc025]" />
-                     <span className="text-[9px] text-[#fcc025]/60 font-bold uppercase tracking-[0.2em]">{isZh ? '加密連線已啟用' : 'Encrypted Session Active'}</span>
+                     <span className="text-[9px] text-[#fcc025]/60 font-bold uppercase tracking-[0.2em]">{t('auth.encrypted_active')}</span>
                  </div>
               </div>
             </motion.div>
@@ -338,13 +334,13 @@ export default function LoginView() {
                   onClick={() => setMode('login')}
                   className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${mode === 'login' ? 'bg-[#494847] text-white' : 'text-[#adaaaa] hover:text-white'}`}
                 >
-                  {isZh ? '登入' : 'Login'}
+                  {t('auth.login')}
                 </button>
                 <button
                   onClick={() => setMode('register')}
                   className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${mode === 'register' ? 'bg-[#494847] text-white' : 'text-[#adaaaa] hover:text-white'}`}
                 >
-                  {isZh ? '註冊' : 'Register'}
+                  {t('auth.register')}
                 </button>
               </div>
 
@@ -359,7 +355,7 @@ export default function LoginView() {
                           type="text"
                           value={username}
                           onChange={e => setUsername(e.target.value)}
-                          placeholder={isZh ? '操作員 ID' : 'Operator ID'}
+                          placeholder={t('auth.operator_id_placeholder')}
                           className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-[#fcc025]/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-[#494847] font-bold"
                           required
                       />
@@ -375,7 +371,7 @@ export default function LoginView() {
                             type="password"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            placeholder={isZh ? '通行密碼' : 'Pass-Code'}
+                            placeholder={t('auth.password_placeholder')}
                             className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-[#fcc025]/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-[#494847] font-bold"
                             required
                         />
@@ -384,7 +380,7 @@ export default function LoginView() {
 
                 {mode === 'register' && (
                   <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{isZh ? '確認密碼' : 'Confirm Password'}</label>
+                      <label className="text-[10px] font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{t('auth.confirm_password')}</label>
                       <div className="relative">
                          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#fcc025]/40">
                             <Monitor size={16} />
@@ -393,7 +389,7 @@ export default function LoginView() {
                               type="password"
                               value={confirmPassword}
                               onChange={e => setConfirmPassword(e.target.value)}
-                              placeholder={isZh ? '再次輸入密碼' : 'Re-enter Pass-Code'}
+                              placeholder={t('auth.confirm_password_placeholder')}
                               className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-[#fcc025]/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-[#494847] font-bold"
                               required
                           />
@@ -415,7 +411,7 @@ export default function LoginView() {
                     {rememberMe && <Check size={14} className="text-black" />}
                   </button>
                   <span className="text-[11px] font-bold text-[#adaaaa]">
-                    {isZh ? '記住我（下次自動登入）' : 'Remember Me (Auto-login next time)'}
+                    {t('auth.remember_me')}
                   </span>
                 </div>
                 {error && (
@@ -438,8 +434,8 @@ export default function LoginView() {
                     <LogIn size={20} className="relative z-10" />
                     <span className="relative z-10 text-xs uppercase italic tracking-tighter">
                       {loading 
-                        ? (mode === 'login' ? t('auth.logging_in') : (isZh ? '註冊中...' : 'Registering...'))
-                        : (mode === 'login' ? t('auth.login_btn') : (isZh ? '建立帳戶' : 'Create Account'))
+                        ? (mode === 'login' ? t('auth.logging_in') : t('auth.registering'))
+                        : (mode === 'login' ? t('auth.login_btn') : t('auth.create_account'))
                       }
                     </span>
                 </motion.button>
@@ -467,7 +463,7 @@ export default function LoginView() {
 
       <p className="mt-12 text-[9px] font-bold text-[#494847] uppercase tracking-[0.5em] flex items-center gap-3">
           <ShieldCheck size={12} className="text-[#fcc025]/30" />
-          {isZh ? '模組化單體架構 v4.1 驅動' : 'Powered by Modular Monolith Infrastructure v4.1'}
+          {t('auth.powered_by')}
       </p>
     </div>
   );

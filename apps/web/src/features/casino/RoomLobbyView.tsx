@@ -22,8 +22,7 @@ type RoomState = {
 };
 
 export default function RoomLobbyView() {
-  const { t, i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { session } = useAuth();
 
@@ -41,15 +40,6 @@ export default function RoomLobbyView() {
     { id: 'poker', name: 'Poker', nameZh: '撲克', icon: '🃏', vipOnly: true },
     { id: 'bluffdice', name: 'Bluff Dice', nameZh: '吹牛', icon: '🎲', vipOnly: true },
   ];
-
-  const zh = {
-    highStakes: '高額場',
-    featuredTitle: '王牌賽馬',
-    vipOnly: 'VIP 專屬',
-    pending: 'VIP 專屬',
-    vipLocked: '需 VIP1 (1 YJC)',
-    entering: '進入中…',
-  };
 
   const roomsQuery = useQuery({
     queryKey: ['game-rooms'],
@@ -142,12 +132,12 @@ export default function RoomLobbyView() {
               <div className="flex items-center gap-1.5 text-[#fcc025]">
                 <Flame size={14} className="fill-current" />
                 <span className="text-[10px] font-bold uppercase tracking-widest">
-                  {isZh ? zh.highStakes : 'High Stakes'}
+                  {t('casino.high_stakes')}
                 </span>
               </div>
             </div>
             <h2 className="text-5xl font-black uppercase italic tracking-tighter">
-              {isZh ? zh.featuredTitle : 'Elite Horse Racing'}
+              {t('casino.featured_title')}
             </h2>
             <Link
               to="/app/casino/horse"
@@ -200,13 +190,13 @@ export default function RoomLobbyView() {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold uppercase tracking-tight text-white transition-colors group-hover:text-[#fcc025]">
-                      {isZh ? game.nameZh : game.name}
+                      {t(`game.${game.id}`)}
                     </h3>
                     <div className="mt-2 flex items-center justify-center gap-1.5">
                       <Users size={10} className="text-[#adaaaa]" />
                       <span className="text-[9px] font-bold uppercase tracking-widest text-[#adaaaa]">
                         {game.vipOnly
-                          ? (locked ? (isZh ? zh.vipLocked : 'VIP1 required') : (isZh ? zh.pending : 'VIP room'))
+                          ? (locked ? t('casino.vip_locked') : t('casino.vip_room'))
                           : `${game.players} ${t('casino.active_players')}`}
                       </span>
                     </div>
@@ -220,7 +210,7 @@ export default function RoomLobbyView() {
                       className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#fcc025]/30 bg-[#121212] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[#fcc025] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {locked ? <Lock size={12} /> : <ChevronRight size={12} />}
-                      {joinRoomMutation.isPending ? (isZh ? zh.entering : 'Entering...') : (isZh ? '進入房間' : 'Enter Room')}
+                      {joinRoomMutation.isPending ? t('casino.entering') : t('casino.enter_room')}
                     </button>
                   ) : (
                     <Link
@@ -228,7 +218,7 @@ export default function RoomLobbyView() {
                       className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#494847]/30 bg-[#121212] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[#d7d7d7]"
                     >
                       <ChevronRight size={12} />
-                      {isZh ? '開始遊戲' : 'Play'}
+                      {t('casino.play')}
                     </Link>
                   )}
                 </div>

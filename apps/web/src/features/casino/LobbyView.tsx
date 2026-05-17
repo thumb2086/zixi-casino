@@ -63,9 +63,8 @@ function GlassCard({
 }
 
 export default function LobbyView() {
+  const { t } = useTranslation();
   const { username, address, balance } = useUserStore();
-  const { i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
   const { summary } = useWallet();
   const { data: leaderboardData } = useLeaderboard('all', 50);
   const selfRank = leaderboardData?.selfRank?.rank;
@@ -106,44 +105,6 @@ export default function LobbyView() {
   });
   const pinnedCount = annData ?? 0;
 
-  const zh = {
-    title: '子熙模擬器',
-    operatorIdentified: '操作者已識別',
-    anonymous: '匿名操作者',
-    encryptionActive: '加密已啟用：AES-256',
-    totalAssets: '總資產',
-    casinoFloor: '娛樂大廳',
-    activeSimulation: '活躍模擬',
-    marketTerminal: '市場終端',
-    liveFeed: '即時走勢',
-    announcements: '公告中心',
-    newAlerts: `${pinnedCount} 則新通知`,
-    rankings: '排行榜',
-    globalSector: '全域排名',
-    wallet: '錢包',
-    secured: '已保護',
-    activity: '最新動態',
-    recentTraces: '最新追蹤',
-    inventory: '背包',
-    items: `${previewItems.length || 0} 項物品`,
-    shop: '商店',
-    shopSubtitle: '寶箱鑰匙 & 組合包',
-    vipProtocol: 'VIP 機制',
-    eliteRank: '菁英等級',
-    tierActive: '等階 4 啟用中',
-    multiplier: '1.5x 倍率加成生效中',
-    adminOverride: '管理中心',
-    authorizedOnly: '限授權操作',
-    adminSummary: '系統設定與管理工具',
-    systemSecure: '系統安全',
-    vipLevels: 'VIP 等級說明',
-    vipSubtitle: '等級特權一覽',
-    gameOdds: '遊戲機率',
-    oddsSubtitle: 'RTP 與公平性說明',
-    itemsCatalog: '物品圖鑑',
-    itemsSubtitle: '道具稀有度說明',
-  };
-
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-24 font-['Manrope'] text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
@@ -153,7 +114,7 @@ export default function LobbyView() {
               <LayoutGrid className="cursor-pointer text-[#fcc025]" />
             </motion.div>
             <h1 className="truncate text-xl font-extrabold uppercase italic tracking-tighter text-[#fcc025]">
-              {isZh ? zh.title : 'ZiXi Simulator'}
+              {t('lobby.title')}
             </h1>
           </div>
           <Link
@@ -172,21 +133,21 @@ export default function LobbyView() {
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="space-y-1">
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#fcc025]">
-                {isZh ? zh.operatorIdentified : 'Operator Identified'}
+                {t('lobby.operator_identified')}
               </p>
               <h2 className="text-4xl font-extrabold uppercase italic tracking-tight">
-                {username || (address ? address.slice(0, 8) : isZh ? zh.anonymous : 'ANONYMOUS')}
+                {username || (address ? address.slice(0, 8) : t('lobby.anonymous'))}
               </h2>
               <div className="mt-2 flex items-center gap-2">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-[#fcc025]" />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
-                  {isZh ? zh.encryptionActive : 'Encryption Active: AES-256'}
+                  {t('lobby.encryption_active')}
                 </span>
               </div>
             </div>
             <div className="text-right">
               <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
-                {isZh ? zh.totalAssets : 'Total Assets'}
+                {t('vault.total_assets')}
               </p>
               <div className="text-5xl font-black uppercase italic tracking-tighter text-[#fcc025]">
                 {formatNumber(liveBalance || 0)} <span className="text-lg not-italic text-white">ZXC</span>
@@ -199,30 +160,30 @@ export default function LobbyView() {
           <GlassCard
             to="/app/announcement"
             icon={Megaphone}
-            title={isZh ? zh.announcements : 'Announcements'}
-            subtitle={isZh ? zh.newAlerts : `${pinnedCount} New Alerts`}
+            title={t('nav.announcements')}
+            subtitle={t('lobby.new_alerts', { count: pinnedCount })}
           >
           </GlassCard>
 
           <GlassCard
             to="/app/leaderboard"
             icon={Trophy}
-            title={isZh ? zh.rankings : 'Rankings'}
+            title={t('lobby.rankings')}
             value={selfRank ? `#${selfRank}` : '-'}
-            subtitle={isZh ? zh.globalSector : 'Global Sector'}
+            subtitle={t('lobby.global_sector')}
           />
           <GlassCard
             to="/app/transactions"
             icon={History}
-            title={isZh ? zh.activity : 'Activity'}
-            subtitle={isZh ? zh.recentTraces : 'Recent Traces'}
+            title={t('lobby.activity')}
+            subtitle={t('lobby.recent_traces')}
           >
             <div className="mt-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa]">
               {!recentTxs || recentTxs.length === 0 ? (
                 <>
                   <div className="flex gap-2">
                     <span className="text-[#fcc025]">--</span>
-                    {isZh ? '尚無動態' : 'No activity yet'}
+                    {t('lobby.no_activity')}
                   </div>
                 </>
               ) : recentTxs.map((tx, i) => (
@@ -237,8 +198,8 @@ export default function LobbyView() {
           <GlassCard
             to="/app/inventory"
             icon={Bell}
-            title={isZh ? zh.inventory : 'Inventory'}
-            subtitle={isZh ? zh.items : `${(inventoryData || []).length || 0} Items`}
+            title={t('nav.inventory')}
+            subtitle={t('lobby.items_count', { count: (inventoryData || []).length || 0 })}
           >
             <div className="mt-4 grid grid-cols-4 gap-2">
               {previewItems.length > 0 ? previewItems.map((invItem) => (
@@ -254,17 +215,17 @@ export default function LobbyView() {
           <GlassCard
             to="/app/shop"
             icon={ShoppingBag}
-            title={isZh ? '商店' : 'Shop'}
-            subtitle={isZh ? '寶箱鑰匙 & 組合包' : 'Chest Keys & Bundles'}
+            title={t('lobby.shop')}
+            subtitle={t('lobby.shop_subtitle')}
           >
             <div className="mt-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
               <div className="flex gap-2">
                 <span className="text-[#fcc025]">🛒</span>
-                {isZh ? '購買寶箱鑰匙' : 'Buy Chest Keys'}
+                {t('lobby.buy_chest_keys')}
               </div>
               <div className="flex gap-2">
                 <span className="text-[#fcc025]">📦</span>
-                {isZh ? '限時組合包優惠' : 'Limited Bundles'}
+                {t('lobby.limited_bundles')}
               </div>
             </div>
           </GlassCard>
@@ -276,19 +237,19 @@ export default function LobbyView() {
                 <Crown className="h-6 w-6 text-[#fcc025]" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
-                {isZh ? '說明與指南' : 'Guides & Information'}
+                {t('lobby.guides')}
               </span>
             </div>
             <h4 className="mb-2 text-lg font-bold uppercase tracking-tight text-white">
-              {isZh ? '資訊中心' : 'Information Center'}
+              {t('lobby.info_center')}
             </h4>
             <div className="mt-4 space-y-3">
               <Link to="/app/info?tab=vip" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-[#fcc025]/40">
                 <Crown className="h-5 w-5 text-[#fcc025]" />
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-bold text-white">{isZh ? 'VIP 等級說明' : 'VIP Levels'}</p>
+                  <p className="text-sm font-bold text-white">{t('lobby.vip_levels')}</p>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
-                    {isZh ? zh.tierActive : 'Tier 4 Active'}
+                    {t('lobby.tier_active', { tier: 4 })}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
@@ -297,9 +258,9 @@ export default function LobbyView() {
               <Link to="/app/info?tab=odds" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-emerald-400/40">
                 <Dice5 className="h-5 w-5 text-emerald-400" />
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-bold text-white">{isZh ? '遊戲機率' : 'Game Odds'}</p>
+                  <p className="text-sm font-bold text-white">{t('lobby.game_odds')}</p>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
-                    {isZh ? 'RTP 與公平性' : 'RTP & Fairness'}
+                    {t('lobby.odds_subtitle')}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
@@ -308,9 +269,9 @@ export default function LobbyView() {
               <Link to="/app/info?tab=items" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-purple-400/40">
                 <Package className="h-5 w-5 text-purple-400" />
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-bold text-white">{isZh ? '物品圖鑑' : 'Items Catalog'}</p>
+                  <p className="text-sm font-bold text-white">{t('lobby.items_catalog')}</p>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
-                    {isZh ? '收藏品與道具' : 'Collectibles & Items'}
+                    {t('lobby.items_subtitle')}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
@@ -320,16 +281,16 @@ export default function LobbyView() {
           <GlassCard
             to="/app/admin"
             icon={SettingsIcon}
-            title={isZh ? zh.adminOverride : 'Admin Override'}
-            subtitle={isZh ? zh.authorizedOnly : 'Authorized Only'}
+            title={t('nav.admin')}
+            subtitle={t('lobby.authorized_only')}
           >
             <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
-              {isZh ? zh.adminSummary : 'System configuration and operator tools.'}
+              {t('lobby.admin_summary')}
             </p>
             <div className="mt-4 flex items-center gap-2">
               <div className="h-1 w-1 animate-pulse rounded-full bg-[#fcc025]" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#fcc025]">
-                {isZh ? zh.systemSecure : 'System Secure'}
+                {t('lobby.system_secure')}
               </span>
             </div>
           </GlassCard>

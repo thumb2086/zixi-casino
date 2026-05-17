@@ -7,8 +7,7 @@ import ChatRoom from './ChatRoom';
 
 export default function Layout() {
   const [chatOpen, setChatOpen] = useState(false);
-  const { i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
+  const { t } = useTranslation();
   const location = useLocation();
 
   return (
@@ -34,17 +33,17 @@ export default function Layout() {
                 <div className="mb-6 flex items-center gap-3">
                   <Bell size={18} className="text-[#fcc025]" />
                   <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#adaaaa]">
-                    {isZh ? '\u7cfb\u7d71\u7d42\u7aef' : 'System Terminal'}
+                    {t('layout.system_terminal')}
                   </h4>
                 </div>
                 <div className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] p-5">
                   <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#fcc025]">
-                    {isZh ? '\u6a21\u64ec\u72c0\u614b' : 'Simulation Status'}
+                    {t('layout.simulation_status')}
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#fcc025]" />
                     <span className="text-[9px] font-black uppercase tracking-widest text-white">
-                      {isZh ? '\u64cd\u4f5c\u54e1\u5df2\u9023\u7dda' : 'Operator Connected'}
+                      {t('layout.operator_connected')}
                     </span>
                   </div>
                 </div>
