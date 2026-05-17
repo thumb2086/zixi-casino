@@ -200,6 +200,11 @@ const ensureCoreSchema = async () => {
         }
 
         if (await isCoreSchemaReady(sql)) {
+          // Ensure reward_grants has all columns even if table already exists
+          await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS granted_by TEXT`.catch(() => {});
+          await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS token_amount NUMERIC`.catch(() => {});
+          await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP`.catch(() => {});
+          await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS meta JSONB`.catch(() => {});
           return;
         }
         await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
@@ -518,11 +523,6 @@ const ensureCoreSchema = async () => {
             created_at TIMESTAMP NOT NULL DEFAULT NOW()
           )
         `;
-        // Ensure reward_grants has all columns from Drizzle schema
-        await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS granted_by TEXT`.catch(() => {});
-        await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS token_amount NUMERIC`.catch(() => {});
-        await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP`.catch(() => {});
-        await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS meta JSONB`.catch(() => {});
         await normalizeLegacyIdentityData(sql);
       } finally {
         await sql.end();
