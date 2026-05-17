@@ -27,7 +27,7 @@ const DUPLICATE_COMPENSATION: Record<string, number> = {
 };
 const chestManager = new ChestManager();
 
-const CHEST_TYPE_ENUM = z.enum(["common", "rare", "epic", "legendary"]);
+const CHEST_TYPE_ENUM = z.enum(["common", "rare", "epic", "legendary", "mythic"]);
 
 let _catalogRepo: RewardCatalogRepository;
 function getCatalogRepo() {
