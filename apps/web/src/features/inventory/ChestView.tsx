@@ -272,7 +272,7 @@ export default function ChestView() {
         {chests.map((chest) => {
           const currentPity = displayPity[chest.id] ?? 0;
           const pityPercent = Math.min(100, (currentPity / chest.pityThreshold) * 100);
-          const keys = displayKeyCounts[`chest_key_${chest.id}`] ?? 0;
+          const keys = displayKeyCounts[chest.id] ?? 0;
           return (
             <motion.button
               key={chest.id}
@@ -473,26 +473,26 @@ export default function ChestView() {
                   <input
                     type="number"
                     min={1}
-                    max={displayKeyCounts[`chest_key_${selectedChest.id}`] || 99}
+                    max={displayKeyCounts[selectedChest.id] || 99}
                     value={openQty}
                     onChange={(e) => {
                       const v = parseInt(e.target.value) || 1;
-                      const max = displayKeyCounts[`chest_key_${selectedChest.id}`] || 99;
+                      const max = displayKeyCounts[selectedChest.id] || 99;
                       setOpenQty(Math.max(1, Math.min(max, v)));
                     }}
                     className="w-16 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-lg text-center
                       focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <div className="text-sm text-[#adaaaa]">
-                    鑰匙 {displayKeyCounts[`chest_key_${selectedChest.id}`] || 0} 把
+                    鑰匙 {displayKeyCounts[selectedChest.id] || 0} 把
                   </div>
                 </div>
                 <button
                   onClick={() => {
-                    const max = displayKeyCounts[`chest_key_${selectedChest.id}`] || 99;
+                    const max = displayKeyCounts[selectedChest.id] || 99;
                     setOpenQty(Math.min(max, openQty + 1));
                   }}
-                  disabled={openQty >= (displayKeyCounts[`chest_key_${selectedChest.id}`] || 99)}
+                  disabled={openQty >= (displayKeyCounts[selectedChest.id] || 99)}
                   className="w-8 h-8 rounded-full bg-[#494847]/40 text-[#fcc025] font-bold text-lg
                     flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
                     hover:bg-[#494847]/60 transition-colors"

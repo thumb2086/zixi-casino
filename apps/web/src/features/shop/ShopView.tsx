@@ -347,7 +347,7 @@ export default function ShopView() {
                     {discount > 0 && <span className="text-emerald-400 ml-1">-{discount * 100}%</span>}
                   </p>
                   <button
-                    onClick={() => handleBuyChest(chest.id)}
+                    onClick={() => handleBuyChest(chest.id, chestQty[chest.id] || 1)}
                     disabled={boughtHere}
                     className="mt-2 w-full bg-[#fcc025] text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
                   >
