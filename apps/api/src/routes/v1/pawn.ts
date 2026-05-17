@@ -146,7 +146,8 @@ export async function pawnRoutes(fastify: FastifyInstance) {
       return createApiEnvelope({ success: false }, request.id, false, `持股不足，目前 ${holding?.qty || 0} 股`);
     }
 
-    const snapshot = marketManager.getSnapshot(symbol);
+    const market = marketManager.buildSnapshot();
+    const snapshot = market.symbols[symbol];
     if (!snapshot) {
       return createApiEnvelope({ success: false }, request.id, false, "查無此股票");
     }
@@ -208,7 +209,8 @@ export async function pawnRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
 
     const { symbol } = request.body as { symbol: string };
-    const snapshot = marketManager.getSnapshot(symbol);
+    const market = marketManager.buildSnapshot();
+    const snapshot = market.symbols[symbol];
     if (!snapshot) {
       return createApiEnvelope({ success: false }, request.id, false, "查無此股票");
     }
@@ -221,7 +223,7 @@ export async function pawnRoutes(fastify: FastifyInstance) {
       symbol,
       marketPrice,
       payoutPerUnit,
-      change24h: snapshot.change24h,
+      change24h: snapshot.changePct,
     }, request.id);
   });
 }
