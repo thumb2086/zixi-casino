@@ -706,33 +706,37 @@ export async function adminRoutes(fastify: FastifyInstance) {
       }),
     },
   }, async (request) => {
-    const ctx = await getAdminContext(request);
-    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
-    const body = request.body as any;
-    const campaignId = String(body.campaignId || "").trim() || `cmp_${Date.now().toString(36)}`;
-    const toDate = (v: any) => (v ? new Date(v) : null);
-    const record = await campaignRepo.upsert({
-      campaignId,
-      title: body.title,
-      description: body.description ?? null,
-      isActive: body.isActive !== undefined ? body.isActive : true,
-      startAt: toDate(body.startAt),
-      endAt: toDate(body.endAt),
-      claimLimitPerUser: body.claimLimitPerUser ?? 1,
-      minLevel: body.minLevel ?? null,
-      rewards: body.rewards || {},
-      createdBy: ctx.session.address,
-    });
-    await opsRepo.logEvent({
-      channel: "admin",
-      severity: "info",
-      source: "admin_api",
-      kind: "campaign_upsert",
-      userId: ctx.user.id,
-      message: `Campaign ${campaignId} saved`,
-      meta: { campaignId, title: body.title },
-    });
-    return createApiEnvelope({ campaign: record }, request.id);
+    try {
+      const ctx = await getAdminContext(request);
+      if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+      const body = request.body as any;
+      const campaignId = String(body.campaignId || "").trim() || `cmp_${Date.now().toString(36)}`;
+      const toDate = (v: any) => (v ? new Date(v) : null);
+      const record = await campaignRepo.upsert({
+        campaignId,
+        title: body.title,
+        description: body.description ?? null,
+        isActive: body.isActive !== undefined ? body.isActive : true,
+        startAt: toDate(body.startAt),
+        endAt: toDate(body.endAt),
+        maxClaimsPerUser: body.claimLimitPerUser ?? body.maxClaimsPerUser ?? 1,
+        requiredLevel: body.minLevel ?? body.requiredLevel ?? null,
+        rewards: body.rewards || {},
+        createdBy: ctx.session.address,
+      });
+      await opsRepo.logEvent({
+        channel: "admin",
+        severity: "info",
+        source: "admin_api",
+        kind: "campaign_upsert",
+        userId: ctx.user.id,
+        message: `Campaign ${campaignId} saved`,
+        meta: { campaignId, title: body.title },
+      });
+      return createApiEnvelope({ campaign: record }, request.id);
+    } catch (err: any) {
+      return createApiEnvelope({ error: { message: err?.message || "campaign upsert failed" } }, request.id);
+    }
   });
 
   typedFastify.delete("/campaigns/:campaignId", async (request) => {
