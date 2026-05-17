@@ -543,12 +543,12 @@ export default function ChestView() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-start justify-center pt-12 pb-24 p-4"
           >
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="max-w-3xl w-full max-h-[90vh] flex flex-col"
+              className="max-w-3xl w-full max-h-[75vh] flex flex-col"
             >
               <h2 className="text-3xl font-black italic text-center text-[#fcc025] mb-6">
                 恭喜獲得!
