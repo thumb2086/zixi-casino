@@ -2,7 +2,7 @@
 
 export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic";
 export type ItemType = "avatar" | "title" | "token" | "buff" | "collectible";
-export type ChestType = "common" | "rare" | "epic" | "legendary";
+export type ChestType = "common" | "rare" | "epic" | "legendary" | "mythic";
 
 export interface ChestConfig {
   id: ChestType;
@@ -97,6 +97,22 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       epic: 400,
       legendary: 450,
       mythic: 50,
+    },
+  },
+  mythic: {
+    id: "mythic",
+    name: "神話寶箱",
+    nameEn: "Mythic Chest",
+    price: 100000,
+    guaranteedRarity: "mythic",
+    pityThreshold: 1,
+    dropCount: { min: 8, max: 12 },
+    weights: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 300,
+      mythic: 700,
     },
   },
 };
@@ -209,17 +225,24 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
   mythic: [
     { id: "token_10000", name: "10000 ZXC", nameEn: "10000 ZXC", type: "token", rarity: "mythic", description: "10000 子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 10000 } },
     { id: "token_100000", name: "100,000 ZXC", nameEn: "100000 ZXC", type: "token", rarity: "mythic", description: "100000 子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 100000 } },
+    { id: "token_500000", name: "500,000 ZXC", nameEn: "500000 ZXC", type: "token", rarity: "mythic", description: "500000 子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 500000 } },
+    { id: "token_1000000", name: "1,000,000 ZXC", nameEn: "1M ZXC", type: "token", rarity: "mythic", description: "一百萬子熙幣", icon: "🏆", tradable: false, consumable: true, effect: { type: "currency", value: 1000000 } },
+    { id: "token_10000000", name: "10,000,000 ZXC", nameEn: "10M ZXC", type: "token", rarity: "mythic", description: "一千萬子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 10000000 } },
     { id: "token_yjc", name: "YJC 幣", nameEn: "YJC Coin", type: "token", rarity: "mythic", description: "0.001 YJC，稀有加密資產", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 0.001, currency: "yjc" } },
+    { id: "token_yjc_01", name: "0.01 YJC", nameEn: "0.01 YJC", type: "token", rarity: "mythic", description: "0.01 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.01, currency: "yjc" } },
     { id: "avatar_mythic", name: "神話", nameEn: "Mythic", type: "avatar", rarity: "mythic", description: "超越傳奇的神話頭像", icon: "🔱", tradable: true, consumable: false },
     { id: "avatar_phoenix", name: "鳳凰", nameEn: "Phoenix", type: "avatar", rarity: "mythic", description: "浴火重生的鳳凰", icon: "🔥", tradable: false, consumable: false },
     { id: "avatar_demon", name: "惡魔", nameEn: "Demon", type: "avatar", rarity: "mythic", description: "來自深淵的惡魔", icon: "😈", tradable: false, consumable: false },
     { id: "avatar_god", name: "神像", nameEn: "God Statue", type: "avatar", rarity: "mythic", description: "遠古神祇的莊嚴雕像", icon: "🗿", tradable: false, consumable: false },
+    { id: "avatar_galaxy", name: "星系", nameEn: "Galaxy", type: "avatar", rarity: "mythic", description: "蘊含星辰的銀河頭像", icon: "🌌", tradable: false, consumable: false },
+    { id: "avatar_voidlord", name: "虛空領主", nameEn: "Void Lord", type: "avatar", rarity: "mythic", description: "統領虛空深處的領主", icon: "🕳️", tradable: false, consumable: false },
     { id: "title_immortal", name: "不朽者", nameEn: "Immortal", type: "title", rarity: "mythic", description: "淩駕於時間之上的不朽者", icon: "👑", tradable: false, consumable: false },
     { id: "title_god", name: "賭神", nameEn: "God of Gamblers", type: "title", rarity: "mythic", description: "賭術已達神之領域", icon: "🕶️", tradable: false, consumable: false },
     { id: "title_creator", name: "創造者", nameEn: "Creator", type: "title", rarity: "mythic", description: "萬物的創造者", icon: "🎨", tradable: false, consumable: false },
     { id: "title_invincible", name: "無敵", nameEn: "Invincible", type: "title", rarity: "mythic", description: "無人能敵的至高存在", icon: "💫", tradable: false, consumable: false },
     { id: "title_architect", name: "建築師", nameEn: "Architect", type: "title", rarity: "mythic", description: "構築世界的建築師", icon: "🏛️", tradable: false, consumable: false },
-    { id: "title_void", name: "虛空", nameEn: "Void", type: "title", rarity: "mythic", description: "來自虛深處的存在", icon: "🕳️", tradable: false, consumable: false },
+    { id: "title_void", name: "虛空", nameEn: "Void", type: "title", rarity: "mythic", description: "來自虛空深處的存在", icon: "🕳️", tradable: false, consumable: false },
+    { id: "title_trillionaire", name: "兆馬克", nameEn: "Trillion Mark", type: "title", rarity: "mythic", description: "資產突破兆級的終極富豪", icon: "💎", tradable: false, consumable: false },
     { id: "collectible_star", name: "星塵瓶", nameEn: "Stardust Vial", type: "collectible", rarity: "mythic", description: "裝載著星辰碎片的魔法瓶", icon: "✨", tradable: false, consumable: false },
     { id: "collectible_heart", name: "龍之心", nameEn: "Dragon Heart", type: "collectible", rarity: "mythic", description: "遠古巨龍跳動的心臟", icon: "❤️‍🔥", tradable: false, consumable: false },
     { id: "collectible_egg", name: "鳳凰蛋", nameEn: "Phoenix Egg", type: "collectible", rarity: "mythic", description: "蘊含重生之火的鳳凰蛋", icon: "🥚", tradable: false, consumable: false },
