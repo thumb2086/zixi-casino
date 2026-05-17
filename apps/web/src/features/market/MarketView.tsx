@@ -251,10 +251,7 @@ export default function MarketView() {
                       )}
                     </div>
                     <p className="mt-5 text-[2rem] font-black italic leading-none tracking-tight text-[#fcc025]">
-                      {Number(quote.price || 0).toLocaleString('en-US', {
-                        minimumFractionDigits: 3,
-                        maximumFractionDigits: 3,
-                      })}
+                      {formatNumber(Number(quote.price || 0))}
                     </p>
                     <p
                       className={`mt-2 text-[14px] font-black tracking-tight ${
@@ -296,7 +293,7 @@ export default function MarketView() {
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white">{position.symbol}</p>
                           <p className="text-[10px] font-bold text-[#adaaaa]">
-                            {t('market.quantity')} {position.quantity} {t('market.units')}
+                            {t('market.quantity')} {formatNumber(position.quantity)} {t('market.units')}
                           </p>
                         </div>
                         <div className="text-right">

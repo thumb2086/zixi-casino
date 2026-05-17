@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
-import { ITEM_DROP_TABLES, RARITY_NAMES } from '@repo/shared';
+import { formatNumber, ITEM_DROP_TABLES, RARITY_NAMES } from '@repo/shared';
 
 const ITEM_MAP: Record<string, { name: string; icon: string; rarity: string; color: string }> = {};
 for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TABLES)[]) {
@@ -208,7 +208,7 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/sell', { sessionId, itemId, quantity });
       if (res.data?.success) {
-        setMsg(`典當成功！獲得 +${res.data.data.payout} ZXC`);
+        setMsg(`典當成功！獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
@@ -228,7 +228,7 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/stock-sell', { sessionId, symbol, quantity: qty });
       if (res.data?.success) {
-        setMsg(`✅ 成功出售 ${qty} 股 ${symbol}，獲得 +${res.data.data.payout} ZXC`);
+        setMsg(`✅ 成功出售 ${qty} 股 ${symbol}，獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {

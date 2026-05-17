@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CalendarClock, Gift, ArrowLeft, Loader2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { formatNumber } from '@repo/shared';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -62,8 +63,8 @@ function resolveRewardName(id: string): string {
 function formatRewardSummary(r: any): string {
   if (!r || typeof r !== 'object') return '獎勵';
   const parts: string[] = [];
-  if (typeof r.zxc === 'number' && r.zxc > 0) parts.push(`${r.zxc.toLocaleString()} ZXC`);
-  if (typeof r.yjc === 'number' && r.yjc > 0) parts.push(`${r.yjc.toLocaleString()} YJC`);
+  if (typeof r.zxc === 'number' && r.zxc > 0) parts.push(`${formatNumber(r.zxc)} ZXC`);
+  if (typeof r.yjc === 'number' && r.yjc > 0) parts.push(`${formatNumber(r.yjc)} YJC`);
   if (Array.isArray(r.items) && r.items.length > 0) {
     const labels = r.items.map((it: any) => {
       const name = it.name || resolveRewardName(it.id || '') || it.id || '道具';
@@ -218,8 +219,8 @@ export default function EventsView() {
               </button>
             </div>
             <div className="mt-4 space-y-2 text-xs text-white">
-              {successBundle.zxc > 0 && <p>+ {Number(successBundle.zxc).toLocaleString()} ZXC</p>}
-              {successBundle.yjc > 0 && <p>+ {Number(successBundle.yjc).toLocaleString()} YJC</p>}
+              {successBundle.zxc > 0 && <p>+ {formatNumber(Number(successBundle.zxc))} ZXC</p>}
+              {successBundle.yjc > 0 && <p>+ {formatNumber(Number(successBundle.yjc))} YJC</p>}
               {Array.isArray(successBundle.items) && successBundle.items.map((it: any, i: number) => (
                 <p key={i}>道具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `×${it.qty}` : ''}</p>
               ))}

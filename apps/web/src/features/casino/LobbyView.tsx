@@ -222,7 +222,7 @@ export default function LobbyView() {
               ) : recentTxs.map((tx, i) => (
                 <div key={i} className="flex gap-2 truncate">
                   <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="truncate">{tx.type} · {tx.amount} {tx.tokenSymbol || ''}</span>
+                  <span className="truncate">{tx.type} · {formatNumber(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
                 </div>
               ))}
             </div>
