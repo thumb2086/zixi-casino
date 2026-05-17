@@ -972,19 +972,6 @@ export async function adminRoutes(fastify: FastifyInstance) {
     });
     return createApiEnvelope({ ticket: updated }, request.id);
   });
-
-  // ─── User list (for admin grant address selector) ─────────────────────────
-
-  typedFastify.get("/users", async (request) => {
-    const ctx = await getAdminContext(request);
-    if (!ctx) {
-      const reason = await getAdminAuthFailureReason(request);
-      return createApiEnvelope({ error: { code: "UNAUTHORIZED", reason: reason.code, message: reason.message } }, request.id);
-    }
-    const query = request.query as { search?: string; limit?: string };
-    const users = await userRepo.listUsers({ search: query.search, limit: Number(query.limit) || 50 });
-    return createApiEnvelope({ users }, request.id);
-  });
 }
 
 
