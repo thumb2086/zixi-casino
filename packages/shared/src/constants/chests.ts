@@ -276,6 +276,7 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "collectible_heart", name: "龍之心", nameEn: "Dragon Heart", type: "collectible", rarity: "mythic", description: "遠古巨龍跳動的心臟", icon: "❤️‍🔥", tradable: false, consumable: false },
     { id: "collectible_egg", name: "鳳凰蛋", nameEn: "Phoenix Egg", type: "collectible", rarity: "mythic", description: "蘊含重生之火的鳳凰蛋", icon: "🥚", tradable: false, consumable: false },
     { id: "collectible_anchor", name: "深海之錨", nameEn: "Abyss Anchor", type: "collectible", rarity: "mythic", description: "來自深海遺跡的遠古船錨", icon: "⚓", tradable: false, consumable: false },
+    { id: "mythic_shard", name: "神話碎片", nameEn: "Mythic Shard", type: "collectible", rarity: "mythic", description: "蘊含遠古神力的神秘碎片", icon: "💠", tradable: false, consumable: true, effect: { type: "chest_requirement", value: 0 } },
   ],
 };
 
@@ -286,6 +287,28 @@ export const RARITY_NAMES: Record<Rarity, { name: string; nameEn: string; color:
   epic: { name: "史詩", nameEn: "Epic", color: "#ba68c8" },
   legendary: { name: "傳奇", nameEn: "Legendary", color: "#ffd54f" },
   mythic: { name: "神話", nameEn: "Mythic", color: "#ff6f00" },
+};
+
+// High-tier chest opening requirements (consumed from inventory on open)
+export const CHEST_OPEN_REQUIREMENTS: Record<ChestType, { itemId: string; qty: number } | null> = {
+  common: null,
+  rare: null,
+  epic: { itemId: "mythic_shard", qty: 1 },
+  legendary: { itemId: "mythic_shard", qty: 3 },
+  mythic: { itemId: "mythic_shard", qty: 5 },
+};
+
+export const MYTHIC_SHARD: ItemDefinition = {
+  id: "mythic_shard",
+  name: "神話碎片",
+  nameEn: "Mythic Shard",
+  type: "collectible",
+  rarity: "mythic",
+  description: "蘊含遠古神力的神秘碎片，需五片合一才能開啟神話寶箱",
+  icon: "💠",
+  tradable: false,
+  consumable: true,
+  effect: { type: "chest_requirement", value: 0 },
 };
 
 // Chest Animation Duration (ms)

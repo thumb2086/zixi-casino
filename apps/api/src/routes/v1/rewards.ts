@@ -14,12 +14,11 @@ import {
   RewardCatalogRepository,
   RewardSubmissionRepository,
   RewardCampaignRepository,
-} from "@repo/infrastructure";
+  } from "@repo/infrastructure";
+import { requireDb } from "@repo/infrastructure";
 import { randomUUID } from "crypto";
 import {
   grantBundleToUser,
-  rollbackGrantBundle,
-  type ProfileInventoryState,
 } from "../../utils/inventory.js";
 
 export async function rewardRoutes(fastify: FastifyInstance) {
@@ -301,181 +300,79 @@ export async function rewardRoutes(fastify: FastifyInstance) {
   });
 
   typedFastify.post("/campaigns/:campaignId/claim", async (request) => {
-    const ctx = await getContext(request);
-    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const handlerCtx = await getContext(request);
+    if (!handlerCtx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { campaignId } = request.params as { campaignId: string };
-    const campaign = await campaignRepo.getById(campaignId);
-    if (!campaign) return createApiEnvelope({ error: { code: "NOT_FOUND", message: "活動不存在" } }, request.id);
-    if (!campaign.isActive) return createApiEnvelope({ error: { code: "INACTIVE", message: "活動已停用" } }, request.id);
-    const now = Date.now();
-    if (campaign.startAt && new Date(campaign.startAt).getTime() > now) {
-      return createApiEnvelope({ error: { code: "NOT_STARTED", message: "活動尚未開始" } }, request.id);
-    }
-    if (campaign.endAt && new Date(campaign.endAt).getTime() < now) {
-      return createApiEnvelope({ error: { code: "ENDED", message: "活動已結束" } }, request.id);
-    }
-    const limit = (campaign as any).maxClaimsPerUser ?? 1;
-    const address = String(ctx.user.address || "").toLowerCase();
-
-    // Atomically check the claim limit and record the claim inside a transaction
-    // guarded by a pg_advisory_xact_lock on (campaignId, userId). Concurrent
-    // requests from the same user serialize on the lock and only the first
-    // `limit` successful inserts return true — the rest return false without
-    // any reward being granted.
-    const ok = await campaignRepo.tryClaim({
-      campaignId,
-      userId: ctx.user.id,
-      address,
-      limit,
-    });
-    if (!ok) {
-      return createApiEnvelope({ error: { code: "LIMIT_REACHED", message: "已達領取上限" } }, request.id);
-    }
-
-    const rewards = (campaign.rewards as any) || {};
-    const bundleSummary: any = {
-      items: rewards.items || [],
-      avatars: rewards.avatars || [],
-      titles: rewards.titles || [],
-    };
-
-    // tryClaim already committed the claim row. If any reward-granting step
-    // below throws we MUST fully unwind the partial grant (DB inventory,
-    // KV-synced owned lists, ZXC/YJC balance credits) AND delete the claim row
-    // so the user can retry. Without this, the user either gets locked out
-    // with no reward OR retries succeed and double-dip on items / balance.
-    //
-    // Strategy: capture the pre-grant snapshot AND the actually-newly-added
-    // avatars/titles from grantBundleToUser's return value (not a separate
-    // pre-load) so rollback targets exactly what the grant modified — no
-    // divergence if something else concurrently touches the inventory.
-    const hasBundle = Boolean(
-      (rewards.items?.length ?? 0) || (rewards.avatars?.length ?? 0) || (rewards.titles?.length ?? 0),
-    );
-    let preState: ProfileInventoryState | null = null;
-    let addedAvatars: string[] = [];
-    let addedTitles: string[] = [];
-    let bundleGranted = false;
-    let zxcCredited = 0;
-    let yjcCredited = 0;
     try {
-      if (hasBundle) {
-        const result = await grantBundleToUser(
-          ctx.user.id,
-          {
-            items: rewards.items,
-            avatars: rewards.avatars,
-            titles: rewards.titles,
-          },
-          address,
-        );
-        preState = result.preState;
-        addedAvatars = result.addedAvatars;
-        addedTitles = result.addedTitles;
-        bundleGranted = true;
+      const campaign = await campaignRepo.getById(campaignId);
+      if (!campaign) return createApiEnvelope({ error: { code: "NOT_FOUND", message: "活動不存在" } }, request.id);
+      if (!campaign.isActive) return createApiEnvelope({ error: { code: "INACTIVE", message: "活動已停用" } }, request.id);
+      const now = Date.now();
+      if (campaign.startAt && new Date(campaign.startAt).getTime() > now) {
+        return createApiEnvelope({ error: { code: "NOT_STARTED", message: "活動尚未開始" } }, request.id);
       }
-      if (typeof rewards.zxc === "number" && rewards.zxc > 0) {
-        const key = `balance:${address}`;
-        const current = parseFloat((await kv.get<string>(key)) || "0");
-        await kv.set(key, (current + rewards.zxc).toString());
-        zxcCredited = rewards.zxc;
-        bundleSummary.zxc = rewards.zxc;
+      if (campaign.endAt && new Date(campaign.endAt).getTime() < now) {
+        return createApiEnvelope({ error: { code: "ENDED", message: "活動已結束" } }, request.id);
       }
-      if (typeof rewards.yjc === "number" && rewards.yjc > 0) {
-        const key = `balance_yjc:${address}`;
-        const current = parseFloat((await kv.get<string>(key)) || "0");
-        await kv.set(key, (current + rewards.yjc).toString());
-        yjcCredited = rewards.yjc;
-        bundleSummary.yjc = rewards.yjc;
+      const limit = (campaign as any).maxClaimsPerUser ?? 1;
+      const address = String(handlerCtx.user.address || "").toLowerCase();
+      const ok = await campaignRepo.tryClaim({ campaignId, userId: handlerCtx.user.id, address, limit });
+      if (!ok) {
+        return createApiEnvelope({ error: { code: "LIMIT_REACHED", message: "已達領取上限" } }, request.id);
       }
-    } catch (err) {
-      // 1. Reverse the items / avatars / titles grant.
-      if (bundleGranted && preState) {
-        try {
-          await rollbackGrantBundle(ctx.user.id, preState, address, addedAvatars, addedTitles);
-        } catch {
-          // swallow - captured below via ops log
-        }
-      }
-      // 2. Reverse any balance credits that were already applied.
-      if (zxcCredited > 0) {
-        try {
-          const key = `balance:${address}`;
-          const current = parseFloat((await kv.get<string>(key)) || "0");
-          await kv.set(key, Math.max(0, current - zxcCredited).toString());
-        } catch {
-          // swallow - captured below via ops log
-        }
-      }
-      if (yjcCredited > 0) {
-        try {
-          const key = `balance_yjc:${address}`;
-          const current = parseFloat((await kv.get<string>(key)) || "0");
-          await kv.set(key, Math.max(0, current - yjcCredited).toString());
-        } catch {
-          // swallow - captured below via ops log
-        }
-      }
-      // 3. Delete the claim row so the user can retry.
+      const rewards = (campaign.rewards as any) || {};
+      const bundleSummary: any = {
+        items: rewards.items || [],
+        avatars: rewards.avatars || [],
+        titles: rewards.titles || [],
+      };
+      let grantErr: Error | null = null;
       try {
-        await campaignRepo.deleteLatestClaim(campaignId, ctx.user.id);
-      } catch (rollbackErr) {
-        await opsRepo.logEvent({
-          channel: "rewards",
-          severity: "error",
-          source: "campaign_claim",
-          kind: "campaign_claim_rollback_failed",
-          userId: ctx.user.id,
-          address,
-          message: `Failed to roll back claim for ${campaignId}`,
-          meta: { campaignId, err: String(rollbackErr) },
-        }).catch(() => {});
+        if (rewards.items?.length || rewards.avatars?.length || rewards.titles?.length) {
+          await grantBundleToUser(handlerCtx.user.id, { items: rewards.items, avatars: rewards.avatars, titles: rewards.titles }, address);
+        }
+        if (typeof rewards.zxc === "number" && rewards.zxc > 0) {
+          const current = parseFloat((await kv.get<string>(`balance:${address}`)) || "0");
+          await kv.set(`balance:${address}`, (current + rewards.zxc).toString());
+          bundleSummary.zxc = rewards.zxc;
+        }
+        if (typeof rewards.yjc === "number" && rewards.yjc > 0) {
+          const current = parseFloat((await kv.get<string>(`balance_yjc:${address}`)) || "0");
+          await kv.set(`balance_yjc:${address}`, (current + rewards.yjc).toString());
+          bundleSummary.yjc = rewards.yjc;
+        }
+      } catch (grantErrInner: any) {
+        grantErr = grantErrInner;
+        // Rollback claim row so user can retry
+        try {
+          const rollbackConn = await requireDb();
+          await rollbackConn.execute?.(
+            `DELETE FROM reward_grants WHERE campaign_id = $1 AND user_id = $2 AND source = 'campaign'`,
+            [campaignId, handlerCtx.user.id]
+          );
+        } catch {}
       }
+      if (grantErr) {
+        await opsRepo.logEvent({
+          channel: "rewards", severity: "error", source: "campaign_claim", kind: "campaign_claim_grant_failed",
+          userId: handlerCtx.user.id, address, message: `Grant failed for campaign ${campaignId}: ${grantErr.message}`,
+          meta: { campaignId, err: String(grantErr) },
+        }).catch(() => {});
+        return createApiEnvelope({ error: { code: "GRANT_FAILED", message: `發放獎勵失敗，請重新領取` } }, request.id);
+      }
+      await campaignRepo.logGrant({ targetAddress: address, operatorAddress: null, source: "campaign", note: campaign.title, bundle: { campaignId, ...bundleSummary } }).catch(() => {});
       await opsRepo.logEvent({
-        channel: "rewards",
-        severity: "error",
-        source: "campaign_claim",
-        kind: "campaign_claim_grant_failed",
-        userId: ctx.user.id,
-        address,
-        message: `Grant failed for campaign ${campaignId} — rolled back`,
-        meta: {
-          campaignId,
-          err: String(err),
-          bundleGranted,
-          addedAvatars,
-          addedTitles,
-          zxcCredited,
-          yjcCredited,
-        },
+        channel: "rewards", severity: "info", source: "campaign_claim", kind: "campaign_claim",
+        userId: handlerCtx.user.id, address, message: `Claimed campaign ${campaignId}`, meta: { campaignId, bundle: bundleSummary },
       }).catch(() => {});
-      throw err;
+      return createApiEnvelope({ success: true, bundle: bundleSummary }, request.id);
+    } catch (outerErr: any) {
+      await opsRepo.logEvent({
+        channel: "rewards", severity: "error", source: "campaign_claim", kind: "campaign_claim_fatal",
+        userId: handlerCtx?.user?.id, message: `Fatal error claiming campaign ${campaignId}: ${outerErr?.message || String(outerErr)}`,
+        meta: { campaignId, stack: outerErr?.stack },
+      }).catch(() => {});
+      return createApiEnvelope({ error: { code: "CLAIM_FAILED", message: `領取失敗: ${outerErr?.message || "未知錯誤"}` } }, request.id);
     }
-    // Claim + rewards already committed at this point. Audit logs (logGrant +
-    // logEvent) are best-effort — swallow their failures so a transient DB
-    // error doesn't surface as a 500 and permanently lock the user out
-    // (tryClaim would reject the retry).
-    await campaignRepo
-      .logGrant({
-        targetAddress: address,
-        operatorAddress: null,
-        source: "campaign",
-        note: campaign.title,
-        bundle: { campaignId, ...bundleSummary },
-      })
-      .catch(() => {});
-    await opsRepo
-      .logEvent({
-        channel: "rewards",
-        severity: "info",
-        source: "campaign_claim",
-        kind: "campaign_claim",
-        userId: ctx.user.id,
-        address,
-        message: `Claimed campaign ${campaignId}`,
-        meta: { campaignId, bundle: bundleSummary },
-      })
-      .catch(() => {});
-    return createApiEnvelope({ success: true, bundle: bundleSummary }, request.id);
   });
 }
