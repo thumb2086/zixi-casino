@@ -64,6 +64,7 @@ export default function ShopView() {
   // ── YJC exchange state ────────────────────────────────────────────────────
   const [yjcBalance, setYjcBalance] = useState('0');
   const [convertZxc, setConvertZxc] = useState('');
+  const [convertYjc, setConvertYjc] = useState('');
   const [converting, setConverting] = useState(false);
   const CONVERSION_RATE = 100_000_000; // 1 YJC = 100M ZXC
 
@@ -168,6 +169,33 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || (amount / CONVERSION_RATE)} YJC`);
         setConvertZxc('');
+        fetchItems();
+      } else {
+        setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
+      }
+    } catch (err: any) {
+      setMsg(`❌ ${err?.response?.data?.error?.message || err?.message || '兌換失敗'}`);
+    } finally {
+      setConverting(false);
+      setTimeout(() => setMsg(null), 5000);
+    }
+  }
+
+  async function handleConvertZxcFromYjc() {
+    if (!sessionId || converting) return;
+    const yjcNum = parseFloat(convertYjc);
+    if (!yjcNum || yjcNum <= 0) {
+      setMsg('❌ 請輸入大於 0 的 YJC 數量');
+      setTimeout(() => setMsg(null), 3000);
+      return;
+    }
+    setConverting(true);
+    setMsg(null);
+    try {
+      const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', { sessionId, yjcAmount: String(yjcNum) });
+      if (res.data?.success) {
+        setMsg(`✅ 成功兌換 ${res.data.data?.zxcAmount || (yjcNum * CONVERSION_RATE).toLocaleString()} ZXC`);
+        setConvertYjc('');
         fetchItems();
       } else {
         setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
@@ -306,6 +334,12 @@ export default function ShopView() {
             <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`最少 ${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-[11px] font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertYjc} disabled={converting || !convertZxc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
               {converting ? <Loader2 size={12} className="animate-spin" /> : '兌換'}
+            </button>
+          </div>
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#494847]/20">
+            <input type="number" min="0.0001" step="0.0001" placeholder="YJC 數量" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-[11px] font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <button onClick={handleConvertZxcFromYjc} disabled={converting || !convertYjc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#fcc025] text-black px-4 py-2 rounded-lg disabled:opacity-50">
+              {converting ? <Loader2 size={12} className="animate-spin" /> : '反向兌換'}
             </button>
           </div>
         </section>
