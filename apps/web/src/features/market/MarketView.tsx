@@ -58,14 +58,30 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
 export default function MarketView() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { snapshot, account, execute } = useMarket();
+  const { amountDisplay } = usePreferencesStore();
+  const numberMode = amountDisplay === 'full' ? 'full' : 'short' as const;
+  const marketSnapshot = snapshot.data;
+  const summary = account.data;
+  const stockSymbols: Quote[] = marketSnapshot?.quotes || [];
+  const selectedQuote = stockSymbols.find((q) => q.symbol === selectedSymbol) || null;
+  const historyBySymbol: Record<string, number[]> = marketSnapshot?.history || {};
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL');
   const [tradeQuantity, setTradeQuantity] = useState('1');
-  const [cashMoveAmount, setCashMoveAmount] = useState('1000');
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     if (actionNotice) { const t = setTimeout(() => setActionNotice(null), 3000); return () => clearTimeout(t); }
   }, [actionNotice]);
+
+  const runAction = async (params: MarketActionParams, successMsg: string) => {
+    try {
+      await execute.mutateAsync(params);
+      setActionNotice({ type: 'success', message: successMsg });
+    } catch (err: any) {
+      setActionNotice({ type: 'error', message: err?.message || t('market.action_failed') });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
