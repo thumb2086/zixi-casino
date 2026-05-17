@@ -729,8 +729,10 @@ export default function AdminView() {
       return;
     }
     try {
-      await api.post('/api/v1/admin/grant', body);
-      show(`已送出獎勵給 ${addr}`);
+      const res = await api.post('/api/v1/admin/grant', body);
+      const data = res.data?.data;
+      if (data?.error) throw new Error(data.error.message || data.error.code || '贈送失敗');
+      show(`✅ 已送出獎勵給 ${addr}`);
       setGrantZxc('');
       setGrantYjc('');
       setGrantItemId('');
@@ -992,20 +994,6 @@ export default function AdminView() {
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Coins size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">調整餘額</h3></div>
-              <p className="text-xs text-[#adaaaa] mb-3">正數為加、負數為減。支援 ZXC 與 YJC。</p>
-              <form onSubmit={handleAdjust} className="space-y-3">
-                <input type="text" value={adjustAddress} onChange={(e) => setAdjustAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="錢包地址 0x..." />
-                <div className="grid grid-cols-2 gap-2">
-                  <input type="text" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="金額 (+/-)" />
-                  <select value={adjustToken} onChange={(e) => setAdjustToken(e.target.value as 'zhixi' | 'yjc')} className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"><option value="zhixi">子熙幣 (ZXC)</option><option value="yjc">佑戩幣 (YJC)</option></select>
-                </div>
-                <input type="text" value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="原因" maxLength={200} />
-                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">調整餘額</button>
-              </form>
-            </div>
-
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
               <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">黑名單</h3></div>
               <form onSubmit={handleBlacklist} className="space-y-3">
                 <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="錢包地址 0x..." />
@@ -1134,53 +1122,6 @@ export default function AdminView() {
                 </ul>
               )}
             </div>
-          </section>
-        )}
-
-        {activeTab === 'balance' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-            <div className="flex items-center gap-2 mb-4">
-              <Coins size={18} className="text-[#fcc025]" />
-              <h3 className="text-sm font-black tracking-wide text-white">調整餘額</h3>
-            </div>
-            <p className="text-xs text-[#adaaaa] mb-3">正數為加、負數為減。支援 ZXC 與 YJC。</p>
-            <form onSubmit={handleAdjust} className="space-y-3">
-              <input
-                type="text"
-                value={adjustAddress}
-                onChange={(e) => setAdjustAddress(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                placeholder="錢包地址 0x..."
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  value={adjustAmount}
-                  onChange={(e) => setAdjustAmount(e.target.value)}
-                  className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                  placeholder="金額 (+/-)"
-                />
-                <select
-                  value={adjustToken}
-                  onChange={(e) => setAdjustToken(e.target.value as 'zhixi' | 'yjc')}
-                  className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="zhixi">子熙幣 (ZXC)</option>
-                  <option value="yjc">佑戩幣 (YJC)</option>
-                </select>
-              </div>
-              <input
-                type="text"
-                value={adjustReason}
-                onChange={(e) => setAdjustReason(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                placeholder="原因"
-                maxLength={200}
-              />
-              <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">
-                調整餘額
-              </button>
-            </form>
           </section>
         )}
 
