@@ -279,6 +279,7 @@ export async function useItem(
 
   let effectSummary = `${def.name} 已使用`;
   let currencyGranted: number | undefined;
+  let currencyType: 'zhixi' | 'yjc' = 'zhixi';
   let buffActivated: ActiveBuff | undefined;
 
   if (def.consumable) {
@@ -292,7 +293,7 @@ export async function useItem(
       const value = Number(def.effect?.value || 0);
       if (value > 0) {
         currencyGranted = value;
-        currencyType = def.effect?.currency || "zhixi";
+        currencyType = def.effect?.currency === "yjc" ? "yjc" : "zhixi";
         const label = currencyType === "yjc" ? "YJC" : "ZXC";
         effectSummary = `已領取 ${value.toLocaleString()} ${label}`;
       }
@@ -567,7 +568,7 @@ export async function creditItemValue(
   if (!outcome.currencyGranted || outcome.currencyGranted <= 0) return null;
   const token = outcome.currencyType || "zhixi";
   // lazy-import to avoid circular dependency
-  const { gameSettlement } = await import("../../utils/game-settlement.js");
+  const { gameSettlement } = await import("./game-settlement.js");
 
   try {
     const current = parseFloat(await gameSettlement.getBalance(address, token)) || 0;
