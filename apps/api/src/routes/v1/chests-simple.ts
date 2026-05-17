@@ -285,6 +285,11 @@ export async function chestRoutes(fastify: FastifyInstance) {
         },
       });
 
+      const newKeyCounts: Record<string, number> = {};
+      for (const ct of Object.keys(CHEST_CONFIGS) as ChestType[]) {
+        newKeyCounts[ct] = outcome.state.inventory[`chest_key_${ct}`] || 0;
+      }
+
       return createApiEnvelope(
         {
           success: true,
@@ -298,6 +303,7 @@ export async function chestRoutes(fastify: FastifyInstance) {
           })),
           isPityTrigger: outcome.result.isPityTrigger,
           pityCount: outcome.state.chestPity[chestType],
+          keyCounts: newKeyCounts,
           totalValue: outcome.result.totalValue,
           inventoryCount: countInventorySlots(outcome.state.inventory),
         },
