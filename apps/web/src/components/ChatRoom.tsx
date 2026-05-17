@@ -24,7 +24,7 @@ export default function ChatRoom() {
     refetchInterval: 3000,
   });
 
-  const { sessionId } = useAuthStore();
+  const { sessionId, address } = useAuthStore();
 
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
@@ -52,13 +52,18 @@ export default function ChatRoom() {
         <span className="text-[10px] text-slate-600">{isZh ? '全域聊天' : 'Global'}</span>
       </div>
 
-      <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.map((m: any) => (
-          <div key={m.id} className="animate-in slide-in-from-bottom-1 fade-in text-xs">
-            <span className="mr-2 font-black text-yellow-500">[{m.displayName}]:</span>
-            <span className="text-slate-300">{m.text}</span>
-          </div>
-        ))}
+      <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-4">
+        {messages.map((m: any) => {
+          const isOwn = m.address?.toLowerCase() === address?.toLowerCase();
+          return (
+            <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[80%] rounded-xl px-3 py-2 ${isOwn ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 rounded-bl-sm'}`}>
+                {!isOwn && <p className="text-[9px] font-bold text-yellow-500 mb-0.5">{m.displayName}</p>}
+                <p className="text-xs leading-relaxed">{m.text}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <form
