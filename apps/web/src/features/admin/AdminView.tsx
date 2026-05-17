@@ -176,7 +176,6 @@ export default function AdminView() {
     { id: 'chest_key_epic', name: '史詩寶箱鑰匙', icon: '🗝️', rarity: 'epic', type: 'chest_key' },
     { id: 'chest_key_legendary', name: '傳奇寶箱鑰匙', icon: '🗝️', rarity: 'legendary', type: 'chest_key' },
     { id: 'chest_key_mythic', name: '神話寶箱鑰匙', icon: '🗝️', rarity: 'mythic', type: 'chest_key' },
-    { id: 'mythic_shard', name: '神話碎片', icon: '💠', rarity: 'mythic', type: 'collectible' },
   ];
 
   useEffect(() => {
