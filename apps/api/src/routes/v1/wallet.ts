@@ -816,8 +816,8 @@ export async function walletRoutes(fastify: FastifyInstance) {
     try {
       const zxcAmountText = parseAmountText(request.body.zxcAmount);
       const conversion = onchainManager.convertZxcToYjc(zxcAmountText);
-      if (conversion.yjcAmount <= 0) {
-        return createApiEnvelope({ error: { message: `At least ${ZXC_PER_YJC} ZXC is required to convert` } }, request.id);
+      if (conversion.yjcAmount < 0.0001) {
+        return createApiEnvelope({ error: { message: "Minimum conversion is 0.0001 YJC" } }, request.id);
       }
 
       const { runtime, client } = getChainClient();

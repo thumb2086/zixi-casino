@@ -64,9 +64,9 @@ export default function MarketView() {
   const marketSnapshot = snapshot.data;
   const summary = account.data;
   const stockSymbols: Quote[] = Object.values(marketSnapshot?.symbols || {});
-  const selectedQuote = stockSymbols.find((q) => q.symbol === selectedSymbol) || null;
   const historyBySymbol: Record<string, number[]> = marketSnapshot?.history || {};
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL');
+  const selectedQuote = stockSymbols.find((q) => q.symbol === selectedSymbol) || null;
   const [tradeQuantity, setTradeQuantity] = useState('1');
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
