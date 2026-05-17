@@ -32,6 +32,7 @@ import { useSyncUser } from './hooks/useSyncUser';
 import Layout from './components/Layout';
 import VIPLevelsView from './features/info/VIPLevelsView';
 import InfoView from './features/info/InfoView';
+import CollectionView from './features/collection/CollectionView';
 import { Loader2 } from 'lucide-react';
 
 const queryClient = new QueryClient();
@@ -119,6 +120,7 @@ function AppContent() {
             <Route path="announcement" element={<AnnouncementCenter />} />
             <Route path="support" element={<SupportView />} />
             <Route path="inventory" element={<InventoryView />} />
+            <Route path="collection" element={<CollectionView />} />
             <Route path="admin" element={<AdminView />} />
             <Route path="settings" element={<SettingsView />} />
             <Route path="transactions" element={<PublicTransactionsView />} />

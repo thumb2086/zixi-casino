@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, RefreshCw, Coins, ShoppingBag, ChevronLeft, Gift, Zap, Shield } from 'lucide-react';
+import { Loader2, RefreshCw, Coins, ShoppingBag, ChevronLeft, Gift, Zap, Shield, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
@@ -26,6 +26,14 @@ const RARITY_COLORS: Record<string, string> = {
   mythic: '#ff6f00',
 };
 
+const PAWN_PRICES: Record<string, number> = {
+  common: 10,
+  rare: 50,
+  epic: 250,
+  legendary: 1000,
+  mythic: 5000,
+};
+
 function formatBalance(raw: string | undefined): string {
   if (!raw) return '0';
   const n = Number(raw);
@@ -35,6 +43,7 @@ function formatBalance(raw: string | undefined): string {
 
 export default function ShopView() {
   const { sessionId, isAuthorized } = useAuthStore();
+  const [tab, setTab] = useState<'shop' | 'pawn'>('shop');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState<string | null>(null);
@@ -43,12 +52,18 @@ export default function ShopView() {
   const [ownedAvatars, setOwnedAvatars] = useState<string[]>([]);
   const [ownedTitles, setOwnedTitles] = useState<string[]>([]);
 
+  // ── Pawn state ───────────────────────────────────────────────────────────
+  const [invItems, setInvItems] = useState<any[]>([]);
+  const [pawnLoading, setPawnLoading] = useState(false);
+  const [sellingId, setSellingId] = useState<string | null>(null);
+
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const [catalogRes, summaryRes, invRes] = await Promise.all([
+      const [catalogRes, summaryRes, invRes, pawnInvRes] = await Promise.all([
         api.get('/api/v1/rewards/catalog'),
         api.get('/api/v1/wallet/summary', { params: { sessionId } }).catch(() => null),
+        api.get('/api/v1/inventory', { params: { sessionId } }).catch(() => null),
         api.get('/api/v1/inventory', { params: { sessionId } }).catch(() => null),
       ]);
       const catalog = catalogRes.data?.data?.customItems || [];
@@ -57,6 +72,9 @@ export default function ShopView() {
       if (invRes?.data?.data) {
         setOwnedAvatars(invRes.data.data.ownedAvatars || []);
         setOwnedTitles(invRes.data.data.ownedTitles || []);
+      }
+      if (pawnInvRes?.data?.data?.items) {
+        setInvItems(pawnInvRes.data.data.items.filter((i: any) => i.type !== 'avatar' && i.type !== 'title'));
       }
       if (summaryRes?.data?.data) {
         const s = summaryRes.data.data;
@@ -132,6 +150,41 @@ export default function ShopView() {
     }
   }
 
+  async function handlePawnSell(itemId: string, quantity: number = 1) {
+    if (!sessionId || sellingId) return;
+    setSellingId(itemId);
+    setMsg(null);
+    try {
+      const res = await api.post('/api/v1/pawn/sell', { sessionId, itemId, quantity });
+      if (res.data?.success) {
+        setMsg(`典當成功！獲得 +${res.data.data.payout} ZXC`);
+        setBalance(res.data.data.balanceAfter);
+        fetchItems();
+      } else {
+        setMsg(res.data?.error || '典當失敗');
+      }
+    } catch (err: any) {
+      setMsg(err?.response?.data?.data?.error || err?.message || '典當失敗');
+    } finally {
+      setSellingId(null);
+    }
+  }
+
+  const visibleItems = items.filter((item: any) => {
+    const meta = item.meta as Record<string, any> | undefined;
+    const bundle = meta?.bundle as Array<{ id: string; qty?: number }> | undefined;
+    if (bundle) {
+      const ownedAvatarOrTitles = bundle.filter(
+        (s) => ownedAvatars.includes(s.id) || ownedTitles.includes(s.id),
+      );
+      const allAvatarOrTitles = bundle.filter((s) => ITEM_MAP[s.id]?.rarity);
+      return allAvatarOrTitles.length === 0 || ownedAvatarOrTitles.length < allAvatarOrTitles.length;
+    }
+    if (item.type === 'avatar' && ownedAvatars.includes(item.itemId)) return false;
+    if (item.type === 'title' && ownedTitles.includes(item.itemId)) return false;
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white font-['Manrope'] pb-32">
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
@@ -144,9 +197,23 @@ export default function ShopView() {
             <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">商店</h1>
           </div>
         </div>
+        <div className="flex max-w-2xl mx-auto px-6 gap-4">
+          <button
+            onClick={() => setTab('shop')}
+            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
+          >
+            商城
+          </button>
+          <button
+            onClick={() => setTab('pawn')}
+            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
+          >
+            當舖
+          </button>
+        </div>
       </header>
 
-      <main className="pt-20 px-6 max-w-2xl mx-auto space-y-6">
+      <main className="pt-28 px-6 max-w-2xl mx-auto space-y-6">
         <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#fcc025]" />
@@ -155,7 +222,9 @@ export default function ShopView() {
           <span className="text-lg font-black italic text-[#fcc025]">{formatBalance(balance)}</span>
         </section>
 
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
+        {tab === 'shop' && (
+          <>
+          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
           <div className="flex items-center gap-2 mb-4">
             <Gift size={16} className="text-[#fcc025]" />
             <h2 className="text-sm font-black uppercase tracking-widest text-white">寶箱</h2>
@@ -198,7 +267,7 @@ export default function ShopView() {
             </div>
           )}
 
-          {!loading && items.length === 0 && (
+          {!loading && visibleItems.length === 0 && (
             <p className="text-sm text-[#adaaaa] text-center py-8">目前暫無商品</p>
           )}
 
@@ -227,30 +296,15 @@ export default function ShopView() {
                     {bundle && (
                       <div className="mt-1.5 space-y-1">
                         {bundle.map((sub: any, i: number) => {
-                          const info = ITEM_MAP[sub.id];
-  const visibleItems = items.filter((item: any) => {
-    const meta = item.meta as Record<string, any> | undefined;
-    const bundle = meta?.bundle as Array<{ id: string; qty?: number }> | undefined;
-    if (bundle) {
-      const ownedAvatarOrTitles = bundle.filter(
-        (s) => ownedAvatars.includes(s.id) || ownedTitles.includes(s.id),
-      );
-      const allAvatarOrTitles = bundle.filter((s) => ITEM_MAP[s.id]?.rarity);
-      return allAvatarOrTitles.length === 0 || ownedAvatarOrTitles.length < allAvatarOrTitles.length;
-    }
-    if (item.type === 'avatar' && ownedAvatars.includes(item.itemId)) return false;
-    if (item.type === 'title' && ownedTitles.includes(item.itemId)) return false;
-    return true;
-  });
-
-  return (
-                            <div key={i} className="flex items-center gap-1.5 text-[10px]">
-                              <span className="shrink-0">{info?.icon || '•'}</span>
-                              <span className="text-white font-medium">{info?.name || sub.id}</span>
-                              {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
-                            </div>
-                          );
-                        })}
+                            const info = ITEM_MAP[sub.id];
+                            return (
+                              <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                                <span className="shrink-0">{info?.icon || '•'}</span>
+                                <span className="text-white font-medium">{info?.name || sub.id}</span>
+                                {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
+                              </div>
+                            );
+                          })}
                       </div>
                     )}
                     {hasDiscount && (
@@ -279,6 +333,53 @@ export default function ShopView() {
           </div>
 
         </section>
+          </>
+        )}
+
+        {tab === 'pawn' && (
+        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+          <div className="flex items-center gap-2 mb-4">
+            <Trash2 size={16} className="text-[#fcc025]" />
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">當舖</h2>
+          </div>
+          <p className="text-[10px] text-[#adaaaa] mb-4">將不需要的道具典當換取 ZXC</p>
+          {invItems.length === 0 ? (
+            <p className="text-sm text-[#adaaaa] text-center py-8">暫無可典當的道具</p>
+          ) : (
+            <div className="space-y-3">
+              {invItems.map((item: any) => {
+                const price = PAWN_PRICES[item.rarity] || 5;
+                return (
+                  <div key={item.id} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                    <div className="text-2xl shrink-0">{item.icon || '📦'}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{item.name}</p>
+                      <p className="text-[10px] text-[#adaaaa] truncate">{item.description || ''}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-bold uppercase" style={{ color: RARITY_COLORS[item.rarity] || '#b0b0b0' }}>
+                          {item.rarity}
+                        </span>
+                        <span className="text-[10px] text-[#adaaaa]">×{item.quantity}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-xs font-black text-emerald-400">+{price} ZXC</span>
+                      <button
+                        onClick={() => handlePawnSell(item.id, 1)}
+                        disabled={sellingId === item.id || !sessionId}
+                        className="text-[10px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
+                      >
+                        {sellingId === item.id ? <Loader2 size={10} className="animate-spin" /> : '典當'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+        )}
+
       </main>
 
       {msg && (
@@ -287,7 +388,7 @@ export default function ShopView() {
         </div>
       )}
 
-      <AppBottomNav current="none" />
+      <AppBottomNav current="shop" />
     </div>
   );
 }
