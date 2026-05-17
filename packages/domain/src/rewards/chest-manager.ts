@@ -135,11 +135,13 @@ export class ChestManager {
         ? !inventory.titles.includes(item.id)
         : !inventory.items[item.id] || inventory.items[item.id] === 0;
       
-      // Update inventory
-      if (!newInventory.items[item.id]) {
-        newInventory.items[item.id] = 0;
+      // Update inventory (skip avatars/titles — they go to dedicated arrays)
+      if (item.type !== "avatar" && item.type !== "title") {
+        if (!newInventory.items[item.id]) {
+          newInventory.items[item.id] = 0;
+        }
+        newInventory.items[item.id]++;
       }
-      newInventory.items[item.id]++;
       
       // Handle special item types
       if (item.type === "avatar" && !newInventory.avatars.includes(item.id)) {
