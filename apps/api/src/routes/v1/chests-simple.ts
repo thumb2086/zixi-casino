@@ -424,26 +424,26 @@ typedFastify.post("/open-bulk", {
       return createApiEnvelope({ success: false }, request.id, false, error?.message || "CHEST_OPEN_FAILED");
     }
 
-    // Merge drops
+    // Merge drops — only show new items, duplicates go to compensation
     for (const reward of outcome.items) {
       const itemId = reward.item.id;
       const def = ALL_ITEMS[itemId];
       if (def?.type === "avatar") {
         if (reward.isNew) {
           state.ownedAvatars.push(itemId);
+          allItems.push({ item: reward.item, isNew: true, quantity: 1 });
         } else {
           totalComp += DUPLICATE_COMPENSATION.avatar;
         }
-        allItems.push({ item: reward.item, isNew: reward.isNew, quantity: 1 });
         continue;
       }
       if (def?.type === "title") {
         if (reward.isNew) {
           state.ownedTitles.push(itemId);
+          allItems.push({ item: reward.item, isNew: true, quantity: 1 });
         } else {
           totalComp += DUPLICATE_COMPENSATION.title;
         }
-        allItems.push({ item: reward.item, isNew: reward.isNew, quantity: 1 });
         continue;
       }
       if (def?.type === "collectible") {
@@ -451,7 +451,6 @@ typedFastify.post("/open-bulk", {
           allItems.push({ item: reward.item, isNew: true, quantity: 1 });
         } else {
           totalComp += DUPLICATE_COMPENSATION.collectible;
-          allItems.push({ item: reward.item, isNew: false, quantity: 1 });
         }
         continue;
       }
