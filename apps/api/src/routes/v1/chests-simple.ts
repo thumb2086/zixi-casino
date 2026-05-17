@@ -5,7 +5,7 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { createApiEnvelope, ITEM_DROP_TABLES, CHEST_CONFIGS, RARITY_NAMES, DAILY_FREE_CHEST_TYPE, DAILY_FREE_CHEST_COOLDOWN_HOURS, MAX_INVENTORY_SLOTS, type ChestType, type Rarity, type ItemDefinition } from "@repo/shared";
+import { createApiEnvelope, ITEM_DROP_TABLES, CHEST_CONFIGS, CHEST_OPEN_REQUIREMENTS, RARITY_NAMES, DAILY_FREE_CHEST_TYPE, DAILY_FREE_CHEST_COOLDOWN_HOURS, MAX_INVENTORY_SLOTS, type ChestType, type Rarity, type ItemDefinition } from "@repo/shared";
 import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@repo/infrastructure";
 import { ChestManager, type UserInventory } from "@repo/domain";
 import { gameSettlement } from "../../utils/game-settlement.js";
@@ -286,6 +286,28 @@ typedFastify.post(
         }
         state.inventory[keyId] = keyCount - 1;
         if (state.inventory[keyId] <= 0) delete state.inventory[keyId];
+        await persistInventoryState(ctx.userId, state);
+      }
+
+      // High-tier chest requirement: mythic_shard consumption
+      const requirement = CHEST_OPEN_REQUIREMENTS?.[chestType];
+      if (requirement) {
+        const shardCount = state.inventory[requirement.itemId] || 0;
+        if (shardCount < requirement.qty) {
+          // Rollback key deduction
+          if (keyId) {
+            state.inventory[keyId] = (state.inventory[keyId] || 0) + 1;
+            await persistInventoryState(ctx.userId, state);
+          }
+          return createApiEnvelope(
+            { success: false },
+            request.id,
+            false,
+            `需要 ${requirement.qty} 個神話碎片才能開啟 ${config.name}，目前擁有 ${shardCount} 個`,
+          );
+        }
+        state.inventory[requirement.itemId] = shardCount - requirement.qty;
+        if (state.inventory[requirement.itemId] <= 0) delete state.inventory[requirement.itemId];
         await persistInventoryState(ctx.userId, state);
       }
 
