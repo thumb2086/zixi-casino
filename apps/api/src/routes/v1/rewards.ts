@@ -265,27 +265,31 @@ export async function rewardRoutes(fastify: FastifyInstance) {
   // ─── Public Campaigns (events) ───────────────────────────────────────────
 
   typedFastify.get("/campaigns", async (request) => {
-    const ctx = await getContext(request);
-    const now = Date.now();
-    const all = await campaignRepo.listActive(50);
-    const campaigns = (all || []).filter((c: any) => {
-      if (c.startAt && new Date(c.startAt).getTime() > now) return false;
-      if (c.endAt && new Date(c.endAt).getTime() < now) return false;
-      return true;
-    });
+    try {
+      const ctx = await getContext(request);
+      const now = Date.now();
+      const all = await campaignRepo.listActive(50);
+      const campaigns = (all || []).filter((c: any) => {
+        if (c.startAt && new Date(c.startAt).getTime() > now) return false;
+        if (c.endAt && new Date(c.endAt).getTime() < now) return false;
+        return true;
+      });
 
-    let claimedSet = new Set<string>();
-    if (ctx?.user?.id) {
-      for (const c of campaigns) {
-        const n = await campaignRepo.countClaims(c.campaignId, ctx.user.id);
-        if (n >= ((c as any).maxClaimsPerUser ?? 1)) claimedSet.add(c.campaignId);
+      let claimedSet = new Set<string>();
+      if (ctx?.user?.id) {
+        for (const c of campaigns) {
+          const n = await campaignRepo.countClaims(c.campaignId, ctx.user.id);
+          if (n >= ((c as any).maxClaimsPerUser ?? 1)) claimedSet.add(c.campaignId);
+        }
       }
+      const enriched = campaigns.map((c: any) => ({
+        ...c,
+        claimed: claimedSet.has(c.campaignId),
+      }));
+      return createApiEnvelope({ campaigns: enriched }, request.id);
+    } catch (err: any) {
+      return createApiEnvelope({ error: { message: err?.message || "campaigns fetch failed" } }, request.id);
     }
-    const enriched = campaigns.map((c: any) => ({
-      ...c,
-      claimed: claimedSet.has(c.campaignId),
-    }));
-    return createApiEnvelope({ campaigns: enriched }, request.id);
   });
 
   typedFastify.post("/campaigns/:campaignId/claim", async (request) => {

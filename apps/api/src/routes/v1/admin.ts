@@ -410,9 +410,13 @@ export async function adminRoutes(fastify: FastifyInstance) {
       const reason = await getAdminAuthFailureReason(request);
       return createApiEnvelope({ error: { code: "UNAUTHORIZED", reason: reason.code, message: reason.message } }, request.id);
     }
-    const q = request.query as { status?: string };
-    const items = await submissionRepo.listByStatus(q?.status ?? null, 100);
-    return createApiEnvelope({ submissions: items }, request.id);
+    try {
+      const q = request.query as { status?: string };
+      const items = await submissionRepo.listByStatus(q?.status ?? null, 100);
+      return createApiEnvelope({ submissions: items }, request.id);
+    } catch (err: any) {
+      return createApiEnvelope({ error: { message: err?.message || "submissions query failed" } }, request.id);
+    }
   });
 
   typedFastify.post("/submissions/:submissionId/approve", {
@@ -670,8 +674,12 @@ export async function adminRoutes(fastify: FastifyInstance) {
       const reason = await getAdminAuthFailureReason(request);
       return createApiEnvelope({ error: { code: "UNAUTHORIZED", reason: reason.code, message: reason.message } }, request.id);
     }
-    const campaigns = await campaignRepo.listAll(200);
-    return createApiEnvelope({ campaigns }, request.id);
+    try {
+      const campaigns = await campaignRepo.listAll(200);
+      return createApiEnvelope({ campaigns }, request.id);
+    } catch (err: any) {
+      return createApiEnvelope({ error: { message: err?.message || "campaigns query failed" } }, request.id);
+    }
   });
 
   typedFastify.post("/campaigns", {
