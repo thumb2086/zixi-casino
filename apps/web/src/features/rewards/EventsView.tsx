@@ -157,7 +157,7 @@ export default function EventsView() {
           </button>
           <div className="flex items-center gap-2">
             <CalendarClock size={16} className="text-[#fcc025]" />
-            <h1 className="text-sm font-black">活動中心</h1>
+            <h1 className="text-lg font-black">活動中心</h1>
           </div>
         </div>
       </header>
@@ -174,7 +174,7 @@ export default function EventsView() {
             <Loader2 className="animate-spin text-[#fcc025]" size={24} />
           </div>
         ) : campaigns.length === 0 ? (
-          <div className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] px-4 py-8 text-center text-xs text-[#adaaaa]">
+          <div className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] px-4 py-8 text-center text-sm text-[#adaaaa]">
             目前沒有進行中的活動
           </div>
         ) : (
@@ -185,18 +185,18 @@ export default function EventsView() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="text-sm font-black text-white">{c.title}</h2>
+                  <h2 className="text-base font-black text-white">{c.title}</h2>
                   {c.description && (
-                    <p className="mt-1 text-xs text-[#adaaaa] break-words">{c.description}</p>
+                    <p className="mt-1 text-sm text-[#adaaaa] break-words">{c.description}</p>
                   )}
                 </div>
                 <Gift size={18} className="shrink-0 text-[#fcc025]" />
               </div>
-              <div className="mt-3 rounded-lg bg-[#262626] px-3 py-2 text-xs text-[#fcc025]">
+              <div className="mt-3 rounded-lg bg-[#262626] px-3 py-2 text-sm text-[#fcc025]">
                 {formatRewardSummary(c.rewards)}
               </div>
               {(c.startAt || c.endAt) && (
-                <p className="mt-2 text-xs text-[#adaaaa]">
+                <p className="mt-2 text-sm text-[#adaaaa]">
                   {c.startAt ? new Date(c.startAt).toLocaleString() : '即刻'} ~{' '}
                   {c.endAt ? new Date(c.endAt).toLocaleString() : '無期限'}
                 </p>
@@ -205,7 +205,7 @@ export default function EventsView() {
                 type="button"
                 disabled={Boolean(c.claimed) || !sessionId}
                 onClick={() => claim(c.campaignId)}
-                className="mt-3 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-xs font-black text-black disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-110"
+                className="mt-3 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-110"
               >
                 {c.claimed ? '已領取' : !sessionId ? '請先登入' : '領取獎勵'}
               </button>
@@ -218,12 +218,12 @@ export default function EventsView() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={() => setSuccessBundle(null)}>
           <div className="w-full max-w-sm rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black text-[#fcc025]">🎉 領取成功</h3>
+              <h3 className="text-base font-black text-[#fcc025]">🎉 領取成功</h3>
               <button type="button" onClick={() => setSuccessBundle(null)} className="rounded-lg p-1 hover:bg-white/10">
                 <X size={16} />
               </button>
             </div>
-            <div className="mt-4 space-y-2 text-xs text-white">
+            <div className="mt-4 space-y-2 text-sm text-white">
               {successBundle.zxc > 0 && <p>+ {formatNumber(Number(successBundle.zxc))} ZXC</p>}
               {successBundle.yjc > 0 && <p>+ {formatNumber(Number(successBundle.yjc))} YJC</p>}
               {Array.isArray(successBundle.items) && successBundle.items.map((it: any, i: number) => (
@@ -239,7 +239,7 @@ export default function EventsView() {
             <button
               type="button"
               onClick={() => setSuccessBundle(null)}
-              className="mt-4 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-xs font-black text-black"
+              className="mt-4 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-sm font-black text-black"
             >
               確定
             </button>
