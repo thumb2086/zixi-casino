@@ -113,12 +113,12 @@ export default function LobbyView() {
     queryKey: ['market-account-preview'],
     queryFn: async () => {
       const res = await api.get('/api/v1/market/me');
-      return res.data?.data as { bankBalance?: number; cash?: number } | undefined;
+      return res.data?.data as { bankBalance?: number; stockValue?: number } | undefined;
     },
     refetchInterval: 30000,
   });
   const bankBalance = marketAccount?.bankBalance?.toFixed(2) || '0';
-  const marketCash = marketAccount?.cash?.toFixed(2) || '0';
+  const stockValue = marketAccount?.stockValue?.toFixed(2) || '0';
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-24 font-['Manrope'] text-white">
@@ -174,7 +174,7 @@ export default function LobbyView() {
                 </span>
                 <span className="flex items-center gap-1">
                   <TrendingUp size={12} className="text-emerald-400" />
-                  {t('market.cash')}: {formatNumber(marketCash)}
+                  股票: {formatNumber(stockValue)}
                 </span>
               </div>
             </div>
