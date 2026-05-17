@@ -99,6 +99,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         body: z.object({
           sessionId: z.string().optional(),
           itemId: z.string(),
+          quantity: z.number().int().min(1).max(9999).optional().default(1),
         }),
       },
     },
@@ -106,11 +107,18 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       const ctx = await getContext(request);
       if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
 
-      const { itemId } = request.body as { itemId: string };
+      const { itemId, quantity } = request.body as { itemId: string; quantity: number };
 
-      let outcome;
+      let lastOutcome;
+      let totalCurrency = 0;
+      let totalBuffs: any[] = [];
+
       try {
-        outcome = await useItem(ctx.userId, itemId);
+        for (let i = 0; i < quantity; i++) {
+          lastOutcome = await useItem(ctx.userId, itemId);
+          if (lastOutcome.currencyGranted) totalCurrency += lastOutcome.currencyGranted;
+          if (lastOutcome.buffActivated) totalBuffs.push(lastOutcome.buffActivated);
+        }
       } catch (error: any) {
         return createApiEnvelope(
           { success: false },
@@ -120,21 +128,24 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         );
       }
 
-      if (outcome.item.type === "avatar" || outcome.item.type === "title") {
-        const key = outcome.item.type === "title" ? `active_title:${ctx.address}` : `active_avatar:${ctx.address}`;
-        await kv.set(key, outcome.item.id).catch(() => {});
+      if (!lastOutcome) return createApiEnvelope({ success: false }, request.id, false, "USE_ITEM_FAILED");
+
+      // Sync avatar/title active state to KV
+      if (lastOutcome.item.type === "avatar" || lastOutcome.item.type === "title") {
+        const key = lastOutcome.item.type === "title" ? `active_title:${ctx.address}` : `active_avatar:${ctx.address}`;
+        await kv.set(key, lastOutcome.item.id).catch(() => {});
       }
 
-      let newBalance: string | null = null;
-      try {
-        newBalance = await creditItemValue(ctx.userId, ctx.address, outcome, opsRepo);
-      } catch (err: any) {
-        return createApiEnvelope(
-          { success: false },
-          request.id,
-          false,
-          "CREDIT_FAILED",
-        );
+      // Credit total amount
+      const creditToken = lastOutcome.currencyType || "zhixi";
+      if (totalCurrency > 0) {
+        try {
+          const curBalance = await gameSettlement.getBalance(ctx.address, creditToken);
+          const newBal = (Number(curBalance) + totalCurrency).toFixed(4);
+          await gameSettlement.setBalance(ctx.address, creditToken, newBal);
+        } catch (err: any) {
+          return createApiEnvelope({ success: false }, request.id, false, "CREDIT_FAILED");
+        }
       }
 
       await opsRepo.logEvent({
@@ -144,27 +155,22 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         kind: "item_used",
         userId: ctx.userId,
         address: ctx.address,
-        message: `Used item ${itemId}`,
-        meta: {
-          itemId,
-          type: outcome.item.type,
-          currencyGranted: outcome.currencyGranted || 0,
-          buffActivated: outcome.buffActivated || null,
-        },
+        message: `Used ${quantity}x ${itemId}`,
+        meta: { itemId, quantity, totalCurrency, buffsActivated: totalBuffs.length },
       });
 
       return createApiEnvelope(
         {
           success: true,
-          item: outcome.item,
-          effectSummary: outcome.effectSummary,
-          currencyGranted: outcome.currencyGranted || 0,
-          buffActivated: outcome.buffActivated || null,
-          balance: newBalance,
-          activeBuffs: outcome.state.activeBuffs,
-          activeAvatar: outcome.state.activeAvatar,
-          activeTitle: outcome.state.activeTitle,
-          remainingQuantity: outcome.state.inventory[itemId] || 0,
+          item: lastOutcome.item,
+          effectSummary: lastOutcome.effectSummary,
+          currencyGranted: totalCurrency,
+          buffActivated: totalBuffs[0] || null,
+          balance: totalCurrency > 0 ? await gameSettlement.getBalance(ctx.address, "zhixi").catch(() => null) : null,
+          activeBuffs: lastOutcome.state.activeBuffs,
+          activeAvatar: lastOutcome.state.activeAvatar,
+          activeTitle: lastOutcome.state.activeTitle,
+          remainingQuantity: lastOutcome.state.inventory[itemId] || 0,
         },
         request.id,
       );
