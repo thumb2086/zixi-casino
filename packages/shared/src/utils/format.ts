@@ -6,6 +6,9 @@ export const formatNumber = (num: number | string, mode: 'short' | 'full' = 'sho
     return n.toLocaleString('zh-TW');
   }
 
+  if (Math.abs(n) >= 1000000000000) {
+    return `${(n / 1000000000000).toFixed(2)} 兆`;
+  }
   if (Math.abs(n) >= 100000000) {
     return `${(n / 100000000).toFixed(2)} 億`;
   }

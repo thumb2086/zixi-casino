@@ -489,6 +489,12 @@ export async function grantBundleToUser(
   for (const it of bundle.items ?? []) {
     const id = String(it?.id || "").trim();
     if (!id) continue;
+    // Chest keys: always go into inventory map regardless of ALL_ITEMS
+    if (id.startsWith('chest_key_')) {
+      const qty = Math.max(1, Math.floor(Number(it?.qty || 1)));
+      nextInventory[id] = (nextInventory[id] || 0) + qty;
+      continue;
+    }
     const def = ALL_ITEMS[id];
     if (def?.type === "avatar") {
       if (!nextAvatars.includes(id)) {
