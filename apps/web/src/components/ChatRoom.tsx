@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '../store/useUserStore';
@@ -13,6 +13,7 @@ export default function ChatRoom() {
   const { isAuthorized } = useAuthStore();
   const queryClient = useQueryClient();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [localMessages, setLocalMessages] = useState<any[]>([]);
 
   const { data: chatData } = useQuery({
     queryKey: ['chat-messages'],
@@ -30,12 +31,31 @@ export default function ChatRoom() {
     mutationFn: async (text: string) => {
       await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
     },
-    onSuccess: () => {
+    onMutate: async (text) => {
+      const optimisticMsg = {
+        id: `temp-${Date.now()}`,
+        address,
+        displayName: username || '我',
+        text,
+        createdAt: Date.now(),
+      };
+      setLocalMessages((prev) => [...prev, optimisticMsg]);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+    },
+    onError: () => {
+      setLocalMessages((prev) => prev.filter((m) => !m.id.startsWith('temp-')));
     },
   });
 
-  const messages = chatData?.messages || [];
+  const serverMessages = chatData?.messages || [];
+  const messages = useMemo(() => {
+    const optimistic = localMessages.filter(
+      (lm) => !serverMessages.some((sm: any) => sm.id === lm.id)
+    );
+    return [...serverMessages, ...optimistic];
+  }, [serverMessages, localMessages]);
 
   useEffect(() => {
     if (scrollRef.current) {
