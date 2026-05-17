@@ -21,6 +21,7 @@ import {
   WalletRepository,
   kv,
 } from "@repo/infrastructure";
+import { gameSettlement } from "../../utils/game-settlement.js";
 
 type WalletTokenKey = "zhixi" | "yjc";
 
@@ -352,7 +353,45 @@ export async function walletRoutes(fastify: FastifyInstance) {
       }
 
       const token: WalletTokenKey = "zhixi";
-      const { client, tokenRuntime, decimals } = await getTokenRuntime(token);
+
+      let onChainRuntime: { client: any; tokenRuntime: any; decimals: number } | null = null;
+      try {
+        onChainRuntime = await getTokenRuntime(token);
+      } catch {
+        const fallbackAmount = "10";
+        const address = ctx.session.address;
+        const prevBalance = await gameSettlement.getBalance(address, token);
+        const newBalance = (parseFloat(prevBalance || "0") + parseFloat(fallbackAmount)).toString();
+        await gameSettlement.setBalance(address, token, newBalance);
+        await walletRepo.saveLedgerEntry({
+          id: randomUUID(),
+          userId: ctx.user.id,
+          address,
+          token,
+          type: "airdrop",
+          amount: fallbackAmount,
+          balanceBefore: prevBalance || "0",
+          balanceAfter: newBalance,
+          txIntentId: null,
+          txHash: null,
+          meta: { source: "daily_airdrop", mode: "direct_credit" },
+          createdAt: new Date(),
+        });
+        await kv.set(`last_airdrop:${address}`, now);
+        await opsRepo.logEvent({
+          channel: "wallet",
+          severity: "info",
+          source: "airdrop",
+          kind: "airdrop_claimed",
+          userId: ctx.user.id,
+          address,
+          message: `Direct credit airdrop: ${fallbackAmount} ZXC to ${address}`,
+          meta: { mode: "direct_credit", fallbackAmount },
+        });
+        return createApiEnvelope({ reward: fallbackAmount, method: "direct_credit" }, request.id);
+      }
+
+      const { client, tokenRuntime, decimals } = onChainRuntime!;
       const distributedWei = normalizeAirdropDistributedWei(distributedTotalRaw);
       const policy = calculateAirdropRewardWei(decimals, distributedWei);
       const fromAddress = client.getWalletAddress();
