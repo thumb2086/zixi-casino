@@ -136,7 +136,7 @@ export default function ItemsTab() {
       >
         <div>
           <p className="text-sm font-black text-white">投稿你的稱號 / 頭像</p>
-          <p className="mt-1 text-[10px] text-[#adaaaa]">送出表情符號與名稱，通過管理員審核後就會加入全站清單</p>
+          <p className="mt-1 text-xs text-[#adaaaa]">送出表情符號與名稱，通過管理員審核後就會加入全站清單</p>
         </div>
         <PlusCircle className="h-6 w-6 text-[#fcc025]" />
       </Link>
@@ -163,7 +163,7 @@ export default function ItemsTab() {
             <button
               key={value}
               onClick={() => setFilter(value)}
-              className={`flex-1 rounded-lg py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`flex-1 rounded-lg py-2 text-xs font-black uppercase tracking-widest transition-all ${
                 filter === value
                   ? 'bg-[#fcc025] text-black'
                   : 'border border-[#494847]/20 bg-[#1a1919] text-[#adaaaa]'
@@ -178,7 +178,7 @@ export default function ItemsTab() {
             <button
               key={value}
               onClick={() => setRarityFilter(value)}
-              className={`rounded-lg px-2.5 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all ${
+              className={`rounded-lg px-2.5 py-1.5 text-xs font-black uppercase tracking-widest transition-all ${
                 rarityFilter === value
                   ? `${border || 'bg-[#fcc025]'} ${text || 'text-black'}`
                   : 'border border-[#494847]/20 bg-[#1a1919] text-[#adaaaa]'
@@ -191,12 +191,12 @@ export default function ItemsTab() {
       </section>
 
       <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-4">
-        <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">稀有度說明</h2>
+        <h2 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">稀有度說明</h2>
         <div className="flex flex-wrap gap-2">
           {Object.values(RARITY_STYLES).map((style) => (
             <div key={style.label} className={`flex items-center gap-2 rounded-lg border px-2 py-1 ${style.border} ${style.bg}`}>
               <Sparkles className={`h-3 w-3 ${style.text}`} />
-              <span className={`text-[10px] font-bold ${style.text}`}>{style.label}</span>
+              <span className={`text-xs font-bold ${style.text}`}>{style.label}</span>
             </div>
           ))}
         </div>
@@ -237,33 +237,33 @@ export default function ItemsTab() {
                   </div>
                   <p className="mt-1 line-clamp-2 text-xs font-bold text-[#adaaaa]">{item.description || '暫無說明'}</p>
                   {item.effect?.type === 'currency' && (
-                    <p className="mt-1 text-[10px] font-bold text-[#fcc025]">
+                    <p className="mt-1 text-xs font-bold text-[#fcc025]">
                       {item.effect.currency === 'yjc' ? `💎 ${item.effect.value} YJC` : `🪙 ${Number(item.effect.value).toLocaleString()} ZXC`}
                     </p>
                   )}
                   {item.effect?.type === 'xp_boost' && (
-                    <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">⚡ 經驗 ×{item.effect.value}{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
+                    <p className="mt-1 text-xs font-bold text-[#adaaaa]">⚡ 經驗 ×{item.effect.value}{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
                   )}
                   {item.effect?.type === 'luck_boost' && (
-                    <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">🍀 運氣 +{Math.round(item.effect.value * 100)}%{item.effect.duration ? ` · ${item.effect.duration}h` : ' · 永久'}</p>
+                    <p className="mt-1 text-xs font-bold text-[#adaaaa]">🍀 運氣 +{Math.round(item.effect.value * 100)}%{item.effect.duration ? ` · ${item.effect.duration}h` : ' · 永久'}</p>
                   )}
                   {item.effect?.type === 'prevent_loss' && (
-                    <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">🛡️ 護盾 ×{item.effect.value} 次</p>
+                    <p className="mt-1 text-xs font-bold text-[#adaaaa]">🛡️ 護盾 ×{item.effect.value} 次</p>
                   )}
                   {item.effect?.type === 'vip_trial' && (
-                    <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">👑 VIP 試用{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
+                    <p className="mt-1 text-xs font-bold text-[#adaaaa]">👑 VIP 試用{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
                   )}
                   {item.price && item.price > 0 && (
-                    <p className="mt-1 text-[10px] font-bold text-[#fcc025]">🛒 {formatNumber(item.price)} ZXC</p>
+                    <p className="mt-1 text-xs font-bold text-[#fcc025]">🛒 {formatNumber(item.price)} ZXC</p>
                   )}
                   {item.meta?.bundle && (
-                    <p className="mt-1 text-[10px] font-bold text-emerald-400">
+                    <p className="mt-1 text-xs font-bold text-emerald-400">
                       📦 內容 {item.meta.bundle.length} 項{item.meta.totalValue ? ` · ~~${formatNumber(item.meta.totalValue)} ZXC~~` : ''}
                       {item.price && item.meta.totalValue ? ` → ${formatNumber(item.price)} ZXC (${formatNumber(Math.round((1 - item.price / item.meta.totalValue) * 100))}% OFF)` : ''}
                     </p>
                   )}
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="flex items-center gap-1 rounded bg-[#0e0e0e] px-2 py-1 text-[9px] font-bold text-[#adaaaa]">
+                    <span className="flex items-center gap-1 rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#adaaaa]">
                       <TypeIcon className="h-3 w-3" />
                       {item.type === 'avatar'
                         ? '頭像'
@@ -275,7 +275,7 @@ export default function ItemsTab() {
                         ? '道具'
                         : item.type}
                     </span>
-                    <span className="rounded bg-[#0e0e0e] px-2 py-1 text-[9px] font-bold text-[#fcc025]">{item.howToGet}</span>
+                    <span className="rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#fcc025]">{item.howToGet}</span>
                   </div>
                 </div>
               </div>
@@ -285,7 +285,7 @@ export default function ItemsTab() {
       </section>
 
       <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-        <h2 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">取得方式說明</h2>
+        <h2 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">取得方式說明</h2>
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#fcc025]/10">

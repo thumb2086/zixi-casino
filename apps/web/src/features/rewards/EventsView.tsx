@@ -54,6 +54,11 @@ const REWARD_NAMES: Record<string, string> = {
   title_member_30: '超越者',
   title_member_31: '至高神座',
   title_member_32: '神諭十二階',
+  chest_key_common: '普通寶箱鑰匙',
+  chest_key_rare: '稀有寶箱鑰匙',
+  chest_key_epic: '史詩寶箱鑰匙',
+  chest_key_legendary: '傳奇寶箱鑰匙',
+  chest_key_mythic: '神話寶箱鑰匙',
 };
 
 function resolveRewardName(id: string): string {
@@ -182,16 +187,16 @@ export default function EventsView() {
                 <div className="min-w-0">
                   <h2 className="text-sm font-black text-white">{c.title}</h2>
                   {c.description && (
-                    <p className="mt-1 text-[11px] text-[#adaaaa] break-words">{c.description}</p>
+                    <p className="mt-1 text-xs text-[#adaaaa] break-words">{c.description}</p>
                   )}
                 </div>
                 <Gift size={18} className="shrink-0 text-[#fcc025]" />
               </div>
-              <div className="mt-3 rounded-lg bg-[#262626] px-3 py-2 text-[11px] text-[#fcc025]">
+              <div className="mt-3 rounded-lg bg-[#262626] px-3 py-2 text-xs text-[#fcc025]">
                 {formatRewardSummary(c.rewards)}
               </div>
               {(c.startAt || c.endAt) && (
-                <p className="mt-2 text-[10px] text-[#adaaaa]">
+                <p className="mt-2 text-xs text-[#adaaaa]">
                   {c.startAt ? new Date(c.startAt).toLocaleString() : '即刻'} ~{' '}
                   {c.endAt ? new Date(c.endAt).toLocaleString() : '無期限'}
                 </p>

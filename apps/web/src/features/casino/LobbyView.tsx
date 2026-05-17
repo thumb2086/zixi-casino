@@ -57,7 +57,7 @@ function GlassCard({
         <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#494847]/20 bg-[#262626] transition-colors">
           <Icon className="h-6 w-6 text-[#fcc025]" />
         </div>
-        {subtitle && <span className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">{subtitle}</span>}
+        {subtitle && <span className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">{subtitle}</span>}
       </div>
       <h4 className="mb-2 text-lg font-bold uppercase tracking-tight text-white">{title}</h4>
       {value && <div className="mb-1 text-2xl font-bold uppercase italic tracking-tighter text-white">{value}</div>}
@@ -147,7 +147,7 @@ export default function LobbyView() {
 
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#fcc025]">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#fcc025]">
                 {t('lobby.operator_identified')}
               </p>
               <h2 className="text-4xl font-extrabold uppercase italic tracking-tight">
@@ -155,19 +155,19 @@ export default function LobbyView() {
               </h2>
               <div className="mt-2 flex items-center gap-2">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-[#fcc025]" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                   {t('lobby.encryption_active')}
                 </span>
               </div>
             </div>
             <div className="text-right">
-              <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 {t('vault.total_assets')}
               </p>
               <div className="text-5xl font-black uppercase italic tracking-tighter text-[#fcc025]">
                 {formatNumber(liveBalance || 0)} <span className="text-lg not-italic text-white">ZXC</span>
               </div>
-              <div className="mt-2 flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <div className="mt-2 flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 <span className="flex items-center gap-1">
                   <Landmark size={12} className="text-[#fcc025]" />
                   {t('market.bank')}: {formatNumber(bankBalance)}
@@ -211,7 +211,7 @@ export default function LobbyView() {
             title={t('lobby.activity')}
             subtitle={t('lobby.recent_traces')}
           >
-            <div className="mt-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa]">
+            <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa]">
               {!recentTxs || recentTxs.length === 0 ? (
                 <>
                   <div className="flex gap-2">
@@ -251,7 +251,7 @@ export default function LobbyView() {
             title={t('lobby.shop')}
             subtitle={t('lobby.shop_subtitle')}
           >
-            <div className="mt-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
+            <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
               <div className="flex gap-2">
                 <span className="text-[#fcc025]">🛒</span>
                 {t('lobby.buy_chest_keys')}
@@ -269,7 +269,7 @@ export default function LobbyView() {
               <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#494847]/20 bg-[#262626]">
                 <Crown className="h-6 w-6 text-[#fcc025]" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 {t('lobby.guides')}
               </span>
             </div>
@@ -281,7 +281,7 @@ export default function LobbyView() {
                 <Crown className="h-5 w-5 text-[#fcc025]" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.vip_levels')}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                     {t('lobby.tier_active', { tier: 4 })}
                   </p>
                 </div>
@@ -292,7 +292,7 @@ export default function LobbyView() {
                 <Dice5 className="h-5 w-5 text-emerald-400" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.game_odds')}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                     {t('lobby.odds_subtitle')}
                   </p>
                 </div>
@@ -303,7 +303,7 @@ export default function LobbyView() {
                 <Package className="h-5 w-5 text-purple-400" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.items_catalog')}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                     {t('lobby.items_subtitle')}
                   </p>
                 </div>
@@ -317,7 +317,7 @@ export default function LobbyView() {
             title="收藏櫃"
             subtitle="頭像、稱號與珍藏品"
           >
-            <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
+            <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
               檢視已獲得的頭像、稱號與收藏品
             </p>
           </GlassCard>
@@ -327,12 +327,12 @@ export default function LobbyView() {
             title={t('nav.admin')}
             subtitle={t('lobby.authorized_only')}
           >
-            <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
+            <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
               {t('lobby.admin_summary')}
             </p>
             <div className="mt-4 flex items-center gap-2">
               <div className="h-1 w-1 animate-pulse rounded-full bg-[#fcc025]" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#fcc025]">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#fcc025]">
                 {t('lobby.system_secure')}
               </span>
             </div>

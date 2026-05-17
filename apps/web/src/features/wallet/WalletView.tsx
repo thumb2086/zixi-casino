@@ -31,10 +31,10 @@ function AssetCard({
 }) {
   return (
     <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-xl">
-      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">{label}</p>
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">{label}</p>
       <div className="mt-3 flex items-end justify-between">
         <p className="text-3xl font-black italic tracking-tight text-[#fcc025]">{value}</p>
-        <span className="text-[11px] font-bold uppercase tracking-widest text-white">{token}</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-white">{token}</span>
       </div>
     </div>
   );
@@ -99,13 +99,13 @@ export default function WalletView() {
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">{t('vault.title')}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/app/shop" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#fcc025]">
+            <Link to="/app/shop" className="text-xs font-black uppercase tracking-[0.18em] text-[#fcc025]">
               {t('nav.inventory')}
             </Link>
-            <Link to="/app/swap" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#fcc025]">
+            <Link to="/app/swap" className="text-xs font-black uppercase tracking-[0.18em] text-[#fcc025]">
               {t('swap.title')}
             </Link>
-            <Link to="/app/transactions" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('nav.feed')}
             </Link>
           </div>
@@ -114,11 +114,11 @@ export default function WalletView() {
 
       <main className="app-shell flex flex-col gap-6 pt-24">
         <section className="rounded-[2rem] border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-8 shadow-[0_0_50px_rgba(252,192,37,0.08)]">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#adaaaa]">{t('vault.total_assets')}</p>
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-[#adaaaa]">{t('vault.total_assets')}</p>
           <p className="mt-4 text-5xl font-black italic tracking-tighter text-[#fcc025]">
             {formatNumber(totalBalance, numberMode)}
           </p>
-          <div className="mt-4 flex flex-wrap gap-4 text-[11px] font-bold uppercase tracking-[0.16em] text-[#adaaaa]">
+          <div className="mt-4 flex flex-wrap gap-4 text-xs font-bold uppercase tracking-[0.16em] text-[#adaaaa]">
             <span>{t('vault.wallet')} {formatNumber(walletOnlyTotal, numberMode)}</span>
             <span>{t('market.title')} {formatNumber(marketNetWorth, numberMode)}</span>
           </div>
@@ -133,7 +133,7 @@ export default function WalletView() {
             <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <Gift className="text-[#fcc025]" size={18} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
+                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
               </div>
               <p className="mt-3 text-sm font-bold text-[#adaaaa]">
                 {t('vault.next_available')}{nextAirdropLabel}
@@ -142,20 +142,20 @@ export default function WalletView() {
                 type="button"
                 disabled={!canClaimAirdrop || airdrop.isPending}
                 onClick={() => airdrop.mutate()}
-                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ArrowDownCircle size={16} />
                 {airdrop.isPending ? t('vault.claiming') : t('vault.claim_airdrop')}
               </button>
               {airdrop.error?.message && (
-                <p className="mt-2 text-[10px] font-bold text-[#ff7351]">{airdrop.error.message}</p>
+                <p className="mt-2 text-xs font-bold text-[#ff7351]">{airdrop.error.message}</p>
               )}
             </div>
 
             <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <Repeat2 className="text-[#fcc025]" size={18} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">{t('vault.transfer')}</h2>
+                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.transfer')}</h2>
               </div>
               <div className="mt-4 grid gap-3">
                 <input
@@ -184,7 +184,7 @@ export default function WalletView() {
                   type="button"
                   disabled={!transferTo || !transferAmount || transfer.isPending}
                   onClick={() => transfer.mutate({ to: transferTo, amount: transferAmount, token: transferToken })}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ArrowUpCircle size={16} />
                   {transfer.isPending ? t('vault.sending') : t('vault.send_transfer')}
@@ -196,7 +196,7 @@ export default function WalletView() {
               <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
                 <div className="flex items-center gap-3">
                   <QrCode className="text-[#fcc025]" size={18} />
-                  <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
+                  <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">
                     {t('vault.receive_funds')}
                   </h2>
                 </div>
@@ -205,7 +205,7 @@ export default function WalletView() {
                     <QRCodeSVG value={myAddress} size={160} level="M" includeMargin={false} />
                   </div>
                   <div className="flex flex-1 flex-col gap-3">
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
                       {t('vault.receive_address')}
                     </p>
                     <p className="break-all rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold text-white">
@@ -214,12 +214,12 @@ export default function WalletView() {
                     <button
                       type="button"
                       onClick={handleCopyAddress}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black"
                     >
                       {copied ? <Check size={16} /> : <Copy size={16} />}
                       {copied ? t('common.copied') : t('vault.copy_address')}
                     </button>
-                    <p className="text-[11px] text-[#adaaaa]">
+                    <p className="text-xs text-[#adaaaa]">
                       {t('vault.receive_instruction')}
                     </p>
                   </div>
@@ -232,7 +232,7 @@ export default function WalletView() {
           <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
             <div className="flex items-center gap-2">
               <History size={16} className="text-[#adaaaa]" />
-              <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('vault.transactions')}</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('vault.transactions')}</h2>
             </div>
             <div className="mt-4 space-y-3">
               {summary.isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
@@ -247,18 +247,18 @@ export default function WalletView() {
                   <div key={tx.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.15em] text-white">{tx.type.replaceAll('_', ' ')}</p>
-                        <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
+                        <p className="text-xs font-black uppercase tracking-[0.15em] text-white">{tx.type.replaceAll('_', ' ')}</p>
+                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
                           {new Date(tx.createdAt).toLocaleString('zh-TW')}
                         </p>
-                        {tx.counterparty && <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">{tx.counterparty}</p>}
+                        {tx.counterparty && <p className="mt-1 text-xs font-bold text-[#adaaaa]">{tx.counterparty}</p>}
                       </div>
                       <div className="text-right">
                         <p className={`text-lg font-black italic tracking-tight ${positive ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
                           {positive ? '+' : '-'}
                           {formatNumber(tx.amount, numberMode)} {tx.token}
                         </p>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">{tx.status}</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">{tx.status}</p>
                       </div>
                     </div>
                   </div>

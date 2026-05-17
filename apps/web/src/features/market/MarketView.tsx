@@ -75,7 +75,7 @@ export default function MarketView() {
             <TrendingUp className="text-[#fcc025]" />
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">{t('market.title')}</h1>
           </div>
-          <Link to="/app/transactions" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+          <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
             {t('market.public_feed')}
           </Link>
         </div>
@@ -95,13 +95,13 @@ export default function MarketView() {
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl lg:col-span-2">
             <div className="flex items-center gap-3">
               <CircleDollarSign className="text-[#fcc025]" size={18} />
-              <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
                 {t('market.market_pulse')}
               </h2>
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
                   {t('market.market_index')}
                 </p>
                 <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">
@@ -109,7 +109,7 @@ export default function MarketView() {
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
                   {t('market.trend')}
                 </p>
                 <p
@@ -122,7 +122,7 @@ export default function MarketView() {
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">
                   {t('market.fear_greed')}
                 </p>
                 <p className="mt-2 text-2xl font-black italic tracking-tight text-white">
@@ -135,13 +135,13 @@ export default function MarketView() {
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
             <div className="flex items-center gap-3">
               <Wallet className="text-[#fcc025]" size={18} />
-              <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
                 {t('market.account')}
               </h2>
             </div>
             <div className="mt-4 space-y-3">
               <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#adaaaa]">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">
                   {t('market.net_worth')}
                 </p>
                 <p className="mt-1 text-2xl font-black italic tracking-tight text-[#fcc025]">
@@ -150,13 +150,13 @@ export default function MarketView() {
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#adaaaa]">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">
                     {t('market.cash')}
                   </p>
                   <p className="mt-1 text-lg font-black text-white">{formatNumber(summary?.cash || 0, numberMode)}</p>
                 </div>
                 <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#adaaaa]">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">
                     {t('market.bank')}
                   </p>
                   <p className="mt-1 text-lg font-black text-white">{formatNumber(summary?.bankBalance || 0, numberMode)}</p>
@@ -171,7 +171,7 @@ export default function MarketView() {
             <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <LineChart className="text-[#fcc025]" size={18} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
                   {t('market.execution_panel')}
                 </h2>
               </div>
@@ -215,7 +215,7 @@ export default function MarketView() {
                 </button>
               </div>
 
-              <div className="mt-4 text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <div className="mt-4 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 銀行存款 / 提款已移至主控台
               </div>
             </div>
@@ -223,7 +223,7 @@ export default function MarketView() {
             <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <BarChart3 className="text-[#fcc025]" size={18} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
                   {t('market.symbols')}
                 </h2>
               </div>
@@ -241,7 +241,7 @@ export default function MarketView() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white">{quote.symbol}</p>
+                        <p className="text-xs font-black uppercase tracking-[0.14em] text-white">{quote.symbol}</p>
                         <p className="mt-1 text-[13px] text-[#aeb7c9]">{quote.name}</p>
                       </div>
                       {(quote.changePct || 0) >= 0 ? (
@@ -262,10 +262,10 @@ export default function MarketView() {
                       {quote.changePct.toFixed(2)}%
                     </p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-[#232323] px-3 py-1 text-[10px] font-bold text-[#aeb7c9]">
+                      <span className="rounded-full bg-[#232323] px-3 py-1 text-xs font-bold text-[#aeb7c9]">
                         {t('market.type')} <span className="ml-1 text-white">{quote.type}</span>
                       </span>
-                      <span className="rounded-full bg-[#232323] px-3 py-1 text-[10px] font-bold text-[#aeb7c9]">
+                      <span className="rounded-full bg-[#232323] px-3 py-1 text-xs font-bold text-[#aeb7c9]">
                         {t('market.sector')} <span className="ml-1 text-white">{quote.sector}</span>
                       </span>
                     </div>
@@ -284,22 +284,22 @@ export default function MarketView() {
 
           <div className="space-y-6">
             <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.portfolio')}</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.portfolio')}</h2>
               <div className="mt-4 space-y-3">
                 {summary?.stockPositions?.length ? (
                   summary.stockPositions.map((position: any) => (
                     <div key={position.symbol} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white">{position.symbol}</p>
-                          <p className="text-[10px] font-bold text-[#adaaaa]">
+                          <p className="text-xs font-black uppercase tracking-[0.12em] text-white">{position.symbol}</p>
+                          <p className="text-xs font-bold text-[#adaaaa]">
                             {t('market.quantity')} {formatNumber(position.quantity)} {t('market.units')}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[11px] font-black text-[#fcc025]">{formatNumber(position.marketValue, numberMode)}</p>
+                          <p className="text-xs font-black text-[#fcc025]">{formatNumber(position.marketValue, numberMode)}</p>
                           <p
-                            className={`text-[10px] font-black ${
+                            className={`text-xs font-black ${
                               (position.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'
                             }`}
                           >
@@ -319,15 +319,15 @@ export default function MarketView() {
             </section>
 
             <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
                 {t('market.recent_activity')}
               </h2>
               <div className="mt-4 space-y-3">
                 {summary?.history?.length ? (
                   summary.history.map((entry: any, index: number) => (
                     <div key={`${entry.at}-${index}`} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white">{entry.summary || entry.type}</p>
-                      <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">{new Date(entry.at).toLocaleString('zh-TW')}</p>
+                      <p className="text-xs font-black uppercase tracking-[0.12em] text-white">{entry.summary || entry.type}</p>
+                      <p className="mt-1 text-xs font-bold text-[#adaaaa]">{new Date(entry.at).toLocaleString('zh-TW')}</p>
                     </div>
                   ))
                 ) : (

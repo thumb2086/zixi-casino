@@ -104,7 +104,7 @@ export default function ItemsCatalogView() {
               <button
                 key={type}
                 onClick={() => setFilter(type)}
-                className={`flex-1 rounded-lg py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`flex-1 rounded-lg py-2 text-xs font-black uppercase tracking-widest transition-all ${
                   filter === type
                     ? 'bg-[#fcc025] text-black'
                     : 'bg-[#1a1919] text-[#adaaaa] border border-[#494847]/20'
@@ -120,7 +120,7 @@ export default function ItemsCatalogView() {
 
         {/* 稀有度說明 */}
         <section className="mb-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-4">
-          <h2 className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <h2 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
             稀有度說明
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -130,7 +130,7 @@ export default function ItemsCatalogView() {
                 className={`flex items-center gap-2 rounded-lg border px-2 py-1 ${colors.border} ${colors.bg}`}
               >
                 <Sparkles className={`h-3 w-3 ${colors.text}`} />
-                <span className={`text-[10px] font-bold ${colors.text}`}>{colors.label}</span>
+                <span className={`text-xs font-bold ${colors.text}`}>{colors.label}</span>
               </div>
             ))}
           </div>
@@ -176,13 +176,13 @@ export default function ItemsCatalogView() {
                       {item.description}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="flex items-center gap-1 rounded bg-[#0e0e0e] px-2 py-1 text-[9px] font-bold text-[#adaaaa]">
+                      <span className="flex items-center gap-1 rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#adaaaa]">
                         <TypeIcon className="h-3 w-3" />
                         {item.type === 'avatar' ? '頭像' : 
                          item.type === 'title' ? '稱號' : 
                          item.type === 'buff' ? '增益' : '道具'}
                       </span>
-                      <span className="rounded bg-[#0e0e0e] px-2 py-1 text-[9px] font-bold text-[#fcc025]">
+                      <span className="rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#fcc025]">
                         {item.howToGet}
                       </span>
                     </div>
@@ -195,7 +195,7 @@ export default function ItemsCatalogView() {
 
         {/* 獲取方式總覽 */}
         <section className="mt-8 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-          <h2 className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <h2 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
             物品獲取方式
           </h2>
           <div className="space-y-3">

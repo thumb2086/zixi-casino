@@ -90,7 +90,7 @@ export default function VIPTab() {
       {activeTab === 'member' && (
         <>
           <section className="rounded-2xl border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">會員等級總覽</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">會員等級總覽</h2>
             <p className="mt-3 text-sm font-bold leading-relaxed text-[#adaaaa]">
               會員等級依照累積押注量提升。等級越高，可用單筆下注額度越高，並獲得更好的每日獎勵與市場手續費折扣。
             </p>
@@ -98,14 +98,14 @@ export default function VIPTab() {
               <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
                 <div className="flex items-center gap-2">
                   <Percent className="h-4 w-4 text-emerald-400" />
-                  <span className="text-[10px] font-bold text-[#adaaaa]">最高手續費減免</span>
+                  <span className="text-xs font-bold text-[#adaaaa]">最高手續費減免</span>
                 </div>
                 <p className="mt-1 text-lg font-black text-emerald-400">100%</p>
               </div>
               <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
                 <div className="flex items-center gap-2">
                   <Gift className="h-4 w-4 text-[#fcc025]" />
-                  <span className="text-[10px] font-bold text-[#adaaaa]">最高每日獎勵倍率</span>
+                  <span className="text-xs font-bold text-[#adaaaa]">最高每日獎勵倍率</span>
                 </div>
                 <p className="mt-1 text-lg font-black text-[#fcc025]">8.0x</p>
               </div>
@@ -113,7 +113,7 @@ export default function VIPTab() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">32 個會員等級</h2>
+            <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">32 個會員等級</h2>
             {VIP_TIERS.map((tier, index) => (
               <div
                 key={tier.name}
@@ -136,7 +136,7 @@ export default function VIPTab() {
                     </div>
                     <div className="text-left">
                       <h3 className="font-bold text-white">{tier.name}</h3>
-                      <p className="text-[10px] font-bold text-[#adaaaa]">累計押注 {formatThreshold(tier.threshold)}</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">累計押注 {formatThreshold(tier.threshold)}</p>
                     </div>
                   </div>
                   <ChevronRight
@@ -147,19 +147,19 @@ export default function VIPTab() {
                 {expandedTier === tier.name && (
                   <div className="mt-4 grid grid-cols-2 gap-2 border-t border-[#494847]/10 pt-4">
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">單筆下注上限</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">單筆下注上限</p>
                       <p className="text-sm font-black text-white">{formatThreshold(tier.maxBet)}</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">市場費率折扣</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">市場費率折扣</p>
                       <p className="text-sm font-black text-emerald-400">{tier.feeDiscount}%</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">每日獎勵倍率</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">每日獎勵倍率</p>
                       <p className="text-sm font-black text-[#fcc025]">{tier.dailyBonus.toFixed(1)}x</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">身份顏色</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">身份顏色</p>
                       <div className="flex items-center gap-2">
                         <div className="h-4 w-4 rounded" style={{ backgroundColor: tier.danmakuColor }} />
                         <span className="text-xs font-bold text-white">{tier.danmakuColor}</span>
@@ -176,20 +176,20 @@ export default function VIPTab() {
       {activeTab === 'vip' && (
         <>
           <section className="rounded-2xl border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">VIP 等級總覽</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">VIP 等級總覽</h2>
             <p className="mt-3 text-sm font-bold leading-relaxed text-[#adaaaa]">
               VIP 等級依照 <span className="text-[#fcc025]">佑件幣 (YJC) 持有量</span> 決定。持有越多，可進入更高級的專屬房間，並享有特殊特權。
             </p>
             <div className="mt-4 rounded-xl border border-[#fcc025]/20 bg-[#0e0e0e] p-4">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-[#adaaaa]">VIP 計算公式：</span>
+                <span className="text-xs font-bold text-[#adaaaa]">VIP 計算公式：</span>
                 <span className="text-sm font-bold text-[#fcc025]">YJC 持有量決定 VIP 等級</span>
               </div>
             </div>
           </section>
 
           <section className="space-y-3">
-            <h2 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">3 個 VIP 等級</h2>
+            <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">3 個 VIP 等級</h2>
             
             {/* VIP 0 / 未達 VIP */}
             <div className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-4">
@@ -199,10 +199,10 @@ export default function VIPTab() {
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-[#adaaaa]">未達 VIP</h3>
-                  <p className="text-[10px] font-bold text-[#494847]">YJC 持有量 0</p>
+                  <p className="text-xs font-bold text-[#494847]">YJC 持有量 0</p>
                 </div>
                 <div className="ml-auto text-right">
-                  <p className="text-[10px] font-bold text-[#adaaaa]">無專屬房間</p>
+                  <p className="text-xs font-bold text-[#adaaaa]">無專屬房間</p>
                 </div>
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function VIPTab() {
                   </div>
                   <div className="text-left">
                     <h3 className="font-bold text-[#fcc025]">VIP 1</h3>
-                    <p className="text-[10px] font-bold text-[#adaaaa]">持有 1 - 999 YJC</p>
+                    <p className="text-xs font-bold text-[#adaaaa]">持有 1 - 999 YJC</p>
                   </div>
                 </div>
                 <ChevronRight
@@ -229,11 +229,11 @@ export default function VIPTab() {
               {expandedTier === 'VIP 1' && (
                 <div className="mt-4 space-y-2 border-t border-[#494847]/10 pt-4">
                   <div className="rounded-lg bg-[#0e0e0e] p-3">
-                    <p className="text-[9px] font-bold text-[#adaaaa]">可進入房間</p>
+                    <p className="text-xs font-bold text-[#adaaaa]">可進入房間</p>
                     <p className="text-sm font-bold text-[#fcc025]">table_1 (VIP 專屬桌)</p>
                   </div>
                   <div className="rounded-lg bg-[#0e0e0e] p-3">
-                    <p className="text-[9px] font-bold text-[#adaaaa]">特殊說明</p>
+                    <p className="text-xs font-bold text-[#adaaaa]">特殊說明</p>
                     <p className="text-xs font-bold text-[#adaaaa]">基礎 VIP 資格，可進入第一級 VIP 專屬遊戲房間</p>
                   </div>
                 </div>
@@ -252,11 +252,11 @@ export default function VIPTab() {
                   </div>
                   <div className="text-left">
                     <h3 className="font-bold text-[#fcc025]">VIP 2</h3>
-                    <p className="text-[10px] font-bold text-[#adaaaa]">持有 1,000+ YJC</p>
+                    <p className="text-xs font-bold text-[#adaaaa]">持有 1,000+ YJC</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded border border-emerald-400/30 px-2 py-1 text-[9px] font-bold uppercase text-emerald-400">
+                  <span className="rounded border border-emerald-400/30 px-2 py-1 text-xs font-bold uppercase text-emerald-400">
                     零手續費
                   </span>
                   <ChevronRight
@@ -267,11 +267,11 @@ export default function VIPTab() {
               {expandedTier === 'VIP 2' && (
                 <div className="mt-4 space-y-2 border-t border-[#494847]/10 pt-4">
                   <div className="rounded-lg bg-[#0e0e0e] p-3">
-                    <p className="text-[9px] font-bold text-[#adaaaa]">可進入房間</p>
+                    <p className="text-xs font-bold text-[#adaaaa]">可進入房間</p>
                     <p className="text-sm font-bold text-[#fcc025]">table_1, table_2 (全部 VIP 房間)</p>
                   </div>
                   <div className="rounded-lg border border-emerald-400/20 bg-emerald-500/5 p-3">
-                    <p className="text-[9px] font-bold text-emerald-400">⭐ 專屬特權</p>
+                    <p className="text-xs font-bold text-emerald-400">⭐ 專屬特權</p>
                     <p className="text-sm font-black text-emerald-400">zero_fee (零手續費)</p>
                     <p className="text-xs font-bold text-[#adaaaa]">市場交易享有零手續費優惠</p>
                   </div>

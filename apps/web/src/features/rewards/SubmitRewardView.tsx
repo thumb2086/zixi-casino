@@ -131,7 +131,7 @@ export default function SubmitRewardView() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">類型</label>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">類型</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -159,7 +159,7 @@ export default function SubmitRewardView() {
             </div>
 
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 名稱（最多 32 字）
               </label>
               <input
@@ -174,7 +174,7 @@ export default function SubmitRewardView() {
 
             {type === 'avatar' && (
               <div>
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                   表情符號（僅接受一個 emoji，不開放圖片上傳）
                 </label>
                 <input
@@ -201,7 +201,7 @@ export default function SubmitRewardView() {
             )}
 
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 說明（選填，最多 240 字）
               </label>
               <textarea
@@ -215,7 +215,7 @@ export default function SubmitRewardView() {
             </div>
 
             <div>
-              <label className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 建議稀有度（管理員可調整）
               </label>
               <select
@@ -273,10 +273,10 @@ export default function SubmitRewardView() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-black">{sub.name}</span>
-                          <span className="text-[9px] font-bold uppercase text-[#adaaaa]">
+                          <span className="text-xs font-bold uppercase text-[#adaaaa]">
                             {sub.type === 'avatar' ? '頭像' : '稱號'}
                           </span>
-                          <span className={`flex items-center gap-1 text-[9px] font-bold uppercase ${status.cls}`}>
+                          <span className={`flex items-center gap-1 text-xs font-bold uppercase ${status.cls}`}>
                             <StatusIcon size={10} />
                             {status.text}
                           </span>
@@ -285,7 +285,7 @@ export default function SubmitRewardView() {
                           <p className="mt-1 text-xs text-[#adaaaa] break-words">{sub.description}</p>
                         )}
                         {sub.reviewNote && (
-                          <p className="mt-1 text-[10px] text-[#adaaaa]">管理員備註：{sub.reviewNote}</p>
+                          <p className="mt-1 text-xs text-[#adaaaa]">管理員備註：{sub.reviewNote}</p>
                         )}
                       </div>
                     </div>

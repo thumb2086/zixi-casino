@@ -66,7 +66,7 @@ export default function RewardsView() {
         >
           <div>
             <p className="text-sm font-black text-white">{t('events.title')}</p>
-            <p className="mt-1 text-[10px] text-[#adaaaa]">{t('events.no_events')}</p>
+            <p className="mt-1 text-xs text-[#adaaaa]">{t('events.no_events')}</p>
           </div>
           <CalendarClock className="h-6 w-6 text-[#fcc025]" />
         </Link>
@@ -75,16 +75,16 @@ export default function RewardsView() {
           <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-[#fcc025] bg-[#1a1919] shadow-[0_0_50px_rgba(252,192,37,0.2)]">
             <Star size={64} fill="#fcc025" className="text-[#fcc025]" />
           </div>
-          <div className="mt-4 rounded-full bg-[#fcc025] px-4 py-1 text-[10px] font-black uppercase tracking-widest text-black shadow-xl">
+          <div className="mt-4 rounded-full bg-[#fcc025] px-4 py-1 text-xs font-black uppercase tracking-widest text-black shadow-xl">
             Platinum IV
           </div>
-          <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.3em] text-[#adaaaa]">
+          <p className="mt-8 text-xs font-bold uppercase tracking-[0.3em] text-[#adaaaa]">
             {t('rewards.vip_progress')}
           </p>
           <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full border border-[#494847]/20 bg-[#1a1919]">
             <div className="h-full w-[65%] bg-[#fcc025] shadow-[0_0_10px_#fcc025]" />
           </div>
-          <div className="mt-2 flex w-full justify-between text-[9px] font-black uppercase text-[#494847]">
+          <div className="mt-2 flex w-full justify-between text-xs font-black uppercase text-[#494847]">
             <span>Gold</span>
             <span>Platinum</span>
           </div>
@@ -93,7 +93,7 @@ export default function RewardsView() {
         <section className="space-y-4">
           <div className="flex items-center gap-2 px-2">
             <Calendar size={16} className="text-[#adaaaa]" />
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
               {t('rewards.daily_rewards')}
             </h3>
           </div>
@@ -125,7 +125,7 @@ export default function RewardsView() {
         <section className="space-y-4">
           <div className="flex items-center gap-2 px-2">
             <Zap size={16} className="text-[#adaaaa]" />
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
               {t('rewards.active_quests')}
             </h3>
           </div>
@@ -139,7 +139,7 @@ export default function RewardsView() {
                   <h4 className="text-sm font-bold uppercase tracking-tight text-white transition-colors group-hover:text-[#fcc025]">
                     {campaign.title}
                   </h4>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-[#fcc025]">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[#fcc025]">
                     {t('rewards.reward_amount', { amount: campaign.rewards.tokens })}
                   </p>
                   <div className="mt-4 h-1 w-48 overflow-hidden rounded-full bg-[#0e0e0e]">
@@ -149,7 +149,7 @@ export default function RewardsView() {
                 <button
                   type="button"
                   onClick={() => claimMutation.mutate(campaign.id)}
-                  className="rounded-lg bg-[#fcc025] px-6 py-2 text-[10px] font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
+                  className="rounded-lg bg-[#fcc025] px-6 py-2 text-xs font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
                 >
                   {t('rewards.claim_reward')}
                 </button>
@@ -157,7 +157,7 @@ export default function RewardsView() {
             ))}
 
             {!campaigns.length && (
-              <div className="rounded-2xl border border-dashed border-[#494847]/20 p-6 text-center text-[11px] font-bold uppercase tracking-widest text-[#adaaaa]">
+              <div className="rounded-2xl border border-dashed border-[#494847]/20 p-6 text-center text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 {t('rewards.no_active_quests')}
               </div>
             )}

@@ -71,7 +71,7 @@ export default function ChatRoom() {
         <span className="text-xs font-black uppercase tracking-widest text-blue-400">
           {t('chat.title')}
         </span>
-        <span className="text-[10px] text-slate-600">{t('chat.global')}</span>
+        <span className="text-xs text-slate-600">{t('chat.global')}</span>
       </div>
 
       <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-4">
@@ -80,7 +80,7 @@ export default function ChatRoom() {
           return (
             <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] rounded-xl px-3 py-2 ${isOwn ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 rounded-bl-sm'}`}>
-                {!isOwn && <p className="text-[9px] font-bold text-yellow-500 mb-0.5">{m.displayName}</p>}
+                {!isOwn && <p className="text-xs font-bold text-yellow-500 mb-0.5">{m.displayName}</p>}
                 <p className="text-xs leading-relaxed">{m.text}</p>
               </div>
             </div>
@@ -106,7 +106,7 @@ export default function ChatRoom() {
         />
         <button
           type="submit"
-          className="rounded bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-blue-500"
+          className="rounded bg-blue-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-blue-500"
           disabled={sendMutation.isPending}
         >
           {t('chat.send')}

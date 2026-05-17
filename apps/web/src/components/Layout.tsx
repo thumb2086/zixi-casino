@@ -32,17 +32,17 @@ export default function Layout() {
               <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-8 shadow-2xl">
                 <div className="mb-6 flex items-center gap-3">
                   <Bell size={18} className="text-[#fcc025]" />
-                  <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#adaaaa]">
+                  <h4 className="text-xs font-bold uppercase tracking-[0.4em] text-[#adaaaa]">
                     {t('layout.system_terminal')}
                   </h4>
                 </div>
                 <div className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] p-5">
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#fcc025]">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-widest text-[#fcc025]">
                     {t('layout.simulation_status')}
                   </p>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#fcc025]" />
-                    <span className="text-[9px] font-black uppercase tracking-widest text-white">
+                    <span className="text-xs font-black uppercase tracking-widest text-white">
                       {t('layout.operator_connected')}
                     </span>
                   </div>
@@ -50,7 +50,7 @@ export default function Layout() {
               </section>
 
               <footer className="py-4 text-center">
-                <p className="text-[9px] font-black uppercase tracking-[0.5em] text-[#494847]">
+                <p className="text-xs font-black uppercase tracking-[0.5em] text-[#494847]">
                   &copy; 2026 ZiXi Simulator - Aureum Edition
                 </p>
               </footer>

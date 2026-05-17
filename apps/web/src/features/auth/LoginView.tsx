@@ -175,7 +175,7 @@ export default function LoginView() {
           className="flex items-center gap-3 px-5 py-2.5 bg-[#1a1919] hover:bg-[#262626] text-[#fcc025] rounded-xl transition-all border border-[#fcc025]/20 shadow-lg"
         >
           <Globe size={16} />
-          <span className="text-[10px] font-bold uppercase tracking-widest">{isZh ? t('common.english') : t('common.chinese')}</span>
+          <span className="text-xs font-bold uppercase tracking-widest">{isZh ? t('common.english') : t('common.chinese')}</span>
         </motion.button>
       </div>
 
@@ -189,7 +189,7 @@ export default function LoginView() {
           <div className="bg-[#1a1919] rounded-2xl border border-[#494847]/15 p-6 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-[#fcc025] rounded-full animate-pulse" />
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#fcc025]">
+              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-[#fcc025]">
                 {t('nav.announcements')}
               </h2>
             </div>
@@ -197,13 +197,13 @@ export default function LoginView() {
               <div className="space-y-4">
                 <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
                   <p className="text-xs font-bold text-white">🎉 {t('announcement.welcome')}</p>
-                  <p className="text-[10px] text-[#adaaaa] mt-1 leading-relaxed">
+                  <p className="text-xs text-[#adaaaa] mt-1 leading-relaxed">
                     {t('announcement.welcome_desc')}
                   </p>
                 </div>
                 <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
                   <p className="text-xs font-bold text-white">💡 {t('announcement.quick_tips')}</p>
-                  <p className="text-[10px] text-[#adaaaa] mt-1 leading-relaxed">
+                  <p className="text-xs text-[#adaaaa] mt-1 leading-relaxed">
                     {t('announcement.tips_desc')}
                   </p>
                 </div>
@@ -216,13 +216,13 @@ export default function LoginView() {
                       <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded">{t('announcement.type_urgent')}</span>
                       <p className="text-xs font-bold text-white truncate">{a.title}</p>
                     </div>
-                    <p className="text-[10px] text-[#adaaaa] leading-relaxed">{a.content}</p>
+                    <p className="text-xs text-[#adaaaa] leading-relaxed">{a.content}</p>
                   </div>
                 ))}
                 {announcements.filter(a => !a.isPinned).slice(0, 3).map((a: any) => (
                   <div key={a.id} className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
                     <p className="text-xs font-bold text-white">{a.title}</p>
-                    <p className="text-[10px] text-[#adaaaa] mt-1 line-clamp-2 leading-relaxed">{a.content}</p>
+                    <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2 leading-relaxed">{a.content}</p>
                   </div>
                 ))}
               </div>
@@ -240,7 +240,7 @@ export default function LoginView() {
           <div className="lg:hidden w-full max-w-md">
             <div className="bg-[#fcc025]/5 rounded-xl border border-[#fcc025]/20 p-3 flex items-start gap-2">
               <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded shrink-0 mt-0.5">{t('announcement.type_urgent')}</span>
-              <p className="text-[10px] text-[#adaaaa] leading-relaxed">
+              <p className="text-xs text-[#adaaaa] leading-relaxed">
                 {announcements.filter(a => a.isPinned)[0].title}
               </p>
             </div>
@@ -264,19 +264,19 @@ export default function LoginView() {
                 <Fingerprint size={42} className="text-[#fcc025]" />
             </motion.div>
             <h1 className="text-4xl font-extrabold text-[#fcc025] tracking-tighter uppercase italic">{t('auth.identity_title')}</h1>
-            <p className="text-[#adaaaa] text-[10px] font-bold uppercase tracking-[0.4em] leading-relaxed">{t('auth.identity_subtitle')}</p>
+            <p className="text-[#adaaaa] text-xs font-bold uppercase tracking-[0.4em] leading-relaxed">{t('auth.identity_subtitle')}</p>
         </header>
 
         <div className="flex bg-[#0e0e0e] p-1.5 rounded-xl border border-[#494847]/20">
           <button
             onClick={() => setTab('qr')}
-            className={`flex-1 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${tab === 'qr' ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'text-[#adaaaa] hover:text-white'}`}
+            className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${tab === 'qr' ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'text-[#adaaaa] hover:text-white'}`}
           >
             {t('auth.qr_login')}
           </button>
           <button
             onClick={() => setTab('custody')}
-            className={`flex-1 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${tab === 'custody' ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'text-[#adaaaa] hover:text-white'}`}
+            className={`flex-1 py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${tab === 'custody' ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'text-[#adaaaa] hover:text-white'}`}
           >
             {t('auth.custody_login')}
           </button>
@@ -303,20 +303,20 @@ export default function LoginView() {
                   )}
               </div>
               <div className="text-center space-y-2 px-4">
-                 <p className="text-[#adaaaa] text-[11px] leading-relaxed font-bold uppercase tracking-tight">
+                 <p className="text-[#adaaaa] text-xs leading-relaxed font-bold uppercase tracking-tight">
                      {t('auth.qr_instruction')}
                  </p>
                  {deepLinkUrl && (
                    <a
                      href={deepLinkUrl}
-                     className="inline-flex items-center justify-center mt-2 px-4 py-2 rounded-lg bg-[#262626] border border-[#fcc025]/20 text-[#fcc025] text-[10px] font-black uppercase tracking-widest hover:bg-[#2c2c2c] transition-all"
+                     className="inline-flex items-center justify-center mt-2 px-4 py-2 rounded-lg bg-[#262626] border border-[#fcc025]/20 text-[#fcc025] text-xs font-black uppercase tracking-widest hover:bg-[#2c2c2c] transition-all"
                    >
                      {t('auth.open_app')}
                    </a>
                  )}
                  <div className="flex items-center justify-center gap-2 pt-2">
                      <QrCode size={12} className="text-[#fcc025]" />
-                     <span className="text-[9px] text-[#fcc025]/60 font-bold uppercase tracking-[0.2em]">{t('auth.encrypted_active')}</span>
+                     <span className="text-xs text-[#fcc025]/60 font-bold uppercase tracking-[0.2em]">{t('auth.encrypted_active')}</span>
                  </div>
               </div>
             </motion.div>
@@ -332,13 +332,13 @@ export default function LoginView() {
               <div className="flex bg-[#0e0e0e] p-1 rounded-lg border border-[#494847]/20">
                 <button
                   onClick={() => setMode('login')}
-                  className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${mode === 'login' ? 'bg-[#494847] text-white' : 'text-[#adaaaa] hover:text-white'}`}
+                  className={`flex-1 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${mode === 'login' ? 'bg-[#494847] text-white' : 'text-[#adaaaa] hover:text-white'}`}
                 >
                   {t('auth.login')}
                 </button>
                 <button
                   onClick={() => setMode('register')}
-                  className={`flex-1 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${mode === 'register' ? 'bg-[#494847] text-white' : 'text-[#adaaaa] hover:text-white'}`}
+                  className={`flex-1 py-2 rounded-md text-xs font-bold uppercase tracking-widest transition-all ${mode === 'register' ? 'bg-[#494847] text-white' : 'text-[#adaaaa] hover:text-white'}`}
                 >
                   {t('auth.register')}
                 </button>
@@ -346,7 +346,7 @@ export default function LoginView() {
 
               <form onSubmit={mode === 'login' ? handleCustodyLogin : handleCustodyRegister} className="space-y-6">
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{t('auth.username')}</label>
+                    <label className="text-xs font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{t('auth.username')}</label>
                     <div className="relative">
                       <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#fcc025]/40">
                         <Monitor size={16} />
@@ -362,7 +362,7 @@ export default function LoginView() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{t('auth.password')}</label>
+                    <label className="text-xs font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{t('auth.password')}</label>
                     <div className="relative">
                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#fcc025]/40">
                           <Monitor size={16} />
@@ -380,7 +380,7 @@ export default function LoginView() {
 
                 {mode === 'register' && (
                   <div className="space-y-2">
-                      <label className="text-[10px] font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{t('auth.confirm_password')}</label>
+                      <label className="text-xs font-bold text-[#fcc025] uppercase ml-1 tracking-widest">{t('auth.confirm_password')}</label>
                       <div className="relative">
                          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#fcc025]/40">
                             <Monitor size={16} />
@@ -410,7 +410,7 @@ export default function LoginView() {
                   >
                     {rememberMe && <Check size={14} className="text-black" />}
                   </button>
-                  <span className="text-[11px] font-bold text-[#adaaaa]">
+                  <span className="text-xs font-bold text-[#adaaaa]">
                     {t('auth.remember_me')}
                   </span>
                 </div>
@@ -418,7 +418,7 @@ export default function LoginView() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-[#ff7351] text-[10px] font-bold text-center bg-[#ff7351]/10 py-4 rounded-xl border border-[#ff7351]/20 uppercase tracking-widest"
+                    className="text-[#ff7351] text-xs font-bold text-center bg-[#ff7351]/10 py-4 rounded-xl border border-[#ff7351]/20 uppercase tracking-widest"
                   >
                     {error}
                   </motion.div>
@@ -447,7 +447,7 @@ export default function LoginView() {
         <div className="pt-8 border-t border-[#494847]/10 flex justify-between items-center">
             <div className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 bg-[#fcc025] rounded-full animate-pulse shadow-[0_0_8px_#fcc025]"></div>
-                <span className="text-[9px] font-bold text-[#adaaaa] uppercase tracking-[0.2em]">{t('auth.system_ready')}</span>
+                <span className="text-xs font-bold text-[#adaaaa] uppercase tracking-[0.2em]">{t('auth.system_ready')}</span>
             </div>
             <motion.button
               whileHover={{ rotate: 180 }}
@@ -461,7 +461,7 @@ export default function LoginView() {
       </motion.div>
       </div>
 
-      <p className="mt-12 text-[9px] font-bold text-[#494847] uppercase tracking-[0.5em] flex items-center gap-3">
+      <p className="mt-12 text-xs font-bold text-[#494847] uppercase tracking-[0.5em] flex items-center gap-3">
           <ShieldCheck size={12} className="text-[#fcc025]/30" />
           {t('auth.powered_by')}
       </p>

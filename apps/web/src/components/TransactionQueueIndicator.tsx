@@ -20,7 +20,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 function TxItem({ entry, onRetry, onRemove }: { entry: TxEntry; onRetry: (id: string) => void; onRemove: (id: string) => void }) {
   return (
-    <div className="flex items-center gap-2 py-1.5 text-[11px]">
+    <div className="flex items-center gap-2 py-1.5 text-xs">
       {STATUS_ICONS[entry.status]}
       <span className="flex-1 truncate text-white">
         {TYPE_LABELS[entry.type] || entry.type}
@@ -64,7 +64,7 @@ export default function TransactionQueueIndicator() {
     <div className="fixed bottom-24 right-4 z-[100]">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-lg transition-all ${
+        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-widest shadow-lg transition-all ${
           failed > 0 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-[#1a1919] text-[#fcc025] border border-[#fcc025]/20'
         }`}
       >
@@ -75,10 +75,10 @@ export default function TransactionQueueIndicator() {
       {open && (
         <div className="absolute bottom-full right-0 mb-2 w-72 rounded-xl bg-[#1a1919] border border-[#494847]/20 shadow-2xl p-3">
           <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#494847]/20">
-            <span className="text-[10px] font-black uppercase tracking-widest text-white">交易佇列</span>
+            <span className="text-xs font-black uppercase tracking-widest text-white">交易佇列</span>
             <button
               onClick={clearCompleted}
-              className="text-[10px] text-[#adaaaa] hover:text-white"
+              className="text-xs text-[#adaaaa] hover:text-white"
             >
               清除已完成
             </button>
@@ -88,7 +88,7 @@ export default function TransactionQueueIndicator() {
               <div key={entry.id}>
                 <TxItem entry={entry} onRetry={retry} onRemove={remove} />
                 {entry.error && entry.status === 'failed' && (
-                  <p className="pl-5 text-[10px] text-red-400 truncate">{entry.error}</p>
+                  <p className="pl-5 text-xs text-red-400 truncate">{entry.error}</p>
                 )}
               </div>
             ))}

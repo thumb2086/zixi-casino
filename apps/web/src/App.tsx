@@ -35,6 +35,7 @@ import VIPLevelsView from './features/info/VIPLevelsView';
 import InfoView from './features/info/InfoView';
 import CollectionView from './features/collection/CollectionView';
 import { Loader2 } from 'lucide-react';
+import { useFontSizeStore } from './store/useFontSizeStore';
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,14 @@ function useFastLogin() {
   return { isRestoring };
 }
 
+function FontSizeApplier() {
+  const fontSize = useFontSizeStore((s) => s.fontSize);
+  useEffect(() => {
+    document.documentElement.dataset.fontSize = fontSize;
+  }, [fontSize]);
+  return null;
+}
+
 function AppContent() {
   const { isAuthorized } = useAuthStore();
   const { isRestoring } = useFastLogin();
@@ -107,6 +116,7 @@ function AppContent() {
 
   return (
     <div className="relative min-h-screen bg-[#0e0e0e]">
+      <FontSizeApplier />
       <SoundPlayer />
       {isAuthorized && <TransactionQueueIndicator />}
       {isAuthorized && <DanmakuOverlay />}
