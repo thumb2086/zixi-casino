@@ -174,7 +174,7 @@ export default function LeaderboardView() {
             <section className="flex flex-col items-center justify-center space-y-2">
               <div className="flex items-center gap-2 text-[#fcc025] opacity-60">
                 <Timer size={14} />
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em]">
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">
                   {showTimeRemaining ? t('leaderboard.time_remaining') : t('leaderboard.all_time')}
                 </span>
               </div>
@@ -195,11 +195,11 @@ export default function LeaderboardView() {
                     </div>
                   </div>
                   <div className="flex h-24 w-20 flex-col items-center justify-center rounded-t-xl border-t border-slate-400/30 bg-gradient-to-t from-[#1a1919] to-slate-400/20 p-2 text-center">
-                    <p className="w-full truncate text-[9px] font-black text-white">{orderedTopThree[0].name}</p>
+                    <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[0].name}</p>
                     {orderedTopThree[0].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-[#fcc025]">{orderedTopThree[0].titleLabel}</p>
                     )}
-                    <p className="mt-1 text-[10px] font-black text-slate-400">
+                    <p className="mt-1 text-xs font-black text-slate-400">
                       {formatNumber(orderedTopThree[0].amount, 'short')} {unit}
                     </p>
                   </div>
@@ -220,7 +220,7 @@ export default function LeaderboardView() {
                     </div>
                   </div>
                   <div className="flex h-32 w-28 flex-col items-center justify-center rounded-t-2xl border-t border-[#fcc025]/30 bg-gradient-to-t from-[#1a1919] to-[#fcc025]/20 p-4 text-center">
-                    <p className="w-full truncate text-[11px] font-black text-white">{orderedTopThree[1].name}</p>
+                    <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[1].name}</p>
                     {orderedTopThree[1].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-[#fcc025]">{orderedTopThree[1].titleLabel}</p>
                     )}
@@ -242,11 +242,11 @@ export default function LeaderboardView() {
                     </div>
                   </div>
                   <div className="flex h-20 w-20 flex-col items-center justify-center rounded-t-xl border-t border-amber-700/30 bg-gradient-to-t from-[#1a1919] to-amber-700/20 p-2 text-center">
-                    <p className="w-full truncate text-[9px] font-black text-white">{orderedTopThree[2].name}</p>
+                    <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[2].name}</p>
                     {orderedTopThree[2].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-amber-500">{orderedTopThree[2].titleLabel}</p>
                     )}
-                    <p className="mt-1 text-[10px] font-black text-amber-500">
+                    <p className="mt-1 text-xs font-black text-amber-500">
                       {formatNumber(orderedTopThree[2].amount, 'short')} {unit}
                     </p>
                   </div>
@@ -261,7 +261,7 @@ export default function LeaderboardView() {
                     key={entry}
                     type="button"
                     onClick={() => setFilter(entry)}
-                    className={`flex-1 whitespace-nowrap rounded-lg px-2 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    className={`flex-1 whitespace-nowrap rounded-lg px-2 py-2.5 text-xs font-bold uppercase tracking-widest transition-all ${
                       filter === entry ? 'bg-[#fcc025] text-black shadow-lg' : 'text-[#adaaaa] hover:text-white'
                     }`}
                   >
@@ -282,7 +282,7 @@ export default function LeaderboardView() {
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <span className={`w-6 text-[10px] font-black ${player.isSelf ? 'text-[#fcc025]' : 'text-[#494847]'}`}>
+                    <span className={`w-6 text-xs font-black ${player.isSelf ? 'text-[#fcc025]' : 'text-[#494847]'}`}>
                       {player.rank}
                     </span>
                     <div
@@ -295,16 +295,16 @@ export default function LeaderboardView() {
                       {player.avatarIcon || player.name.charAt(0)}
                     </div>
                     <div>
-                      <p className={`text-[11px] font-black ${player.isSelf ? 'text-[#fcc025]' : 'text-white'}`}>
+                      <p className={`text-xs font-black ${player.isSelf ? 'text-[#fcc025]' : 'text-white'}`}>
                         {player.name}
                       </p>
                       {player.titleLabel && (
-                        <p className="mt-0.5 inline-block rounded bg-[#262626] px-1.5 py-0.5 text-[9px] font-bold text-[#fcc025]">
+                        <p className="mt-0.5 inline-block rounded bg-[#262626] px-1.5 py-0.5 text-xs font-bold text-[#fcc025]">
                           {player.titleLabel}
                         </p>
                       )}
                       {player.isSelf && (
-                        <p className="text-[9px] font-bold tracking-tighter text-[#adaaaa]">{t('leaderboard.you')}</p>
+                        <p className="text-xs font-bold tracking-tighter text-[#adaaaa]">{t('leaderboard.you')}</p>
                       )}
                     </div>
                   </div>
@@ -312,7 +312,7 @@ export default function LeaderboardView() {
                     <p className={`text-sm font-black italic tracking-tighter ${player.isSelf ? 'text-[#fcc025]' : 'text-white'}`}>
                       {formatNumber(player.amount, 'short')} {unit}
                     </p>
-                    <p className="mt-1 text-[9px] font-bold uppercase tracking-widest text-[#494847]">{metricLabel}</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-widest text-[#494847]">{metricLabel}</p>
                   </div>
                 </div>
               ))}
@@ -325,19 +325,19 @@ export default function LeaderboardView() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="w-6 text-[11px] font-black text-[#fcc025]">{selfEntry.rank}</span>
+                    <span className="w-6 text-xs font-black text-[#fcc025]">{selfEntry.rank}</span>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#fcc025]/30 bg-[#262626] text-xs font-bold uppercase text-[#fcc025]">
                       {selfEntry.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-[11px] font-black uppercase text-white">{selfEntry.name}</p>
+                      <p className="text-xs font-black uppercase text-white">{selfEntry.name}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-black italic tracking-tighter text-[#fcc025]">
                       {formatNumber(selfEntry.amount, 'short')} {unit}
                     </p>
-                    <p className="mt-1 text-[9px] font-bold uppercase tracking-widest text-[#494847]">{metricLabel}</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-widest text-[#494847]">{metricLabel}</p>
                   </div>
                 </div>
               )}

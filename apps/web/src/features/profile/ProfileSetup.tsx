@@ -54,12 +54,12 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
 
           <div className="space-y-2">
             <h1 className="text-3xl font-extrabold text-[#fcc025] tracking-tighter uppercase italic">Identity Sync</h1>
-            <p className="text-[#adaaaa] font-bold uppercase text-[10px] tracking-[0.3em] leading-relaxed">Establish your operator designation to proceed with the simulation.</p>
+            <p className="text-[#adaaaa] font-bold uppercase text-xs tracking-[0.3em] leading-relaxed">Establish your operator designation to proceed with the simulation.</p>
           </div>
 
           <form onSubmit={handleSave} className="w-full space-y-6 pt-4">
             <div className="space-y-2 text-left">
-              <label className="text-[10px] uppercase tracking-[0.2em] text-[#adaaaa] font-bold ml-1">Operator ID</label>
+              <label className="text-xs uppercase tracking-[0.2em] text-[#adaaaa] font-bold ml-1">Operator ID</label>
               <div className="relative">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#fcc025]/40">
                   <User size={18} />
@@ -80,7 +80,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-[#ff7351] text-[10px] font-bold bg-[#ff7351]/10 py-4 px-4 rounded-xl border border-[#ff7351]/20 uppercase tracking-widest flex items-center gap-3"
+                className="text-[#ff7351] text-xs font-bold bg-[#ff7351]/10 py-4 px-4 rounded-xl border border-[#ff7351]/20 uppercase tracking-widest flex items-center gap-3"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#ff7351] animate-pulse" />
                 {error}

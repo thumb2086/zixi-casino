@@ -35,7 +35,7 @@ export default function StatusView() {
           <div className="flex-1 min-w-0">
             <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
             {titleItem && <p className="text-xs font-bold text-[#fcc025]">{titleItem.icon} {titleItem.name}</p>}
-            <p className="text-[10px] font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
+            <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
           </div>
         </section>
 
@@ -44,14 +44,14 @@ export default function StatusView() {
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-[#fcc025]" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
             </div>
             <p className="text-xl font-black italic text-[#fcc025]">{Number(balance).toLocaleString()}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-[#fcc025]" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#adaaaa]">活躍頭像</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">活躍頭像</span>
             </div>
             <p className="text-sm font-bold text-white truncate">{avatarItem?.name || activeAvatar}</p>
           </div>

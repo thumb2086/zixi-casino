@@ -102,7 +102,7 @@ export default function AnnouncementCenter() {
           </div>
           <div className="flex items-center gap-3 mb-4">
             <AlertTriangle className="text-red-500 animate-pulse" size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">{t('announcement.critical_alert')}</span>
+            <span className="text-xs font-black uppercase tracking-[0.2em] text-red-500">{t('announcement.critical_alert')}</span>
           </div>
           <h2 className="text-2xl font-black italic tracking-tighter uppercase mb-2">
             {featured?.title || t('announcement.no_active')}
@@ -110,14 +110,14 @@ export default function AnnouncementCenter() {
           <p className="text-xs text-[#adaaaa] font-bold uppercase leading-relaxed mb-6">
             {featured?.content || t('announcement.feed_online')}
           </p>
-          <div className="text-[10px] font-black uppercase tracking-widest text-white/70">
+          <div className="text-xs font-black uppercase tracking-widest text-white/70">
             {featured ? formatRelativeTime(featured.createdAt, t) : 'SYNCED'}
           </div>
         </section>
 
         <div className="flex items-center gap-2 px-2">
           <div className="w-1 h-3 bg-[#fcc025] rounded-full" />
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">{t('announcement.system_alerts')}</h3>
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">{t('announcement.system_alerts')}</h3>
         </div>
 
         <div className="flex bg-[#1a1919] p-1.5 rounded-xl border border-[#494847]/20">
@@ -126,7 +126,7 @@ export default function AnnouncementCenter() {
               key={entry}
               type="button"
               onClick={() => setFilter(entry)}
-              className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+              className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
                 filter === entry ? 'bg-[#fcc025] text-black shadow-lg' : 'text-[#adaaaa] hover:text-white'
               }`}
             >
@@ -137,13 +137,13 @@ export default function AnnouncementCenter() {
 
         <section className="space-y-4">
           {loading && (
-            <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-[11px] font-bold uppercase tracking-widest text-[#adaaaa]">
+            <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
               {t('announcement.loading')}
             </div>
           )}
 
           {!loading && filteredItems.length === 0 && (
-            <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-[11px] font-bold uppercase tracking-widest text-[#adaaaa]">
+            <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
               {t('announcement.no_category')}
             </div>
           )}
@@ -155,11 +155,11 @@ export default function AnnouncementCenter() {
                   <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm border ${getBadgeStyle(item.type)}`}>
                     {typeLabel(item.type)}
                   </span>
-                  <span className="text-[9px] font-bold text-[#494847] uppercase tracking-widest">{formatRelativeTime(item.createdAt, t)}</span>
+                  <span className="text-xs font-bold text-[#494847] uppercase tracking-widest">{formatRelativeTime(item.createdAt, t)}</span>
                 </div>
                 <div>
                   <h4 className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-[#fcc025] transition-colors">{item.title}</h4>
-                  <p className="text-[10px] text-[#adaaaa] font-bold mt-1 line-clamp-2">{item.content}</p>
+                  <p className="text-xs text-[#adaaaa] font-bold mt-1 line-clamp-2">{item.content}</p>
                 </div>
               </div>
               <ChevronRight size={16} className="text-[#494847] group-hover:text-[#fcc025] group-hover:translate-x-1 transition-all" />

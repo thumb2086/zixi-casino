@@ -126,12 +126,12 @@ export default function RoomLobbyView() {
           />
           <div className="absolute bottom-0 left-0 z-20 space-y-4 p-10">
             <div className="flex items-center gap-2">
-              <span className="rounded-sm bg-[#fcc025] px-2 py-1 text-[9px] font-black uppercase tracking-widest text-black">
+              <span className="rounded-sm bg-[#fcc025] px-2 py-1 text-xs font-black uppercase tracking-widest text-black">
                 {t('casino.featured')}
               </span>
               <div className="flex items-center gap-1.5 text-[#fcc025]">
                 <Flame size={14} className="fill-current" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-xs font-bold uppercase tracking-widest">
                   {t('casino.high_stakes')}
                 </span>
               </div>
@@ -194,7 +194,7 @@ export default function RoomLobbyView() {
                     </h3>
                     <div className="mt-2 flex items-center justify-center gap-1.5">
                       <Users size={10} className="text-[#adaaaa]" />
-                      <span className="text-[9px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                      <span className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                         {game.vipOnly
                           ? (locked ? t('casino.vip_locked') : t('casino.vip_room'))
                           : `${game.players} ${t('casino.active_players')}`}
@@ -207,7 +207,7 @@ export default function RoomLobbyView() {
                       type="button"
                       disabled={locked || joinRoomMutation.isPending}
                       onClick={() => handleVipEnter(game.id)}
-                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#fcc025]/30 bg-[#121212] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[#fcc025] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#fcc025]/30 bg-[#121212] px-3 py-1.5 text-xs font-black uppercase tracking-widest text-[#fcc025] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {locked ? <Lock size={12} /> : <ChevronRight size={12} />}
                       {joinRoomMutation.isPending ? t('casino.entering') : t('casino.enter_room')}
@@ -215,7 +215,7 @@ export default function RoomLobbyView() {
                   ) : (
                     <Link
                       to={`/app/casino/${game.id}`}
-                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#494847]/30 bg-[#121212] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-[#d7d7d7]"
+                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#494847]/30 bg-[#121212] px-3 py-1.5 text-xs font-black uppercase tracking-widest text-[#d7d7d7]"
                     >
                       <ChevronRight size={12} />
                       {t('casino.play')}

@@ -63,7 +63,7 @@ export default function CollectionView() {
           <div className="rounded-xl border border-[#494847]/20 bg-[#1a1919] p-12 text-center mt-8">
             <Archive className="w-12 h-12 mx-auto text-[#494847] mb-4" />
             <p className="text-sm text-[#adaaaa]">尚未收藏任何物品</p>
-            <p className="text-[10px] text-[#494847] mt-1">開啟寶箱有機會獲得稀有收藏品</p>
+            <p className="text-xs text-[#494847] mt-1">開啟寶箱有機會獲得稀有收藏品</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
@@ -75,9 +75,9 @@ export default function CollectionView() {
               >
                 <div className="text-5xl mb-3">{item.icon || '📦'}</div>
                 <h3 className="font-bold text-sm mb-1">{item.name}</h3>
-                <p className="text-[10px] text-[#adaaaa]">{item.description || ''}</p>
+                <p className="text-xs text-[#adaaaa]">{item.description || ''}</p>
                 <span
-                  className="inline-block mt-2 text-[10px] font-bold px-2 py-1 rounded-full"
+                  className="inline-block mt-2 text-xs font-bold px-2 py-1 rounded-full"
                   style={{
                     backgroundColor: `${RARITY_COLORS[item.rarity] || '#494847'}30`,
                     color: RARITY_COLORS[item.rarity] || '#494847',

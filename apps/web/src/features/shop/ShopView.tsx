@@ -331,13 +331,13 @@ export default function ShopView() {
           </div>
           <div className="text-sm text-[#adaaaa] mb-2">1 YJC = {CONVERSION_RATE.toLocaleString()} ZXC</div>
           <div className="flex items-center gap-2">
-            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`最少 ${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-[11px] font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`最少 ${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertYjc} disabled={converting || !convertZxc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
               {converting ? <Loader2 size={12} className="animate-spin" /> : '兌換'}
             </button>
           </div>
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#494847]/20">
-            <input type="number" min="0.0001" step="0.0001" placeholder="YJC 數量" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-[11px] font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <input type="number" min="0.0001" step="0.0001" placeholder="YJC 數量" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertZxcFromYjc} disabled={converting || !convertYjc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#fcc025] text-black px-4 py-2 rounded-lg disabled:opacity-50">
               {converting ? <Loader2 size={12} className="animate-spin" /> : '反向兌換'}
             </button>
@@ -376,7 +376,7 @@ export default function ShopView() {
                     />
                     <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.min(999, (p[chest.id] || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
                   </div>
-                  <p className="text-center text-[11px] text-[#adaaaa] mt-2">
+                  <p className="text-center text-xs text-[#adaaaa] mt-2">
                     {(qty * unitPrice).toLocaleString()} ZXC
                     {discount > 0 && <span className="text-emerald-400 ml-1">-{discount * 100}%</span>}
                   </p>

@@ -59,7 +59,7 @@ function SwapPanel({
     <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-black uppercase tracking-widest text-white">兌換</h2>
-        <p className="text-[10px] font-black uppercase tracking-widest text-[#fcc025]">
+        <p className="text-xs font-black uppercase tracking-widest text-[#fcc025]">
           固定匯率：1 YJC = {ZXC_PER_YJC.toLocaleString()} ZXC
         </p>
       </div>
@@ -71,8 +71,8 @@ function SwapPanel({
       <form onSubmit={handleSwap} className="space-y-4">
         <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">支付</span>
-            <span className="text-[10px] text-[#adaaaa]">餘額 {formatBalance(fromBalance)} {fromSymbol}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">支付</span>
+            <span className="text-xs text-[#adaaaa]">餘額 {formatBalance(fromBalance)} {fromSymbol}</span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -100,8 +100,8 @@ function SwapPanel({
 
         <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">收到</span>
-            <span className="text-[10px] text-[#adaaaa]">餘額 {formatBalance(toBalance)} {toSymbol}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">收到</span>
+            <span className="text-xs text-[#adaaaa]">餘額 {formatBalance(toBalance)} {toSymbol}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="flex-1 text-2xl font-black italic text-[#fcc025]">
@@ -127,7 +127,7 @@ function SwapPanel({
         )}
       </form>
 
-      <div className="mt-4 text-[11px] text-[#adaaaa] space-y-1">
+      <div className="mt-4 text-xs text-[#adaaaa] space-y-1">
         <p>• 匯率固定為 1 YJC = {ZXC_PER_YJC.toLocaleString()} ZXC（1 億子熙幣）</p>
         <p>• 手續費：0</p>
         <p>• 雙向兌換，兌換以整數為單位，小數部分自動捨去</p>
@@ -227,11 +227,11 @@ export default function SwapView() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">ZXC 子熙幣</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC 子熙幣</p>
               <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(zxcBalance)}</p>
             </div>
             <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">YJC 佑戩幣</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">YJC 佑戩幣</p>
               <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(yjcBalance)}</p>
             </div>
           </div>

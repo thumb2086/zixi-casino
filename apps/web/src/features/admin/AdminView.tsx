@@ -826,7 +826,7 @@ export default function AdminView() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {healthCards.map((s) => (
                   <div key={s.label} className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
-                    <p className="text-[10px] font-black tracking-wide text-[#adaaaa]">{s.label}</p>
+                    <p className="text-xs font-black tracking-wide text-[#adaaaa]">{s.label}</p>
                     <p className="text-2xl font-black italic tracking-tighter text-[#fcc025] mt-2">{s.value}</p>
                   </div>
                 ))}
@@ -839,7 +839,7 @@ export default function AdminView() {
                   <ScrollText size={18} className="text-[#fcc025]" />
                   <h3 className="text-sm font-black tracking-wide text-white">事件紀錄（{events.length}）</h3>
                 </div>
-                <button type="button" onClick={refresh} className="text-[10px] text-[#fcc025] hover:underline">重新整理</button>
+                <button type="button" onClick={refresh} className="text-xs text-[#fcc025] hover:underline">重新整理</button>
               </div>
               {loading && events.length === 0 ? (
                 <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> 載入中...</div>
@@ -850,10 +850,10 @@ export default function AdminView() {
                   {events.map((evt, i) => (
                     <li key={evt.id || i} className="border-l-2 border-[#fcc025]/40 pl-3 py-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-[9px] font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-[#fcc025]/10 text-[#fcc025]' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                        <span className={`text-xs font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-[#fcc025]/10 text-[#fcc025]' : 'bg-emerald-500/10 text-emerald-400'}`}>
                           {({ error: '錯誤', warn: '警告', info: '資訊', important: '重要' } as Record<string, string>)[evt.severity] || evt.severity || '資訊'}
                         </span>
-                        <span className="text-[9px] font-bold text-[#adaaaa]">
+                        <span className="text-xs font-bold text-[#adaaaa]">
                           {({
                             'rewards/item_pawned': '道具典當',
                             'rewards/chests_opened_bulk': '大量開箱',
@@ -901,7 +901,7 @@ export default function AdminView() {
                           return fn ? fn(evt.message) : evt.message;
                         })()}
                       </p>
-                      <p className="text-[10px] text-[#adaaaa] mt-0.5">{evt.createdAt ? new Date(evt.createdAt).toLocaleString() : ''}</p>
+                      <p className="text-xs text-[#adaaaa] mt-0.5">{evt.createdAt ? new Date(evt.createdAt).toLocaleString() : ''}</p>
                     </li>
                   ))}
                 </ul>
@@ -939,7 +939,7 @@ export default function AdminView() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">{ann.isPinned && <Pin size={12} className="text-[#fcc025]" />}<p className={`text-sm font-bold ${ann.isActive ? 'text-white' : 'text-[#494847] line-through'}`}>{ann.title}</p></div>
                         <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2 whitespace-pre-wrap">{ann.content}</p>
-                        <p className="text-[9px] text-[#494847] mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
+                        <p className="text-xs text-[#494847] mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
                         <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? '取消釘選' : '置頂'}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
@@ -970,25 +970,25 @@ export default function AdminView() {
                   {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">顯示名稱：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
                   {userInspect.balances && (
                     <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
-                      <div><p className="text-[9px] text-[#494847]">ZXC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p></div>
-                      <div><p className="text-[9px] text-[#494847]">YJC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p></div>
-                      <div><p className="text-[9px] text-[#494847]">累積下注</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">ZXC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">YJC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">累積下注</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p></div>
                     </div>
                   )}
                   <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">目前勝率偏置：</span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : '未設定（採系統預設）'}</span></div>
                   <div className="flex gap-2">
                     <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder="0.0 - 1.0（留空清除）" className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
                     <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> 套用</button>
-                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-[10px] font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300">清除</button>
+                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300">清除</button>
                   </div>
                   <div className="space-y-2 border-t border-[#494847]/20 pt-3">
-                    <p className="text-[10px] text-[#adaaaa]">VIP 等級：<span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
+                    <p className="text-xs text-[#adaaaa]">VIP 等級：<span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
                     <div className="flex flex-wrap gap-1">{[0, 1, 2, 3, 4, 5].map((lv) => (
-                      <button key={lv} type="button" onClick={() => handleSetVipLevel(lv)} className={`px-3 py-1 rounded text-[10px] font-bold ${(userInspect.vipLevel ?? -1) === lv ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] hover:bg-[#1a1919]'}`}>T{lv}</button>
+                      <button key={lv} type="button" onClick={() => handleSetVipLevel(lv)} className={`px-3 py-1 rounded text-xs font-bold ${(userInspect.vipLevel ?? -1) === lv ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] hover:bg-[#1a1919]'}`}>T{lv}</button>
                     ))}</div>
                   </div>
                   <div className="flex gap-2 pt-2 border-t border-[#494847]/20">
-                    <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-[10px] font-bold text-red-400 hover:bg-red-500/10">重設下注統計</button>
+                    <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10">重設下注統計</button>
                   </div>
                 </div>
               )}
@@ -1002,12 +1002,12 @@ export default function AdminView() {
                 <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">加入黑名單</button>
               </form>
               <div className="mt-6 pt-4 border-t border-[#494847]/30">
-                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">目前黑名單（{blacklist.length}）</h4><button type="button" onClick={refreshBlacklist} className="text-[10px] text-[#fcc025] hover:underline">重新整理</button></div>
+                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">目前黑名單（{blacklist.length}）</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-[#fcc025] hover:underline">重新整理</button></div>
                 {blacklist.length === 0 ? <p className="text-xs text-[#adaaaa]">尚無黑名單紀錄。</p> : (
                   <ul className="space-y-2 max-h-64 overflow-y-auto">{blacklist.map((b: any, i: number) => (
                     <li key={b.address || b.key || i} className="flex items-center justify-between bg-[#0e0e0e] rounded-lg px-3 py-2 text-xs">
-                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}…</div>{b.reason && <div className="text-[#adaaaa] text-[10px] mt-1">{b.reason}</div>}</div>
-                      <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show('已移除黑名單'); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-[10px] text-red-400 hover:text-red-300">移除</button>
+                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}…</div>{b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}</div>
+                      <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show('已移除黑名單'); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">移除</button>
                     </li>
                   ))}</ul>
                 )}
@@ -1015,7 +1015,7 @@ export default function AdminView() {
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3><p className="text-[10px] text-[#adaaaa]">直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者</p></div>
+              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3><p className="text-xs text-[#adaaaa]">直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者</p></div>
               <div className="relative">
                 <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder="搜尋使用者名稱或地址..." className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
                 {userResults.length > 0 && (
@@ -1079,7 +1079,7 @@ export default function AdminView() {
                 <button
                   type="button"
                   onClick={refreshBlacklist}
-                  className="text-[10px] text-[#fcc025] hover:underline"
+                  className="text-xs text-[#fcc025] hover:underline"
                 >
                   重新整理
                 </button>
@@ -1097,7 +1097,7 @@ export default function AdminView() {
                         <div className="text-white font-mono">
                           {String(b.address || b.key || '').slice(0, 10)}…
                         </div>
-                        {b.reason && <div className="text-[#adaaaa] text-[10px] mt-1">{b.reason}</div>}
+                        {b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}
                       </div>
                       <button
                         type="button"
@@ -1114,7 +1114,7 @@ export default function AdminView() {
                             show(errMsg(err));
                           }
                         }}
-                        className="text-[10px] text-red-400 hover:text-red-300"
+                        className="text-xs text-red-400 hover:text-red-300"
                       >
                         移除
                       </button>
@@ -1129,7 +1129,7 @@ export default function AdminView() {
         {activeTab === 'users' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
             <h3 className="text-sm font-black tracking-wide text-white">使用者查詢與勝率偏置</h3>
-            <p className="text-[10px] text-[#adaaaa]">
+            <p className="text-xs text-[#adaaaa]">
               查詢使用者資料並可調整勝率偏置（0 到 1 之間，越高代表越容易贏；留空送出則清除）
             </p>
             <div className="flex gap-2">
@@ -1164,15 +1164,15 @@ export default function AdminView() {
                 {userInspect.balances && (
                   <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
                     <div>
-                      <p className="text-[9px] text-[#494847]">ZXC 餘額</p>
+                      <p className="text-xs text-[#494847]">ZXC 餘額</p>
                       <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] text-[#494847]">YJC 餘額</p>
+                      <p className="text-xs text-[#494847]">YJC 餘額</p>
                       <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] text-[#494847]">累積下注</p>
+                      <p className="text-xs text-[#494847]">累積下注</p>
                       <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p>
                     </div>
                   </div>
@@ -1201,14 +1201,14 @@ export default function AdminView() {
                   <button
                     type="button"
                     onClick={handleClearWinBias}
-                    className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-[10px] font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300"
+                    className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300"
                   >
                     清除
                   </button>
                 </div>
 
                 <div className="space-y-2 border-t border-[#494847]/20 pt-3">
-                  <p className="text-[10px] text-[#adaaaa]">
+                  <p className="text-xs text-[#adaaaa]">
                     VIP 等級：
                     <span className="ml-1 font-black text-[#fcc025]">
                       {typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}
@@ -1220,7 +1220,7 @@ export default function AdminView() {
                         key={lv}
                         type="button"
                         onClick={() => handleSetVipLevel(lv)}
-                        className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-1.5 text-[10px] font-black text-white hover:border-[#fcc025]/60 hover:text-[#fcc025]"
+                        className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-1.5 text-xs font-black text-white hover:border-[#fcc025]/60 hover:text-[#fcc025]"
                       >
                         VIP {lv}
                       </button>
@@ -1232,7 +1232,7 @@ export default function AdminView() {
                   <button
                     type="button"
                     onClick={handleResetTotalBet}
-                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-[10px] font-black text-red-300 hover:bg-red-500/20"
+                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-black text-red-300 hover:bg-red-500/20"
                   >
                     歸零累積下注
                   </button>
@@ -1298,7 +1298,7 @@ export default function AdminView() {
                               </p>
                             </div>
                             <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2 whitespace-pre-wrap">{ann.content}</p>
-                            <p className="text-[9px] text-[#494847] mt-1">
+                            <p className="text-xs text-[#494847] mt-1">
                               {ann.publishedAt || ann.createdAt
                                 ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString()
                                 : ''}
@@ -1426,11 +1426,11 @@ export default function AdminView() {
                             <p className={`text-sm font-bold ${item.isActive ? 'text-white' : 'text-[#494847] line-through'}`}>
                               {item.name}
                             </p>
-                            <span className="text-[9px] font-black tracking-widest uppercase text-[#fcc025]">
+                            <span className="text-xs font-black tracking-widest uppercase text-[#fcc025]">
                               {TYPE_LABEL[item.type] || item.type} · {RARITY_LABEL[item.rarity] || item.rarity}
                             </span>
                           </div>
-                          <p className="text-[9px] text-[#494847] mt-1">id: {item.itemId}</p>
+                          <p className="text-xs text-[#494847] mt-1">id: {item.itemId}</p>
                           {item.description && (
                             <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2">{item.description}</p>
                           )}
@@ -1480,10 +1480,10 @@ export default function AdminView() {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-black text-white">{sub.name}</span>
-                            <span className="text-[9px] font-bold uppercase text-[#fcc025]">
+                            <span className="text-xs font-bold uppercase text-[#fcc025]">
                               {sub.type === 'avatar' ? '頭像' : '稱號'}
                             </span>
-                            <span className={`text-[9px] font-bold uppercase ${
+                            <span className={`text-xs font-bold uppercase ${
                               sub.status === 'pending'
                                 ? 'text-[#fcc025]'
                                 : sub.status === 'approved'
@@ -1492,18 +1492,18 @@ export default function AdminView() {
                             }`}>
                               {sub.status === 'pending' ? '待審核' : sub.status === 'approved' ? '已通過' : '已拒絕'}
                             </span>
-                            <span className="text-[9px] font-bold uppercase text-[#adaaaa]">
+                            <span className="text-xs font-bold uppercase text-[#adaaaa]">
                               {RARITY_LABEL[sub.rarity] || sub.rarity}
                             </span>
                           </div>
                           {sub.description && (
                             <p className="mt-1 text-xs text-[#adaaaa] break-words">{sub.description}</p>
                           )}
-                          <p className="mt-1 text-[10px] text-[#494847] break-all">
+                          <p className="mt-1 text-xs text-[#494847] break-all">
                             投稿者：{sub.address?.slice(0, 10)}...{sub.address?.slice(-6)}
                           </p>
                           {sub.reviewNote && (
-                            <p className="mt-1 text-[10px] text-[#adaaaa]">審核備註：{sub.reviewNote}</p>
+                            <p className="mt-1 text-xs text-[#adaaaa]">審核備註：{sub.reviewNote}</p>
                           )}
                         </div>
                       </div>
@@ -1539,7 +1539,7 @@ export default function AdminView() {
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-6">
             <div>
               <h3 className="text-sm font-black tracking-wide text-white mb-1">活動管理</h3>
-              <p className="text-[10px] text-[#adaaaa]">
+              <p className="text-xs text-[#adaaaa]">
                 建立活動讓使用者到獎勵頁領取（ZXC / YJC / 稱號 / 頭像 / 道具）
               </p>
             </div>
@@ -1572,13 +1572,13 @@ export default function AdminView() {
                   type="datetime-local"
                   value={campaignStartAt}
                   onChange={(e) => setCampaignStartAt(e.target.value)}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-[10px] text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
                 <input
                   type="datetime-local"
                   value={campaignEndAt}
                   onChange={(e) => setCampaignEndAt(e.target.value)}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-[10px] text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -1653,7 +1653,7 @@ export default function AdminView() {
                   </option>
                 ))}
               </select>
-              <label className="flex items-center gap-2 text-[10px] text-[#adaaaa]">
+              <label className="flex items-center gap-2 text-xs text-[#adaaaa]">
                 <input
                   type="checkbox"
                   checked={campaignIsActive}
@@ -1673,7 +1673,7 @@ export default function AdminView() {
             <div>
               <h4 className="mb-2 text-xs font-black text-white">目前活動（{campaigns.length}）</h4>
               {campaigns.length === 0 ? (
-                <p className="text-[10px] text-[#adaaaa]">尚未建立任何活動</p>
+                <p className="text-xs text-[#adaaaa]">尚未建立任何活動</p>
               ) : (
                 <ul className="space-y-2">
                   {campaigns.map((c) => (
@@ -1686,7 +1686,7 @@ export default function AdminView() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-black text-white">{c.title}</span>
                             <span
-                              className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                              className={`text-xs font-bold px-2 py-0.5 rounded ${
                                 c.isActive
                                   ? 'bg-emerald-500/20 text-emerald-300'
                                   : 'bg-[#494847]/30 text-[#adaaaa]'
@@ -1695,11 +1695,11 @@ export default function AdminView() {
                               {c.isActive ? '啟用' : '停用'}
                             </span>
                           </div>
-                          <p className="mt-1 text-[10px] text-[#adaaaa] break-words">
+                          <p className="mt-1 text-xs text-[#adaaaa] break-words">
                             ID: {c.campaignId}
                           </p>
                           {c.description && (
-                            <p className="mt-1 text-[10px] text-[#adaaaa] break-words">
+                            <p className="mt-1 text-xs text-[#adaaaa] break-words">
                               {c.description}
                             </p>
                           )}
@@ -1758,7 +1758,7 @@ export default function AdminView() {
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
             <div>
               <h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3>
-              <p className="text-[10px] text-[#adaaaa]">
+              <p className="text-xs text-[#adaaaa]">
                 直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者
               </p>
             </div>
@@ -1916,13 +1916,13 @@ export default function AdminView() {
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
                         <p className="text-sm font-black text-white">{t.title || '（無標題）'}</p>
-                        <p className="text-[10px] text-[#adaaaa]">
+                        <p className="text-xs text-[#adaaaa]">
                           {t.category || '其他'} · {t.address ? `${String(t.address).slice(0, 10)}…` : '匿名'}
                           {t.createdAt && ` · ${new Date(t.createdAt).toLocaleString()}`}
                         </p>
                       </div>
                       <span
-                        className={`text-[10px] font-black uppercase tracking-wide px-2 py-1 rounded ${
+                        className={`text-xs font-black uppercase tracking-wide px-2 py-1 rounded ${
                           t.status === 'open'
                             ? 'bg-red-500/20 text-red-300'
                             : t.status === 'in_progress'
@@ -1946,7 +1946,7 @@ export default function AdminView() {
                     {t.message && <p className="text-xs text-white whitespace-pre-wrap break-words">{t.message}</p>}
                     {t.adminUpdate && (
                       <div className="rounded bg-[#fcc025]/10 border border-[#fcc025]/30 p-2">
-                        <p className="text-[10px] font-black text-[#fcc025] mb-1">管理員回覆</p>
+                        <p className="text-xs font-black text-[#fcc025] mb-1">管理員回覆</p>
                         <p className="text-xs text-white whitespace-pre-wrap break-words">{t.adminUpdate}</p>
                       </div>
                     )}
@@ -1976,7 +1976,7 @@ export default function AdminView() {
                               show(errMsg(err));
                             }
                           }}
-                          className={`text-[10px] font-black px-2 py-1 rounded border ${
+                          className={`text-xs font-black px-2 py-1 rounded border ${
                             t.status === s
                               ? 'border-[#fcc025] bg-[#fcc025]/10 text-[#fcc025]'
                               : 'border-[#494847]/40 text-[#adaaaa] hover:border-[#fcc025]/60 hover:text-[#fcc025]'

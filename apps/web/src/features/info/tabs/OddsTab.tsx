@@ -47,7 +47,7 @@ export default function OddsTab() {
       </section>
 
       <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">什麼是 RTP？</h2>
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">什麼是 RTP？</h2>
         <p className="mt-3 text-sm font-bold leading-relaxed text-[#adaaaa]">
           RTP 是玩家回報率。若 RTP 為 97%，代表長期大量局數下，平均每投注 100 元會返還 97 元。剩餘 3% 即為平台優勢。
         </p>
@@ -60,7 +60,7 @@ export default function OddsTab() {
       </section>
 
       <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-        <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">手續費與等級優惠</h2>
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">手續費與等級優惠</h2>
         <p className="mt-3 text-sm font-bold leading-relaxed text-[#adaaaa]">
           遊戲手續費採統一公式：<span className="text-emerald-400">手續費 = 下注金額 × 2% × (1 - 等級折扣率)</span>。
           等級折扣率依會員等級計算，最高可到 <span className="text-[#fcc025]">100%</span>（等於遊戲手續費 0）。
@@ -75,7 +75,7 @@ export default function OddsTab() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">各遊戲機率與說明</h2>
+        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">各遊戲機率與說明</h2>
         {GAME_ODDS.map((game) => (
           <div key={game.key} className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-4">
             <button
@@ -89,8 +89,8 @@ export default function OddsTab() {
                 <div className="text-left">
                   <h3 className="font-bold text-white">{game.name}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-emerald-400">RTP {game.rtp}%</span>
-                    <span className="text-[10px] font-bold text-[#adaaaa]">平台優勢 {game.houseEdge}%</span>
+                    <span className="text-xs font-bold text-emerald-400">RTP {game.rtp}%</span>
+                    <span className="text-xs font-bold text-[#adaaaa]">平台優勢 {game.houseEdge}%</span>
                   </div>
                 </div>
               </div>
@@ -112,11 +112,11 @@ export default function OddsTab() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="rounded-lg bg-[#0e0e0e] p-2 text-center">
-                    <p className="text-[9px] font-bold text-[#adaaaa]">長期回報率</p>
+                    <p className="text-xs font-bold text-[#adaaaa]">長期回報率</p>
                     <p className="text-lg font-black text-emerald-400">{game.rtp}%</p>
                   </div>
                   <div className="rounded-lg bg-[#0e0e0e] p-2 text-center">
-                    <p className="text-[9px] font-bold text-[#adaaaa]">平台優勢</p>
+                    <p className="text-xs font-bold text-[#adaaaa]">平台優勢</p>
                     <p className="text-lg font-black text-[#ff7351]">{game.houseEdge}%</p>
                   </div>
                 </div>
