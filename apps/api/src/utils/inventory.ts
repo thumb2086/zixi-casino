@@ -326,7 +326,7 @@ export async function useItem(
         currencyGranted = value;
         currencyType = def.effect?.currency === "yjc" ? "yjc" : "zhixi";
         const label = currencyType === "yjc" ? "YJC" : "ZXC";
-        effectSummary = `已領取 ${value.toLocaleString()} ${label}`;
+        effectSummary = `已領取 ${value} ${label}`;
       }
       break;
     }
