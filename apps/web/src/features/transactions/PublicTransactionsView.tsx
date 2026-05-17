@@ -3,7 +3,7 @@ import { api } from '../../store/api';
 import { Activity, HeartPulse, User, Coins, Sparkles, ChevronRight, Terminal, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ITEM_DROP_TABLES } from '@repo/shared';
+import { formatNumber, ITEM_DROP_TABLES } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
@@ -249,7 +249,7 @@ export default function PublicTransactionsView() {
             </p>
             <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(successRatePct)}</p>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-              {t('transactions.success_summary', { success: summary?.confirmed ?? 0, scored: summary?.total ?? 0 })}
+              {t('transactions.success_summary', { success: formatNumber(summary?.confirmed ?? 0), scored: formatNumber(summary?.total ?? 0) })}
             </p>
           </div>
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
@@ -288,7 +288,7 @@ export default function PublicTransactionsView() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white">
-                      {`${item.type?.toUpperCase?.() || 'TX'} • ${item.amount} ${item.tokenSymbol || ''}`}
+                      {`${item.type?.toUpperCase?.() || 'TX'} • ${formatNumber(Number(item.amount))} ${item.tokenSymbol || ''}`}
                     </p>
                     <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
                       {item.userAddress} / round {String(item.roundId)}
@@ -316,7 +316,7 @@ export default function PublicTransactionsView() {
                   <span>{item.userAddress}</span>
                   <span className="uppercase text-[#fcc025]">{item.type}</span>
                 </div>
-                <div className="text-[#fcc025]">{item.amount} {item.tokenSymbol || ''}</div>
+                <div className="text-[#fcc025]">{formatNumber(Number(item.amount))} {item.tokenSymbol || ''}</div>
                 <div className="mt-1">status: {item.status}</div>
                 <div className="truncate">
                   tx: {item.txHash ? <a className="text-[#fcc025] underline" href={`https://sepolia.etherscan.io/tx/${item.txHash}`} target="_blank" rel="noreferrer">{item.txHash}</a> : '--'}
