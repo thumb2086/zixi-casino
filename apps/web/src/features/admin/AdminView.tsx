@@ -170,7 +170,7 @@ export default function AdminView() {
   const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
 
   useEffect(() => {
-    if (activeTab !== 'grant') return;
+    if (activeTab !== 'usermgr') return;
     Promise.all([
       api.get('/api/v1/chests/items').catch(() => null),
       api.get('/api/v1/rewards/catalog').catch(() => null),
@@ -191,6 +191,10 @@ export default function AdminView() {
   }, [activeTab]);
 
   useEffect(() => {
+    if (activeTab !== 'usermgr') {
+      setUserResults([]);
+      return;
+    }
     if (!userSearch.trim()) {
       setUserResults([]);
       return;
