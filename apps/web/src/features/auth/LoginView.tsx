@@ -10,6 +10,13 @@ export default function LoginView() {
   const { t, i18n } = useTranslation();
   const isZh = i18n.language.startsWith('zh');
   const [tab, setTab] = useState<'qr' | 'custody'>('qr');
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/api/v1/support/announcements')
+      .then(res => { if (res.data?.data?.announcements) setAnnouncements(res.data.data.announcements); })
+      .catch(() => {});
+  }, []);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
   const [deepLinkUrl, setDeepLinkUrl] = useState<string | null>(null);
@@ -161,11 +168,83 @@ export default function LoginView() {
         </motion.button>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md bg-[#1a1919] rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-[#494847]/15 p-10 space-y-10 relative z-10 overflow-hidden"
-      >
+      <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 w-full max-w-5xl relative z-10">
+        {/* Announcements Panel */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="hidden lg:flex flex-col w-80 shrink-0"
+        >
+          <div className="bg-[#1a1919] rounded-2xl border border-[#494847]/15 p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-[#fcc025] rounded-full animate-pulse" />
+              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#fcc025]">
+                {isZh ? '最新公告' : 'Announcements'}
+              </h2>
+            </div>
+            {announcements.length === 0 ? (
+              <div className="space-y-4">
+                <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
+                  <p className="text-xs font-bold text-white">🎉 {isZh ? '歡迎來到子嘻！' : 'Welcome to Zixi!'}</p>
+                  <p className="text-[10px] text-[#adaaaa] mt-1 leading-relaxed">
+                    {isZh
+                      ? '一個模擬博弈平台，體驗遊戲樂趣。使用 ZXC 代幣參與各類遊戲。'
+                      : 'A simulation gambling platform. Use ZXC tokens to play various games.'}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
+                  <p className="text-xs font-bold text-white">💡 {isZh ? '新手提示' : 'Quick Tips'}</p>
+                  <p className="text-[10px] text-[#adaaaa] mt-1 leading-relaxed">
+                    {isZh
+                      ? '先到商店購買組合包獲得初始道具，再到寶箱頁面開啟獲取更多獎勵！'
+                      : 'Visit the shop for starter packs, then open chests for rewards!'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {announcements.filter(a => a.isPinned).map((a: any) => (
+                  <div key={a.id} className="rounded-xl bg-[#fcc025]/5 border border-[#fcc025]/20 p-4">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded">置頂</span>
+                      <p className="text-xs font-bold text-white truncate">{a.title}</p>
+                    </div>
+                    <p className="text-[10px] text-[#adaaaa] leading-relaxed">{a.content}</p>
+                  </div>
+                ))}
+                {announcements.filter(a => !a.isPinned).slice(0, 3).map((a: any) => (
+                  <div key={a.id} className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
+                    <p className="text-xs font-bold text-white">{a.title}</p>
+                    <p className="text-[10px] text-[#adaaaa] mt-1 line-clamp-2 leading-relaxed">{a.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="pt-2 border-t border-[#494847]/10">
+              <p className="text-[8px] font-bold text-[#494847] uppercase tracking-[0.3em]">
+                {isZh ? '更多資訊請至支援頁面' : 'More info in Support'}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Mobile announcements banner */}
+        {announcements.filter(a => a.isPinned).length > 0 && (
+          <div className="lg:hidden w-full max-w-md">
+            <div className="bg-[#fcc025]/5 rounded-xl border border-[#fcc025]/20 p-3 flex items-start gap-2">
+              <span className="text-[8px] font-black bg-[#fcc025] text-black px-1.5 py-0.5 rounded shrink-0 mt-0.5">公告</span>
+              <p className="text-[10px] text-[#adaaaa] leading-relaxed">
+                {announcements.filter(a => a.isPinned)[0].title}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md bg-[#1a1919] rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-[#494847]/15 p-10 space-y-10 relative overflow-hidden"
+        >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#fcc025] to-transparent opacity-40" />
 
         <header className="text-center space-y-3">
@@ -373,6 +452,7 @@ export default function LoginView() {
             </motion.button>
         </div>
       </motion.div>
+      </div>
 
       <p className="mt-12 text-[9px] font-bold text-[#494847] uppercase tracking-[0.5em] flex items-center gap-3">
           <ShieldCheck size={12} className="text-[#fcc025]/30" />
