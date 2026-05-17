@@ -445,6 +445,24 @@ const ensureCoreSchema = async () => {
             updated_at TIMESTAMP NOT NULL DEFAULT NOW()
           )
         `;
+        await sql`
+          CREATE TABLE IF NOT EXISTS reward_submissions (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL REFERENCES users(id),
+            address TEXT NOT NULL,
+            type TEXT NOT NULL,
+            name TEXT NOT NULL,
+            icon TEXT NOT NULL DEFAULT '',
+            description TEXT,
+            rarity TEXT NOT NULL DEFAULT 'common',
+            status TEXT NOT NULL DEFAULT 'pending',
+            reviewed_by TEXT,
+            review_note TEXT,
+            approved_item_id TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            reviewed_at TIMESTAMP
+          )
+        `;
         await normalizeLegacyIdentityData(sql);
       } finally {
         await sql.end();
@@ -1177,21 +1195,47 @@ export class RewardCatalogRepository {
 export class RewardSubmissionRepository {
   async listByStatus(status: string | null, limit: number = 100) {
     const conn = await requireDb();
-    return await conn.query.rewardCatalog.findMany({ where: (c: any, { eq }: any) => eq(c.isActive, status === 'approved'), limit });
+    return await conn.query.rewardSubmissions.findMany({
+      where: status ? (s: any, { eq }: any) => eq(s.status, status) : undefined,
+      limit,
+      orderBy: (s: any, { desc }: any) => [desc(s.createdAt)],
+    });
   }
   async listByUser(userId: string, limit: number = 50) {
-    return [];
+    const conn = await requireDb();
+    return await conn.query.rewardSubmissions.findMany({
+      where: (s: any, { eq }: any) => eq(s.userId, userId),
+      limit,
+      orderBy: (s: any, { desc }: any) => [desc(s.createdAt)],
+    });
   }
-  async create(data: any) {
-    return;
+  async create(data: { submissionId: string; userId: string; address: string; type: string; name: string; icon: string | null; description: string | null; rarity: string }) {
+    const conn = await requireDb();
+    await conn.insert((schema as any).rewardSubmissions).values({
+      id: data.submissionId,
+      userId: data.userId,
+      address: data.address,
+      type: data.type,
+      name: data.name,
+      icon: data.icon || '',
+      description: data.description,
+      rarity: data.rarity,
+      status: 'pending',
+    });
   }
   async getById(id: string) {
     const conn = await requireDb();
-    return await conn.query.rewardCatalog.findFirst({ where: (c: any, { eq }: any) => eq(c.id, id) });
+    return await conn.query.rewardSubmissions.findFirst({ where: (s: any, { eq }: any) => eq(s.id, id) });
   }
   async updateStatus(id: string, data: { status: string; reviewedBy?: string; reviewNote?: string; approvedItemId?: string }) {
     const conn = await requireDb();
-    await conn.update((schema as any).rewardCatalog).set({ isActive: data.status === 'approved', meta: data, updatedAt: new Date() }).where(eq((schema as any).rewardCatalog.id, id));
+    await conn.update((schema as any).rewardSubmissions).set({
+      status: data.status,
+      reviewedBy: data.reviewedBy,
+      reviewNote: data.reviewNote,
+      approvedItemId: data.approvedItemId,
+      reviewedAt: new Date(),
+    }).where(eq((schema as any).rewardSubmissions.id, id));
   }
 }
 

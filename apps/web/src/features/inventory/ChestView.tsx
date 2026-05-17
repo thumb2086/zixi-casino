@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Package, Sparkles, Coins, ChevronRight, X, Shield, Zap } from 'lucide-react';
+import { Gift, Package, Sparkles, ChevronRight, X, Shield, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { api } from '../../store/api';
 
 interface ChestConfig {
@@ -117,7 +118,6 @@ export default function ChestView() {
   });
   const [useStatusMessage, setUseStatusMessage] = useState<string | null>(null);
 
-  const balance = status?.balance ? parseFloat(status.balance) : 0;
   const pity = status?.chestPity || {};
 
   const refreshStatus = useCallback(async () => {
@@ -163,7 +163,6 @@ export default function ChestView() {
       const data = res.data;
 
       if (data?.success) {
-        await new Promise((r) => setTimeout(r, 1500));
         setOpenedItems(data.data.items);
         setShowResult(true);
         await Promise.all([refreshStatus(), refreshInventory()]);
@@ -199,10 +198,6 @@ export default function ChestView() {
         <div>
           <h1 className="text-3xl font-black italic text-[#fcc025]">寶箱</h1>
           <p className="text-sm text-[#adaaaa] mt-1">開啟寶箱獲得稀有道具、頭像與 ZXC</p>
-        </div>
-        <div className="flex items-center gap-2 bg-[#1a1919] px-4 py-2 rounded-xl border border-[#494847]/20">
-          <Coins className="w-5 h-5 text-[#fcc025]" />
-          <span className="font-black text-[#fcc025]">{balance.toLocaleString()} ZXC</span>
         </div>
       </div>
 
@@ -262,10 +257,6 @@ export default function ChestView() {
                 <Gift className="w-10 h-10 mx-auto text-[#fcc025]" />
               </div>
               <h3 className="font-black text-sm mb-1">{chest.name}</h3>
-              <div className="flex items-center gap-1 text-xs text-[#fcc025] mb-2">
-                <Coins className="w-3 h-3" />
-                {chest.price.toLocaleString()}
-              </div>
               <div className="h-1 bg-[#494847]/30 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#fcc025]"
@@ -388,7 +379,7 @@ export default function ChestView() {
 
               <button
                 onClick={() => openChest(selectedChest.id)}
-                disabled={isOpening || balance < selectedChest.price}
+                disabled={isOpening}
                 className="w-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03] text-black font-black
                   py-4 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed
                   flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -405,11 +396,17 @@ export default function ChestView() {
                   </>
                 ) : (
                   <>
-                    <Coins className="w-5 h-5" />
-                    開啟 ({selectedChest.price.toLocaleString()} ZXC)
+                    <Gift className="w-5 h-5" />
+                    開啟寶箱
                   </>
                 )}
               </button>
+              <Link
+                to="/app/shop"
+                className="mt-2 block w-full text-center text-[10px] font-bold text-[#adaaaa] hover:text-[#fcc025] transition-colors"
+              >
+                前往商店購買寶箱鑰匙 ↗
+              </Link>
             </motion.div>
           </motion.div>
         )}

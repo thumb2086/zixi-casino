@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Bell } from 'lucide-react';
+import { Bell, MessageCircle, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ChatRoom from './ChatRoom';
 
 export default function Layout() {
+  const [chatOpen, setChatOpen] = useState(false);
   const { i18n } = useTranslation();
   const isZh = i18n.language.startsWith('zh');
   const location = useLocation();
@@ -57,6 +59,31 @@ export default function Layout() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Mobile chat FAB */}
+      <button
+        onClick={() => setChatOpen(o => !o)}
+        className="fixed bottom-24 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition-colors hover:bg-blue-500 lg:hidden"
+      >
+        {chatOpen ? <X size={20} /> : <MessageCircle size={20} />}
+      </button>
+
+      {/* Mobile chat drawer */}
+      <AnimatePresence>
+        {chatOpen && (
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed inset-x-0 bottom-0 z-40 lg:hidden"
+          >
+            <div className="mx-2 mb-2">
+              <ChatRoom />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

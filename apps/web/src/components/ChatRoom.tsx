@@ -24,9 +24,11 @@ export default function ChatRoom() {
     refetchInterval: 3000,
   });
 
+  const { sessionId } = useAuthStore();
+
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
-      await api.post('/api/v1/support/chat/messages', { text, displayName: username });
+      await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });

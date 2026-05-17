@@ -65,7 +65,11 @@ export default function ItemsTab() {
           howToGet: getHowToGet(item.source),
         }));
         const chestItems = (chestItemsRes?.data?.data ?? []).map((item: any) => {
-          const isBuff = (item.type || item.id || '').toString().startsWith('buff_') || item.type === 'buff';
+          const rawType = (item.type || item.id || '').toString();
+          const itemType = rawType.startsWith('avatar_') || item.type === 'avatar' ? 'avatar'
+            : rawType.startsWith('title_') || item.type === 'title' ? 'title'
+            : rawType.startsWith('buff_') || item.type === 'buff' ? 'buff'
+            : 'item';
           return {
             id: item.id,
             name: item.name || item.label,
@@ -74,8 +78,8 @@ export default function ItemsTab() {
             icon: item.icon || '🎁',
             rarity: item.rarity,
             source: item.source || 'chest',
-            type: isBuff ? ('buff' as const) : ('item' as const),
-            howToGet: getHowToGet(item.source),
+            type: itemType,
+            howToGet: getHowToGet(item.source || 'chest'),
             effect: item.effect,
             price: item.price,
             meta: item.meta,
@@ -91,7 +95,7 @@ export default function ItemsTab() {
             icon: item.icon || '🎁',
             rarity: item.rarity || 'common',
             source: 'shop',
-            type: item.type === 'buff' ? ('buff' as const) : ('item' as const),
+            type: item.type === 'buff' ? 'buff' : item.type === 'avatar' ? 'avatar' : item.type === 'title' ? 'title' : 'item',
             howToGet: '商城兌換',
             effect: item.effect,
             price: Number(item.price) || 0,

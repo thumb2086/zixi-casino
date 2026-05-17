@@ -297,6 +297,23 @@ export const gameSettlements = pgTable("game_settlements", {
   settledAt: timestamp("settled_at").notNull().defaultNow(),
 });
 
+export const rewardSubmissions = pgTable("reward_submissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  address: text("address").notNull(),
+  type: text("type").notNull(), // avatar, title
+  name: text("name").notNull(),
+  icon: text("icon").notNull(),
+  description: text("description"),
+  rarity: text("rarity").notNull().default('common'),
+  status: text("status").notNull().default('pending'), // pending, approved, rejected
+  reviewedBy: text("reviewed_by"),
+  reviewNote: text("review_note"),
+  approvedItemId: text("approved_item_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  reviewedAt: timestamp("reviewed_at"),
+});
+
 // ─── Rewards ──────────────────────────────────────────────────────────────────
 
 export const rewardCatalog = pgTable("reward_catalog", {

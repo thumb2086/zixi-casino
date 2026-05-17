@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, RefreshCw, Coins, ShoppingBag, ChevronLeft } from 'lucide-react';
+import { Loader2, RefreshCw, Coins, ShoppingBag, ChevronLeft, Gift, Zap, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
@@ -54,6 +54,40 @@ export default function ShopView() {
     fetchItems();
   }, [fetchItems]);
 
+  const [chests, setChests] = useState<any[]>([]);
+  const [buyingChest, setBuyingChest] = useState<string | null>(null);
+
+  const fetchChests = useCallback(async () => {
+    try {
+      const res = await api.get('/api/v1/chests');
+      if (res.data?.success) setChests(res.data.data);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    fetchChests();
+  }, [fetchChests]);
+
+  async function handleBuyChest(chestType: string) {
+    if (!sessionId) return;
+    setBuyingChest(chestType);
+    setMsg(null);
+    try {
+      const res = await api.post('/api/v1/chests/buy', { sessionId, chestType });
+      if (res.data?.success) {
+        setMsg(`購買成功！獲得 1 個 ${chestType} 寶箱鑰匙`);
+        const newBal = res.data.data?.balanceAfter;
+        if (newBal) setBalance(newBal);
+      } else {
+        setMsg(res.data?.error || '購買失敗');
+      }
+    } catch (err: any) {
+      setMsg(err?.response?.data?.data?.error || err?.message || '購買失敗');
+    } finally {
+      setBuyingChest(null);
+    }
+  }
+
   async function handleBuy(itemId: string) {
     if (!sessionId) return;
     setBuyingId(itemId);
@@ -99,6 +133,29 @@ export default function ShopView() {
         </section>
 
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
+          <div className="flex items-center gap-2 mb-4">
+            <Gift size={16} className="text-[#fcc025]" />
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">寶箱鑰匙</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {chests.map((chest: any) => (
+              <div key={chest.id} className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                <Gift className="w-8 h-8 mx-auto mb-2 text-[#fcc025]" />
+                <p className="text-xs font-bold text-white text-center truncate">{chest.name}</p>
+                <p className="text-[10px] font-black text-[#fcc025] text-center mt-1">{chest.price.toLocaleString()} ZXC</p>
+                <button
+                  onClick={() => handleBuyChest(chest.id)}
+                  disabled={buyingChest === chest.id || !sessionId}
+                  className="mt-2 w-full text-[10px] font-black uppercase tracking-widest bg-[#fcc025] text-[#0e0e0e] py-1.5 rounded-lg disabled:opacity-50"
+                >
+                  {buyingChest === chest.id ? <Loader2 size={10} className="animate-spin mx-auto" /> : '購買'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-black uppercase tracking-widest text-white">商城商品</h2>
             <button onClick={fetchItems} className="text-[#adaaaa] hover:text-white transition-colors">

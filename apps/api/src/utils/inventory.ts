@@ -142,7 +142,7 @@ export async function loadInventoryState(userId: string): Promise<ProfileInvento
   };
 }
 
-async function persistInventoryState(userId: string, next: ProfileInventoryState): Promise<void> {
+export async function persistInventoryState(userId: string, next: ProfileInventoryState): Promise<void> {
   await Promise.all([
     userRepo.saveUserProfile(userId, {
       inventory: next.inventory,

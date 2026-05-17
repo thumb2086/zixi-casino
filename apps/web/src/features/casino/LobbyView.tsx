@@ -11,6 +11,7 @@ import {
   Megaphone,
   Package,
   Settings as SettingsIcon,
+  ShoppingBag,
   Trophy,
   User,
 } from 'lucide-react';
@@ -95,6 +96,8 @@ export default function LobbyView() {
     loginDetected: '偵測到新登入：192.168.1.1',
     inventory: '背包',
     items: '14 項物品',
+    shop: '商店',
+    shopSubtitle: '寶箱鑰匙 & 組合包',
     vipProtocol: 'VIP 機制',
     eliteRank: '菁英等級',
     tierActive: '等階 4 啟用中',
@@ -211,6 +214,23 @@ export default function LobbyView() {
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="aspect-square rounded border border-[#494847]/20 bg-[#262626]" />
               ))}
+            </div>
+          </GlassCard>
+          <GlassCard
+            to="/app/shop"
+            icon={ShoppingBag}
+            title={isZh ? '商店' : 'Shop'}
+            subtitle={isZh ? '寶箱鑰匙 & 組合包' : 'Chest Keys & Bundles'}
+          >
+            <div className="mt-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
+              <div className="flex gap-2">
+                <span className="text-[#fcc025]">🛒</span>
+                {isZh ? '購買寶箱鑰匙' : 'Buy Chest Keys'}
+              </div>
+              <div className="flex gap-2">
+                <span className="text-[#fcc025]">📦</span>
+                {isZh ? '限時組合包優惠' : 'Limited Bundles'}
+              </div>
             </div>
           </GlassCard>
           <GlassCard
