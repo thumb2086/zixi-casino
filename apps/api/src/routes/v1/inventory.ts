@@ -184,6 +184,30 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
 
       const rawMeta = catalogItem.meta as Record<string, any> | undefined;
       const subItems = rawMeta?.bundle as Array<{ id: string; qty?: number }> | undefined;
+      const isBundle = !!subItems;
+
+      // ── Purchase limit: one per user for bundles / unique items ────────────
+      if (isBundle || catalogItem.type === "avatar" || catalogItem.type === "title") {
+        const state = await loadInventoryState(ctx.userId);
+        if (isBundle) {
+          const ownedSubIds = subItems!.filter(
+            (s) => (ITEM_INDEX[s.id]?.type === "avatar" && state.ownedAvatars.includes(s.id))
+              || (ITEM_INDEX[s.id]?.type === "title" && state.ownedTitles.includes(s.id)),
+          );
+          if (ownedSubIds.length === subItems!.filter(
+            (s) => ITEM_INDEX[s.id]?.type === "avatar" || ITEM_INDEX[s.id]?.type === "title",
+          ).length && subItems!.some((s) => ITEM_INDEX[s.id]?.type === "avatar" || ITEM_INDEX[s.id]?.type === "title")) {
+            return createApiEnvelope({ success: false }, request.id, false, "你已擁有此組合包的所有獨特物品");
+          }
+        } else if (catalogItem.type === "avatar" && state.ownedAvatars.includes(itemId)) {
+          return createApiEnvelope({ success: false }, request.id, false, "你已擁有此頭像");
+        } else if (catalogItem.type === "title" && state.ownedTitles.includes(itemId)) {
+          return createApiEnvelope({ success: false }, request.id, false, "你已擁有此稱號");
+        }
+      }
+
+      await gameSettlement.setBalance(ctx.address, "zhixi", (balance - price).toString());
+
       const bundle = subItems
         ? { items: subItems.map((i: any) => ({ id: i.id, qty: i.qty || 1 })) }
         : { items: [{ id: itemId, qty: 1 }] };

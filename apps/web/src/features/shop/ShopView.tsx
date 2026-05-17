@@ -40,17 +40,24 @@ export default function ShopView() {
   const [buyingId, setBuyingId] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [balance, setBalance] = useState('0');
+  const [ownedAvatars, setOwnedAvatars] = useState<string[]>([]);
+  const [ownedTitles, setOwnedTitles] = useState<string[]>([]);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const [catalogRes, summaryRes] = await Promise.all([
+      const [catalogRes, summaryRes, invRes] = await Promise.all([
         api.get('/api/v1/rewards/catalog'),
         api.get('/api/v1/wallet/summary', { params: { sessionId } }).catch(() => null),
+        api.get('/api/v1/inventory', { params: { sessionId } }).catch(() => null),
       ]);
       const catalog = catalogRes.data?.data?.customItems || [];
       const shopItems = catalog.filter((i: any) => i.source === 'shop' && Number(i.price) > 0);
       setItems(shopItems);
+      if (invRes?.data?.data) {
+        setOwnedAvatars(invRes.data.data.ownedAvatars || []);
+        setOwnedTitles(invRes.data.data.ownedTitles || []);
+      }
       if (summaryRes?.data?.data) {
         const s = summaryRes.data.data;
         const bal = s?.summary?.balances?.ZXC || s?.balances?.zhixi?.balance || '0';
@@ -196,7 +203,7 @@ export default function ShopView() {
           )}
 
           <div className="space-y-3">
-            {items.map((item: any) => {
+            {visibleItems.map((item: any) => {
               const meta = item.meta as Record<string, any> | undefined;
               const bundle = meta?.bundle as Array<{ id: string; qty?: number }> | undefined;
               const totalValue = Number(meta?.totalValue) || 0;
@@ -221,7 +228,22 @@ export default function ShopView() {
                       <div className="mt-1.5 space-y-1">
                         {bundle.map((sub: any, i: number) => {
                           const info = ITEM_MAP[sub.id];
-                          return (
+  const visibleItems = items.filter((item: any) => {
+    const meta = item.meta as Record<string, any> | undefined;
+    const bundle = meta?.bundle as Array<{ id: string; qty?: number }> | undefined;
+    if (bundle) {
+      const ownedAvatarOrTitles = bundle.filter(
+        (s) => ownedAvatars.includes(s.id) || ownedTitles.includes(s.id),
+      );
+      const allAvatarOrTitles = bundle.filter((s) => ITEM_MAP[s.id]?.rarity);
+      return allAvatarOrTitles.length === 0 || ownedAvatarOrTitles.length < allAvatarOrTitles.length;
+    }
+    if (item.type === 'avatar' && ownedAvatars.includes(item.itemId)) return false;
+    if (item.type === 'title' && ownedTitles.includes(item.itemId)) return false;
+    return true;
+  });
+
+  return (
                             <div key={i} className="flex items-center gap-1.5 text-[10px]">
                               <span className="shrink-0">{info?.icon || '•'}</span>
                               <span className="text-white font-medium">{info?.name || sub.id}</span>
