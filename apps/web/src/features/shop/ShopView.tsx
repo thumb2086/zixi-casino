@@ -94,6 +94,7 @@ export default function ShopView() {
 
   const [chests, setChests] = useState<any[]>([]);
   const [buyingChest, setBuyingChest] = useState<string | null>(null);
+  const [chestQty, setChestQty] = useState<Record<string, number>>({});
 
   const fetchChests = useCallback(async () => {
     try {
@@ -106,16 +107,18 @@ export default function ShopView() {
     fetchChests();
   }, [fetchChests]);
 
-  async function handleBuyChest(chestType: string) {
+  async function handleBuyChest(chestType: string, quantity: number = 1) {
     if (!sessionId) return;
+    const label = chestType === 'common' ? '普通' : chestType === 'rare' ? '稀有' : chestType === 'epic' ? '史詩' : '傳奇';
     setBuyingChest(chestType);
     setMsg(null);
     try {
-      const res = await api.post('/api/v1/chests/buy', { sessionId, chestType });
+      const res = await api.post('/api/v1/chests/buy', { sessionId, chestType, quantity });
       if (res.data?.success) {
-        setMsg(`✅ ${chestType === 'common' ? '普通' : chestType === 'rare' ? '稀有' : chestType === 'epic' ? '史詩' : '傳奇'}寶箱 已放入背包！`);
-        const newBal = res.data.data?.balanceAfter;
-        if (newBal) setBalance(newBal);
+        const d = res.data.data;
+        const discountText = d.discount > 0 ? ` (省 ${(d.discount * 100).toFixed(0)}%)` : '';
+        setMsg(`✅ ${quantity} x ${label}寶箱 已放入背包！${discountText}`);
+        if (d.balanceAfter) setBalance(d.balanceAfter);
         setTimeout(() => setMsg(null), 3000);
       } else {
         setMsg(`❌ ${res.data?.error || '購買失敗'}`);
@@ -232,18 +235,32 @@ export default function ShopView() {
           <div className="grid grid-cols-2 gap-3">
             {chests.map((chest: any) => {
               const boughtHere = buyingChest === chest.id;
+              const qty = chestQty[chest.id] || 1;
+              const discount = qty >= 10 ? 0.10 : qty >= 5 ? 0.05 : 0;
+              const unitPrice = Math.round(chest.price * (1 - discount));
               return (
-                <div key={chest.id} className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                <div key={chest.id} className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20 flex flex-col">
                   <Gift className="w-8 h-8 mx-auto mb-2 text-[#fcc025]" />
                   <p className="text-xs font-bold text-white text-center truncate">{chest.name}</p>
-                  <p className="text-[10px] font-black text-[#fcc025] text-center mt-1">{chest.price.toLocaleString()} ZXC</p>
-                  <button
-                    onClick={() => handleBuyChest(chest.id)}
-                    disabled={boughtHere || !sessionId}
-                    className="mt-2 w-full text-[10px] font-black uppercase tracking-widest bg-[#fcc025] text-[#0e0e0e] py-1.5 rounded-lg disabled:opacity-50"
-                  >
-                    {boughtHere ? <Loader2 size={10} className="animate-spin mx-auto" /> : '購買'}
-                  </button>
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.max(1, (p[chest.id] || 1) - 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">−</button>
+                    <span className="text-sm font-black text-white w-6 text-center">{qty}</span>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.min(99, (p[chest.id] || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
+                  </div>
+                  {discount > 0 ? (
+                    <div className="text-center mt-1">
+                      <span className="text-[10px] text-[#adaaaa] line-through">{chest.price.toLocaleString()} ZXC</span>
+                      <span className="text-[10px] font-black text-emerald-400 ml-1">{(discount * 100).toFixed(0)}%OFF</span>
+                      <p className="text-[10px] font-black text-[#fcc025]">{(unitPrice * qty).toLocaleString()} ZXC</p>
+                    </div>
+                  ) : (
+                    <p className="text-[10px] font-black text-[#fcc025] text-center mt-1">{chest.price.toLocaleString()} ZXC / 個</p>
+                  )}
+                  <div className="mt-auto pt-2">
+                    <button onClick={() => handleBuyChest(chest.id, qty)} disabled={boughtHere || !sessionId} className="w-full text-[10px] font-black uppercase tracking-widest bg-[#fcc025] text-[#0e0e0e] py-1.5 rounded-lg disabled:opacity-50">
+                      {boughtHere ? <Loader2 size={10} className="animate-spin mx-auto" /> : '購買'}
+                    </button>
+                  </div>
                 </div>
               );
             })}
