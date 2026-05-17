@@ -16,6 +16,7 @@ import {
   RewardCampaignRepository,
 } from "@repo/infrastructure";
 import { grantBundleToUser } from "../../utils/inventory.js";
+import { gameSettlement } from "../../utils/game-settlement.js";
 
 export async function adminRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -774,17 +775,15 @@ export async function adminRoutes(fastify: FastifyInstance) {
     // Adjust balances (if provided)
     const bundleSummary: any = { items: body.items || [], avatars: body.avatars || [], titles: body.titles || [] };
     if (typeof body.zxc === "number" && body.zxc !== 0) {
-      const key = `balance:${normalized}`;
-      const current = parseFloat((await kv.get<string>(key)) || "0");
-      const next = Math.max(0, current + body.zxc).toString();
-      await kv.set(key, next);
+      const current = await gameSettlement.getBalance(normalized, "zhixi");
+      const next = Math.max(0, Number(current) + body.zxc).toFixed(4);
+      await gameSettlement.setBalance(normalized, "zhixi", next);
       bundleSummary.zxc = body.zxc;
     }
     if (typeof body.yjc === "number" && body.yjc !== 0) {
-      const key = `balance_yjc:${normalized}`;
-      const current = parseFloat((await kv.get<string>(key)) || "0");
-      const next = Math.max(0, current + body.yjc).toString();
-      await kv.set(key, next);
+      const current = await gameSettlement.getBalance(normalized, "yjc");
+      const next = Math.max(0, Number(current) + body.yjc).toFixed(4);
+      await gameSettlement.setBalance(normalized, "yjc", next);
       bundleSummary.yjc = body.yjc;
     }
 
