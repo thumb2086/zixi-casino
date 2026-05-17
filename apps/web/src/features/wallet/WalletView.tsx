@@ -175,6 +175,9 @@ export default function WalletView() {
                 <ArrowDownCircle size={16} />
                 {airdrop.isPending ? (isZh ? zh.claiming : 'Claiming') : (isZh ? zh.claimAirdrop : 'Claim Airdrop')}
               </button>
+              {airdrop.error?.message && (
+                <p className="mt-2 text-[10px] font-bold text-[#ff7351]">{airdrop.error.message}</p>
+              )}
             </div>
 
             <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">

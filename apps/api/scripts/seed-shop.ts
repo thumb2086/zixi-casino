@@ -65,21 +65,21 @@ const SHOP_ITEMS = [
   },
   {
     type: 'bundle',
-    itemId: 'combo_zxc_v1',
-    name: '子熙幣超值包',
-    nameEn: 'ZXC Value Pack',
-    description: '內含 10000 ZXC + 5000 ZXC + 10000 ZXC 三包，一次滿足！',
+    itemId: 'combo_mythic',
+    name: '神話降臨組合包',
+    nameEn: 'Mythic Descent Pack',
+    description: '內含鳳凰頭像 + 賭神稱號 + 5000 ZXC，一次入手神話級收藏！',
     rarity: 'mythic',
     source: 'shop',
     price: 15000,
     isActive: true,
     meta: {
       bundle: [
-        { id: 'token_10000', qty: 1 },
+        { id: 'avatar_phoenix', qty: 1 },
+        { id: 'title_god', qty: 1 },
         { id: 'token_5000', qty: 1 },
-        { id: 'token_10000', qty: 1 },
       ],
-      totalValue: 25000,
+      totalValue: 22000,
     },
   },
 ];
@@ -93,6 +93,9 @@ async function main() {
   }
   console.log('🌱 Seeding shop items...');
   const sql = postgres(url, { ssl: 'require', max: 1 });
+  // Remove old broken bundle (spending ZXC to buy ZXC)
+  await sql`DELETE FROM reward_catalog WHERE item_id = 'combo_zxc_v1'`;
+  console.log('  🗑️ Removed old combo_zxc_v1');
   for (const item of SHOP_ITEMS) {
     try {
       await sql`
