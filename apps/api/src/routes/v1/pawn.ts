@@ -2,7 +2,8 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
-import { SessionRepository, OpsRepository } from "@repo/infrastructure";
+import { MarketManager } from "@repo/domain";
+import { SessionRepository, OpsRepository, MarketRepository } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, ALL_ITEMS } from "../../utils/inventory.js";
@@ -19,6 +20,8 @@ export async function pawnRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const sessionRepo = new SessionRepository();
   const opsRepo = new OpsRepository();
+  const marketRepo = new MarketRepository();
+  const marketManager = new MarketManager();
 
   const getContext = (req: any) => getSessionContext(req, sessionRepo);
 
@@ -115,4 +118,110 @@ export async function pawnRoutes(fastify: FastifyInstance) {
       return createApiEnvelope({ itemId, rarity: def.rarity, pricePerUnit }, request.id);
     },
   );
+
+  // ── Stock Pawn: sell stocks at discount ─────────────────────────────────
+
+  typedFastify.post("/stock-sell", {
+    schema: {
+      body: z.object({
+        sessionId: z.string().optional(),
+        symbol: z.string(),
+        quantity: z.number().int().min(1).optional().default(1),
+      }),
+    },
+  }, async (request: any) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
+
+    const { symbol, quantity } = request.body as { symbol: string; quantity: number };
+    const address = ctx.address.toLowerCase();
+
+    const account = await marketRepo.getAccount(address);
+    if (!account) {
+      return createApiEnvelope({ success: false }, request.id, false, "尚無股票帳戶");
+    }
+
+    const holding = account.stockHoldings?.[symbol];
+    if (!holding || holding.qty < quantity) {
+      return createApiEnvelope({ success: false }, request.id, false, `持股不足，目前 ${holding?.qty || 0} 股`);
+    }
+
+    const snapshot = marketManager.getSnapshot(symbol);
+    if (!snapshot) {
+      return createApiEnvelope({ success: false }, request.id, false, "查無此股票");
+    }
+
+    const currentPrice = Number(snapshot.price) || 0;
+    const discountRate = 0.7; // 70% of market value
+    const payoutPerUnit = Math.round(currentPrice * discountRate);
+    const totalPayout = payoutPerUnit * quantity;
+
+    // Deduct stocks
+    const remainingQty = holding.qty - quantity;
+    if (remainingQty <= 0) {
+      delete account.stockHoldings[symbol];
+    } else {
+      account.stockHoldings[symbol] = { qty: remainingQty, avgPrice: holding.avgPrice };
+    }
+
+    // No need to recalculate - just save and credit
+    const now = new Date().toISOString();
+    account.updatedAt = now;
+    await marketRepo.saveAccount(address, ctx.userId, account);
+
+    const currentBal = parseFloat(await gameSettlement.getBalance(ctx.address, "zhixi")) || 0;
+    const newBal = (currentBal + totalPayout).toString();
+    await gameSettlement.setBalance(ctx.address, "zhixi", newBal);
+
+    await opsRepo.logEvent({
+      channel: "market",
+      severity: "info",
+      source: "pawn",
+      kind: "stock_pawned",
+      userId: ctx.userId,
+      address: ctx.address,
+      message: `Pawned ${quantity} shares of ${symbol} for ${totalPayout} ZXC (70% of market)`,
+      meta: { symbol, quantity, payout: totalPayout, marketPrice: currentPrice },
+    });
+
+    return createApiEnvelope({
+      success: true,
+      symbol,
+      quantity,
+      payout: totalPayout,
+      marketPrice: currentPrice,
+      payoutPerUnit,
+      balanceAfter: newBal,
+      remainingShares: account.stockHoldings?.[symbol]?.qty || 0,
+    }, request.id);
+  });
+
+  typedFastify.post("/stock-info", {
+    schema: {
+      body: z.object({
+        sessionId: z.string().optional(),
+        symbol: z.string(),
+      }),
+    },
+  }, async (request: any) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
+
+    const { symbol } = request.body as { symbol: string };
+    const snapshot = marketManager.getSnapshot(symbol);
+    if (!snapshot) {
+      return createApiEnvelope({ success: false }, request.id, false, "查無此股票");
+    }
+
+    const discountRate = 0.7;
+    const marketPrice = Number(snapshot.price) || 0;
+    const payoutPerUnit = Math.round(marketPrice * discountRate);
+
+    return createApiEnvelope({
+      symbol,
+      marketPrice,
+      payoutPerUnit,
+      change24h: snapshot.change24h,
+    }, request.id);
+  });
 }

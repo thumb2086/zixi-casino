@@ -324,6 +324,9 @@ export async function adminRoutes(fastify: FastifyInstance) {
         icon: z.string().optional(),
         price: z.union([z.string(), z.number()]).optional(),
         isActive: z.boolean().optional(),
+        meta: z.any().optional(),
+        bundle: z.array(z.object({ id: z.string(), qty: z.number().optional(), value: z.number().optional() })).optional(),
+        totalValue: z.number().optional(),
       }),
     },
   }, async (request) => {
@@ -331,6 +334,13 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
     const body = request.body as any;
+    const metaObj: Record<string, any> = body.meta || {};
+    if (body.bundle) {
+      metaObj.bundle = body.bundle;
+    }
+    if (body.totalValue !== undefined) {
+      metaObj.totalValue = body.totalValue;
+    }
     const saved = await rewardCatalogRepo.upsertItem({
       itemId: body.itemId,
       type: body.type,
@@ -341,6 +351,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
       icon: body.icon,
       price: body.price,
       isActive: body.isActive,
+      meta: Object.keys(metaObj).length > 0 ? metaObj : undefined,
     });
 
     await opsRepo.logEvent({

@@ -56,6 +56,10 @@ export default function ShopView() {
   const [invItems, setInvItems] = useState<any[]>([]);
   const [pawnLoading, setPawnLoading] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
+  const [pawnTab, setPawnTab] = useState<'items' | 'stocks'>('items');
+  const [stockHoldings, setStockHoldings] = useState<any[]>([]);
+  const [stockPrices, setStockPrices] = useState<Record<string, any>>({});
+  const [sellingStock, setSellingStock] = useState<string | null>(null);
 
   // ── YJC exchange state ────────────────────────────────────────────────────
   const [yjcBalance, setYjcBalance] = useState('0');
@@ -88,6 +92,16 @@ export default function ShopView() {
         setBalance(String(bal));
         setYjcBalance(s?.summary?.balances?.YJC || s?.balances?.yjc?.balance || '0');
       }
+      // Fetch stock holdings for pawn
+      try {
+        const marketRes = await api.get('/api/v1/market/me', { params: { sessionId } });
+        const acct = marketRes.data?.data?.account;
+        if (acct?.stockPositions) {
+          setStockHoldings(acct.stockPositions);
+        } else if (acct?.stockHoldings) {
+          setStockHoldings(Object.entries(acct.stockHoldings).map(([symbol, h]: any) => ({ symbol, ...h })));
+        }
+      } catch {}
     } catch {
       setItems([]);
     } finally {
@@ -204,6 +218,27 @@ export default function ShopView() {
       setMsg(err?.response?.data?.data?.error || err?.message || '典當失敗');
     } finally {
       setSellingId(null);
+    }
+  }
+
+  async function handleStockSell(symbol: string, qty: number) {
+    if (!sessionId || sellingStock) return;
+    setSellingStock(symbol);
+    setMsg(null);
+    try {
+      const res = await api.post('/api/v1/pawn/stock-sell', { sessionId, symbol, quantity: qty });
+      if (res.data?.success) {
+        setMsg(`✅ 成功出售 ${qty} 股 ${symbol}，獲得 +${res.data.data.payout} ZXC`);
+        setBalance(res.data.data.balanceAfter);
+        fetchItems();
+      } else {
+        setMsg(`❌ ${res.data?.error || '出售失敗'}`);
+      }
+    } catch (err: any) {
+      setMsg(`❌ ${err?.response?.data?.data?.error || err?.message || '出售失敗'}`);
+    } finally {
+      setSellingStock(null);
+      setTimeout(() => setMsg(null), 4000);
     }
   }
 
@@ -375,11 +410,16 @@ export default function ShopView() {
                       <div className="mt-1.5 space-y-1">
                         {bundle.map((sub: any, i: number) => {
                             const info = ITEM_MAP[sub.id];
+                            const subValue = sub.value || meta?.subItemValues?.[sub.id];
                             return (
                               <div key={i} className="flex items-center gap-1.5 text-sm">
                                 <span className="shrink-0">{info?.icon || '•'}</span>
                                 <span className="text-white font-medium">{info?.name || sub.id}</span>
                                 {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
+                                {subValue ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{subValue.toLocaleString()} ZXC</span>
+                                  : hasDiscount && totalValue > 0 && bundle.length > 1 && (
+                                    <span className="text-sm text-[#adaaaa] ml-auto">~{Math.round(totalValue / bundle.length).toLocaleString()} ZXC</span>
+                                  )}
                               </div>
                             );
                           })}
@@ -420,6 +460,23 @@ export default function ShopView() {
             <Trash2 size={16} className="text-[#fcc025]" />
             <h2 className="text-sm font-black uppercase tracking-widest text-white">當舖</h2>
           </div>
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setPawnTab('items')}
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'items' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
+            >
+              道具
+            </button>
+            <button
+              onClick={() => setPawnTab('stocks')}
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'stocks' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
+            >
+              股票
+            </button>
+          </div>
+
+          {pawnTab === 'items' && (
+          <>
           <p className="text-sm text-[#adaaaa] mb-4">將不需要的道具典當換取 ZXC</p>
           {invItems.length === 0 ? (
             <p className="text-sm text-[#adaaaa] text-center py-8">暫無可典當的道具</p>
@@ -454,6 +511,48 @@ export default function ShopView() {
                 );
               })}
             </div>
+          )}
+          </>
+          )}
+
+          {pawnTab === 'stocks' && (
+          <>
+          <p className="text-sm text-[#adaaaa] mb-4">以市價 70% 出售股票，立即變現 ZXC</p>
+          {stockHoldings.length === 0 ? (
+            <p className="text-sm text-[#adaaaa] text-center py-8">暫無持股</p>
+          ) : (
+            <div className="space-y-3">
+              {stockHoldings.map((stock: any) => {
+                const marketPrice = stock.price || stock.marketPrice || 0;
+                const payoutPerUnit = Math.round(marketPrice * 0.7);
+                const totalPayout = payoutPerUnit * stock.qty;
+                return (
+                  <div key={stock.symbol} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                    <div className="text-2xl shrink-0">📈</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{stock.symbol}</p>
+                      <p className="text-sm text-[#adaaaa]">{stock.qty} 股 · 均價 {Number(stock.avgPrice || 0).toLocaleString()} ZXC</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-[#adaaaa]">市值 {Math.round(marketPrice * stock.qty).toLocaleString()} ZXC</span>
+                        <span className="text-sm text-emerald-400">→ {totalPayout.toLocaleString()} ZXC</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-sm font-black text-emerald-400">+{totalPayout.toLocaleString()} ZXC</span>
+                      <button
+                        onClick={() => handleStockSell(stock.symbol, stock.qty)}
+                        disabled={sellingStock === stock.symbol || !sessionId}
+                        className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
+                      >
+                        {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '出售'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          </>
           )}
         </section>
         )}
