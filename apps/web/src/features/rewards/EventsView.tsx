@@ -214,16 +214,16 @@ export default function EventsView() {
               </button>
             </div>
             <div className="mt-4 space-y-2 text-xs text-white">
-              {successBundle.zxc > 0 && <p>+ {successBundle.zxc.toLocaleString()} ZXC</p>}
-              {successBundle.yjc > 0 && <p>+ {successBundle.yjc.toLocaleString()} YJC</p>}
+              {successBundle.zxc > 0 && <p>+ {Number(successBundle.zxc).toLocaleString()} ZXC</p>}
+              {successBundle.yjc > 0 && <p>+ {Number(successBundle.yjc).toLocaleString()} YJC</p>}
               {Array.isArray(successBundle.items) && successBundle.items.map((it: any, i: number) => (
                 <p key={i}>道具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `×${it.qty}` : ''}</p>
               ))}
-              {Array.isArray(successBundle.avatars) && successBundle.avatars.map((a: string, i: number) => (
-                <p key={i}>頭像：{resolveRewardName(a)}</p>
+              {Array.isArray(successBundle.avatars) && successBundle.avatars.map((a: any, i: number) => (
+                <p key={i}>頭像：{a.name || resolveRewardName(a.id || a) || a.id || a}</p>
               ))}
-              {Array.isArray(successBundle.titles) && successBundle.titles.map((t: string, i: number) => (
-                <p key={i}>稱號：{resolveRewardName(t)}</p>
+              {Array.isArray(successBundle.titles) && successBundle.titles.map((t: any, i: number) => (
+                <p key={i}>稱號：{t.name || resolveRewardName(t.id || t) || t.id || t}</p>
               ))}
             </div>
             <button

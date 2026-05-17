@@ -19,6 +19,7 @@ import { requireDb } from "@repo/infrastructure";
 import { randomUUID } from "crypto";
 import {
   grantBundleToUser,
+  ALL_ITEMS,
 } from "../../utils/inventory.js";
 
 export async function rewardRoutes(fastify: FastifyInstance) {
@@ -321,10 +322,19 @@ export async function rewardRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ error: { code: "LIMIT_REACHED", message: "已達領取上限" } }, request.id);
       }
       const rewards = (campaign.rewards as any) || {};
+      const resolveName = (id: string) => {
+        const def = ALL_ITEMS[id];
+        if (def) return def.name || def.nameEn || id;
+        if (id.startsWith('chest_key_')) {
+          const typeName = id.replace('chest_key_', '');
+          return ({ common: '普通', rare: '稀有', epic: '史詩', legendary: '傳奇', mythic: '神話' } as Record<string, string>)[typeName] + '寶箱鑰匙' || id;
+        }
+        return id;
+      };
       const bundleSummary: any = {
-        items: rewards.items || [],
-        avatars: rewards.avatars || [],
-        titles: rewards.titles || [],
+        items: (rewards.items || []).map((it: any) => ({ ...it, name: resolveName(it.id) })),
+        avatars: (rewards.avatars || []).map((a: string) => ({ id: a, name: resolveName(a) })),
+        titles: (rewards.titles || []).map((t: string) => ({ id: t, name: resolveName(t) })),
       };
       let grantErr: Error | null = null;
       try {
