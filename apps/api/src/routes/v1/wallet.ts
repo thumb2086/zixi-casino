@@ -441,14 +441,14 @@ export async function walletRoutes(fastify: FastifyInstance) {
           txHash,
           confirmedAt: new Date(),
         });
-        await saveReceipt(intent.id, txHash, receipt, reverted ? "reverted" : "confirmed");
+        await saveReceipt(intent.id, txHash!, receipt, reverted ? "reverted" : "confirmed");
 
         if (reverted) {
-          await walletRepo.saveTxIntent(walletManager.processTxIntent(intent, "reverted", txHash, "Transaction reverted"));
+          await walletRepo.saveTxIntent(walletManager.processTxIntent(intent, "reverted", txHash!, "Transaction reverted"));
           return createApiEnvelope({ error: { message: "Airdrop reverted on-chain" } }, request.id);
         }
 
-        await walletRepo.saveTxIntent(walletManager.processTxIntent(intent, "confirmed", txHash));
+        await walletRepo.saveTxIntent(walletManager.processTxIntent(intent, "confirmed", txHash!));
 
         const [adminBalanceWeiAfter, recipientBalanceWeiAfter] = await Promise.all([
           client.getBalance(fromAddress, tokenRuntime.contractAddress),
