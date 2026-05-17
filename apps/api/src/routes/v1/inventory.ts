@@ -8,7 +8,7 @@ import { createApiEnvelope, ITEM_DROP_TABLES, RARITY_NAMES, type ItemDefinition,
 import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
-import { loadInventoryState, useItem, creditItemValue, grantBundleToUser } from "../../utils/inventory.js";
+import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser } from "../../utils/inventory.js";
 
 function buildItemIndex(): Record<string, ItemDefinition & { rarity: Rarity }> {
   const out: Record<string, ItemDefinition & { rarity: Rarity }> = {};
@@ -188,14 +188,8 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       if (isBundle || catalogItem.type === "avatar" || catalogItem.type === "title") {
         const state = await loadInventoryState(ctx.userId);
         if (isBundle) {
-          const ownedSubIds = subItems!.filter(
-            (s) => (ITEM_INDEX[s.id]?.type === "avatar" && state.ownedAvatars.includes(s.id))
-              || (ITEM_INDEX[s.id]?.type === "title" && state.ownedTitles.includes(s.id)),
-          );
-          if (ownedSubIds.length === subItems!.filter(
-            (s) => ITEM_INDEX[s.id]?.type === "avatar" || ITEM_INDEX[s.id]?.type === "title",
-          ).length && subItems!.some((s) => ITEM_INDEX[s.id]?.type === "avatar" || ITEM_INDEX[s.id]?.type === "title")) {
-            return createApiEnvelope({ success: false }, request.id, false, "你已擁有此組合包的所有獨特物品");
+          if (state.inventory[itemId] > 0) {
+            return createApiEnvelope({ success: false }, request.id, false, "你已購買過此組合包");
           }
         } else if (catalogItem.type === "avatar" && state.ownedAvatars.includes(itemId)) {
           return createApiEnvelope({ success: false }, request.id, false, "你已擁有此頭像");
@@ -211,6 +205,11 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         : { items: [{ id: itemId, qty: 1 }] };
       try {
         await grantBundleToUser(ctx.userId, bundle, ctx.address);
+        if (isBundle) {
+          const state = await loadInventoryState(ctx.userId);
+          state.inventory[itemId] = (state.inventory[itemId] || 0) + 1;
+          await persistInventoryState(ctx.userId, state);
+        }
       } catch (err: any) {
         await gameSettlement.setBalance(ctx.address, "zhixi", balanceStr);
         return createApiEnvelope({ success: false }, request.id, false, "GRANT_FAILED");
