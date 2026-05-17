@@ -15,6 +15,9 @@ import {
   ShoppingBag,
   Trophy,
   User,
+  Landmark,
+  Archive,
+  TrendingUp,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
@@ -105,6 +108,17 @@ export default function LobbyView() {
   });
   const pinnedCount = annData ?? 0;
 
+  const { data: marketAccount } = useQuery({
+    queryKey: ['market-account-preview'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/market/me');
+      return res.data?.data as { bankBalance?: number; cash?: number } | undefined;
+    },
+    refetchInterval: 30000,
+  });
+  const bankBalance = marketAccount?.bankBalance?.toFixed(2) || '0';
+  const marketCash = marketAccount?.cash?.toFixed(2) || '0';
+
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-24 font-['Manrope'] text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
@@ -151,6 +165,16 @@ export default function LobbyView() {
               </p>
               <div className="text-5xl font-black uppercase italic tracking-tighter text-[#fcc025]">
                 {formatNumber(liveBalance || 0)} <span className="text-lg not-italic text-white">ZXC</span>
+              </div>
+              <div className="mt-2 flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                <span className="flex items-center gap-1">
+                  <Landmark size={12} className="text-[#fcc025]" />
+                  {t('market.bank')}: {formatNumber(bankBalance)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <TrendingUp size={12} className="text-emerald-400" />
+                  {t('market.cash')}: {formatNumber(marketCash)}
+                </span>
               </div>
             </div>
           </div>
@@ -278,6 +302,16 @@ export default function LobbyView() {
               </Link>
             </div>
           </div>
+          <GlassCard
+            to="/app/collection"
+            icon={Archive}
+            title={t('lobby.items_catalog')}
+            subtitle={t('lobby.items_subtitle')}
+          >
+            <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
+              檢視已獲得的頭像、稱號與收藏品
+            </p>
+          </GlassCard>
           <GlassCard
             to="/app/admin"
             icon={SettingsIcon}

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Home, LayoutGrid, Settings, ShoppingBag, TrendingUp, Wallet, Archive } from 'lucide-react';
+import { Home, LayoutGrid, Settings, ShoppingBag, TrendingUp, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-type NavKey = 'home' | 'casino' | 'shop' | 'wallet' | 'collection' | 'settings' | 'none';
+type NavKey = 'home' | 'casino' | 'shop' | 'wallet' | 'settings' | 'none';
 
 export default function AppBottomNav({ current }: { current: NavKey }) {
   const { t } = useTranslation();
@@ -12,7 +12,6 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
     { key: 'casino' as const, to: '/app/casino/lobby', icon: LayoutGrid, label: t('nav.casino') },
     { key: 'shop' as const, to: '/app/shop', icon: ShoppingBag, label: '商店' },
     { key: 'wallet' as const, to: '/app/wallet', icon: Wallet, label: t('nav.vault') },
-    { key: 'collection' as const, to: '/app/collection', icon: Archive, label: '收藏' },
     { key: 'settings' as const, to: '/app/settings', icon: Settings, label: t('nav.settings') },
   ];
 

@@ -110,16 +110,16 @@ export class OnchainWalletManager {
 
   convertZxcToYjc(rawAmount: string | number): { requestedZxc: number; requiredZxc: number; yjcAmount: number } {
     const numeric = typeof rawAmount === "number" ? rawAmount : Number(String(rawAmount || "").replace(/,/g, "").trim());
-    const requestedZxc = Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
-    const yjcAmount = Math.floor(requestedZxc / ZXC_PER_YJC);
-    const requiredZxc = yjcAmount * ZXC_PER_YJC;
-    return { requestedZxc, requiredZxc, yjcAmount };
+    const requestedZxc = Number.isFinite(numeric) ? Math.max(0, numeric) : 0;
+    const yjcAmount = Math.round((requestedZxc / ZXC_PER_YJC) * 100) / 100;
+    const requiredZxc = Math.round(yjcAmount * ZXC_PER_YJC);
+    return { requestedZxc: Math.floor(requestedZxc), requiredZxc, yjcAmount };
   }
 
   convertYjcToZxc(rawAmount: string | number): { yjcAmount: number; zxcAmount: number } {
     const numeric = typeof rawAmount === "number" ? rawAmount : Number(String(rawAmount || "").replace(/,/g, "").trim());
-    const yjcAmount = Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
-    const zxcAmount = yjcAmount * ZXC_PER_YJC;
+    const yjcAmount = Number.isFinite(numeric) ? Math.max(0, Math.round(numeric * 100) / 100) : 0;
+    const zxcAmount = Math.round(yjcAmount * ZXC_PER_YJC);
     return { yjcAmount, zxcAmount };
   }
 }
