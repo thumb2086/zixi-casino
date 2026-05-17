@@ -16,7 +16,7 @@ import EventsView from './features/rewards/EventsView';
 import AdminView from './features/admin/AdminView';
 import InventoryView from './features/profile/InventoryView';
 import LeaderboardView from './features/stats/LeaderboardView';
-import HealthView from './features/stats/HealthView';
+
 import RoomLobbyView from './features/casino/RoomLobbyView';
 import LobbyView from './features/casino/LobbyView';
 import SupportView from './features/support/SupportView';
@@ -137,7 +137,7 @@ function AppContent() {
             <Route path="settings" element={<SettingsView />} />
             <Route path="transactions" element={<PublicTransactionsView />} />
             <Route path="dashboard/transactions" element={<TransactionsDashboardView />} />
-            <Route path="health" element={<HealthView />} />
+
             <Route path="info/vip-levels" element={<VIPLevelsView />} />
             <Route path="info/odds" element={<Navigate to="/app/info?tab=odds" replace />} />
             <Route path="info" element={<InfoView />} />
