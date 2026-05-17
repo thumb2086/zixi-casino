@@ -638,6 +638,7 @@ export default function AdminView() {
         startAt: campaignStartAt || null,
         endAt: campaignEndAt || null,
         claimLimitPerUser: Number(campaignClaimLimit || '1'),
+        maxClaimsPerUser: Number(campaignClaimLimit || '1'),
         rewards,
       });
       show('活動已儲存');
@@ -668,11 +669,11 @@ export default function AdminView() {
         title: c.title,
         description: c.description ?? undefined,
         isActive: !c.isActive,
-        claimLimitPerUser: c.maxClaimsPerUser ?? 1,
+        maxClaimsPerUser: c.maxClaimsPerUser ?? 1,
         rewards: c.rewards ?? {},
         startAt: c.startAt ?? null,
         endAt: c.endAt ?? null,
-        minLevel: c.requiredLevel ?? undefined,
+        requiredLevel: c.requiredLevel ?? undefined,
       });
       refresh();
     } catch (err: any) {
@@ -1039,7 +1040,7 @@ export default function AdminView() {
                 <option value="">— 頭像 —</option>{allAvatars.map((av) => (<option key={av.id} value={av.id}>{av.icon || ''} {av.name || av.id}</option>))}
               </select>
               <select value={grantTitleId} onChange={(e) => setGrantTitleId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
-                <option value="">— 稱號 —</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.id}</option>))}
+                <option value="">— 稱號 —</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.label || t.id}</option>))}
               </select>
               <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder="備註（選填）" className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
               <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> 送出獎勵</button>
