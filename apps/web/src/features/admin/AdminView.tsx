@@ -164,6 +164,47 @@ export default function AdminView() {
   const [grantAvatarId, setGrantAvatarId] = useState('');
   const [grantTitleId, setGrantTitleId] = useState('');
   const [grantNote, setGrantNote] = useState('');
+  const [allItemsList, setAllItemsList] = useState<Array<{ id: string; name?: string; icon?: string; rarity?: string; type?: string }>>([]);
+  const [allAvatars, setAllAvatars] = useState<Array<{ id: string; name?: string; icon?: string }>>([]);
+  const [allTitles, setAllTitles] = useState<Array<{ id: string; name?: string; icon?: string }>>([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
+
+  useEffect(() => {
+    if (activeTab !== 'grant') return;
+    Promise.all([
+      api.get('/api/v1/chests/items').catch(() => null),
+      api.get('/api/v1/rewards/catalog').catch(() => null),
+    ]).then(([chestRes, catRes]) => {
+      const chestItems: Array<{ id: string; name: string; icon: string; rarity: string; type: string }> = chestRes?.data?.data ?? [];
+      const catData = catRes?.data?.data ?? {};
+      const catAvatars: Array<{ id: string; name?: string; icon?: string }> = catData.avatars ?? [];
+      const catTitles: Array<{ id: string; name?: string; icon?: string }> = catData.titles ?? [];
+      const merged: Record<string, typeof chestItems[0]> = {};
+      for (const item of chestItems) merged[item.id] = item;
+      setAllItemsList(Object.values(merged));
+      setAllAvatars(catAvatars);
+      setAllTitles(catTitles);
+    });
+    api.get('/api/v1/admin/users', { params: { limit: 200 } }).then((res) => {
+      setUserResults(res.data?.data?.users ?? []);
+    }).catch(() => {});
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!userSearch.trim()) {
+      setUserResults([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      api.get('/api/v1/admin/users', { params: { search: userSearch, limit: 20 } }).then((res) => {
+        setUserResults(res.data?.data?.users ?? []);
+      }).catch(() => {});
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [userSearch]);
+
+  const showUserDropdown = userResults.length > 0;
 
   // Tickets (support)
   const [tickets, setTickets] = useState<any[]>([]);
@@ -1491,13 +1532,37 @@ export default function AdminView() {
                 直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者
               </p>
             </div>
-            <input
-              type="text"
-              value={grantAddress}
-              onChange={(e) => setGrantAddress(e.target.value)}
-              placeholder="使用者地址 0x..."
-              className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={grantAddress}
+                onChange={(e) => {
+                  setGrantAddress(e.target.value);
+                  setUserSearch(e.target.value);
+                }}
+                placeholder="搜尋使用者名稱或地址..."
+                className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+              />
+              {showUserDropdown && (
+                <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-[#494847]/30 bg-[#1a1919] shadow-xl">
+                  {userResults.map((u) => (
+                    <button
+                      key={u.address}
+                      type="button"
+                      onClick={() => {
+                        setGrantAddress(u.address);
+                        setUserSearch('');
+                        setUserResults([]);
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"
+                    >
+                      <span className="font-bold">{u.displayName || u.username || '未知'}</span>
+                      <span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="number"
@@ -1515,13 +1580,20 @@ export default function AdminView() {
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <input
-                type="text"
+              <select
                 value={grantItemId}
                 onChange={(e) => setGrantItemId(e.target.value)}
-                placeholder="道具 ID"
                 className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
-              />
+              >
+                <option value="">— 道具 —</option>
+                {allItemsList
+                  .filter((i) => i.type !== 'avatar' && i.type !== 'title')
+                  .map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.icon || ''} {item.name || item.id} [{item.rarity || ''}]
+                    </option>
+                  ))}
+              </select>
               <input
                 type="number"
                 min="1"
@@ -1531,20 +1603,30 @@ export default function AdminView() {
                 className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
             </div>
-            <input
-              type="text"
+            <select
               value={grantAvatarId}
               onChange={(e) => setGrantAvatarId(e.target.value)}
-              placeholder="頭像 ID（例如 classic_chip）"
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
-            />
-            <input
-              type="text"
+            >
+              <option value="">— 頭像 —</option>
+              {allAvatars.map((av) => (
+                <option key={av.id} value={av.id}>
+                  {av.icon || ''} {av.name || av.id}
+                </option>
+              ))}
+            </select>
+            <select
               value={grantTitleId}
               onChange={(e) => setGrantTitleId(e.target.value)}
-              placeholder="稱號 ID（例如 newbie）"
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
-            />
+            >
+              <option value="">— 稱號 —</option>
+              {allTitles.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.icon || ''} {t.name || t.id}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               value={grantNote}
