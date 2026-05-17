@@ -242,8 +242,9 @@ export default function LobbyView() {
           >
             <div className="mt-4 grid grid-cols-4 gap-2">
               {previewItems.length > 0 ? previewItems.map((invItem) => (
-                <Link key={invItem.id} to="/app/inventory" className="group aspect-square rounded border border-[#494847]/20 bg-[#262626] flex items-center justify-center text-lg hover:border-[#fcc025]/40 transition-all hover:scale-105" title={invItem.name}>
-                  <span>{invItem.icon}</span>
+                <Link key={invItem.id} to="/app/inventory" className="group aspect-square rounded border border-[#494847]/20 bg-[#262626] flex flex-col items-center justify-center gap-0.5 hover:border-[#fcc025]/40 transition-all hover:scale-105" title={invItem.name}>
+                  <span className="text-base leading-none">{invItem.icon}</span>
+                  <span className="text-[7px] font-bold text-[#adaaaa] truncate w-full text-center leading-tight px-0.5">{invItem.name}</span>
                 </Link>
               )) : [1, 2, 3, 4].map((i) => (
                 <div key={i} className="aspect-square rounded border border-[#494847]/20 bg-[#262626]" />

@@ -21,7 +21,7 @@ export const useWallet = () => {
   const airdropMutation = useMutation({
     mutationFn: async () => {
       const res = await api.post(`${API_BASE}/airdrop`, { sessionId });
-      if (res.data.error) throw new Error(res.data.error.message);
+      if (res.data.data?.error) throw new Error(res.data.data.error.message);
       return res.data.data;
     },
     onSuccess: () => {
@@ -33,7 +33,7 @@ export const useWallet = () => {
   const transferMutation = useMutation({
     mutationFn: async (params: { to: string, amount: string, token: string }) => {
       const res = await api.post(`${API_BASE}/transfer`, { ...params, sessionId });
-      if (res.data.error) throw new Error(res.data.error.message);
+      if (res.data.data?.error) throw new Error(res.data.data.error.message);
       return res.data.data;
     },
     onSuccess: () => {
@@ -45,7 +45,7 @@ export const useWallet = () => {
   const convertMutation = useMutation({
     mutationFn: async (params: { zxcAmount: string }) => {
       const res = await api.post(`${API_BASE}/convert`, { ...params, sessionId });
-      if (res.data.error) throw new Error(res.data.error.message);
+      if (res.data.data?.error) throw new Error(res.data.data.error.message);
       return res.data.data;
     },
     onSuccess: () => {
