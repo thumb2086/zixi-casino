@@ -155,6 +155,10 @@ export default function AdminView() {
   const [campaignClaimLimit, setCampaignClaimLimit] = useState('1');
   const [campaignRewardZxc, setCampaignRewardZxc] = useState('');
   const [campaignRewardYjc, setCampaignRewardYjc] = useState('');
+  const [campaignRewardItemId, setCampaignRewardItemId] = useState('');
+  const [campaignRewardItemQty, setCampaignRewardItemQty] = useState('1');
+  const [campaignRewardAvatarId, setCampaignRewardAvatarId] = useState('');
+  const [campaignRewardTitleId, setCampaignRewardTitleId] = useState('');
 
   const [grantAddress, setGrantAddress] = useState('');
   const [grantZxc, setGrantZxc] = useState('');
@@ -603,6 +607,15 @@ export default function AdminView() {
       const n = Number(campaignRewardYjc);
       if (Number.isFinite(n) && n > 0) rewards.yjc = n;
     }
+    if (campaignRewardItemId.trim()) {
+      rewards.items = [{ id: campaignRewardItemId.trim(), qty: Math.max(1, Number(campaignRewardItemQty) || 1) }];
+    }
+    if (campaignRewardAvatarId.trim()) {
+      rewards.avatars = [campaignRewardAvatarId.trim()];
+    }
+    if (campaignRewardTitleId.trim()) {
+      rewards.titles = [campaignRewardTitleId.trim()];
+    }
     try {
       await api.post('/api/v1/admin/campaigns', {
         sessionId,
@@ -623,6 +636,10 @@ export default function AdminView() {
       setCampaignEndAt('');
       setCampaignRewardZxc('');
       setCampaignRewardYjc('');
+      setCampaignRewardItemId('');
+      setCampaignRewardItemQty('1');
+      setCampaignRewardAvatarId('');
+      setCampaignRewardTitleId('');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -1447,6 +1464,54 @@ export default function AdminView() {
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={campaignRewardItemId}
+                  onChange={(e) => setCampaignRewardItemId(e.target.value)}
+                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                >
+                  <option value="">— 道具獎勵 —</option>
+                  {allItemsList
+                    .filter((i) => i.type !== 'avatar' && i.type !== 'title')
+                    .map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.icon || ''} {item.name || item.id}
+                      </option>
+                    ))}
+                </select>
+                <input
+                  type="number"
+                  min="1"
+                  value={campaignRewardItemQty}
+                  onChange={(e) => setCampaignRewardItemQty(e.target.value)}
+                  placeholder="數量"
+                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                />
+              </div>
+              <select
+                value={campaignRewardAvatarId}
+                onChange={(e) => setCampaignRewardAvatarId(e.target.value)}
+                className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+              >
+                <option value="">— 頭像獎勵 —</option>
+                {allAvatars.map((av) => (
+                  <option key={av.id} value={av.id}>
+                    {av.icon || ''} {av.name || av.id}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={campaignRewardTitleId}
+                onChange={(e) => setCampaignRewardTitleId(e.target.value)}
+                className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+              >
+                <option value="">— 稱號獎勵 —</option>
+                {allTitles.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.icon || ''} {t.name || t.id}
+                  </option>
+                ))}
+              </select>
               <label className="flex items-center gap-2 text-[10px] text-[#adaaaa]">
                 <input
                   type="checkbox"
@@ -1786,10 +1851,33 @@ export default function AdminView() {
                             : 'text-emerald-400'
                         }`}
                       >
-                        {evt.severity || 'info'}
+                        {(() => {
+                          const labels: Record<string, string> = { error: '錯誤', warn: '警告', info: '資訊', important: '重要' };
+                          return labels[evt.severity] || evt.severity || 'info';
+                        })()}
                       </span>
                       <span className="text-[9px] font-bold uppercase text-[#adaaaa]">
-                        {evt.channel}/{evt.kind}
+                        {(() => {
+                          const labels: Record<string, string> = {
+                            'rewards/item_pawned': '道具典當',
+                            'rewards/chests_opened_bulk': '大量開箱',
+                            'wallet/airdrop_claimed': '空投領取',
+                            'wallet/zxc_to_yjc_confirmed': 'ZXC→YJC 兌換',
+                            'wallet/transfer': '轉帳',
+                            'game/play_completed': '遊戲結算',
+                            'admin/campaign_upsert': '活動異動',
+                            'admin/grant': '管理員贈送',
+                            'admin/maintenance': '維護模式',
+                            'admin/blacklist': '黑名單變更',
+                            'admin/announcement': '公告異動',
+                            'admin/reward_catalog': '獎勵目錄變更',
+                            'admin/submission': '投稿審核',
+                            'support/ticket_created': '工單建立',
+                            'support/ticket_updated': '工單更新',
+                          };
+                          const key = `${evt.channel}/${evt.kind}`;
+                          return labels[key] || key;
+                        })()}
                       </span>
                     </div>
                     <p className="text-white mt-1 break-words">{evt.message}</p>
