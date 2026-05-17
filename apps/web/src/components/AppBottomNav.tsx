@@ -32,7 +32,7 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
               }`}
             >
               <Icon size={24} className="mb-1" />
-              <span className="w-full truncate text-center text-[10px] font-bold uppercase tracking-[0.06em]">{item.label}</span>
+              <span className="w-full truncate text-center text-xs font-bold uppercase tracking-[0.06em]">{item.label}</span>
             </Link>
           );
         })}

@@ -168,7 +168,7 @@ export default function SupportView() {
               {announcements.slice(0, 5).map((a) => (
                 <li key={a.id} className="border-l-2 border-[#fcc025]/50 pl-3">
                   <div className="flex items-center gap-2">
-                    {a.isPinned && <span className="text-[9px] font-black uppercase text-[#fcc025]">釘選</span>}
+                    {a.isPinned && <span className="text-xs font-black uppercase text-[#fcc025]">釘選</span>}
                     <h3 className="text-sm font-bold text-white">{a.title}</h3>
                   </div>
                   <p className="text-xs text-[#adaaaa] mt-1 whitespace-pre-wrap">{a.content}</p>
@@ -188,7 +188,7 @@ export default function SupportView() {
           ) : (
             <form onSubmit={handleSubmitTicket} className="space-y-3">
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-[#adaaaa] mb-1">標題</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">標題</label>
                 <input
                   type="text"
                   value={title}
@@ -199,7 +199,7 @@ export default function SupportView() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-[#adaaaa] mb-1">分類</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">分類</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
@@ -211,7 +211,7 @@ export default function SupportView() {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-[#adaaaa] mb-1">內容</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">內容</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -221,7 +221,7 @@ export default function SupportView() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-[#adaaaa] mb-1">聯絡方式（選填）</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">聯絡方式（選填）</label>
                 <input
                   type="text"
                   value={contact}

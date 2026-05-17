@@ -43,7 +43,7 @@ export default function VIPLevelsView() {
       <main className="mx-auto max-w-2xl px-6 pt-24">
         {/* 等級總覽 */}
         <section className="mb-8 rounded-2xl border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
             等級系統總覽
           </h2>
           <p className="mt-3 text-sm font-bold text-[#adaaaa] leading-relaxed">
@@ -53,14 +53,14 @@ export default function VIPLevelsView() {
             <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
               <div className="flex items-center gap-2">
                 <Percent className="h-4 w-4 text-emerald-400" />
-                <span className="text-[10px] font-bold text-[#adaaaa]">最高折扣</span>
+                <span className="text-xs font-bold text-[#adaaaa]">最高折扣</span>
               </div>
               <p className="mt-1 text-lg font-black text-emerald-400">100%</p>
             </div>
             <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
               <div className="flex items-center gap-2">
                 <Gift className="h-4 w-4 text-[#fcc025]" />
-                <span className="text-[10px] font-bold text-[#adaaaa]">最高倍率</span>
+                <span className="text-xs font-bold text-[#adaaaa]">最高倍率</span>
               </div>
               <p className="mt-1 text-lg font-black text-[#fcc025]">8.0x</p>
             </div>
@@ -69,7 +69,7 @@ export default function VIPLevelsView() {
 
         {/* 特權說明 */}
         <section className="mb-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
             VIP 特權說明
           </h2>
           <div className="mt-4 space-y-4">
@@ -122,7 +122,7 @@ export default function VIPLevelsView() {
 
         {/* 等級列表 */}
         <section className="space-y-3">
-          <h2 className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
             完整等級列表
           </h2>
           {LEVEL_TIERS.map((tier, index) => (
@@ -150,7 +150,7 @@ export default function VIPLevelsView() {
                   </div>
                   <div className="text-left">
                     <h3 className="font-bold text-white">{tier.label}</h3>
-                    <p className="text-[10px] font-bold text-[#adaaaa]">
+                    <p className="text-xs font-bold text-[#adaaaa]">
                       門檻: {formatNumber(tier.threshold)}
                     </p>
                   </div>
@@ -166,23 +166,23 @@ export default function VIPLevelsView() {
                 <div className="mt-4 space-y-2 border-t border-[#494847]/10 pt-4">
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">單注上限</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">單注上限</p>
                       <p className="text-sm font-black text-white">{formatNumber(tier.maxBet)}</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">手續費折扣</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">手續費折扣</p>
                       <p className="text-sm font-black text-emerald-400">
                         {gameFeeDiscountByThreshold(tier.threshold)}%
                       </p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">紅利倍率</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">紅利倍率</p>
                       <p className="text-sm font-black text-[#fcc025]">
                         {(tier.dailyBonusMultiplier || 1).toFixed(1)}x
                       </p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-[9px] font-bold text-[#adaaaa]">彈幕顏色</p>
+                      <p className="text-xs font-bold text-[#adaaaa]">彈幕顏色</p>
                       <div className="flex items-center gap-2">
                         <div 
                           className="h-4 w-4 rounded"

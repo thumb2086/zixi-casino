@@ -635,7 +635,7 @@ export default function ChestView() {
                       style={{ borderColor: RARITY_COLORS[item.item.rarity] || '#494847' }}
                     >
                       {(item.quantity || 0) > 1 && (
-                        <span className="absolute -top-2 -right-2 bg-[#fcc025] text-black text-[10px] font-black min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-lg z-10">
+                        <span className="absolute -top-2 -right-2 bg-[#fcc025] text-black text-xs font-black min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-lg z-10">
                           x{item.quantity}
                         </span>
                       )}
@@ -670,7 +670,7 @@ export default function ChestView() {
                       <span className="text-lg">🪙</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>
                       <p className="text-lg font-black italic text-[#fcc025]">+{openCompensation} ZXC</p>
                     </div>
                   </div>

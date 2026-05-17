@@ -44,7 +44,7 @@ export default function UnderConstruction({
         </p>
 
         <div className="mt-8 rounded-xl border border-[#494847]/20 bg-[#1a1919] p-6">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[#494847]">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#494847]">
             預計上線功能
           </p>
           <ul className="mt-4 space-y-2 text-sm font-bold text-[#adaaaa]">

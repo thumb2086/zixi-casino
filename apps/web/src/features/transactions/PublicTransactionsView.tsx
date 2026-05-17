@@ -116,21 +116,21 @@ export default function PublicTransactionsView() {
           <div className="flex-1 min-w-0">
             <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
             {titleItem && <p className="text-xs font-bold text-[#fcc025]">{titleItem.icon} {titleItem.name}</p>}
-            <p className="text-[10px] font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
+            <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
           </div>
         </section>
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-[#fcc025]" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
             </div>
             <p className="text-xl font-black italic text-[#fcc025]">{Number(balance).toLocaleString()}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-[#fcc025]" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#adaaaa]">活躍頭像</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">活躍頭像</span>
             </div>
             <p className="text-sm font-bold text-white truncate">{avatarItem?.name || activeAvatar}</p>
           </div>
@@ -153,7 +153,7 @@ export default function PublicTransactionsView() {
         <section className="mb-10 space-y-6">
           <div className="flex items-center gap-2">
             <HeartPulse size={16} className="text-[#fcc025]" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('transactions.service_status')}
             </h2>
           </div>
@@ -184,7 +184,7 @@ export default function PublicTransactionsView() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Activity size={14} className="text-[#fcc025]" />
-                  <h3 className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SIMULATION THROUGHPUT</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SIMULATION THROUGHPUT</h3>
                 </div>
                 <div className="flex items-center gap-3 text-[7px] font-black uppercase">
                   <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 border border-emerald-500" /> SUCCESS</div>
@@ -202,7 +202,7 @@ export default function PublicTransactionsView() {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center opacity-30">
                     <Activity size={24} className="text-[#494847]" />
-                    <span className="text-[#494847] text-[9px] font-bold uppercase ml-2">No Data</span>
+                    <span className="text-[#494847] text-xs font-bold uppercase ml-2">No Data</span>
                   </div>
                 )}
               </div>
@@ -215,7 +215,7 @@ export default function PublicTransactionsView() {
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/10 space-y-4">
               <div className="flex items-center gap-2">
                 <Terminal size={14} className="text-[#fcc025]" />
-                <h3 className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SYSTEM PROTOCOL LOGS</h3>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SYSTEM PROTOCOL LOGS</h3>
               </div>
               <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 hide-scrollbar">
                 {events.length === 0 && (
@@ -234,7 +234,7 @@ export default function PublicTransactionsView() {
                         {new Date(ev.createdAt).toLocaleTimeString([], { hour12: false })}
                       </span>
                     </div>
-                    <p className="text-[9px] font-bold text-white leading-relaxed uppercase italic tracking-tight">{ev.message}</p>
+                    <p className="text-xs font-bold text-white leading-relaxed uppercase italic tracking-tight">{ev.message}</p>
                   </div>
                 ))}
               </div>
@@ -244,36 +244,36 @@ export default function PublicTransactionsView() {
 
         <section className="mb-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('transactions.overall_success_rate')}
             </p>
             <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(successRatePct)}</p>
-            <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
               {t('transactions.success_summary', { success: formatNumber(summary?.confirmed ?? 0), scored: formatNumber(summary?.total ?? 0) })}
             </p>
           </div>
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('transactions.wallet_execution')}
             </p>
             <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(walletExecutionPct)}</p>
-            <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
               {t('transactions.confirmed_wallet_intents')}
             </p>
           </div>
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('transactions.market_win_rate')}
             </p>
             <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(marketWinRatePct)}</p>
-            <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
               {t('transactions.market_outcomes')}
             </p>
           </div>
         </section>
 
         <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
             {t('transactions.latest_activity')}
           </p>
           <div className="mt-4 space-y-3">
@@ -287,16 +287,16 @@ export default function PublicTransactionsView() {
               <div key={item.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white">
+                    <p className="text-xs font-black uppercase tracking-[0.14em] text-white">
                       {`${item.type?.toUpperCase?.() || 'TX'} • ${formatNumber(Number(item.amount))} ${item.tokenSymbol || ''}`}
                     </p>
-                    <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
                       {item.userAddress} / round {String(item.roundId)}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#fcc025]">{item.status}</p>
-                    <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">{new Date(item.createdAt).toLocaleString('zh-TW')}</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#fcc025]">{item.status}</p>
+                    <p className="mt-1 text-xs font-bold text-[#adaaaa]">{new Date(item.createdAt).toLocaleString('zh-TW')}</p>
                   </div>
                 </div>
               </div>
@@ -305,7 +305,7 @@ export default function PublicTransactionsView() {
         </section>
 
         <section className="mt-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">Latest REGISTER_BONUS</p>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">Latest REGISTER_BONUS</p>
           <div className="mt-4 space-y-2">
             {!registerBonusItems.length && (
               <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">No register bonus records</div>

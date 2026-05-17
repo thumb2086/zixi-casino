@@ -51,7 +51,7 @@ export default function CasinoView() {
             <h2 className="text-2xl font-black uppercase italic tracking-tighter text-[#494847]">
               {t('casino.game_unavailable', { game })}
             </h2>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
               {t('casino.game_coming_soon')}
             </p>
             <Link

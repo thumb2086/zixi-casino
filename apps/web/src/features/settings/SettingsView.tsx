@@ -7,6 +7,7 @@ import {
   Globe,
   LogOut,
   Settings as SettingsIcon,
+  Type,
   User,
   Volume2,
 } from 'lucide-react';
@@ -16,6 +17,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useUserStore } from '../../store/useUserStore';
 import { api } from '../../store/api';
 import { usePreferencesStore } from '../../store/usePreferencesStore';
+import { useFontSizeStore } from '../../store/useFontSizeStore';
 import AppBottomNav from '../../components/AppBottomNav';
 import { useWallet } from '../wallet/useWallet';
 import { resolvePreferredBalance } from '../../utils/balance';
@@ -47,7 +49,7 @@ function SliderRow({
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[#adaaaa]">
+      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#adaaaa]">
         <span>{label}</span>
         <span className="font-mono text-[#fcc025]">{Math.round(value * 100)}%</span>
       </div>
@@ -85,6 +87,7 @@ export default function SettingsView() {
   const [statusText, setStatusText] = useState<string | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [displayNameDraft, setDisplayNameDraft] = useState(username || '');
+  const { fontSize, setFontSize } = useFontSizeStore();
 
   const isZh = i18n.language.startsWith('zh');
 
@@ -187,7 +190,7 @@ export default function SettingsView() {
               {t('settings.title')}
             </h1>
           </div>
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <div className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
             {saving ? t('settings.syncing') : 'v1.0.0'}
           </div>
         </div>
@@ -201,10 +204,10 @@ export default function SettingsView() {
                 <User className="text-[#fcc025]" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
                   {t('settings.profile')}
                 </p>
-                <p className="mt-1 text-[10px] font-bold text-[#6f6f6f]">{t('settings.name_hint')}</p>
+                <p className="mt-1 text-xs font-bold text-[#6f6f6f]">{t('settings.name_hint')}</p>
                 {isEditingName ? (
                   <div className="mt-3 flex flex-col gap-3">
                     <input
@@ -217,7 +220,7 @@ export default function SettingsView() {
                       <button
                         type="button"
                         onClick={saveDisplayName}
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#fcc025] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-black"
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#fcc025] px-4 py-2 text-xs font-black uppercase tracking-widest text-black"
                       >
                         <Check size={14} />
                         {t('common.save')}
@@ -228,7 +231,7 @@ export default function SettingsView() {
                           setDisplayNameDraft(username || '');
                           setIsEditingName(false);
                         }}
-                        className="rounded-xl border border-[#494847]/20 bg-[#262626] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white"
+                        className="rounded-xl border border-[#494847]/20 bg-[#262626] px-4 py-2 text-xs font-black uppercase tracking-widest text-white"
                       >
                         {t('common.cancel')}
                       </button>
@@ -239,13 +242,13 @@ export default function SettingsView() {
                     <h2 className="mt-1 truncate text-2xl font-black uppercase italic tracking-tight">
                       {username || 'OPERATOR'}
                     </h2>
-                    <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-[0.18em] text-[#adaaaa]">
+                    <p className="mt-1 truncate text-xs font-bold uppercase tracking-[0.18em] text-[#adaaaa]">
                       {address || t('settings.no_address')}
                     </p>
                     <button
                       type="button"
                       onClick={() => setIsEditingName(true)}
-                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#fcc025]/40 bg-[#262626] px-3 py-2 text-[10px] font-black uppercase tracking-widest text-[#fcc025] hover:bg-[#313131]"
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#fcc025]/40 bg-[#262626] px-3 py-2 text-xs font-black uppercase tracking-widest text-[#fcc025] hover:bg-[#313131]"
                     >
                       <Edit2 size={12} />
                       {t('settings.edit_name')}
@@ -266,7 +269,7 @@ export default function SettingsView() {
           </div>
 
           <div className="mt-5 rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-            <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('settings.balance_preview')}
             </p>
             <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">{previewBalance}</p>
@@ -276,7 +279,7 @@ export default function SettingsView() {
         <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
           <div className="flex items-center gap-3">
             <Volume2 className="text-[#fcc025]" size={18} />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
+            <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
               {t('settings.display_audio')}
             </h3>
           </div>
@@ -284,14 +287,14 @@ export default function SettingsView() {
           <div className="mt-6 space-y-6">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white">
+                <span className="text-xs font-bold uppercase tracking-[0.12em] text-white">
                   {t('settings.amount_display')}
                 </span>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => persistPrefs({ amountDisplay: 'compact' })}
-                    className={`rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-wider ${
+                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider ${
                       amountDisplay === 'compact' ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
                     }`}
                   >
@@ -300,7 +303,7 @@ export default function SettingsView() {
                   <button
                     type="button"
                     onClick={() => persistPrefs({ amountDisplay: 'full' })}
-                    className={`rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-wider ${
+                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider ${
                       amountDisplay === 'full' ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
                     }`}
                   >
@@ -317,19 +320,19 @@ export default function SettingsView() {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('settings.bgm')}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">{t('settings.bgm')}</span>
                   <Toggle enabled={bgmEnabled} onClick={() => persistPrefs({ bgmEnabled: !bgmEnabled })} />
                 </div>
               </div>
               <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('settings.sfx')}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">{t('settings.sfx')}</span>
                   <Toggle enabled={sfxEnabled} onClick={() => persistPrefs({ sfxEnabled: !sfxEnabled })} />
                 </div>
               </div>
               <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('settings.danmaku')}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">{t('settings.danmaku')}</span>
                   <Toggle enabled={danmuEnabled} onClick={() => persistPrefs({ danmuEnabled: !danmuEnabled })} />
                 </div>
               </div>
@@ -338,14 +341,37 @@ export default function SettingsView() {
         </section>
 
         <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+          <div className="flex items-center gap-3">
+            <Type className="text-[#fcc025]" size={18} />
+            <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
+              字體大小
+            </h3>
+          </div>
+          <div className="mt-4 flex gap-2">
+            {(['small', 'medium', 'large'] as const).map((level) => (
+              <button
+                key={level}
+                type="button"
+                onClick={() => setFontSize(level)}
+                className={`flex-1 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-wider ${
+                  fontSize === level ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
+                }`}
+              >
+                {level === 'small' ? '小' : level === 'medium' ? '中' : '大'}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Globe className="text-[#fcc025]" size={18} />
               <div>
-                <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
+                <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
                   {t('settings.language')}
                 </h3>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
                   {isZh ? t('common.chinese') : t('common.english')}
                 </p>
               </div>
@@ -353,7 +379,7 @@ export default function SettingsView() {
             <button
               type="button"
               onClick={() => i18n.changeLanguage(isZh ? 'en' : 'zh')}
-              className="rounded-xl border border-[#fcc025]/20 bg-[#262626] px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-[#fcc025]"
+              className="rounded-xl border border-[#fcc025]/20 bg-[#262626] px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#fcc025]"
             >
               {t('settings.switch_label')}
             </button>
@@ -361,7 +387,7 @@ export default function SettingsView() {
 
           <div className="mt-6 divide-y divide-[#494847]/10 overflow-hidden rounded-2xl border border-[#494847]/10 bg-[#0e0e0e]">
             <Link to="/app/support" className="flex items-center justify-between p-4 transition-colors hover:bg-[#1a1919]">
-              <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
+              <span className="text-xs font-bold uppercase tracking-[0.12em]">
                 {t('nav.support')}
               </span>
               <ChevronRight size={16} className="text-[#adaaaa]" />
@@ -372,7 +398,7 @@ export default function SettingsView() {
               rel="noreferrer"
               className="flex items-center justify-between p-4 transition-colors hover:bg-[#1a1919]"
             >
-              <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
+              <span className="text-xs font-bold uppercase tracking-[0.12em]">
                 {t('settings.github_repo')}
               </span>
               <ChevronRight size={16} className="text-[#adaaaa]" />
@@ -381,7 +407,7 @@ export default function SettingsView() {
         </section>
 
         <section className="space-y-3 pb-4">
-          <p className="min-h-[18px] text-center text-[11px] font-bold uppercase tracking-[0.12em] text-[#fcc025]">
+          <p className="min-h-[18px] text-center text-xs font-bold uppercase tracking-[0.12em] text-[#fcc025]">
             {statusText ?? ''}
           </p>
           <button
@@ -399,7 +425,7 @@ export default function SettingsView() {
       </main>
 
           <AppBottomNav current="settings" />
-        <p className="pb-4 text-center text-[9px] font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer')}</p>
+        <p className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer')}</p>
         </div>
   );
 }

@@ -48,7 +48,7 @@ export default function InfoView() {
             <Sparkles className="text-[#fcc025]" />
             <div>
               <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">說明中心</h1>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">{activeLabel}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">{activeLabel}</p>
             </div>
           </div>
         </div>

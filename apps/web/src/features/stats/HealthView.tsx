@@ -72,7 +72,7 @@ export default function HealthView() {
               <div className="flex items-center justify-between">
                  <div className="flex items-center gap-2">
                     <Activity size={16} className="text-[#fcc025]" />
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SIMULATION THROUGHPUT</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SIMULATION THROUGHPUT</h3>
                  </div>
                  <div className="flex items-center gap-4 text-[8px] font-black uppercase">
                     <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 border border-emerald-500" /> SUCCESS</div>
@@ -94,7 +94,7 @@ export default function HealthView() {
                  ) : (
                    <div className="w-full h-full flex flex-col items-center justify-center opacity-30">
                      <Activity size={32} className="text-[#494847] mb-2" />
-                     <span className="text-[#494847] text-[10px] font-bold uppercase">No Data Available</span>
+                     <span className="text-[#494847] text-xs font-bold uppercase">No Data Available</span>
                    </div>
                  )}
               </div>
@@ -108,7 +108,7 @@ export default function HealthView() {
            <section className="bg-[#1a1919] rounded-2xl p-8 border border-[#494847]/10 space-y-6">
               <div className="flex items-center gap-2">
                  <Terminal size={16} className="text-[#fcc025]" />
-                 <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SYSTEM PROTOCOL LOGS</h3>
+                 <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SYSTEM PROTOCOL LOGS</h3>
               </div>
               <div className="space-y-4 max-h-[350px] overflow-y-auto pr-4 hide-scrollbar">
                  {events.map((ev: any, i: number) => (
@@ -117,13 +117,13 @@ export default function HealthView() {
                           <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm ${ev.severity === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-[#fcc025]/10 text-[#fcc025]'}`}>[{ev.kind}]</span>
                           <span className="text-[8px] font-bold text-[#494847]">{new Date(ev.createdAt).toLocaleTimeString([], { hour12: false })}</span>
                        </div>
-                       <p className="text-[10px] font-bold text-white leading-relaxed uppercase italic tracking-tight">{ev.message}</p>
+                       <p className="text-xs font-bold text-white leading-relaxed uppercase italic tracking-tight">{ev.message}</p>
                     </div>
                  ))}
                  {events.length === 0 && (
                    <div className="flex flex-col items-center justify-center py-20 opacity-20 space-y-4">
                       <Database size={40} />
-                      <p className="text-[9px] font-black uppercase tracking-[0.5em]">No recent traces detected</p>
+                      <p className="text-xs font-black uppercase tracking-[0.5em]">No recent traces detected</p>
                    </div>
                  )}
               </div>

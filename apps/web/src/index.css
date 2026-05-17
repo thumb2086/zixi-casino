@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root { --base-font-size: 18px; }
+html { font-size: var(--base-font-size); }
+html[data-font-size="small"]  { --base-font-size: 16px; }
+html[data-font-size="medium"] { --base-font-size: 18px; }
+html[data-font-size="large"]  { --base-font-size: 20px; }
+
 * { box-sizing: border-box; }
 body {
   margin: 0;
