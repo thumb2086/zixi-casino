@@ -1329,9 +1329,9 @@ export class RewardCampaignRepository {
     });
     return data;
   }
-  async delete(id: string) {
+  async delete(campaignId: string) {
     const conn = await requireDb();
-    await conn.delete((schema as any).rewardCampaigns).where(eq((schema as any).rewardCampaigns.id, id));
+    await conn.delete((schema as any).rewardCampaigns).where(eq((schema as any).rewardCampaigns.campaignId, campaignId));
   }
   async tryClaim(data: { campaignId: string; userId: string; address?: string; limit?: number }) {
     const conn = await requireDb();
