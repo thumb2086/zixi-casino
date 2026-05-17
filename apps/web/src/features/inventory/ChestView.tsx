@@ -121,6 +121,10 @@ export default function ChestView() {
 
   const pity = status?.chestPity || {};
   const keyCounts = status?.keyCounts || {};
+  const [localPity, setLocalPity] = useState<Record<string, number> | null>(null);
+  const [localKeyCounts, setLocalKeyCounts] = useState<Record<string, number> | null>(null);
+  const displayPity = localPity || pity;
+  const displayKeyCounts = localKeyCounts || keyCounts;
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -167,6 +171,14 @@ export default function ChestView() {
       if (data?.success) {
         setOpenedItems(data.data.items);
         setShowResult(true);
+        // Update pity and key counts instantly from response
+        const d = data.data;
+        if (d.pityCount !== undefined) {
+          setLocalPity((prev) => ({ ...(prev || pity), [chestType]: d.pityCount }));
+        }
+        if (d.keyCounts) {
+          setLocalKeyCounts((prev) => ({ ...(prev || keyCounts), ...d.keyCounts }));
+        }
         await Promise.all([refreshStatus(), refreshInventory()]);
       } else {
         setUseStatusMessage(data?.error || '開啟失敗');
@@ -245,9 +257,9 @@ export default function ChestView() {
       {/* Chest Grid */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {chests.map((chest) => {
-          const currentPity = pity[chest.id] ?? 0;
+          const currentPity = displayPity[chest.id] ?? 0;
           const pityPercent = Math.min(100, (currentPity / chest.pityThreshold) * 100);
-          const keys = keyCounts[chest.id] ?? 0;
+          const keys = displayKeyCounts[chest.id] ?? 0;
           return (
             <motion.button
               key={chest.id}
