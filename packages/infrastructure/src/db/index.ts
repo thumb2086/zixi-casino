@@ -134,6 +134,10 @@ const isCoreSchemaReady = async (sql: any) => {
       to_regclass('public.total_bets') IS NOT NULL AS "totalBetsExists",
       to_regclass('public.leaderboard_kings') IS NOT NULL AS "leaderboardKingsExists",
       to_regclass('public.kv_store') IS NOT NULL AS "kvStoreExists",
+      to_regclass('public.reward_submissions') IS NOT NULL AS "rewardSubmissionsExists",
+      to_regclass('public.reward_catalog') IS NOT NULL AS "rewardCatalogExists",
+      to_regclass('public.reward_campaigns') IS NOT NULL AS "rewardCampaignsExists",
+      to_regclass('public.reward_grants') IS NOT NULL AS "rewardGrantsExists",
       EXISTS (
         SELECT 1
         FROM information_schema.columns
@@ -160,6 +164,10 @@ const isCoreSchemaReady = async (sql: any) => {
     row?.totalBetsExists &&
     row?.leaderboardKingsExists &&
     row?.kvStoreExists &&
+    row?.rewardSubmissionsExists &&
+    row?.rewardCatalogExists &&
+    row?.rewardCampaignsExists &&
+    row?.rewardGrantsExists &&
     row?.soundPrefsExists
   );
 };
@@ -461,6 +469,53 @@ const ensureCoreSchema = async () => {
             approved_item_id TEXT,
             created_at TIMESTAMP NOT NULL DEFAULT NOW(),
             reviewed_at TIMESTAMP
+          )
+        `;
+        await sql`
+          CREATE TABLE IF NOT EXISTS reward_catalog (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            item_id TEXT NOT NULL UNIQUE,
+            type TEXT NOT NULL,
+            name TEXT NOT NULL,
+            rarity TEXT NOT NULL,
+            source TEXT NOT NULL DEFAULT 'admin',
+            description TEXT,
+            icon TEXT,
+            price NUMERIC,
+            is_active BOOLEAN DEFAULT TRUE,
+            meta JSONB,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )
+        `;
+        await sql`
+          CREATE TABLE IF NOT EXISTS reward_campaigns (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            campaign_id TEXT NOT NULL UNIQUE,
+            title TEXT NOT NULL,
+            description TEXT,
+            is_active BOOLEAN DEFAULT TRUE,
+            start_at TIMESTAMP,
+            end_at TIMESTAMP,
+            required_level TEXT,
+            max_claims_total INTEGER,
+            max_claims_per_user INTEGER DEFAULT 1,
+            rewards JSONB NOT NULL,
+            created_by TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )
+        `;
+        await sql`
+          CREATE TABLE IF NOT EXISTS reward_grants (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL REFERENCES users(id),
+            address TEXT NOT NULL,
+            item_id TEXT NOT NULL,
+            type TEXT NOT NULL,
+            source TEXT NOT NULL,
+            campaign_id TEXT,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
           )
         `;
         await normalizeLegacyIdentityData(sql);
