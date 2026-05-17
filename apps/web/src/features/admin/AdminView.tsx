@@ -170,6 +170,14 @@ export default function AdminView() {
   const [userSearch, setUserSearch] = useState('');
   const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
 
+  const CHEST_KEY_ITEMS = [
+    { id: 'chest_key_common', name: '普通寶箱鑰匙', icon: '🗝️', rarity: 'common', type: 'chest_key' },
+    { id: 'chest_key_rare', name: '稀有寶箱鑰匙', icon: '🗝️', rarity: 'rare', type: 'chest_key' },
+    { id: 'chest_key_epic', name: '史詩寶箱鑰匙', icon: '🗝️', rarity: 'epic', type: 'chest_key' },
+    { id: 'chest_key_legendary', name: '傳奇寶箱鑰匙', icon: '🗝️', rarity: 'legendary', type: 'chest_key' },
+    { id: 'chest_key_mythic', name: '神話寶箱鑰匙', icon: '🗝️', rarity: 'mythic', type: 'chest_key' },
+  ];
+
   useEffect(() => {
     if (activeTab !== 'usermgr' && activeTab !== 'campaigns') return;
     Promise.all([
@@ -192,7 +200,7 @@ export default function AdminView() {
           catTitlesMap.set(item.id, { id: item.id, name: item.name, icon: item.icon });
         }
       }
-      setAllItemsList(Object.values(mergedItems));
+      setAllItemsList([...Object.values(mergedItems), ...CHEST_KEY_ITEMS]);
       setAllAvatars(Array.from(catAvatarsMap.values()));
       setAllTitles(Array.from(catTitlesMap.values()));
     });
