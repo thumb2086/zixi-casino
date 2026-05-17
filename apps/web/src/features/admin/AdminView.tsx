@@ -638,7 +638,7 @@ export default function AdminView() {
       rewards.titles = [campaignRewardTitleId.trim()];
     }
     try {
-      await api.post('/api/v1/admin/campaigns', {
+      const res = await api.post('/api/v1/admin/campaigns', {
         sessionId,
         campaignId: campaignDraftId.trim() || undefined,
         title,
@@ -650,6 +650,8 @@ export default function AdminView() {
         maxClaimsPerUser: Number(campaignClaimLimit || '1'),
         rewards,
       });
+      const data = res.data?.data;
+      if (data?.error) throw new Error(data.error.message || data.error.code || '儲存失敗');
       show('活動已儲存');
       setCampaignDraftId('');
       setCampaignTitle('');
