@@ -232,29 +232,8 @@ export default function MarketView() {
                 </button>
               </div>
 
-              <div className="mt-6 grid gap-3 md:grid-cols-[1fr_1fr_1fr]">
-                <input
-                  value={cashMoveAmount}
-                  onChange={(event) => setCashMoveAmount(event.target.value)}
-                  placeholder={t('market.amount')}
-                  className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none"
-                />
-                <button
-                  type="button"
-                  disabled={execute.isPending}
-                  onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
-                  className="rounded-2xl border border-[#494847]/20 bg-white px-4 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:opacity-50"
-                >
-                  {t('market.bank_deposit')}
-                </button>
-                <button
-                  type="button"
-                  disabled={execute.isPending}
-                  onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
-                  className="rounded-2xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-white disabled:opacity-50"
-                >
-                  {t('market.bank_withdraw')}
-                </button>
+              <div className="mt-4 text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                銀行存款 / 提款已移至主控台
               </div>
             </div>
 
