@@ -567,9 +567,14 @@ export default function ChestView() {
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ delay: index * 0.03, type: 'spring' }}
-                      className="bg-[#1a1919] rounded-xl p-2 border-2 text-center"
+                      className="bg-[#1a1919] rounded-xl p-2 border-2 text-center relative"
                       style={{ borderColor: RARITY_COLORS[item.item.rarity] || '#494847' }}
                     >
+                      {(item.quantity || 0) > 1 && (
+                        <span className="absolute -top-2 -right-2 bg-[#fcc025] text-black text-[10px] font-black min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-lg z-10">
+                          x{item.quantity}
+                        </span>
+                      )}
                       <div className="text-2xl mb-1">{item.item.icon}</div>
                       <h3 className="font-bold text-xs mb-0.5 truncate">{item.item.name}</h3>
                       <p className="text-xs text-[#adaaaa] mb-1 truncate">{item.item.description}</p>
@@ -596,9 +601,15 @@ export default function ChestView() {
 
               {openCompensation > 0 && (
                 <div className="text-center mb-4">
-                  <span className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-xl px-4 py-2 text-sm font-bold">
-                    重複物品補償 +{openCompensation} ZXC
-                  </span>
+                  <div className="inline-flex items-center gap-3 bg-gradient-to-br from-[#fcc025]/20 to-[#e6ad03]/10 border border-[#fcc025]/40 rounded-2xl px-6 py-4 shadow-lg shadow-[#fcc025]/5">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fcc025] to-[#e6ad03] flex items-center justify-center shadow-lg">
+                      <span className="text-lg">🪙</span>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>
+                      <p className="text-lg font-black italic text-[#fcc025]">+{openCompensation} ZXC</p>
+                    </div>
+                  </div>
                 </div>
               )}
 
