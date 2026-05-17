@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
 import {
   Bell,
   ChevronRight,
@@ -18,6 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
+import { api } from '../../store/api';
 import AppBottomNav from '../../components/AppBottomNav';
 import { useWallet } from '../wallet/useWallet';
 import { resolvePreferredBalance } from '../../utils/balance';
@@ -74,6 +76,36 @@ export default function LobbyView() {
     fallbackBalance: balance,
   });
 
+  const { data: inventoryData } = useQuery({
+    queryKey: ['inventory-preview'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/inventory');
+      return (res.data?.data?.items || []) as Array<{ id: string; icon: string; name: string; rarity: string; rarityColor?: string }>;
+    },
+    refetchInterval: 30000,
+  });
+  const previewItems = (inventoryData || []).slice(0, 4);
+
+  const { data: recentTxs } = useQuery({
+    queryKey: ['recent-activity-preview'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/dashboard/transactions', { params: { limit: 2, page: 1 } });
+      return (res.data?.data?.items || []) as Array<{ type: string; amount: string; tokenSymbol?: string; status: string; createdAt: string }>;
+    },
+    refetchInterval: 15000,
+  });
+
+  const { data: annData } = useQuery({
+    queryKey: ['announcement-count'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/support/announcements');
+      const anns = (res.data?.data?.announcements || []) as any[];
+      return anns.filter((a: any) => a.isPinned).length;
+    },
+    staleTime: 60000,
+  });
+  const pinnedCount = annData ?? 0;
+
   const zh = {
     title: '子熙模擬器',
     operatorIdentified: '操作者已識別',
@@ -85,17 +117,15 @@ export default function LobbyView() {
     marketTerminal: '市場終端',
     liveFeed: '即時走勢',
     announcements: '公告中心',
-    newAlerts: '3 則新通知',
+    newAlerts: `${pinnedCount} 則新通知`,
     rankings: '排行榜',
     globalSector: '全域排名',
     wallet: '錢包',
     secured: '已保護',
     activity: '最新動態',
     recentTraces: '最新追蹤',
-    withdrawalSuccess: '提領已成功',
-    loginDetected: '偵測到新登入：192.168.1.1',
     inventory: '背包',
-    items: '14 項物品',
+    items: `${previewItems.length || 0} 項物品`,
     shop: '商店',
     shopSubtitle: '寶箱鑰匙 & 組合包',
     vipProtocol: 'VIP 機制',
@@ -170,13 +200,8 @@ export default function LobbyView() {
             to="/app/announcement"
             icon={Megaphone}
             title={isZh ? zh.announcements : 'Announcements'}
-            subtitle={isZh ? zh.newAlerts : '3 New Alerts'}
+            subtitle={isZh ? zh.newAlerts : `${pinnedCount} New Alerts`}
           >
-            <div className="mt-4 space-y-2">
-              <div className="h-1 w-full overflow-hidden rounded-full bg-[#494847]/30">
-                <div className="h-full w-1/3 rounded-full bg-[#fcc025]" />
-              </div>
-            </div>
           </GlassCard>
 
           <GlassCard
@@ -192,15 +217,20 @@ export default function LobbyView() {
             title={isZh ? zh.activity : 'Activity'}
             subtitle={isZh ? zh.recentTraces : 'Recent Traces'}
           >
-            <div className="mt-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
-              <div className="flex gap-2">
-                <span className="text-[#fcc025]">01</span>
-                {isZh ? zh.withdrawalSuccess : 'Withdrawal Successful'}
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[#fcc025]">02</span>
-                {isZh ? zh.loginDetected : 'New Login: 192.168.1.1'}
-              </div>
+            <div className="mt-4 space-y-2 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa]">
+              {!recentTxs || recentTxs.length === 0 ? (
+                <>
+                  <div className="flex gap-2">
+                    <span className="text-[#fcc025]">--</span>
+                    {isZh ? '尚無動態' : 'No activity yet'}
+                  </div>
+                </>
+              ) : recentTxs.map((tx, i) => (
+                <div key={i} className="flex gap-2 truncate">
+                  <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="truncate">{tx.type} · {tx.amount} {tx.tokenSymbol || ''}</span>
+                </div>
+              ))}
             </div>
           </GlassCard>
 
@@ -208,10 +238,14 @@ export default function LobbyView() {
             to="/app/inventory"
             icon={Bell}
             title={isZh ? zh.inventory : 'Inventory'}
-            subtitle={isZh ? zh.items : '14 Items'}
+            subtitle={isZh ? zh.items : `${(inventoryData || []).length || 0} Items`}
           >
             <div className="mt-4 grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map((i) => (
+              {previewItems.length > 0 ? previewItems.map((invItem) => (
+                <Link key={invItem.id} to="/app/inventory" className="group aspect-square rounded border border-[#494847]/20 bg-[#262626] flex items-center justify-center text-lg hover:border-[#fcc025]/40 transition-all hover:scale-105" title={invItem.name}>
+                  <span>{invItem.icon}</span>
+                </Link>
+              )) : [1, 2, 3, 4].map((i) => (
                 <div key={i} className="aspect-square rounded border border-[#494847]/20 bg-[#262626]" />
               ))}
             </div>
@@ -233,15 +267,22 @@ export default function LobbyView() {
               </div>
             </div>
           </GlassCard>
-          <GlassCard
-            to="/app/info"
-            icon={Crown}
-            title={isZh ? '資訊中心' : 'Information Center'}
-            subtitle={isZh ? '說明與指南' : 'Guides & Information'}
-            border
+          <div
+            className={`rounded-xl bg-[#1a1919] p-6 transition-all border-l-4 border-l-[#fcc025]/40`}
           >
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#494847]/20 bg-[#262626]">
+                <Crown className="h-6 w-6 text-[#fcc025]" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#adaaaa]">
+                {isZh ? '說明與指南' : 'Guides & Information'}
+              </span>
+            </div>
+            <h4 className="mb-2 text-lg font-bold uppercase tracking-tight text-white">
+              {isZh ? '資訊中心' : 'Information Center'}
+            </h4>
             <div className="mt-4 space-y-3">
-              <div className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-[#fcc025]/40">
+              <Link to="/app/info?tab=vip" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-[#fcc025]/40">
                 <Crown className="h-5 w-5 text-[#fcc025]" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{isZh ? 'VIP 等級說明' : 'VIP Levels'}</p>
@@ -250,9 +291,9 @@ export default function LobbyView() {
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
-              </div>
+              </Link>
               
-              <div className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-emerald-400/40">
+              <Link to="/app/info?tab=odds" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-emerald-400/40">
                 <Dice5 className="h-5 w-5 text-emerald-400" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{isZh ? '遊戲機率' : 'Game Odds'}</p>
@@ -261,9 +302,9 @@ export default function LobbyView() {
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
-              </div>
+              </Link>
               
-              <div className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-purple-400/40">
+              <Link to="/app/info?tab=items" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-purple-400/40">
                 <Package className="h-5 w-5 text-purple-400" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{isZh ? '物品圖鑑' : 'Items Catalog'}</p>
@@ -272,9 +313,9 @@ export default function LobbyView() {
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
-              </div>
+              </Link>
             </div>
-          </GlassCard>
+          </div>
           <GlassCard
             to="/app/admin"
             icon={SettingsIcon}
