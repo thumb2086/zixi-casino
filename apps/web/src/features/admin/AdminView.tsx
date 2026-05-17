@@ -643,8 +643,8 @@ export default function AdminView() {
         title,
         description: campaignDescription.trim() || undefined,
         isActive: campaignIsActive,
-        startAt: campaignStartAt || null,
-        endAt: campaignEndAt || null,
+        startAt: campaignStartAt ? new Date(campaignStartAt).toISOString() : null,
+        endAt: campaignEndAt ? new Date(campaignEndAt).toISOString() : null,
         claimLimitPerUser: Number(campaignClaimLimit || '1'),
         maxClaimsPerUser: Number(campaignClaimLimit || '1'),
         rewards,
@@ -1712,8 +1712,8 @@ export default function AdminView() {
                               setCampaignTitle(c.title || '');
                               setCampaignDescription(c.description || '');
                               setCampaignIsActive(c.isActive ?? true);
-                              setCampaignStartAt(c.startAt ? new Date(c.startAt).toISOString().slice(0, 16) : '');
-                              setCampaignEndAt(c.endAt ? new Date(c.endAt).toISOString().slice(0, 16) : '');
+                              setCampaignStartAt(c.startAt ? (() => { const d = new Date(c.startAt); const pad = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; })() : '');
+                              setCampaignEndAt(c.endAt ? (() => { const d = new Date(c.endAt); const pad = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; })() : '');
                               setCampaignClaimLimit(String(c.maxClaimsPerUser ?? 1));
                               const r = c.rewards || {};
                               setCampaignRewardZxc(String(r.zxc || ''));
