@@ -30,8 +30,7 @@ type DashboardTransaction = {
 };
 
 export default function PublicTransactionsView() {
-  const { t, i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
+  const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
     queryKey: ['public-transactions'],
@@ -77,27 +76,6 @@ export default function PublicTransactionsView() {
     refetchInterval: 10000,
   });
 
-  const zh = {
-    title: '\u516c\u958b\u4ea4\u6613\u52d5\u614b',
-    overallSuccessRate: '\u6574\u9ad4\u6210\u529f\u7387',
-    walletExecution: '\u9322\u5305\u57f7\u884c\u7387',
-    marketWinRate: '\u5e02\u5834\u52dd\u7387',
-    successSummary: '\u6210\u529f {{success}} \u7b46 / \u7d0d\u5165\u7d71\u8a08 {{scored}} \u7b46',
-    confirmedWalletIntents: '\u5df2\u78ba\u8a8d\u9322\u5305\u610f\u5716',
-    marketOutcomes: '\u5df2\u7d50\u7b97\u5e02\u5834\u7d50\u679c',
-    serviceStatus: '\u670d\u52d9\u72c0\u614b',
-    serviceStatusSummary: '\u7cfb\u7d71\u72c0\u614b\u8207\u5340\u584a\u4ea4\u6613\u8ffd\u8e64',
-    uptime: '\u7a69\u5b9a\u7387',
-    failureRate: '\u5931\u6557\u7387',
-    viewDetails: '\u67e5\u770b\u8a73\u7d30',
-    latestActivity: '\u6700\u65b0\u5e02\u5834\u8207\u9322\u5305\u52d5\u614b',
-    loading: '\u8f09\u5165\u4e2d...',
-    empty: '\u5c1a\u7121\u516c\u958b\u4ea4\u6613\u8cc7\u6599',
-    wallet: '\u9322\u5305',
-    market: '\u5e02\u5834',
-    public: '\u516c\u958b',
-  };
-
   const items = data?.items || [];
   const summary = data?.summary;
   const registerBonusItems = items.filter((item) =>
@@ -126,7 +104,7 @@ export default function PublicTransactionsView() {
         <div className="app-shell flex items-center gap-3 py-4">
           <Activity className="text-[#fcc025]" />
           <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
-            {isZh ? zh.title : 'Public Transactions'}
+            {t('transactions.title')}
           </h1>
         </div>
       </header>
@@ -176,7 +154,7 @@ export default function PublicTransactionsView() {
           <div className="flex items-center gap-2">
             <HeartPulse size={16} className="text-[#fcc025]" />
             <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {isZh ? zh.serviceStatus : 'Service Status'}
+              {t('transactions.service_status')}
             </h2>
           </div>
 
@@ -267,46 +245,42 @@ export default function PublicTransactionsView() {
         <section className="mb-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {isZh ? zh.overallSuccessRate : 'Overall Success Rate'}
+              {t('transactions.overall_success_rate')}
             </p>
             <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(successRatePct)}</p>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-              {isZh
-                ? zh.successSummary
-                    .replace('{{success}}', String(summary?.confirmed ?? 0))
-                    .replace('{{scored}}', String(summary?.total ?? 0))
-                : `${summary?.confirmed ?? 0} success / ${summary?.total ?? 0} scored`}
+              {t('transactions.success_summary', { success: summary?.confirmed ?? 0, scored: summary?.total ?? 0 })}
             </p>
           </div>
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {isZh ? zh.walletExecution : 'Wallet Execution'}
+              {t('transactions.wallet_execution')}
             </p>
             <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(walletExecutionPct)}</p>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-              {isZh ? zh.confirmedWalletIntents : 'Confirmed wallet intents'}
+              {t('transactions.confirmed_wallet_intents')}
             </p>
           </div>
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {isZh ? zh.marketWinRate : 'Market Win Rate'}
+              {t('transactions.market_win_rate')}
             </p>
             <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(marketWinRatePct)}</p>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-              {isZh ? zh.marketOutcomes : 'Closed/realized market outcomes'}
+              {t('transactions.market_outcomes')}
             </p>
           </div>
         </section>
 
         <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-            {isZh ? zh.latestActivity : 'Latest Market & Wallet Activity'}
+            {t('transactions.latest_activity')}
           </p>
           <div className="mt-4 space-y-3">
-            {isLoading && <div className="text-sm text-[#adaaaa]">{isZh ? zh.loading : t('common.loading')}</div>}
+            {isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
             {!isLoading && !items.length && (
               <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
-                {isZh ? zh.empty : 'No public transactions yet'}
+                {t('transactions.empty')}
               </div>
             )}
             {items.map((item) => (

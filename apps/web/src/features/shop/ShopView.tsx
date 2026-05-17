@@ -210,7 +210,7 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`典當成功！獲得 +${res.data.data.payout} ZXC`);
         setBalance(res.data.data.balanceAfter);
-        fetchItems();
+        await fetchItems();
       } else {
         setMsg(res.data?.error || '典當失敗');
       }
@@ -230,7 +230,7 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`✅ 成功出售 ${qty} 股 ${symbol}，獲得 +${res.data.data.payout} ZXC`);
         setBalance(res.data.data.balanceAfter);
-        fetchItems();
+        await fetchItems();
       } else {
         setMsg(`❌ ${res.data?.error || '出售失敗'}`);
       }
@@ -263,7 +263,7 @@ export default function ShopView() {
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-3">
-            <Link to="/app/wallet" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+            <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
               <ChevronLeft size={24} />
             </Link>
             <ShoppingBag className="text-[#fcc025]" />
@@ -332,38 +332,31 @@ export default function ShopView() {
                     <input
                       type="number"
                       min={1}
-                      max={99}
-                      value={qty}
+                      max={999}
+                      value={chestQty[chest.id] || 1}
                       onChange={(e) => {
                         const v = parseInt(e.target.value) || 1;
-                        setChestQty(p => ({ ...p, [chest.id]: Math.max(1, Math.min(99, v)) }));
+                        setChestQty(p => ({ ...p, [chest.id]: Math.max(1, Math.min(999, v)) }));
                       }}
-                      className="w-10 bg-[#0e0e0e] border border-[#494847]/40 rounded text-sm font-black text-white text-center
-                        focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded text-center text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]"
                     />
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.min(99, (p[chest.id] || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.min(999, (p[chest.id] || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
                   </div>
-                  {discount > 0 ? (
-                    <div className="text-center mt-1">
-                      <span className="text-sm text-[#adaaaa] line-through">{chest.price.toLocaleString()} ZXC</span>
-                      <span className="text-sm font-black text-emerald-400 ml-1">{(discount * 100).toFixed(0)}%OFF</span>
-                      <p className="text-sm font-black text-[#fcc025]">{(unitPrice * qty).toLocaleString()} ZXC</p>
-                    </div>
-                  ) : (
-                    <p className="text-sm font-black text-[#fcc025] text-center mt-1">{chest.price.toLocaleString()} ZXC / 個</p>
-                  )}
-                  <div className="mt-auto pt-2">
-                    <button onClick={() => handleBuyChest(chest.id, qty)} disabled={boughtHere || !sessionId} className="w-full text-sm font-black uppercase tracking-widest bg-[#fcc025] text-[#0e0e0e] py-1.5 rounded-lg disabled:opacity-50">
-                      {boughtHere ? <Loader2 size={10} className="animate-spin mx-auto" /> : '購買'}
-                    </button>
-                  </div>
+                  <p className="text-center text-[11px] text-[#adaaaa] mt-2">
+                    {(qty * unitPrice).toLocaleString()} ZXC
+                    {discount > 0 && <span className="text-emerald-400 ml-1">-{discount * 100}%</span>}
+                  </p>
+                  <button
+                    onClick={() => handleBuyChest(chest.id)}
+                    disabled={boughtHere}
+                    className="mt-2 w-full bg-[#fcc025] text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
+                  >
+                    {boughtHere ? '購買中...' : '購買'}
+                  </button>
                 </div>
               );
             })}
           </div>
-          <p className="mt-3 text-sm text-center text-[#adaaaa]">
-            購買後會放入背包，可到<Link to="/app/inventory" className="text-[#fcc025] underline">道具背包</Link>開啟
-          </p>
         </section>
 
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">

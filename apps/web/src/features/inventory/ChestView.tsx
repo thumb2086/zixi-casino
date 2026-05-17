@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Package, Sparkles, ChevronRight, X, Shield, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../store/api';
 
 interface ChestConfig {
@@ -105,13 +105,13 @@ function formatExpires(expiresAt?: string | null): string {
 }
 
 export default function ChestView() {
+  const navigate = useNavigate();
   const [chests, setChests] = useState<ChestConfig[]>([]);
   const [selectedChest, setSelectedChest] = useState<ChestConfig | null>(null);
   const [isOpening, setIsOpening] = useState(false);
   const [openQty, setOpenQty] = useState(1);
   const [openedItems, setOpenedItems] = useState<ChestItem[]>([]);
   const [openCompensation, setOpenCompensation] = useState(0);
-  const [compToast, setCompToast] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [status, setStatus] = useState<ChestStatus | null>(null);
   const [inventory, setInventory] = useState<InventoryState>({
@@ -184,10 +184,6 @@ export default function ChestView() {
         setOpenedItems(data.data.items);
         const comp = data.data.compensationZXC || 0;
         setOpenCompensation(comp);
-        if (comp > 0) {
-          setCompToast(`重複物品補償 +${comp} ZXC`);
-          setTimeout(() => setCompToast(null), 4000);
-        }
         setShowResult(true);
         // Update pity and key counts instantly from response
         const d = data.data;
@@ -276,7 +272,7 @@ export default function ChestView() {
         {chests.map((chest) => {
           const currentPity = displayPity[chest.id] ?? 0;
           const pityPercent = Math.min(100, (currentPity / chest.pityThreshold) * 100);
-          const keys = displayKeyCounts[chest.id] ?? 0;
+          const keys = displayKeyCounts[`chest_key_${chest.id}`] ?? 0;
           return (
             <motion.button
               key={chest.id}
@@ -520,23 +516,28 @@ export default function ChestView() {
                 恭喜獲得!
               </h2>
 
-              <div className="overflow-y-auto flex-1 min-h-0 pr-1 scrollbar-thin">
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mb-6">
-                  {openedItems.map((item, index) => (
+              <div className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 pr-1 scrollbar-thin">
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-2 mb-6">
+                  {[...openedItems]
+                    .sort((a, b) => {
+                      const order = ['common', 'rare', 'epic', 'legendary', 'mythic'];
+                      return order.indexOf(b.item.rarity) - order.indexOf(a.item.rarity);
+                    })
+                    .map((item, index) => (
                     <motion.div
                       key={index}
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
-                      transition={{ delay: index * 0.05, type: 'spring' }}
-                      className="bg-[#1a1919] rounded-xl p-3 border-2 text-center"
+                      transition={{ delay: index * 0.03, type: 'spring' }}
+                      className="bg-[#1a1919] rounded-xl p-2 border-2 text-center"
                       style={{ borderColor: RARITY_COLORS[item.item.rarity] || '#494847' }}
                     >
                       <div className="text-2xl mb-1">{item.item.icon}</div>
-                      <h3 className="font-bold text-sm mb-0.5 truncate">{item.item.name}</h3>
-                      <p className="text-sm text-[#adaaaa] mb-1 truncate">{item.item.description}</p>
+                      <h3 className="font-bold text-xs mb-0.5 truncate">{item.item.name}</h3>
+                      <p className="text-xs text-[#adaaaa] mb-1 truncate">{item.item.description}</p>
                       <div className="flex items-center justify-center gap-1">
                         <span
-                          className="text-sm px-1.5 py-0.5 rounded-full font-bold"
+                          className="text-xs px-1 py-0.5 rounded-full font-bold"
                           style={{
                             backgroundColor: `${RARITY_COLORS[item.item.rarity]}30`,
                             color: RARITY_COLORS[item.item.rarity],
@@ -545,7 +546,7 @@ export default function ChestView() {
                           {item.item.rarity}
                         </span>
                         {item.isNew && (
-                          <span className="text-sm bg-[#fcc025] text-black px-1.5 py-0.5 rounded-full font-bold">
+                          <span className="text-xs bg-[#fcc025] text-black px-1 py-0.5 rounded-full font-bold">
                             NEW
                           </span>
                         )}
@@ -568,6 +569,7 @@ export default function ChestView() {
                   onClick={() => {
                     setOpenQty(1);
                     setShowResult(false);
+                    navigate('/app/inventory');
                   }}
                   className="bg-[#494847] hover:bg-[#5a5858] text-white font-bold px-8 py-3
                     rounded-xl transition-colors inline-flex items-center gap-2"
@@ -581,11 +583,6 @@ export default function ChestView() {
         )}
       </AnimatePresence>
 
-      {compToast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-emerald-500/20 border border-emerald-400/40 shadow-lg shadow-black/50 text-sm font-bold text-emerald-400 animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
-          {compToast}
-        </div>
-      )}
     </div>
   );
 }

@@ -7,8 +7,7 @@ import { api } from '../store/api';
 
 export default function ChatRoom() {
   const [inputText, setInputText] = useState('');
-  const { i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
+  const { t } = useTranslation();
   const { username } = useUserStore();
   const { isAuthorized } = useAuthStore();
   const queryClient = useQueryClient();
@@ -67,9 +66,9 @@ export default function ChatRoom() {
     <div className="flex h-[400px] flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80 shadow-2xl">
       <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 p-3">
         <span className="text-xs font-black uppercase tracking-widest text-blue-400">
-          {isZh ? '\u5168\u57df\u804a\u5929' : 'Global Chat'}
+          {t('chat.title')}
         </span>
-        <span className="text-[10px] text-slate-600">{isZh ? '全域聊天' : 'Global'}</span>
+        <span className="text-[10px] text-slate-600">{t('chat.global')}</span>
       </div>
 
       <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-4">
@@ -99,7 +98,7 @@ export default function ChatRoom() {
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder={isZh ? '\u8aaa\u9ede\u4ec0\u9ebc...' : 'Say something...'}
+          placeholder={t('chat.placeholder')}
           className="flex-1 rounded border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs text-white transition-colors focus:border-blue-500 focus:outline-none"
         />
         <button
@@ -107,7 +106,7 @@ export default function ChatRoom() {
           className="rounded bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-blue-500"
           disabled={sendMutation.isPending}
         >
-          {isZh ? '\u767c\u9001' : 'Send'}
+          {t('chat.send')}
         </button>
       </form>
     </div>

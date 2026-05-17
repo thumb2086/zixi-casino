@@ -23,8 +23,7 @@ const DAILY_REWARDS = [
 ];
 
 export default function RewardsView() {
-  const { t, i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const rewardsQuery = useQuery({
@@ -66,8 +65,8 @@ export default function RewardsView() {
           className="flex items-center justify-between rounded-xl border border-[#fcc025]/30 bg-gradient-to-r from-[#fcc025]/15 to-[#fcc025]/5 p-4 transition-all hover:from-[#fcc025]/25 hover:to-[#fcc025]/10"
         >
           <div>
-            <p className="text-sm font-black text-white">活動中心</p>
-            <p className="mt-1 text-[10px] text-[#adaaaa]">查看進行中的活動並領取獎勵</p>
+            <p className="text-sm font-black text-white">{t('events.title')}</p>
+            <p className="mt-1 text-[10px] text-[#adaaaa]">{t('events.no_events')}</p>
           </div>
           <CalendarClock className="h-6 w-6 text-[#fcc025]" />
         </Link>
@@ -80,7 +79,7 @@ export default function RewardsView() {
             Platinum IV
           </div>
           <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.3em] text-[#adaaaa]">
-            {isZh ? 'VIP \u7b49\u7d1a\u9032\u5ea6' : 'VIP Tier Progress'}
+            {t('rewards.vip_progress')}
           </p>
           <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full border border-[#494847]/20 bg-[#1a1919]">
             <div className="h-full w-[65%] bg-[#fcc025] shadow-[0_0_10px_#fcc025]" />
@@ -95,7 +94,7 @@ export default function RewardsView() {
           <div className="flex items-center gap-2 px-2">
             <Calendar size={16} className="text-[#adaaaa]" />
             <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
-              {isZh ? '\u6bcf\u65e5\u734e\u52f5' : 'Daily Rewards'}
+              {t('rewards.daily_rewards')}
             </h3>
           </div>
           <div className="grid grid-cols-4 gap-3 md:grid-cols-7">
@@ -115,7 +114,7 @@ export default function RewardsView() {
                 {reward.status === 'CLAIMED' && <CheckCircle2 size={12} className="text-emerald-500" />}
                 {reward.status === 'AVAILABLE' && (
                   <button type="button" className="rounded-sm bg-[#fcc025] px-1.5 py-0.5 text-[7px] font-black uppercase tracking-tighter text-black">
-                    {isZh ? '\u9818\u53d6' : 'Claim'}
+                    {t('rewards.claim')}
                   </button>
                 )}
               </div>
@@ -127,7 +126,7 @@ export default function RewardsView() {
           <div className="flex items-center gap-2 px-2">
             <Zap size={16} className="text-[#adaaaa]" />
             <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
-              {isZh ? '\u76ee\u524d\u4efb\u52d9' : 'Active Quests'}
+              {t('rewards.active_quests')}
             </h3>
           </div>
           <div className="space-y-4">
@@ -141,7 +140,7 @@ export default function RewardsView() {
                     {campaign.title}
                   </h4>
                   <p className="text-[9px] font-bold uppercase tracking-widest text-[#fcc025]">
-                    Reward: {campaign.rewards.tokens} ZXC
+                    {t('rewards.reward_amount', { amount: campaign.rewards.tokens })}
                   </p>
                   <div className="mt-4 h-1 w-48 overflow-hidden rounded-full bg-[#0e0e0e]">
                     <div className="h-full w-1/2 bg-[#fcc025]/50" />
@@ -152,14 +151,14 @@ export default function RewardsView() {
                   onClick={() => claimMutation.mutate(campaign.id)}
                   className="rounded-lg bg-[#fcc025] px-6 py-2 text-[10px] font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
                 >
-                  {isZh ? '\u9818\u53d6\u734e\u52f5' : 'Claim Reward'}
+                  {t('rewards.claim_reward')}
                 </button>
               </div>
             ))}
 
             {!campaigns.length && (
               <div className="rounded-2xl border border-dashed border-[#494847]/20 p-6 text-center text-[11px] font-bold uppercase tracking-widest text-[#adaaaa]">
-                {isZh ? '\u76ee\u524d\u6c92\u6709\u555f\u7528\u4e2d\u7684\u4efb\u52d9' : 'No active reward quests'}
+                {t('rewards.no_active_quests')}
               </div>
             )}
           </div>

@@ -41,7 +41,7 @@ function AssetCard({
 }
 
 export default function WalletView() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { amountDisplay } = usePreferencesStore();
   const { balance: syncedBalance, address: userAddress } = useUserStore();
   const { summary, airdrop, transfer, convert } = useWallet();
@@ -64,7 +64,6 @@ export default function WalletView() {
     }
   };
 
-  const isZh = i18n.language.startsWith('zh');
   const numberMode = amountDisplay === 'full' ? 'full' : 'short';
   const walletSummary = summary.data?.summary;
   const assets = summary.data?.assets;
@@ -86,37 +85,10 @@ export default function WalletView() {
   const walletOnlyTotal = (Number(zxcBalance || 0) + Number(yjcBalance || 0)).toFixed(4);
   const totalBalance = (Number(walletOnlyTotal) + Number(marketNetWorth || 0)).toFixed(4);
 
-  const zh = {
-    wallet: '\u9322\u5305',
-    market: '\u5e02\u5834',
-    zxc: '\u5b50\u7199\u5e63',
-    yjc: '\u4f51\u6229\u5e63',
-    dailyAirdrop: '\u6bcf\u65e5\u7a7a\u6295',
-    nextAvailable: '\u4e0b\u6b21\u53ef\u9818\u6642\u9593\uff1a',
-    airdropNow: '\u53ef\u7acb\u5373\u9818\u53d6',
-    claiming: '\u9818\u53d6\u4e2d',
-    claimAirdrop: '\u9818\u53d6\u7a7a\u6295',
-    transfer: '\u8f49\u5e33',
-    recipient: '\u6536\u6b3e\u5730\u5740',
-    amount: '\u6578\u91cf',
-    sending: '\u8f49\u5e33\u4e2d',
-    sendTransfer: '\u9001\u51fa\u8f49\u5e33',
-    convert: 'ZXC \u514c\u63db YJC',
-    convertAmount: '\u8f38\u5165 ZXC \u6578\u91cf',
-    converting: '\u514c\u63db\u4e2d',
-    startConvert: '\u958b\u59cb\u514c\u63db',
-    zxcOnchain: 'ZXC \u93c8\u4e0a\u9918\u984d',
-    yjcOnchain: 'YJC \u93c8\u4e0a\u9918\u984d',
-    adminSigner: '\u7ba1\u7406\u54e1\u7c3d\u7f72\u5730\u5740',
-    notConfigured: '\u672a\u8a2d\u5b9a',
-    loading: '\u8f09\u5165\u4e2d...',
-    noTransactions: '\u76ee\u524d\u6c92\u6709\u4ea4\u6613\u7d00\u9304',
-  };
-
   const nextAirdropLabel = useMemo(() => {
-    if (!nextAirdropAt || canClaimAirdrop) return isZh ? zh.airdropNow : 'Available now';
+    if (!nextAirdropAt || canClaimAirdrop) return t('vault.airdrop_now');
     return new Date(nextAirdropAt).toLocaleString('zh-TW');
-  }, [canClaimAirdrop, nextAirdropAt, isZh]);
+  }, [canClaimAirdrop, nextAirdropAt, t]);
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-40 font-['Manrope'] text-white">
@@ -128,13 +100,13 @@ export default function WalletView() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/app/shop" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#fcc025]">
-              商店
+              {t('nav.inventory')}
             </Link>
             <Link to="/app/swap" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#fcc025]">
-              Swap
+              {t('swap.title')}
             </Link>
             <Link to="/app/transactions" className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              Public Feed
+              {t('nav.feed')}
             </Link>
           </div>
         </div>
@@ -147,12 +119,12 @@ export default function WalletView() {
             {formatNumber(totalBalance, numberMode)}
           </p>
           <div className="mt-4 flex flex-wrap gap-4 text-[11px] font-bold uppercase tracking-[0.16em] text-[#adaaaa]">
-            <span>{isZh ? zh.wallet : 'Wallet'} {formatNumber(walletOnlyTotal, numberMode)}</span>
-            <span>{isZh ? zh.market : 'Market'} {formatNumber(marketNetWorth, numberMode)}</span>
+            <span>{t('vault.wallet')} {formatNumber(walletOnlyTotal, numberMode)}</span>
+            <span>{t('market.title')} {formatNumber(marketNetWorth, numberMode)}</span>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <AssetCard label={isZh ? zh.zxc : 'ZiXi Coin'} value={formatNumber(zxcBalance, numberMode)} token="ZXC" />
-            <AssetCard label={isZh ? zh.yjc : 'YouJian Coin'} value={formatNumber(yjcBalance, numberMode)} token="YJC" />
+            <AssetCard label={t('vault.zxc_label')} value={formatNumber(zxcBalance, numberMode)} token="ZXC" />
+            <AssetCard label={t('vault.yjc_label')} value={formatNumber(yjcBalance, numberMode)} token="YJC" />
           </div>
         </section>
 
@@ -161,10 +133,10 @@ export default function WalletView() {
             <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <Gift className="text-[#fcc025]" size={18} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">{isZh ? zh.dailyAirdrop : 'Daily Airdrop'}</h2>
+                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
               </div>
               <p className="mt-3 text-sm font-bold text-[#adaaaa]">
-                {isZh ? zh.nextAvailable : 'Next available: '}{nextAirdropLabel}
+                {t('vault.next_available')}{nextAirdropLabel}
               </p>
               <button
                 type="button"
@@ -173,7 +145,7 @@ export default function WalletView() {
                 className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ArrowDownCircle size={16} />
-                {airdrop.isPending ? (isZh ? zh.claiming : 'Claiming') : (isZh ? zh.claimAirdrop : 'Claim Airdrop')}
+                {airdrop.isPending ? t('vault.claiming') : t('vault.claim_airdrop')}
               </button>
               {airdrop.error?.message && (
                 <p className="mt-2 text-[10px] font-bold text-[#ff7351]">{airdrop.error.message}</p>
@@ -183,20 +155,20 @@ export default function WalletView() {
             <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <div className="flex items-center gap-3">
                 <Repeat2 className="text-[#fcc025]" size={18} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">{isZh ? zh.transfer : 'Transfer'}</h2>
+                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">{t('vault.transfer')}</h2>
               </div>
               <div className="mt-4 grid gap-3">
                 <input
                   value={transferTo}
                   onChange={(event) => setTransferTo(event.target.value)}
-                  placeholder={isZh ? zh.recipient : 'Recipient address'}
+                  placeholder={t('vault.recipient_placeholder')}
                   className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
                 />
                 <div className="grid gap-3 md:grid-cols-[1fr_140px]">
                   <input
                     value={transferAmount}
                     onChange={(event) => setTransferAmount(event.target.value)}
-                    placeholder={isZh ? zh.amount : 'Amount'}
+                    placeholder={t('market.amount')}
                     className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
                   />
                   <select
@@ -215,7 +187,7 @@ export default function WalletView() {
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ArrowUpCircle size={16} />
-                  {transfer.isPending ? (isZh ? zh.sending : 'Sending') : (isZh ? zh.sendTransfer : 'Send Transfer')}
+                  {transfer.isPending ? t('vault.sending') : t('vault.send_transfer')}
                 </button>
               </div>
             </div>
@@ -225,7 +197,7 @@ export default function WalletView() {
                 <div className="flex items-center gap-3">
                   <QrCode className="text-[#fcc025]" size={18} />
                   <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
-                    {isZh ? '匯入資金（他人匯入你的雲端錢包）' : 'Receive funds'}
+                    {t('vault.receive_funds')}
                   </h2>
                 </div>
                 <div className="mt-4 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
@@ -234,7 +206,7 @@ export default function WalletView() {
                   </div>
                   <div className="flex flex-1 flex-col gap-3">
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                      {isZh ? '收款地址' : 'Receive address'}
+                      {t('vault.receive_address')}
                     </p>
                     <p className="break-all rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold text-white">
                       {myAddress}
@@ -245,14 +217,10 @@ export default function WalletView() {
                       className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black"
                     >
                       {copied ? <Check size={16} /> : <Copy size={16} />}
-                      {copied
-                        ? (isZh ? '已複製' : 'Copied')
-                        : (isZh ? '複製錢包地址' : 'Copy address')}
+                      {copied ? t('common.copied') : t('vault.copy_address')}
                     </button>
                     <p className="text-[11px] text-[#adaaaa]">
-                      {isZh
-                        ? '把上面地址或 QR 給對方，對方轉帳後你的餘額會自動刷新。'
-                        : 'Share this address or QR with the sender. Your balance refreshes automatically.'}
+                      {t('vault.receive_instruction')}
                     </p>
                   </div>
                 </div>
@@ -263,7 +231,7 @@ export default function WalletView() {
               <div className="flex items-center gap-3">
                 <Repeat2 className="text-[#fcc025]" size={18} />
                 <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
-                  {isZh ? zh.convert : 'Convert ZXC to YJC'}
+                  {t('vault.convert')}
                 </h2>
               </div>
               <p className="mt-3 text-sm font-bold text-[#adaaaa]">100,000,000 ZXC = 1 YJC</p>
@@ -271,7 +239,7 @@ export default function WalletView() {
                 <input
                   value={convertAmount}
                   onChange={(event) => setConvertAmount(event.target.value)}
-                  placeholder={isZh ? zh.convertAmount : 'ZXC amount'}
+                  placeholder={t('vault.convert_placeholder')}
                   className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
                 />
                 <button
@@ -281,12 +249,12 @@ export default function WalletView() {
                   className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Repeat2 size={16} />
-                  {convert.isPending ? (isZh ? zh.converting : 'Converting') : (isZh ? zh.startConvert : 'Convert')}
+                  {convert.isPending ? t('vault.converting') : t('vault.start_convert')}
                 </button>
                 <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4 text-xs font-bold text-[#adaaaa]">
-                  <div>{isZh ? zh.zxcOnchain : 'ZXC on-chain'}: {formatNumber(zxcBalance, numberMode)}</div>
-                  <div className="mt-1">{isZh ? zh.yjcOnchain : 'YJC on-chain'}: {formatNumber(yjcBalance, numberMode)}</div>
-                  <div className="mt-1">{isZh ? zh.adminSigner : 'Admin signer'}: {onchain?.adminAddress || (isZh ? zh.notConfigured : 'not configured')}</div>
+                  <div>{t('vault.zxc_onchain')}: {formatNumber(zxcBalance, numberMode)}</div>
+                  <div className="mt-1">{t('vault.yjc_onchain')}: {formatNumber(yjcBalance, numberMode)}</div>
+                  <div className="mt-1">{t('vault.admin_signer')}: {onchain?.adminAddress || t('vault.not_configured')}</div>
                 </div>
               </div>
             </div>
@@ -298,10 +266,10 @@ export default function WalletView() {
               <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('vault.transactions')}</h2>
             </div>
             <div className="mt-4 space-y-3">
-              {summary.isLoading && <div className="text-sm text-[#adaaaa]">{isZh ? zh.loading : 'Loading...'}</div>}
+              {summary.isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
               {!summary.isLoading && walletSummary?.recentTransactions?.length === 0 && (
                 <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
-                  {isZh ? zh.noTransactions : 'No transactions yet'}
+                  {t('vault.no_transactions')}
                 </div>
               )}
               {walletSummary?.recentTransactions?.map((tx: any) => {

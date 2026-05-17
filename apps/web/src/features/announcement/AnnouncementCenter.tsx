@@ -18,18 +18,17 @@ type AnnouncementItem = {
   active: boolean;
 };
 
-function formatRelativeTime(value: string) {
+function formatRelativeTime(value: string, t: (key: string, opts?: any) => string) {
   const diff = Date.now() - new Date(value).getTime();
   const hours = Math.max(1, Math.floor(diff / (1000 * 60 * 60)));
-  if (hours < 24) return `${hours} HOURS AGO`;
+  if (hours < 24) return t('common.hours_ago', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days === 1) return 'YESTERDAY';
-  return `${days} DAYS AGO`;
+  if (days === 1) return t('common.yesterday');
+  return t('common.days_ago', { count: days });
 }
 
 export default function AnnouncementCenter() {
-  const { t, i18n } = useTranslation();
-  const isZh = (i18n.language || 'zh').toLowerCase().startsWith('zh');
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<'LATEST' | 'MAINTENANCE' | 'EVENTS'>('LATEST');
   const [items, setItems] = useState<AnnouncementItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,15 +70,16 @@ export default function AnnouncementCenter() {
   };
 
   const typeLabel = (type: AnnouncementItem['type']) => {
-    if (!isZh) return type.toUpperCase();
-    if (type === 'urgent') return '緊急';
-    if (type === 'warning') return '維護';
-    return '活動';
+    if (type === 'urgent') return t('announcement.type_urgent');
+    if (type === 'warning') return t('announcement.type_warning');
+    return t('announcement.events');
   };
 
-  const tabLabel: Record<'LATEST' | 'MAINTENANCE' | 'EVENTS', string> = isZh
-    ? { LATEST: '最新', MAINTENANCE: '維護', EVENTS: '活動' }
-    : { LATEST: 'LATEST', MAINTENANCE: 'MAINTENANCE', EVENTS: 'EVENTS' };
+  const tabLabel: Record<'LATEST' | 'MAINTENANCE' | 'EVENTS', string> = {
+    LATEST: t('announcement.tab_latest'),
+    MAINTENANCE: t('announcement.tab_maintenance'),
+    EVENTS: t('announcement.tab_events'),
+  };
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white font-['Manrope'] pb-32">
@@ -102,13 +102,13 @@ export default function AnnouncementCenter() {
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500">{t('announcement.critical_alert')}</span>
           </div>
           <h2 className="text-2xl font-black italic tracking-tighter uppercase mb-2">
-            {featured?.title || (isZh ? '目前沒有啟用中的公告' : 'No active announcements')}
+            {featured?.title || t('announcement.no_active')}
           </h2>
           <p className="text-xs text-[#adaaaa] font-bold uppercase leading-relaxed mb-6">
-            {featured?.content || (isZh ? '公告系統連線正常，但目前沒有正在啟用的公告。' : 'The announcement feed is online, but there are no active messages right now.')}
+            {featured?.content || t('announcement.feed_online')}
           </p>
           <div className="text-[10px] font-black uppercase tracking-widest text-white/70">
-            {featured ? formatRelativeTime(featured.createdAt) : 'SYNCED'}
+            {featured ? formatRelativeTime(featured.createdAt, t) : 'SYNCED'}
           </div>
         </section>
 
@@ -135,13 +135,13 @@ export default function AnnouncementCenter() {
         <section className="space-y-4">
           {loading && (
             <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-[11px] font-bold uppercase tracking-widest text-[#adaaaa]">
-              {isZh ? '公告載入中...' : 'Loading announcements...'}
+              {t('announcement.loading')}
             </div>
           )}
 
           {!loading && filteredItems.length === 0 && (
             <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-[11px] font-bold uppercase tracking-widest text-[#adaaaa]">
-              {isZh ? '此分類目前沒有公告。' : 'No announcements in this category.'}
+              {t('announcement.no_category')}
             </div>
           )}
 
@@ -152,7 +152,7 @@ export default function AnnouncementCenter() {
                   <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm border ${getBadgeStyle(item.type)}`}>
                     {typeLabel(item.type)}
                   </span>
-                  <span className="text-[9px] font-bold text-[#494847] uppercase tracking-widest">{formatRelativeTime(item.createdAt)}</span>
+                  <span className="text-[9px] font-bold text-[#494847] uppercase tracking-widest">{formatRelativeTime(item.createdAt, t)}</span>
                 </div>
                 <div>
                   <h4 className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-[#fcc025] transition-colors">{item.title}</h4>

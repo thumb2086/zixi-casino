@@ -7,6 +7,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope, ITEM_DROP_TABLES, CHEST_CONFIGS, RARITY_NAMES, DAILY_FREE_CHEST_TYPE, DAILY_FREE_CHEST_COOLDOWN_HOURS, MAX_INVENTORY_SLOTS, type ChestType, type Rarity, type ItemDefinition } from "@repo/shared";
 import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@repo/infrastructure";
+import { ChestManager, type UserInventory } from "@repo/domain";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import {
@@ -16,7 +17,14 @@ import {
   openChestForUser,
   persistInventoryState,
   restoreDailyFreeChestMark,
+  ALL_ITEMS,
 } from "../../utils/inventory.js";
+
+const DUPLICATE_COMPENSATION: Record<string, number> = {
+  avatar: 500,
+  title: 300,
+};
+const chestManager = new ChestManager();
 
 const CHEST_TYPE_ENUM = z.enum(["common", "rare", "epic", "legendary"]);
 
@@ -155,7 +163,7 @@ typedFastify.post("/buy", {
     body: z.object({
       sessionId: z.string().optional(),
       chestType: CHEST_TYPE_ENUM,
-      quantity: z.number().int().min(1).max(99).optional().default(1),
+      quantity: z.number().int().min(1).max(999).optional().default(1),
     }),
   },
 }, async (request: any) => {
@@ -368,7 +376,7 @@ typedFastify.post("/open-bulk", {
     body: z.object({
       sessionId: z.string().optional(),
       chestType: CHEST_TYPE_ENUM,
-      quantity: z.number().int().min(1).max(99),
+      quantity: z.number().int().min(1).max(999),
     }),
   },
 }, async (request: any) => {
@@ -390,33 +398,70 @@ typedFastify.post("/open-bulk", {
   let finalPity = 0;
   const customTables = await buildCustomDropTables();
 
-  for (let i = 0; i < quantity; i++) {
-    state.inventory[keyId] = (state.inventory[keyId] || 0) - 1;
-    if (state.inventory[keyId] <= 0) delete state.inventory[keyId];
-    await persistInventoryState(ctx.userId, state);
+  // Deduct all keys at once and persist once
+  state.inventory[keyId] = (state.inventory[keyId] || 0) - quantity;
+  if (state.inventory[keyId] <= 0) delete state.inventory[keyId];
+  await persistInventoryState(ctx.userId, state);
 
+  // Build UserInventory from state
+  const inventory: UserInventory = {
+    items: { ...state.inventory },
+    avatars: [...state.ownedAvatars],
+    titles: [...state.ownedTitles],
+    activeAvatar: state.activeAvatar,
+    activeTitle: state.activeTitle,
+    chestPity: { ...state.chestPity },
+  };
+
+  for (let i = 0; i < quantity; i++) {
     let outcome;
     try {
-      outcome = await openChestForUser(ctx.userId, ctx.address, chestType, customTables);
+      outcome = chestManager.openChest(ctx.userId, chestType, inventory, customTables);
     } catch (error: any) {
-      state.inventory[keyId] = (state.inventory[keyId] || 0) + 1;
+      state.inventory[keyId] = (state.inventory[keyId] || 0) + (quantity - i);
       await persistInventoryState(ctx.userId, state);
       return createApiEnvelope({ success: false }, request.id, false, error?.message || "CHEST_OPEN_FAILED");
     }
 
-    for (const drop of outcome.result.items) {
-      const existing = allItems.find((x) => x.item.id === drop.item.id);
+    // Merge drops
+    for (const reward of outcome.items) {
+      const itemId = reward.item.id;
+      const def = ALL_ITEMS[itemId];
+      if (def?.type === "avatar") {
+        if (reward.isNew) {
+          state.ownedAvatars.push(itemId);
+        } else {
+          totalComp += DUPLICATE_COMPENSATION.avatar;
+        }
+        allItems.push({ item: reward.item, isNew: reward.isNew, quantity: 1 });
+        continue;
+      }
+      if (def?.type === "title") {
+        if (reward.isNew) {
+          state.ownedTitles.push(itemId);
+        } else {
+          totalComp += DUPLICATE_COMPENSATION.title;
+        }
+        allItems.push({ item: reward.item, isNew: reward.isNew, quantity: 1 });
+        continue;
+      }
+      const existing = allItems.find((x) => x.item.id === itemId);
       if (existing) {
-        existing.quantity += drop.quantity;
+        existing.quantity += 1;
       } else {
-        allItems.push({ item: drop.item, isNew: drop.isNew, quantity: drop.quantity });
+        allItems.push({ item: reward.item, isNew: reward.isNew, quantity: 1 });
       }
     }
-    totalComp += outcome.compensationZXC;
-    totalValue += outcome.result.totalValue;
-    finalPity = outcome.state.chestPity[chestType];
-    state = outcome.state;
+    totalValue += outcome.totalValue;
+    finalPity = outcome.pityCount >= CHEST_CONFIGS[chestType].pityThreshold ? 0 : outcome.pityCount;
   }
+
+  // Sync state from mutated inventory
+  state.inventory = { ...inventory.items };
+  state.ownedAvatars = [...inventory.avatars];
+  state.ownedTitles = [...inventory.titles];
+  state.chestPity = { ...state.chestPity, [chestType]: finalPity };
+  await persistInventoryState(ctx.userId, state);
 
   if (totalComp > 0) {
     const bal = await gameSettlement.getBalance(ctx.address, "zhixi");
