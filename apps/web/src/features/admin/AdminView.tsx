@@ -848,8 +848,34 @@ export default function AdminView() {
                           })[`${evt.channel}/${evt.kind}`] || `${evt.channel}/${evt.kind}`}
                         </span>
                       </div>
-                      <p className="text-white mt-1 text-xs break-words">{evt.message}</p>
-                      <p className="text-[10px] text-[#494847] mt-0.5">{evt.createdAt ? new Date(evt.createdAt).toLocaleString() : ''}</p>
+                      <p className="text-white mt-1 text-xs break-words">
+                        {(() => {
+                          const msgLabels: Record<string, (m: string) => string> = {
+                            'rewards/chests_opened_bulk': (m) => {
+                              const match = m.match(/Opened (\d+) x (\w+) chests/);
+                              return match ? `大量開箱 ${match[1]} x ${match[2]} 寶箱` : m;
+                            },
+                            'rewards/chests_opened': (m) => {
+                              const match = m.match(/Opened (\w+) chest/);
+                              return match ? `開啟 ${match[1]} 寶箱` : m;
+                            },
+                            'rewards/item_pawned': (m) => {
+                              const match = m.match(/Pawned (\d+)x (\w+) for ([\d.]+) ZXC/);
+                              return match ? `典當 ${match[2]} x${match[1]}，獲得 ${match[3]} ZXC` : m;
+                            },
+                            'game/play_completed': (m) => {
+                              const match = m.match(/User played (\w+): bet ([\d.]+), payout ([\d.]+)/);
+                              return match ? `遊玩 ${match[1]}：下注 ${match[2]}，獲得 ${match[3]}` : m;
+                            },
+                            'wallet/transfer': (m) => m.replace('Transfer', '轉帳'),
+                            'wallet/airdrop_claimed': (m) => m.replace(/airdrop/g, '空投'),
+                          };
+                          const key = `${evt.channel}/${evt.kind}`;
+                          const fn = msgLabels[key];
+                          return fn ? fn(evt.message) : evt.message;
+                        })()}
+                      </p>
+                      <p className="text-[10px] text-[#adaaaa] mt-0.5">{evt.createdAt ? new Date(evt.createdAt).toLocaleString() : ''}</p>
                     </li>
                   ))}
                 </ul>
