@@ -18,6 +18,7 @@ import {
   Landmark,
   Archive,
   TrendingUp,
+  CalendarClock,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
@@ -186,6 +187,14 @@ export default function LobbyView() {
             icon={Megaphone}
             title={t('nav.announcements')}
             subtitle={t('lobby.new_alerts', { count: pinnedCount })}
+          >
+          </GlassCard>
+
+          <GlassCard
+            to="/app/events"
+            icon={CalendarClock}
+            title="活動"
+            subtitle="進行中活動與獎勵"
           >
           </GlassCard>
 
