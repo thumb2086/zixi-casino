@@ -49,6 +49,7 @@ export default function ItemsTab() {
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'avatar' | 'title' | 'item' | 'buff'>('all');
+  const [rarityFilter, setRarityFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -119,10 +120,11 @@ export default function ItemsTab() {
       items.filter((item) => {
         const itemName = item.name || item.label || item.id;
         if (filter !== 'all' && item.type !== filter) return false;
+        if (rarityFilter !== 'all' && (item.rarity || 'common') !== rarityFilter) return false;
         if (search && !itemName.toLowerCase().includes(search.toLowerCase())) return false;
         return true;
       }),
-    [filter, items, search],
+    [filter, rarityFilter, items, search],
   );
 
   return (
@@ -163,6 +165,21 @@ export default function ItemsTab() {
               className={`flex-1 rounded-lg py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
                 filter === value
                   ? 'bg-[#fcc025] text-black'
+                  : 'border border-[#494847]/20 bg-[#1a1919] text-[#adaaaa]'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {[['all', '全部', ''], ...Object.entries(RARITY_STYLES).map(([k, v]) => [k, v.label, v.border, v.text])].map(([value, label, border, text]: string[]) => (
+            <button
+              key={value}
+              onClick={() => setRarityFilter(value)}
+              className={`rounded-lg px-2.5 py-1.5 text-[9px] font-black uppercase tracking-widest transition-all ${
+                rarityFilter === value
+                  ? `${border || 'bg-[#fcc025]'} ${text || 'text-black'}`
                   : 'border border-[#494847]/20 bg-[#1a1919] text-[#adaaaa]'
               }`}
             >
