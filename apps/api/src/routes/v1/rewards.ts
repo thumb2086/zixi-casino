@@ -128,53 +128,61 @@ export async function rewardRoutes(fastify: FastifyInstance) {
       }),
     },
   }, async (request) => {
-    const ctx = await getContext(request);
-    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    try {
+      const ctx = await getContext(request);
+      if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
-    const { type, name, icon, description, rarity } = request.body;
+      const { type, name, icon, description, rarity } = request.body;
 
-    // Basic rate-limit: max 3 pending per user
-    const mine = await submissionRepo.listByUser(ctx.user.id, 50);
-    const pending = mine.filter((s: any) => s.status === "pending");
-    if (pending.length >= 3) {
-      return createApiEnvelope(
-        { error: { code: "TOO_MANY_PENDING", message: "您目前已有 3 份待審核的投稿，請等審核後再提交" } },
-        request.id,
-      );
+      // Basic rate-limit: max 3 pending per user
+      const mine = await submissionRepo.listByUser(ctx.user.id, 50);
+      const pending = mine.filter((s: any) => s.status === "pending");
+      if (pending.length >= 3) {
+        return createApiEnvelope(
+          { error: { code: "TOO_MANY_PENDING", message: "您目前已有 3 份待審核的投稿，請等審核後再提交" } },
+          request.id,
+        );
+      }
+
+      const submissionId = randomUUID();
+      await submissionRepo.create({
+        submissionId,
+        userId: ctx.user.id,
+        address: ctx.session.address,
+        type,
+        name,
+        icon: icon ?? null,
+        description: description ?? null,
+        rarity: rarity ?? "common",
+      });
+
+      await opsRepo.logEvent({
+        channel: "rewards",
+        severity: "info",
+        source: "user_submission",
+        kind: "submission_created",
+        userId: ctx.user.id,
+        address: ctx.session.address,
+        message: `User submitted ${type}: ${name}`,
+        meta: { submissionId, type, name, icon, rarity },
+      });
+
+      return createApiEnvelope({ success: true, submissionId }, request.id);
+    } catch (err: any) {
+      return createApiEnvelope({ error: { message: err?.message || "Submission failed" } }, request.id);
     }
-
-    const submissionId = randomUUID();
-    await submissionRepo.create({
-      submissionId,
-      userId: ctx.user.id,
-      address: ctx.session.address,
-      type,
-      name,
-      icon: icon ?? null,
-      description: description ?? null,
-      rarity: rarity ?? "common",
-    });
-
-    await opsRepo.logEvent({
-      channel: "rewards",
-      severity: "info",
-      source: "user_submission",
-      kind: "submission_created",
-      userId: ctx.user.id,
-      address: ctx.session.address,
-      message: `User submitted ${type}: ${name}`,
-      meta: { submissionId, type, name, icon, rarity },
-    });
-
-    return createApiEnvelope({ success: true, submissionId }, request.id);
   });
 
   // List my own submissions
   typedFastify.get("/submissions/me", async (request) => {
-    const ctx = await getContext(request);
-    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
-    const items = await submissionRepo.listByUser(ctx.user.id, 50);
-    return createApiEnvelope({ submissions: items }, request.id);
+    try {
+      const ctx = await getContext(request);
+      if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+      const items = await submissionRepo.listByUser(ctx.user.id, 50);
+      return createApiEnvelope({ submissions: items }, request.id);
+    } catch (err: any) {
+      return createApiEnvelope({ error: { message: err?.message || "list submissions failed" } }, request.id);
+    }
   });
 
   // ─── Chest Opening ────────────────────────────────────────────────────────

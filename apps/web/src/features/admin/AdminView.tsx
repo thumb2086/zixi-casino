@@ -170,7 +170,7 @@ export default function AdminView() {
   const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
 
   useEffect(() => {
-    if (activeTab !== 'usermgr') return;
+    if (activeTab !== 'usermgr' && activeTab !== 'campaigns') return;
     Promise.all([
       api.get('/api/v1/chests/items').catch(() => null),
       api.get('/api/v1/rewards/catalog').catch(() => null),
