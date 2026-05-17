@@ -87,32 +87,6 @@ export default function SettingsView() {
   const [displayNameDraft, setDisplayNameDraft] = useState(username || '');
 
   const isZh = i18n.language.startsWith('zh');
-  const zh = {
-    syncing: '\u540c\u6b65\u4e2d',
-    profile: '\u64cd\u4f5c\u54e1\u6a94\u6848',
-    save: '\u5132\u5b58',
-    cancel: '\u53d6\u6d88',
-    noAddress: '\u672a\u9023\u63a5\u5730\u5740',
-    balancePreview: '\u9918\u984d\u9810\u89bd',
-    displayAudio: '\u986f\u793a\u8207\u97f3\u6548',
-    amountDisplay: '\u91d1\u984d\u986f\u793a\u683c\u5f0f',
-    masterVolume: '\u7e3d\u97f3\u91cf',
-    bgmVolume: 'BGM \u97f3\u91cf',
-    sfxVolume: '\u97f3\u6548\u97f3\u91cf',
-    danmaku: '\u5f48\u5e55',
-    language: '\u8a9e\u8a00',
-    chinese: '\u4e2d\u6587',
-    switchLabel: '\u5207\u63db',
-    supportCenter: '\u652f\u63f4\u4e2d\u5fc3',
-    githubRepo: 'GitHub \u5009\u5eab',
-    syncingSettings: '\u8a2d\u5b9a\u540c\u6b65\u4e2d...',
-    syncFailed: '\u8a2d\u5b9a\u540c\u6b65\u5931\u6557',
-    settingsSaved: '\u8a2d\u5b9a\u5df2\u5132\u5b58',
-    nameLength: '\u986f\u793a\u540d\u7a31\u9577\u5ea6\u9700\u4ecb\u65bc 2 \u5230 20 \u5b57',
-    nameUpdateFailed: '\u986f\u793a\u540d\u7a31\u66f4\u65b0\u5931\u6557',
-    nameUpdated: '\u986f\u793a\u540d\u7a31\u5df2\u66f4\u65b0',
-    nameHint: '\u53ef\u66f4\u6539\u7684\u662f\u986f\u793a\u540d\u7a31\uff08\u4e0d\u5f71\u97ff\u767b\u5165\u5e33\u865f\uff09',
-  };
 
   const walletPreviewBalance = resolvePreferredBalance({
     onchainBalance: walletSummaryQuery.data?.onchain?.zxc?.balance,
@@ -141,17 +115,17 @@ export default function SettingsView() {
     if (!sessionId) return;
     setPrefs(updates);
     setSaving(true);
-    setStatusText(isZh ? zh.syncingSettings : 'Syncing settings...');
+    setStatusText(t('settings.syncing_settings'));
     try {
       const res = await api.post('/api/v1/profile/prefs', { sessionId, prefs: updates });
       const payload = res.data;
       if (payload?.success === false) {
-        setStatusText(isZh ? zh.syncFailed : 'Failed to sync settings');
+        setStatusText(t('settings.sync_failed'));
       } else {
-        setStatusText(isZh ? zh.settingsSaved : 'Settings saved');
+        setStatusText(t('settings.settings_saved'));
       }
     } catch {
-      setStatusText(isZh ? zh.syncFailed : 'Failed to sync settings');
+      setStatusText(t('settings.sync_failed'));
     } finally {
       setSaving(false);
       window.setTimeout(() => setStatusText(null), 1500);
@@ -161,7 +135,7 @@ export default function SettingsView() {
   const saveDisplayName = async () => {
     const nextName = displayNameDraft.trim();
     if (!sessionId || nextName.length < 2 || nextName.length > 20) {
-      setStatusText(isZh ? zh.nameLength : 'Display name must be 2-20 characters');
+      setStatusText(t('profile.name_length_error'));
       return;
     }
 
@@ -170,7 +144,7 @@ export default function SettingsView() {
       const res = await api.post('/api/v1/profile/set-username', { sessionId, username: nextName });
       const payload = res.data;
       if (payload?.success === false) {
-        setStatusText(payload?.error || (isZh ? zh.nameUpdateFailed : 'Failed to update display name'));
+        setStatusText(payload?.error || t('profile.name_update_failed'));
         return;
       }
 
@@ -181,9 +155,9 @@ export default function SettingsView() {
       setUsername(syncedName);
       setDisplayNameDraft(syncedName);
       setIsEditingName(false);
-      setStatusText(isZh ? zh.nameUpdated : 'Display name updated');
+      setStatusText(t('profile.name_updated'));
     } catch {
-      setStatusText(isZh ? zh.nameUpdateFailed : 'Failed to update display name');
+      setStatusText(t('profile.name_update_failed'));
     } finally {
       setSaving(false);
       window.setTimeout(() => setStatusText(null), 1500);
@@ -214,7 +188,7 @@ export default function SettingsView() {
             </h1>
           </div>
           <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-            {saving ? (isZh ? zh.syncing : 'Syncing') : 'v1.0.0'}
+            {saving ? t('settings.syncing') : 'v1.0.0'}
           </div>
         </div>
       </header>
@@ -228,9 +202,9 @@ export default function SettingsView() {
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-                  {isZh ? zh.profile : 'Operator Profile'}
+                  {t('settings.profile')}
                 </p>
-                <p className="mt-1 text-[10px] font-bold text-[#6f6f6f]">{isZh ? zh.nameHint : 'Display name only (does not change login account)'}</p>
+                <p className="mt-1 text-[10px] font-bold text-[#6f6f6f]">{t('settings.name_hint')}</p>
                 {isEditingName ? (
                   <div className="mt-3 flex flex-col gap-3">
                     <input
@@ -246,7 +220,7 @@ export default function SettingsView() {
                         className="inline-flex items-center gap-2 rounded-xl bg-[#fcc025] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-black"
                       >
                         <Check size={14} />
-                        {isZh ? zh.save : 'Save'}
+                        {t('common.save')}
                       </button>
                       <button
                         type="button"
@@ -256,7 +230,7 @@ export default function SettingsView() {
                         }}
                         className="rounded-xl border border-[#494847]/20 bg-[#262626] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white"
                       >
-                        {isZh ? zh.cancel : 'Cancel'}
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </div>
@@ -266,7 +240,7 @@ export default function SettingsView() {
                       {username || 'OPERATOR'}
                     </h2>
                     <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-[0.18em] text-[#adaaaa]">
-                      {address || (isZh ? zh.noAddress : 'NO ADDRESS')}
+                      {address || t('settings.no_address')}
                     </p>
                     <button
                       type="button"
@@ -274,7 +248,7 @@ export default function SettingsView() {
                       className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#fcc025]/40 bg-[#262626] px-3 py-2 text-[10px] font-black uppercase tracking-widest text-[#fcc025] hover:bg-[#313131]"
                     >
                       <Edit2 size={12} />
-                      {isZh ? '修改名稱' : 'Edit Name'}
+                      {t('settings.edit_name')}
                     </button>
                   </>
                 )}
@@ -293,7 +267,7 @@ export default function SettingsView() {
 
           <div className="mt-5 rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
             <p className="text-[9px] font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {isZh ? zh.balancePreview : 'Balance Preview'}
+              {t('settings.balance_preview')}
             </p>
             <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">{previewBalance}</p>
           </div>
@@ -303,7 +277,7 @@ export default function SettingsView() {
           <div className="flex items-center gap-3">
             <Volume2 className="text-[#fcc025]" size={18} />
             <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
-              {isZh ? zh.displayAudio : 'Display & Audio'}
+              {t('settings.display_audio')}
             </h3>
           </div>
 
@@ -311,7 +285,7 @@ export default function SettingsView() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-white">
-                  {isZh ? zh.amountDisplay : 'Amount Display'}
+                  {t('settings.amount_display')}
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -321,7 +295,7 @@ export default function SettingsView() {
                       amountDisplay === 'compact' ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
                     }`}
                   >
-                    {isZh ? '100\u842c' : '100M'}
+                    {t('settings.compact')}
                   </button>
                   <button
                     type="button"
@@ -336,26 +310,26 @@ export default function SettingsView() {
               </div>
             </div>
 
-            <SliderRow label={isZh ? zh.masterVolume : 'Master Volume'} value={masterVolume} onChange={(value) => persistPrefs({ masterVolume: value })} />
-            <SliderRow label={isZh ? zh.bgmVolume : 'BGM Volume'} value={bgmVolume} onChange={(value) => persistPrefs({ bgmVolume: value })} />
-            <SliderRow label={isZh ? zh.sfxVolume : 'SFX Volume'} value={sfxVolume} onChange={(value) => persistPrefs({ sfxVolume: value })} />
+            <SliderRow label={t('settings.master_volume')} value={masterVolume} onChange={(value) => persistPrefs({ masterVolume: value })} />
+            <SliderRow label={t('settings.bgm_volume')} value={bgmVolume} onChange={(value) => persistPrefs({ bgmVolume: value })} />
+            <SliderRow label={t('settings.sfx_volume')} value={sfxVolume} onChange={(value) => persistPrefs({ sfxVolume: value })} />
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">BGM</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('settings.bgm')}</span>
                   <Toggle enabled={bgmEnabled} onClick={() => persistPrefs({ bgmEnabled: !bgmEnabled })} />
                 </div>
               </div>
               <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">SFX</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('settings.sfx')}</span>
                   <Toggle enabled={sfxEnabled} onClick={() => persistPrefs({ sfxEnabled: !sfxEnabled })} />
                 </div>
               </div>
               <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{isZh ? zh.danmaku : 'Danmaku'}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{t('settings.danmaku')}</span>
                   <Toggle enabled={danmuEnabled} onClick={() => persistPrefs({ danmuEnabled: !danmuEnabled })} />
                 </div>
               </div>
@@ -369,10 +343,10 @@ export default function SettingsView() {
               <Globe className="text-[#fcc025]" size={18} />
               <div>
                 <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
-                  {isZh ? zh.language : 'Language'}
+                  {t('settings.language')}
                 </h3>
                 <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-                  {isZh ? zh.chinese : 'English'}
+                  {isZh ? t('common.chinese') : t('common.english')}
                 </p>
               </div>
             </div>
@@ -381,14 +355,14 @@ export default function SettingsView() {
               onClick={() => i18n.changeLanguage(isZh ? 'en' : 'zh')}
               className="rounded-xl border border-[#fcc025]/20 bg-[#262626] px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-[#fcc025]"
             >
-              {isZh ? zh.switchLabel : 'Switch'}
+              {t('settings.switch_label')}
             </button>
           </div>
 
           <div className="mt-6 divide-y divide-[#494847]/10 overflow-hidden rounded-2xl border border-[#494847]/10 bg-[#0e0e0e]">
             <Link to="/app/support" className="flex items-center justify-between p-4 transition-colors hover:bg-[#1a1919]">
               <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
-                {isZh ? zh.supportCenter : 'Support Center'}
+                {t('nav.support')}
               </span>
               <ChevronRight size={16} className="text-[#adaaaa]" />
             </Link>
@@ -399,7 +373,7 @@ export default function SettingsView() {
               className="flex items-center justify-between p-4 transition-colors hover:bg-[#1a1919]"
             >
               <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
-                {isZh ? zh.githubRepo : 'GitHub Repository'}
+                {t('settings.github_repo')}
               </span>
               <ChevronRight size={16} className="text-[#adaaaa]" />
             </a>
@@ -425,7 +399,7 @@ export default function SettingsView() {
       </main>
 
           <AppBottomNav current="settings" />
-        <p className="pb-4 text-center text-[9px] font-black uppercase tracking-[0.5em] text-[#494847]">© 2026 ZiXi Simulator v1.0.0 — Aureum Edition</p>
+        <p className="pb-4 text-center text-[9px] font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer')}</p>
         </div>
   );
 }

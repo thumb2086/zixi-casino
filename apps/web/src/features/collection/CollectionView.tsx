@@ -45,7 +45,7 @@ export default function CollectionView() {
     <div className="min-h-screen bg-[#0e0e0e] text-white font-['Manrope'] pb-32">
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="flex items-center gap-3 px-6 py-4 max-w-2xl mx-auto">
-          <Link to="/app/inventory" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+          <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
             <ChevronLeft size={24} />
           </Link>
           <Archive className="text-[#fcc025]" />
