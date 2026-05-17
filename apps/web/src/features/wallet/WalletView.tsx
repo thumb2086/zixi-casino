@@ -227,37 +227,6 @@ export default function WalletView() {
               </div>
             )}
 
-            <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-              <div className="flex items-center gap-3">
-                <Repeat2 className="text-[#fcc025]" size={18} />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
-                  {t('vault.convert')}
-                </h2>
-              </div>
-              <p className="mt-3 text-sm font-bold text-[#adaaaa]">100,000,000 ZXC = 1 YJC</p>
-              <div className="mt-4 grid gap-3">
-                <input
-                  value={convertAmount}
-                  onChange={(event) => setConvertAmount(event.target.value)}
-                  placeholder={t('vault.convert_placeholder')}
-                  className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
-                />
-                <button
-                  type="button"
-                  disabled={!convertAmount || convert.isPending}
-                  onClick={() => convert.mutate({ zxcAmount: convertAmount })}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-[11px] font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Repeat2 size={16} />
-                  {convert.isPending ? t('vault.converting') : t('vault.start_convert')}
-                </button>
-                <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4 text-xs font-bold text-[#adaaaa]">
-                  <div>{t('vault.zxc_onchain')}: {formatNumber(zxcBalance, numberMode)}</div>
-                  <div className="mt-1">{t('vault.yjc_onchain')}: {formatNumber(yjcBalance, numberMode)}</div>
-                  <div className="mt-1">{t('vault.admin_signer')}: {onchain?.adminAddress || t('vault.not_configured')}</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">

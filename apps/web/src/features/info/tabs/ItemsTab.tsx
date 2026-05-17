@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Crown, Gift, Package, Search, Shield, Sparkles, Zap, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatNumber } from '@repo/shared';
 import { api } from '../../../store/api';
 
 interface CatalogItem {
@@ -253,12 +254,12 @@ export default function ItemsTab() {
                     <p className="mt-1 text-[10px] font-bold text-[#adaaaa]">👑 VIP 試用{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
                   )}
                   {item.price && item.price > 0 && (
-                    <p className="mt-1 text-[10px] font-bold text-[#fcc025]">🛒 {item.price.toLocaleString()} ZXC</p>
+                    <p className="mt-1 text-[10px] font-bold text-[#fcc025]">🛒 {formatNumber(item.price)} ZXC</p>
                   )}
                   {item.meta?.bundle && (
                     <p className="mt-1 text-[10px] font-bold text-emerald-400">
-                      📦 內容 {item.meta.bundle.length} 項{item.meta.totalValue ? ` · ~~${item.meta.totalValue.toLocaleString()} ZXC~~` : ''}
-                      {item.price && item.meta.totalValue ? ` → ${item.price.toLocaleString()} ZXC (${Math.round((1 - item.price / item.meta.totalValue) * 100)}% OFF)` : ''}
+                      📦 內容 {item.meta.bundle.length} 項{item.meta.totalValue ? ` · ~~${formatNumber(item.meta.totalValue)} ZXC~~` : ''}
+                      {item.price && item.meta.totalValue ? ` → ${formatNumber(item.price)} ZXC (${formatNumber(Math.round((1 - item.price / item.meta.totalValue) * 100))}% OFF)` : ''}
                     </p>
                   )}
                   <div className="mt-2 flex flex-wrap items-center gap-2">
