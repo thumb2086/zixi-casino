@@ -4,6 +4,19 @@ import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
+import { ITEM_DROP_TABLES, RARITY_NAMES } from '@repo/shared';
+
+const ITEM_MAP: Record<string, { name: string; icon: string; rarity: string; color: string }> = {};
+for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TABLES)[]) {
+  for (const item of ITEM_DROP_TABLES[rarity]) {
+    ITEM_MAP[item.id] = {
+      name: item.name,
+      icon: item.icon,
+      rarity,
+      color: RARITY_NAMES[rarity]?.color || '#b0b0b0',
+    };
+  }
+}
 
 const RARITY_COLORS: Record<string, string> = {
   common: '#b0b0b0',
@@ -205,17 +218,27 @@ export default function ShopView() {
                       )}
                     </div>
                     {bundle && (
-                      <div className="mt-1 space-y-0.5">
-                        {bundle.map((sub: any, i: number) => (
-                          <p key={i} className="text-[9px] text-[#adaaaa]">· {sub.id} ×{sub.qty || 1}</p>
-                        ))}
+                      <div className="mt-1.5 space-y-1">
+                        {bundle.map((sub: any, i: number) => {
+                          const info = ITEM_MAP[sub.id];
+                          return (
+                            <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                              <span className="shrink-0">{info?.icon || '•'}</span>
+                              <span className="text-white font-medium">{info?.name || sub.id}</span>
+                              {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     {hasDiscount && (
-                      <p className="mt-1 text-[9px] text-[#adaaaa]">
-                        ~~{totalValue.toLocaleString()} ZXC~~ → <span className="text-emerald-400 font-bold">{price.toLocaleString()} ZXC</span>
-                        <span className="text-emerald-400 ml-1">({Math.round((1 - price / totalValue) * 100)}% OFF)</span>
-                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-[10px] text-[#adaaaa] line-through">{totalValue.toLocaleString()} ZXC</span>
+                        <span className="text-sm font-black text-emerald-400">{price.toLocaleString()} ZXC</span>
+                        <span className="text-[9px] font-black bg-emerald-400/20 text-emerald-400 px-1.5 py-0.5 rounded">
+                          -{Math.round((1 - price / totalValue) * 100)}%
+                        </span>
+                      </div>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
