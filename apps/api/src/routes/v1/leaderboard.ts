@@ -43,15 +43,26 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       }
     }
 
-    // Iterate over entries directly so indices always stay aligned even when
-    // some entries have empty addresses.
     await Promise.all(entries.map(async (entry) => {
       const addr = String(entry?.address || "").toLowerCase();
       if (!addr) return;
-      const [avId, tiId] = await Promise.all([
+      let [avId, tiId] = await Promise.all([
         kv.get<string>(`active_avatar:${addr}`).catch(() => null),
         kv.get<string>(`active_title:${addr}`).catch(() => null),
       ]);
+      // Fallback: read from DB if KV misses
+      if (!avId || !tiId) {
+        try {
+          const db2 = await requireDb();
+          const profile = await db2.query.userProfiles.findFirst({
+            where: (p: any, { eq }: any) => eq(p.address, addr),
+          });
+          if (profile) {
+            if (!avId) avId = profile.selectedAvatarId || "classic_chip";
+            if (!tiId) tiId = profile.selectedTitleId || "newbie";
+          }
+        } catch {}
+      }
       const av = avatarMap.get(avId || "classic_chip") || avatarMap.get("classic_chip");
       const ti = titleMap.get(tiId || "newbie") || titleMap.get("newbie");
       entry.activeAvatarId = av?.id ?? null;
