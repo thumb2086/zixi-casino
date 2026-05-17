@@ -514,43 +514,45 @@ export default function ChestView() {
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="max-w-2xl w-full"
+              className="max-w-3xl w-full max-h-[90vh] flex flex-col"
             >
-              <h2 className="text-3xl font-black italic text-center text-[#fcc025] mb-8">
+              <h2 className="text-3xl font-black italic text-center text-[#fcc025] mb-6">
                 恭喜獲得!
               </h2>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                {openedItems.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: index * 0.1, type: 'spring' }}
-                    className="bg-[#1a1919] rounded-2xl p-6 border-2 text-center"
-                    style={{ borderColor: RARITY_COLORS[item.item.rarity] || '#494847' }}
-                  >
-                    <div className="text-4xl mb-3">{item.item.icon}</div>
-                    <h3 className="font-bold text-sm mb-1">{item.item.name}</h3>
-                    <p className="text-xs text-[#adaaaa] mb-2">{item.item.description}</p>
-                    <div className="flex items-center justify-center gap-2">
-                      <span
-                        className="text-xs px-2 py-1 rounded-full font-bold"
-                        style={{
-                          backgroundColor: `${RARITY_COLORS[item.item.rarity]}30`,
-                          color: RARITY_COLORS[item.item.rarity],
-                        }}
-                      >
-                        {item.item.rarity}
-                      </span>
-                      {item.isNew && (
-                        <span className="text-xs bg-[#fcc025] text-black px-2 py-1 rounded-full font-bold">
-                          NEW
+              <div className="overflow-y-auto flex-1 min-h-0 pr-1 scrollbar-thin">
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 mb-6">
+                  {openedItems.map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: index * 0.05, type: 'spring' }}
+                      className="bg-[#1a1919] rounded-xl p-3 border-2 text-center"
+                      style={{ borderColor: RARITY_COLORS[item.item.rarity] || '#494847' }}
+                    >
+                      <div className="text-2xl mb-1">{item.item.icon}</div>
+                      <h3 className="font-bold text-[10px] mb-0.5 truncate">{item.item.name}</h3>
+                      <p className="text-[9px] text-[#adaaaa] mb-1 truncate">{item.item.description}</p>
+                      <div className="flex items-center justify-center gap-1">
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                          style={{
+                            backgroundColor: `${RARITY_COLORS[item.item.rarity]}30`,
+                            color: RARITY_COLORS[item.item.rarity],
+                          }}
+                        >
+                          {item.item.rarity}
                         </span>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
+                        {item.isNew && (
+                          <span className="text-[9px] bg-[#fcc025] text-black px-1.5 py-0.5 rounded-full font-bold">
+                            NEW
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
 
               {openCompensation > 0 && (
