@@ -70,19 +70,15 @@ interface CatalogItem {
   isActive?: boolean;
 }
 
-type TabId = 'dashboard' | 'maintenance' | 'blacklist' | 'balance' | 'users' | 'announcement' | 'catalog' | 'submissions' | 'campaigns' | 'grant' | 'tickets' | 'events';
+type TabId = 'dashboard' | 'maintenance' | 'usermgr' | 'catalog' | 'submissions' | 'campaigns' | 'tickets' | 'events';
 
 const TABS: { id: TabId; label: string; icon: typeof ShieldAlert }[] = [
   { id: 'dashboard', label: '儀表板', icon: Activity },
   { id: 'maintenance', label: '維護', icon: AlertOctagon },
-  { id: 'blacklist', label: '黑名單', icon: Ban },
-  { id: 'balance', label: '餘額', icon: Coins },
-  { id: 'users', label: '使用者', icon: UserSearch },
-  { id: 'announcement', label: '公告', icon: Megaphone },
-  { id: 'catalog', label: '稱號頭像', icon: Package },
+  { id: 'usermgr', label: '使用者管理', icon: UserSearch },
+  { id: 'catalog', label: '獎勵目錄', icon: Package },
   { id: 'submissions', label: '投稿審核', icon: Inbox },
   { id: 'campaigns', label: '活動', icon: CalendarClock },
-  { id: 'grant', label: '贈送', icon: GiftIcon },
   { id: 'tickets', label: '工單', icon: MessageCircle },
   { id: 'events', label: '事件紀錄', icon: ScrollText },
 ];
@@ -826,35 +822,152 @@ export default function AdminView() {
         )}
 
         {activeTab === 'maintenance' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertOctagon size={18} className="text-[#fcc025]" />
-              <h3 className="text-sm font-black tracking-wide text-white">維護模式</h3>
+          <section className="space-y-6">
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+              <div className="flex items-center gap-2 mb-4"><AlertOctagon size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">維護模式</h3></div>
+              <p className="text-xs text-[#adaaaa] mb-3">啟用後前台會顯示維護通知，阻擋進場。當前狀態：<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? '啟用中' : '關閉'}</span></p>
+              <form onSubmit={handleMaintenance} className="space-y-3">
+                <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="維護訊息（可選）" maxLength={200} />
+                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-[#fcc025] text-[#0e0e0e]'}`}>{maintenanceOn ? '停用維護模式' : '啟用維護模式'}</button>
+              </form>
             </div>
-            <p className="text-xs text-[#adaaaa] mb-3">
-              啟用後前台會顯示維護通知，阻擋進場。當前狀態：
-              <span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>
-                {maintenanceOn ? '啟用中' : '關閉'}
-              </span>
-            </p>
-            <form onSubmit={handleMaintenance} className="space-y-3">
-              <input
-                type="text"
-                value={maintenanceMessage}
-                onChange={(e) => setMaintenanceMessage(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                placeholder="維護訊息（可選）"
-                maxLength={200}
-              />
-              <button
-                type="submit"
-                className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${
-                  maintenanceOn ? 'bg-[#494847] text-white' : 'bg-[#fcc025] text-[#0e0e0e]'
-                }`}
-              >
-                {maintenanceOn ? '停用維護模式' : '啟用維護模式'}
-              </button>
-            </form>
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">發佈新公告</h3></div>
+              <form onSubmit={handleAnnouncementCreate} className="space-y-3">
+                <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="標題" maxLength={100} />
+                <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder="內容" maxLength={2000} />
+                <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />發佈時即釘選於最上方</label>
+                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">發佈公告</button>
+              </form>
+            </div>
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+              <h3 className="text-sm font-black tracking-wide text-white mb-4">現有公告（{announcements.length}）</h3>
+              {announcements.length === 0 ? (<p className="text-xs text-[#adaaaa]">目前沒有公告</p>) : (
+                <ul className="space-y-3">{announcements.map((ann) => {
+                  const id = ann.announcementId || ann.id || ann.title;
+                  return (<li key={id} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">{ann.isPinned && <Pin size={12} className="text-[#fcc025]" />}<p className={`text-sm font-bold ${ann.isActive ? 'text-white' : 'text-[#494847] line-through'}`}>{ann.title}</p></div>
+                        <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2 whitespace-pre-wrap">{ann.content}</p>
+                        <p className="text-[9px] text-[#494847] mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? '取消釘選' : '置頂'}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isActive ? '隱藏' : '顯示'}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}</button>
+                        <button onClick={() => handleAnnouncementDelete(ann)} className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10" title="刪除"><Trash2 size={14} className="text-red-400" /></button>
+                      </div>
+                    </div>
+                  </li>);
+                })}</ul>
+              )}
+            </div>
+          </section>
+        )}
+
+        {activeTab === 'usermgr' && (
+          <section className="space-y-6">
+
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
+              <h3 className="text-sm font-black tracking-wide text-white">使用者查詢</h3>
+              <div className="flex gap-2">
+                <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder="輸入使用者地址 0x..." className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110">查詢</button>
+              </div>
+              {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
+              {userInspect && (
+                <div className="space-y-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-4">
+                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">地址：</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
+                  {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">顯示名稱：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
+                  {userInspect.balances && (
+                    <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
+                      <div><p className="text-[9px] text-[#494847]">ZXC 餘額</p><p className="mt-1 font-mono text-xs text-white">{userInspect.balances.zxc}</p></div>
+                      <div><p className="text-[9px] text-[#494847]">YJC 餘額</p><p className="mt-1 font-mono text-xs text-white">{userInspect.balances.yjc}</p></div>
+                      <div><p className="text-[9px] text-[#494847]">累積下注</p><p className="mt-1 font-mono text-xs text-white">{userInspect.balances.totalBet}</p></div>
+                    </div>
+                  )}
+                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">目前勝率偏置：</span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : '未設定（採系統預設）'}</span></div>
+                  <div className="flex gap-2">
+                    <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder="0.0 - 1.0（留空清除）" className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                    <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> 套用</button>
+                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-[10px] font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300">清除</button>
+                  </div>
+                  <div className="space-y-2 border-t border-[#494847]/20 pt-3">
+                    <p className="text-[10px] text-[#adaaaa]">VIP 等級：<span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
+                    <div className="flex flex-wrap gap-1">{[0, 1, 2, 3, 4, 5].map((lv) => (
+                      <button key={lv} type="button" onClick={() => handleSetVipLevel(lv)} className={`px-3 py-1 rounded text-[10px] font-bold ${(userInspect.vipLevel ?? -1) === lv ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] hover:bg-[#1a1919]'}`}>T{lv}</button>
+                    ))}</div>
+                  </div>
+                  <div className="flex gap-2 pt-2 border-t border-[#494847]/20">
+                    <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-[10px] font-bold text-red-400 hover:bg-red-500/10">重設下注統計</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+              <div className="flex items-center gap-2 mb-4"><Coins size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">調整餘額</h3></div>
+              <p className="text-xs text-[#adaaaa] mb-3">正數為加、負數為減。支援 ZXC 與 YJC。</p>
+              <form onSubmit={handleAdjust} className="space-y-3">
+                <input type="text" value={adjustAddress} onChange={(e) => setAdjustAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="錢包地址 0x..." />
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="text" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="金額 (+/-)" />
+                  <select value={adjustToken} onChange={(e) => setAdjustToken(e.target.value as 'zhixi' | 'yjc')} className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"><option value="zhixi">子熙幣 (ZXC)</option><option value="yjc">佑戩幣 (YJC)</option></select>
+                </div>
+                <input type="text" value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="原因" maxLength={200} />
+                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">調整餘額</button>
+              </form>
+            </div>
+
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+              <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">黑名單</h3></div>
+              <form onSubmit={handleBlacklist} className="space-y-3">
+                <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="錢包地址 0x..." />
+                <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="原因（可選）" maxLength={200} />
+                <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">加入黑名單</button>
+              </form>
+              <div className="mt-6 pt-4 border-t border-[#494847]/30">
+                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">目前黑名單（{blacklist.length}）</h4><button type="button" onClick={refreshBlacklist} className="text-[10px] text-[#fcc025] hover:underline">重新整理</button></div>
+                {blacklist.length === 0 ? <p className="text-xs text-[#adaaaa]">尚無黑名單紀錄。</p> : (
+                  <ul className="space-y-2 max-h-64 overflow-y-auto">{blacklist.map((b: any, i: number) => (
+                    <li key={b.address || b.key || i} className="flex items-center justify-between bg-[#0e0e0e] rounded-lg px-3 py-2 text-xs">
+                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}…</div>{b.reason && <div className="text-[#adaaaa] text-[10px] mt-1">{b.reason}</div>}</div>
+                      <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show('已移除黑名單'); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-[10px] text-red-400 hover:text-red-300">移除</button>
+                    </li>
+                  ))}</ul>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
+              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3><p className="text-[10px] text-[#adaaaa]">直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者</p></div>
+              <div className="relative">
+                <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder="搜尋使用者名稱或地址..." className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                {userResults.length > 0 && (
+                  <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-[#494847]/30 bg-[#1a1919] shadow-xl">
+                    {userResults.map((u) => (<button key={u.address} type="button" onClick={() => { setGrantAddress(u.address); setUserSearch(''); setUserResults([]); }} className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"><span className="font-bold">{u.displayName || u.username || '未知'}</span><span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span></button>))}
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input type="number" value={grantZxc} onChange={(e) => setGrantZxc(e.target.value)} placeholder="ZXC 數量（可負）" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" value={grantYjc} onChange={(e) => setGrantYjc(e.target.value)} placeholder="YJC 數量（可負）" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <select value={grantItemId} onChange={(e) => setGrantItemId(e.target.value)} className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
+                  <option value="">— 道具 —</option>{allItemsList.filter((i) => i.type !== 'avatar' && i.type !== 'title').map((item) => (<option key={item.id} value={item.id}>{item.icon || ''} {item.name || item.id} [{item.rarity || ''}]</option>))}
+                </select>
+                <input type="number" min="1" value={grantItemQty} onChange={(e) => setGrantItemQty(e.target.value)} placeholder="數量" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+              </div>
+              <select value={grantAvatarId} onChange={(e) => setGrantAvatarId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
+                <option value="">— 頭像 —</option>{allAvatars.map((av) => (<option key={av.id} value={av.id}>{av.icon || ''} {av.name || av.id}</option>))}
+              </select>
+              <select value={grantTitleId} onChange={(e) => setGrantTitleId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
+                <option value="">— 稱號 —</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.id}</option>))}
+              </select>
+              <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder="備註（選填）" className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> 送出獎勵</button>
+            </div>
           </section>
         )}
 

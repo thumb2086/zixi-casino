@@ -305,8 +305,8 @@ export default function LobbyView() {
           <GlassCard
             to="/app/collection"
             icon={Archive}
-            title={t('lobby.items_catalog')}
-            subtitle={t('lobby.items_subtitle')}
+            title="收藏櫃"
+            subtitle="頭像、稱號與珍藏品"
           >
             <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
               檢視已獲得的頭像、稱號與收藏品
