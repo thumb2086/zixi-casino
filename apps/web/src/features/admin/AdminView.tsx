@@ -24,6 +24,7 @@ import {
   Gift as GiftIcon,
   Send,
   MessageCircle,
+  Edit2,
 } from 'lucide-react';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
@@ -177,13 +178,23 @@ export default function AdminView() {
     ]).then(([chestRes, catRes]) => {
       const chestItems: Array<{ id: string; name: string; icon: string; rarity: string; type: string }> = chestRes?.data?.data ?? [];
       const catData = catRes?.data?.data ?? {};
-      const catAvatars: Array<{ id: string; name?: string; icon?: string }> = catData.avatars ?? [];
-      const catTitles: Array<{ id: string; name?: string; icon?: string }> = catData.titles ?? [];
-      const merged: Record<string, typeof chestItems[0]> = {};
-      for (const item of chestItems) merged[item.id] = item;
-      setAllItemsList(Object.values(merged));
-      setAllAvatars(catAvatars);
-      setAllTitles(catTitles);
+      const catAvatarsMap = new Map<string, { id: string; name?: string; icon?: string }>();
+      const catTitlesMap = new Map<string, { id: string; name?: string; icon?: string }>();
+      for (const a of (catData.avatars ?? [])) catAvatarsMap.set(a.id, a);
+      for (const t of (catData.titles ?? [])) catTitlesMap.set(t.id, t);
+      const mergedItems: Record<string, typeof chestItems[0]> = {};
+      for (const item of chestItems) {
+        mergedItems[item.id] = item;
+        if (item.type === 'avatar' && !catAvatarsMap.has(item.id)) {
+          catAvatarsMap.set(item.id, { id: item.id, name: item.name, icon: item.icon });
+        }
+        if (item.type === 'title' && !catTitlesMap.has(item.id)) {
+          catTitlesMap.set(item.id, { id: item.id, name: item.name, icon: item.icon });
+        }
+      }
+      setAllItemsList(Object.values(mergedItems));
+      setAllAvatars(Array.from(catAvatarsMap.values()));
+      setAllTitles(Array.from(catTitlesMap.values()));
     });
     api.get('/api/v1/admin/users', { params: { limit: 200 } }).then((res) => {
       setUserResults(res.data?.data?.users ?? []);
@@ -1742,6 +1753,30 @@ export default function AdminView() {
                           )}
                         </div>
                         <div className="flex shrink-0 gap-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCampaignDraftId(c.campaignId);
+                              setCampaignTitle(c.title || '');
+                              setCampaignDescription(c.description || '');
+                              setCampaignIsActive(c.isActive ?? true);
+                              setCampaignStartAt(c.startAt ? new Date(c.startAt).toISOString().slice(0, 16) : '');
+                              setCampaignEndAt(c.endAt ? new Date(c.endAt).toISOString().slice(0, 16) : '');
+                              setCampaignClaimLimit(String(c.maxClaimsPerUser ?? 1));
+                              const r = c.rewards || {};
+                              setCampaignRewardZxc(String(r.zxc || ''));
+                              setCampaignRewardYjc(String(r.yjc || ''));
+                              const firstItem = (r.items || [])[0];
+                              setCampaignRewardItemId(firstItem?.id || '');
+                              setCampaignRewardItemQty(String(firstItem?.qty || '1'));
+                              setCampaignRewardAvatarId((r.avatars || [])[0] || '');
+                              setCampaignRewardTitleId((r.titles || [])[0] || '');
+                            }}
+                            className="rounded-lg bg-[#1a1919] p-2 hover:bg-[#fcc025]/10"
+                            title="編輯"
+                          >
+                            <Edit2 size={12} />
+                          </button>
                           <button
                             type="button"
                             onClick={() => handleCampaignToggle(c)}
