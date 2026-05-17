@@ -115,48 +115,58 @@ export async function chestRoutes(fastify: FastifyInstance) {
     );
   });
 
-  // Buy a chest key (consumable inventory item)
-  typedFastify.post("/buy", {
-    schema: {
-      body: z.object({
-        sessionId: z.string().optional(),
-        chestType: CHEST_TYPE_ENUM,
-      }),
-    },
-  }, async (request: any) => {
-    const ctx = await getContext(request);
-    if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
+// Buy chest keys (consumable inventory item)
+typedFastify.post("/buy", {
+  schema: {
+    body: z.object({
+      sessionId: z.string().optional(),
+      chestType: CHEST_TYPE_ENUM,
+      quantity: z.number().int().min(1).max(99).optional().default(1),
+    }),
+  },
+}, async (request: any) => {
+  const ctx = await getContext(request);
+  if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
 
-    const { chestType } = request.body as { chestType: ChestType };
-    const config = CHEST_CONFIGS[chestType];
-    const state = await loadInventoryState(ctx.userId);
-    const balanceBefore = await gameSettlement.getBalance(ctx.address, "zhixi");
-    const balanceBeforeNum = parseFloat(balanceBefore) || 0;
+  const { chestType, quantity } = request.body as { chestType: ChestType; quantity: number };
+  const config = CHEST_CONFIGS[chestType];
+  const basePrice = config.price;
 
-    if (balanceBeforeNum < config.price) {
-      return createApiEnvelope(
-        { success: false },
-        request.id,
-        false,
-        `餘額不足，購買 ${config.name} 需 ${config.price} ZXC`,
-      );
-    }
+  const discountRate = quantity >= 10 ? 0.10 : quantity >= 5 ? 0.05 : 0;
+  const unitPrice = Math.round(basePrice * (1 - discountRate));
+  const totalPrice = unitPrice * quantity;
 
-    await gameSettlement.setBalance(ctx.address, "zhixi", (balanceBeforeNum - config.price).toString());
+  const state = await loadInventoryState(ctx.userId);
+  const balanceBefore = await gameSettlement.getBalance(ctx.address, "zhixi");
+  const balanceBeforeNum = parseFloat(balanceBefore) || 0;
 
-    const keyId = `chest_key_${chestType}`;
-    const nextState = { ...state, inventory: { ...state.inventory } };
-    nextState.inventory[keyId] = (nextState.inventory[keyId] || 0) + 1;
-    await persistInventoryState(ctx.userId, nextState);
+  if (balanceBeforeNum < totalPrice) {
+    return createApiEnvelope(
+      { success: false },
+      request.id,
+      false,
+      `餘額不足，購買 ${quantity} 個 ${config.name} 需 ${totalPrice.toLocaleString()} ZXC`,
+    );
+  }
 
-    return createApiEnvelope({
-      success: true,
-      chestType,
-      price: config.price,
-      balanceAfter: (balanceBeforeNum - config.price).toString(),
-      inventoryCount: Object.keys(nextState.inventory).length,
-    }, request.id);
-  });
+  await gameSettlement.setBalance(ctx.address, "zhixi", (balanceBeforeNum - totalPrice).toString());
+
+  const keyId = `chest_key_${chestType}`;
+  const nextState = { ...state, inventory: { ...state.inventory } };
+  nextState.inventory[keyId] = (nextState.inventory[keyId] || 0) + quantity;
+  await persistInventoryState(ctx.userId, nextState);
+
+  return createApiEnvelope({
+    success: true,
+    chestType,
+    quantity,
+    unitPrice,
+    discount: discountRate,
+    totalPrice,
+    balanceAfter: (balanceBeforeNum - totalPrice).toString(),
+    inventoryCount: Object.keys(nextState.inventory).length,
+  }, request.id);
+});
 
   // Open a chest. For the daily free chest the user must use action="claim_free".
   typedFastify.post(

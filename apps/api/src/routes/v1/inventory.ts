@@ -180,8 +180,6 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: false }, request.id, false, "INSUFFICIENT_BALANCE");
       }
 
-      await gameSettlement.setBalance(ctx.address, "zhixi", (balance - price).toString());
-
       const rawMeta = catalogItem.meta as Record<string, any> | undefined;
       const subItems = rawMeta?.bundle as Array<{ id: string; qty?: number }> | undefined;
       const isBundle = !!subItems;
