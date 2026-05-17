@@ -4,7 +4,7 @@ import { api } from '../../store/api';
 import { RefreshCw, ShieldCheck, Globe, LogIn, Fingerprint, QrCode, Monitor, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QRCode } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function LoginView() {
   const { setAuth } = useAuthStore();
@@ -298,7 +298,7 @@ export default function LoginView() {
               <div className="relative p-6 bg-gradient-to-br from-[#fcc025] to-[#e6ad03] rounded-3xl shadow-[0_20px_50px_rgba(252,192,37,0.15)] group">
                  {deepLinkUrl ? (
                     <div className="p-3 bg-white rounded-xl group-hover:scale-105 transition-transform duration-500">
-                       <QRCode value={deepLinkUrl} size={176} level="M" />
+                       <QRCodeSVG value={deepLinkUrl} size={176} level="M" />
                     </div>
                   ) : (
                     <div className="w-44 h-44 flex items-center justify-center">
