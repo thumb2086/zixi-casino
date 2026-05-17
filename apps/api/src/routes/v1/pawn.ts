@@ -5,7 +5,7 @@ import { createApiEnvelope } from "@repo/shared";
 import { SessionRepository, OpsRepository } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
-import { loadInventoryState, persistInventoryState } from "../../utils/inventory.js";
+import { loadInventoryState, persistInventoryState, ALL_ITEMS } from "../../utils/inventory.js";
 
 const PAWN_PRICES: Record<string, number> = {
   common: 10,
@@ -45,7 +45,6 @@ export async function pawnRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: false }, request.id, false, "道具數量不足");
       }
 
-      const { ALL_ITEMS } = await import("../../utils/inventory.js");
       const def = ALL_ITEMS[itemId];
       if (!def) {
         return createApiEnvelope({ success: false }, request.id, false, "未知道具");
@@ -107,7 +106,6 @@ export async function pawnRoutes(fastify: FastifyInstance) {
       if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
 
       const { itemId } = request.body as { itemId: string };
-      const { ALL_ITEMS } = await import("../../utils/inventory.js");
       const def = ALL_ITEMS[itemId];
       if (!def) {
         return createApiEnvelope({ success: false }, request.id, false, "未知道具");

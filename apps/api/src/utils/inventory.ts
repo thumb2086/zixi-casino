@@ -23,7 +23,7 @@ function chestMetaKey(userId: string): string {
   return `chest_meta:${userId}`;
 }
 
-const ALL_ITEMS: Record<string, ItemDefinition> = (() => {
+export const ALL_ITEMS: Record<string, ItemDefinition> = (() => {
   const out: Record<string, ItemDefinition> = {};
   for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TABLES)[]) {
     for (const item of ITEM_DROP_TABLES[rarity]) {
