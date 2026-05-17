@@ -179,6 +179,7 @@ export interface OpenChestOutcome {
 const DUPLICATE_COMPENSATION: Record<string, number> = {
   avatar: 500,
   title: 300,
+  collectible: 200,
 };
 
 export async function openChestForUser(
@@ -225,6 +226,14 @@ export async function openChestForUser(
         nextState.ownedTitles.push(itemId);
       } else {
         compensationZXC += DUPLICATE_COMPENSATION.title;
+      }
+      continue;
+    }
+    if (def?.type === "collectible") {
+      if (!nextState.inventory[itemId]) {
+        nextState.inventory[itemId] = 1;
+      } else {
+        compensationZXC += DUPLICATE_COMPENSATION.collectible;
       }
       continue;
     }
