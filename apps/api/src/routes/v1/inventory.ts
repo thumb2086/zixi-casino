@@ -51,6 +51,34 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         };
       });
 
+    // Include owned avatars/titles even if not in inventory (already equipped)
+    for (const avatarId of state.ownedAvatars) {
+      if (!items.find((i) => i.id === avatarId)) {
+        const def = ITEM_INDEX[avatarId];
+        if (def) {
+          items.push({
+            ...def,
+            quantity: 1,
+            rarityColor: RARITY_NAMES[def.rarity].color,
+            rarityName: RARITY_NAMES[def.rarity].name,
+          });
+        }
+      }
+    }
+    for (const titleId of state.ownedTitles) {
+      if (!items.find((i) => i.id === titleId)) {
+        const def = ITEM_INDEX[titleId];
+        if (def) {
+          items.push({
+            ...def,
+            quantity: 1,
+            rarityColor: RARITY_NAMES[def.rarity].color,
+            rarityName: RARITY_NAMES[def.rarity].name,
+          });
+        }
+      }
+    }
+
     return createApiEnvelope(
       {
         items,

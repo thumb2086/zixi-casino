@@ -10,6 +10,7 @@ import {
   tokenSymbolToOnchainKey,
   VipManager,
   IdentityManager,
+  RewardManager,
 } from "@repo/domain";
 import {
   WalletRepository,
@@ -20,7 +21,7 @@ import {
   ChainClient,
   kv,
 } from "@repo/infrastructure";
-import { consumePreventLossBuff, restorePreventLossBuff } from "./inventory.js";
+import { consumePreventLossBuff, restorePreventLossBuff, grantBundleToUser, loadInventoryState } from "./inventory.js";
 import { getOnChainConfig, SettlementServiceImpl, ViemRepository, VipBetLevelService, BetPayoutService } from "@repo/on-chain";
 import type { Game, TokenSymbol } from "@repo/shared";
 import type { TxIntent } from "@repo/shared";
@@ -620,10 +621,60 @@ export class GameSettlementWrapper {
   /**
    * Update total bet tracking
    */
-  async updateTotalBet(address: string, betAmount: number): Promise<void> {
-    const key = `total_bet:${address}`;
+  async updateTotalBet(address: string, betAmount: number, winAmount?: number, userId?: string): Promise<void> {
+    const [totalBetRaw, totalWinRaw] = await Promise.all([
+      kv.get<string>(`total_bet:${address}`),
+      kv.get<string>(`total_win:${address}`),
+    ]);
+    const newBet = (parseFloat(totalBetRaw || "0") + betAmount).toString();
+    const newWin = (parseFloat(totalWinRaw || "0") + (winAmount || 0)).toString();
+    await Promise.all([
+      kv.set(`total_bet:${address}`, newBet),
+      kv.set(`total_win:${address}`, newWin),
+    ]);
+    if (userId) {
+      await this.checkAndUnlockTitles(userId, address);
+    }
+  }
+
+  async updateTotalWin(address: string, winAmount: number): Promise<void> {
+    const key = `total_win:${address}`;
     const current = parseFloat(await kv.get<string>(key) || "0");
-    await kv.set(key, (current + betAmount).toString());
+    await kv.set(key, (current + winAmount).toString());
+  }
+
+  async checkAndUnlockTitles(userId: string, address: string): Promise<void> {
+    try {
+      const [totalBetRaw, totalWinRaw] = await Promise.all([
+        kv.get<string>(`total_bet:${address}`),
+        kv.get<string>(`total_win:${address}`),
+      ]);
+      const stats = {
+        totalBet: parseFloat(totalBetRaw || "0"),
+        totalWin: parseFloat(totalWinRaw || "0"),
+      };
+      const rewardManager = new RewardManager();
+      const unlocked = rewardManager.checkTitleUnlock(userId, stats);
+      if (unlocked.length === 0) return;
+
+      const state = await loadInventoryState(userId);
+      const newTitles = unlocked.filter((t) => !state.ownedTitles.includes(t));
+      if (newTitles.length === 0) return;
+
+      await grantBundleToUser(userId, { titles: newTitles }, address);
+      await this.opsRepo.logEvent({
+        channel: "rewards",
+        severity: "info",
+        source: "title_unlock",
+        kind: "title_auto_unlocked",
+        userId,
+        address,
+        message: `Auto-unlocked titles: ${newTitles.join(", ")}`,
+        meta: { newTitles },
+      });
+    } catch (err) {
+      console.error("checkAndUnlockTitles error:", err);
+    }
   }
 
   /**

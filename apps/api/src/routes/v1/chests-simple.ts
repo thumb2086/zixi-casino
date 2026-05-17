@@ -23,6 +23,7 @@ import {
 const DUPLICATE_COMPENSATION: Record<string, number> = {
   avatar: 500,
   title: 300,
+  collectible: 200,
 };
 const chestManager = new ChestManager();
 
@@ -443,6 +444,15 @@ typedFastify.post("/open-bulk", {
           totalComp += DUPLICATE_COMPENSATION.title;
         }
         allItems.push({ item: reward.item, isNew: reward.isNew, quantity: 1 });
+        continue;
+      }
+      if (def?.type === "collectible") {
+        if (reward.isNew) {
+          allItems.push({ item: reward.item, isNew: true, quantity: 1 });
+        } else {
+          totalComp += DUPLICATE_COMPENSATION.collectible;
+          allItems.push({ item: reward.item, isNew: false, quantity: 1 });
+        }
         continue;
       }
       const existing = allItems.find((x) => x.item.id === itemId);
