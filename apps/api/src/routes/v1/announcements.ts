@@ -59,4 +59,32 @@ export async function announcementRoutes(fastify: FastifyInstance) {
     });
     return createApiEnvelope({ success: true }, request.id);
   });
+
+  typedFastify.post("/update", {
+    schema: {
+      body: z.object({
+        id: z.string(),
+        title: z.string(),
+        content: z.string(),
+        type: z.enum(["info", "warning", "urgent"]),
+        active: z.boolean().optional().default(true),
+      })
+    }
+  }, async (request) => {
+    const { id, title, content, type, active } = request.body;
+    const now = new Date();
+
+    // We can use saveAnnouncement for updates if we match the announcementId or ID.
+    // In this repo, saveAnnouncement seems to handle both.
+    await repo.saveAnnouncement({
+      announcementId: id,
+      title,
+      content,
+      isPinned: type === "urgent",
+      isActive: active,
+      updatedBy: "system",
+      updatedAt: now,
+    });
+    return createApiEnvelope({ success: true }, request.id);
+  });
 }

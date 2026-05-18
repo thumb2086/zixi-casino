@@ -44,7 +44,7 @@
     "system_ready": "系統已就緒",
     "error_password_mismatch": "密碼不符",
     "error_password_too_short": "密碼過短",
-    "identity_title": "ZiXi 身份",
+    "identity_title": "子熙身份",
     "identity_subtitle": "安全模擬存取協定",
     "open_app": "開啟 App",
     "encrypted_active": "加密連線生效",
@@ -198,7 +198,7 @@
     "no_category": "此分類尚無公告",
     "type_urgent": "緊急",
     "type_warning": "警告",
-    "welcome": "歡迎來到 ZiXi！",
+    "welcome": "歡迎來到子熙！",
     "welcome_desc": "模擬博弈平台",
     "quick_tips": "快速提示",
     "tips_desc": "前往商店購買新手禮包...",
@@ -234,7 +234,7 @@
     "language": "語言",
     "switch_label": "切換",
     "github_repo": "GitHub 儲存庫",
-    "footer": "© 2026 ZiXi Simulator v1.0.0 — Aureum Edition"
+    "footer": "© 2026 子熙模擬器 v1.0.0 — Aureum Edition"
   },
   "inventory": {
     "title": "背包",
@@ -296,7 +296,7 @@
     "no_register_bonus": "尚無註冊獎金記錄"
   },
   "lobby": {
-    "title": "ZiXi Simulator",
+    "title": "子熙模擬器",
     "operator_identified": "操作員已識別",
     "anonymous": "匿名",
     "encryption_active": "加密啟用：AES-256",

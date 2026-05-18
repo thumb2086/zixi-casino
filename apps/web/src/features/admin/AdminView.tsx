@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, FormEvent } from 'react';
+import { useEffect, useMemo, useState, FormEvent, useCallback } from 'react';
 import {
   ShieldAlert,
   Activity,
@@ -1242,101 +1242,9 @@ export default function AdminView() {
           </section>
         )}
 
-        {activeTab === 'announcement' && (
-          <section className="space-y-6">
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4">
-                <Megaphone size={18} className="text-[#fcc025]" />
-                <h3 className="text-sm font-black tracking-wide text-white">發佈新公告</h3>
-              </div>
-              <form onSubmit={handleAnnouncementCreate} className="space-y-3">
-                <input
-                  type="text"
-                  value={announcementTitle}
-                  onChange={(e) => setAnnouncementTitle(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                  placeholder="標題"
-                  maxLength={100}
-                />
-                <textarea
-                  value={announcementContent}
-                  onChange={(e) => setAnnouncementContent(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24"
-                  placeholder="內容"
-                  maxLength={2000}
-                />
-                <label className="flex items-center gap-2 text-xs text-[#adaaaa]">
-                  <input
-                    type="checkbox"
-                    checked={announcementPinned}
-                    onChange={(e) => setAnnouncementPinned(e.target.checked)}
-                  />
-                  發佈時即釘選於最上方
-                </label>
-                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">
-                  發佈公告
-                </button>
-              </form>
-            </div>
-
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <h3 className="text-sm font-black tracking-wide text-white mb-4">現有公告（{announcements.length}）</h3>
-              {announcements.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">目前沒有公告</p>
-              ) : (
-                <ul className="space-y-3">
-                  {announcements.map((ann) => {
-                    const id = ann.announcementId || ann.id || ann.title;
-                    return (
-                      <li key={id} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              {ann.isPinned && <Pin size={12} className="text-[#fcc025]" />}
-                              <p className={`text-sm font-bold ${ann.isActive ? 'text-white' : 'text-[#494847] line-through'}`}>
-                                {ann.title}
-                              </p>
-                            </div>
-                            <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2 whitespace-pre-wrap">{ann.content}</p>
-                            <p className="text-xs text-[#494847] mt-1">
-                              {ann.publishedAt || ann.createdAt
-                                ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString()
-                                : ''}
-                            </p>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-1">
-                            <button
-                              onClick={() => handleAnnouncementToggle(ann, 'isPinned')}
-                              className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]"
-                              title={ann.isPinned ? '取消釘選' : '置頂'}
-                            >
-                              {ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}
-                            </button>
-                            <button
-                              onClick={() => handleAnnouncementToggle(ann, 'isActive')}
-                              className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]"
-                              title={ann.isActive ? '隱藏' : '顯示'}
-                            >
-                              {ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}
-                            </button>
-                            <button
-                              onClick={() => handleAnnouncementDelete(ann)}
-                              className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10"
-                              title="刪除"
-                            >
-                              <Trash2 size={14} className="text-red-400" />
-                            </button>
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </section>
+        {activeTab === "announcement" && (
+          <AnnouncementManager />
         )}
-
         {activeTab === 'catalog' && (
           <section className="space-y-6">
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
@@ -1996,6 +1904,117 @@ export default function AdminView() {
       </main>
 
       <AppBottomNav current="none" />
+    </div>
+  );
+}
+
+export function AnnouncementManager() {
+  const { sessionId } = useAuthStore();
+  const [anns, setAnns] = useState<any[]>([]);
+  const [editing, setEditing] = useState<any | null>(null);
+  const [form, setForm] = useState({ title: '', content: '', type: 'info', active: true });
+  const [loading, setLoading] = useState(false);
+
+  const fetchAnns = useCallback(async () => {
+    try {
+      const res = await api.get('/api/v1/announcements');
+      if (res.data?.success) setAnns(res.data.data);
+    } catch {}
+  }, []);
+
+  useEffect(() => { fetchAnns(); }, [fetchAnns]);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (editing) {
+        await api.post('/api/v1/announcements/update', { sessionId, ...form, id: editing.id });
+      } else {
+        await api.post('/api/v1/announcements/add', { sessionId, ...form });
+      }
+      setEditing(null);
+      setForm({ title: '', content: '', type: 'info', active: true });
+      fetchAnns();
+    } catch (err: any) {
+      alert(err?.response?.data?.message || '操作失敗');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="bg-[#1a1919] p-4 rounded-xl border border-[#494847]/30 space-y-3">
+        <h3 className="text-sm font-black text-[#fcc025]">{editing ? '編輯公告' : '新增公告'}</h3>
+        <input
+          value={form.title}
+          onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+          placeholder="標題"
+          className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
+          required
+        />
+        <textarea
+          value={form.content}
+          onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))}
+          placeholder="內容"
+          className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white min-h-[100px]"
+          required
+        />
+        <div className="flex gap-4">
+          <select
+            value={form.type}
+            onChange={e => setForm(prev => ({ ...prev, type: e.target.value }))}
+            className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
+          >
+            <option value="info">一般</option>
+            <option value="warning">維護</option>
+            <option value="urgent">緊急</option>
+          </select>
+          <label className="flex items-center gap-2 text-sm text-[#adaaaa]">
+            <input
+              type="checkbox"
+              checked={form.active}
+              onChange={e => setForm(prev => ({ ...prev, active: e.target.checked }))}
+            />
+            啟用
+          </label>
+        </div>
+        <div className="flex gap-2">
+          <button type="submit" disabled={loading} className="flex-1 bg-[#fcc025] text-black font-black py-2 rounded-lg">
+            {loading ? '處理中...' : '儲存公告'}
+          </button>
+          {editing && (
+            <button
+              type="button"
+              onClick={() => { setEditing(null); setForm({ title: '', content: '', type: 'info', active: true }); }}
+              className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg"
+            >
+              取消
+            </button>
+          )}
+        </div>
+      </form>
+
+      <div className="space-y-2">
+        {anns.map(ann => (
+          <div key={ann.id} className="bg-[#1a1919] p-3 rounded-xl border border-[#494847]/20 flex justify-between items-center">
+            <div>
+              <p className="text-sm font-bold text-white">{ann.title}</p>
+              <p className="text-xs text-[#adaaaa]">{ann.type} · {ann.active ? '已啟用' : '已停用'}</p>
+            </div>
+            <button
+              onClick={() => {
+                setEditing(ann);
+                setForm({ title: ann.title, content: ann.content, type: ann.type, active: ann.active });
+              }}
+              className="text-[#fcc025] text-xs font-bold border border-[#fcc025]/30 px-2 py-1 rounded"
+            >
+              編輯
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
