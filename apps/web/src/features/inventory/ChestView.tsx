@@ -98,21 +98,17 @@ function formatExpires(expiresAt?: string | null): string {
   if (!expiresAt) return '';
   const ts = Date.parse(expiresAt);
   if (!Number.isFinite(ts)) return '';
-  const remaining = ts - Date.now();
-  if (remaining <= 0) return '已過期';
-  const hours = Math.ceil(remaining / (1000 * 60 * 60));
-  return `${hours} 小時內有效`;
+  const diff = ts - Date.now();
+  if (diff <= 0) return '已過期';
+  const mins = Math.ceil(diff / 60000);
+  if (mins < 60) return `剩餘 ${mins} 分鐘`;
+  const hrs = Math.ceil(mins / 60);
+  return `剩餘 ${hrs} 小時`;
 }
 
-export default function ChestView() {
+export function ChestView() {
   const navigate = useNavigate();
   const [chests, setChests] = useState<ChestConfig[]>([]);
-  const [selectedChest, setSelectedChest] = useState<ChestConfig | null>(null);
-  const [isOpening, setIsOpening] = useState(false);
-  const [openQty, setOpenQty] = useState(1);
-  const [openedItems, setOpenedItems] = useState<ChestItem[]>([]);
-  const [openCompensation, setOpenCompensation] = useState(0);
-  const [showResult, setShowResult] = useState(false);
   const [status, setStatus] = useState<ChestStatus | null>(null);
   const [inventory, setInventory] = useState<InventoryState>({
     items: [],
@@ -127,6 +123,7 @@ export default function ChestView() {
   const [giftAddress, setGiftAddress] = useState('');
   const [giftQty, setGiftQty] = useState(1);
   const [giftSending, setGiftSending] = useState(false);
+  const [recipients, setRecipients] = useState<Array<{ address: string; displayName: string }>>([]);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -139,6 +136,15 @@ export default function ChestView() {
   const [localKeyCounts, setLocalKeyCounts] = useState<Record<string, number> | null>(null);
   const displayPity = localPity || pity;
   const displayKeyCounts = localKeyCounts || keyCounts;
+
+  const fetchRecipients = useCallback(async () => {
+    try {
+      const res = await api.get("/api/v1/gift/recipients");
+      if (res.data?.success) setRecipients(res.data.data.users);
+    } catch (err) {
+      console.error("Failed to fetch recipients:", err);
+    }
+  }, []);
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -159,6 +165,7 @@ export default function ChestView() {
   }, []);
 
   useEffect(() => {
+    fetchRecipients();
     (async () => {
       try {
         const res = await api.get('/api/v1/chests');
@@ -167,435 +174,304 @@ export default function ChestView() {
         console.error('Failed to fetch chests:', err);
       }
     })();
-    void refreshStatus();
-    void refreshInventory();
-  }, [refreshStatus, refreshInventory]);
+    refreshStatus();
+    refreshInventory();
+  }, [refreshStatus, refreshInventory, fetchRecipients]);
 
-  const openChest = async (chestType: string, free = false) => {
-    if (isOpening) return;
+  const [opening, setOpening] = useState(false);
+  const [openQty, setOpenQty] = useState(1);
+  const [showResult, setShowResult] = useState(false);
+  const [openedItems, setOpenedItems] = useState<ChestItem[]>([]);
+  const [openCompensation, setOpenCompensation] = useState(0);
 
-    setIsOpening(true);
-    setShowResult(false);
-    setOpenedItems([]);
-
+  const handleOpen = async (chestId: string, quantity: number) => {
+    if (opening) return;
+    setOpening(true);
     try {
-      const qty = free ? 1 : openQty;
-      const endpoint = qty > 1 ? '/api/v1/chests/open-bulk' : '/api/v1/chests/open';
-      const body = qty > 1 ? { chestType, quantity: qty } : { chestType, free };
-      const res = await api.post(endpoint, body);
-      const data = res.data;
-
-      if (data?.success) {
-        setOpenedItems(data.data.items);
-        const comp = data.data.compensationZXC || 0;
-        setOpenCompensation(comp);
+      const res = await api.post('/api/v1/chests/open', { chestId, quantity });
+      if (res.data?.success) {
+        const { items, compensation, status: nextStatus } = res.data.data;
+        setOpenedItems(items);
+        setOpenCompensation(compensation);
+        setLocalPity(nextStatus.chestPity);
+        setLocalKeyCounts(nextStatus.keyCounts);
         setShowResult(true);
-        // Update pity and key counts instantly from response
-        const d = data.data;
-        if (d.pityCount !== undefined) {
-          setLocalPity((prev) => ({ ...(prev || pity), [chestType]: d.pityCount }));
-        }
-        if (d.keyCounts) {
-          setLocalKeyCounts((prev) => ({ ...(prev || keyCounts), ...d.keyCounts }));
-        }
-        await Promise.all([refreshStatus(), refreshInventory()]);
+        await refreshInventory();
+        await refreshStatus();
       } else {
-        setSelectedChest(null);
-        showToast(data?.error || '開啟失敗');
+        showToast(res.data?.error || '開啟失敗');
       }
     } catch (err: any) {
-      console.error('Failed to open chest:', err);
-      setSelectedChest(null);
-      showToast(err?.response?.data?.data?.error || err?.response?.data?.error || '開啟失敗');
+      showToast(err?.response?.data?.error || '網路錯誤');
     } finally {
-      setIsOpening(false);
+      setOpening(false);
     }
   };
 
-  const useItem = async (itemId: string, qty: number = 1) => {
+  const useItem = async (itemId: string, quantity: number = 1) => {
+    setUseStatusMessage('正在處理...');
     try {
-      const res = await api.post('/api/v1/inventory/use', { itemId, quantity: qty });
+      const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
-        showToast(res.data.data.effectSummary || '使用成功');
-        await Promise.all([refreshStatus(), refreshInventory()]);
+        showToast(`成功使用 ${res.data.data.usedCount} 個物品`);
+        if (res.data.data.message) showToast(res.data.data.message);
+        await refreshInventory();
       } else {
         showToast(res.data?.error || '使用失敗');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.data?.error || err?.response?.data?.error || '使用失敗');
+      showToast(err?.response?.data?.error || '使用失敗');
+    } finally {
+      setUseStatusMessage(null);
     }
   };
 
+  const groupedItems = inventory.items.reduce((acc, item) => {
+    if (!acc[item.type]) acc[item.type] = [];
+    acc[item.type].push(item);
+    return acc;
+  }, {} as Record<string, InventoryEntry[]>);
+
+  const itemTypeLabels: Record<string, string> = {
+    chest_key: '鑰匙',
+    token: '代幣',
+    buff: '加成',
+    avatar: '頭像',
+    title: '稱號',
+    collectible: '收藏品',
+  };
+
   return (
-    <div className="min-h-screen bg-[#0f0e0e] text-white p-4 max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-black italic text-[#fcc025]">寶箱</h1>
-          <p className="text-sm text-[#adaaaa] mt-1">開啟寶箱獲得稀有道具、頭像與 ZXC</p>
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+              <ChevronRight className="rotate-180" size={24} />
+            </Link>
+            <Package className="text-[#fcc025]" />
+            <div>
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
+                物資中心
+              </h1>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
+                背包與補給
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">空間</p>
+              <p className="text-sm font-black text-white">
+                {status?.inventorySlotsUsed || 0}
+                <span className="mx-1 text-[#494847]">/</span>
+                {status?.inventorySlotsMax || 0}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {toastMsg && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
-          {toastMsg}
-        </div>
-      )}
-
-      {/* Active Buffs */}
-      {inventory.activeBuffs.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-sm font-black uppercase tracking-widest text-[#adaaaa] mb-2 flex items-center gap-2">
-            <Zap className="w-3 h-3 text-[#fcc025]" />
-            生效中的 Buff
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <main className="mx-auto max-w-2xl px-6 pt-24 space-y-8">
+        {/* Active Buffs */}
+        {inventory.activeBuffs.length > 0 && (
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {inventory.activeBuffs.map((buff) => (
-              <div
-                key={buff.id}
-                className="rounded-xl border border-[#fcc025]/30 bg-[#1a1919] p-3 flex items-center gap-2"
-              >
-                <Shield className="w-5 h-5 text-[#fcc025] flex-shrink-0" />
-                <div className="min-w-0">
-                  <div className="text-sm font-black truncate">
-                    {BUFF_TYPE_LABEL[buff.type] || buff.type}
+              <div key={buff.id} className="relative overflow-hidden rounded-xl border border-[#fcc025]/20 bg-[#1a1919] p-3">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fcc025]/10 text-[#fcc025]">
+                    {buff.type === 'prevent_loss' ? <Shield size={16} /> : <Zap size={16} />}
                   </div>
-                  <div className="text-sm text-[#adaaaa]">
-                    {buff.remaining !== undefined
-                      ? `剩餘 ${buff.remaining} 次`
-                      : formatExpires(buff.expiresAt)}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-[#adaaaa]">
+                      {BUFF_TYPE_LABEL[buff.type] || '加成'}
+                    </p>
+                    <p className="text-xs font-black text-white">
+                      {buff.type === 'prevent_loss' ? `x${buff.remaining}` : `+${buff.value * 100}%`}
+                    </p>
                   </div>
+                </div>
+                <div className="mt-2 text-[10px] font-bold text-[#adaaaa] opacity-60">
+                  {buff.expiresAt ? formatExpires(buff.expiresAt) : '生效中'}
                 </div>
               </div>
             ))}
-          </div>
-        </section>
-      )}
+          </section>
+        )}
 
-      {/* Chest Grid */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {chests.map((chest) => {
-          const currentPity = displayPity[chest.id] ?? 0;
-          const pityPercent = Math.min(100, (currentPity / chest.pityThreshold) * 100);
-          const keys = displayKeyCounts[chest.id] ?? 0;
-          return (
-            <motion.button
-              key={chest.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedChest(chest)}
-              className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 text-left hover:border-[#fcc025]/50 transition-colors"
-            >
-              <div className="text-4xl mb-2 text-center relative">
-                <Gift className="w-10 h-10 mx-auto text-[#fcc025]" />
-                {keys > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#fcc025] text-[#0e0e0e] text-sm font-black min-w-[18px] h-[18px] rounded-full flex items-center justify-center">
-                    {keys}
-                  </span>
-                )}
-              </div>
-              <h3 className="font-black text-sm mb-1">{chest.name}</h3>
-              <div className="h-1.5 bg-[#494847]/30 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${pityPercent}%`,
-                    background: pityPercent >= 100
-                      ? 'linear-gradient(90deg, #fcc025, #ff6f00)'
-                      : '#fcc025',
-                  }}
-                />
-              </div>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-sm text-[#adaaaa]">
-                  保底 {currentPity}/{chest.pityThreshold}
-                </span>
-                {keys > 0 && (
-                  <span className="text-sm font-bold text-[#fcc025]">{keys} 把鑰匙</span>
-                )}
-              </div>
-            </motion.button>
-          );
-        })}
-      </section>
-
-      {/* Inventory */}
-      <section>
-        <h2 className="text-sm font-black uppercase tracking-widest text-[#adaaaa] mb-3 flex items-center gap-2">
-          <Package className="w-3 h-3" />
-          我的道具（{inventory.items.length}）
-        </h2>
-        {inventory.items.length === 0 ? (
-          <div className="rounded-xl border border-[#494847]/20 bg-[#1a1919] p-8 text-center text-sm text-[#adaaaa]">
-            尚未擁有任何道具，開啟寶箱以獲得！
+        {/* Chests */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">可開啟寶箱</h2>
+            <div className="flex gap-2">
+              {[1, 5, 10].map((q) => (
+                <button
+                  key={q}
+                  onClick={() => setOpenQty(q)}
+                  className={`rounded-md px-3 py-1 text-[10px] font-black transition-all ${
+                    openQty === q ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'bg-[#1a1919] text-[#adaaaa] border border-[#494847]/30'
+                  }`}
+                >
+                  x{q}
+                </button>
+              ))}
+            </div>
           </div>
-        ) : (
-          (() => {
-            const groups: Record<string, InventoryEntry[]> = {};
-            for (const item of inventory.items) {
-              const key = item.type || 'other';
-              if (!groups[key]) groups[key] = [];
-              groups[key].push(item);
-            }
-            const typeOrder = ['avatar', 'title', 'buff', 'token', 'collectible', 'other'];
-            const typeLabels: Record<string, string> = {
-              avatar: '頭像',
-              title: '稱號',
-              buff: 'Buff',
-              token: '代幣',
-              collectible: '收藏品',
-              other: '其他',
-            };
-            const typeIcons: Record<string, string> = {
-              avatar: '🎭',
-              title: '👑',
-              buff: '⚡',
-              token: '🪙',
-              collectible: '💎',
-              other: '📦',
-            };
-            return (
-              <div className="space-y-6">
-                {typeOrder.filter((t) => groups[t]?.length).map((typeKey) => (
-                  <div key={typeKey}>
-                    <h3 className="text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-2 flex items-center gap-2">
-                      <span>{typeIcons[typeKey]}</span>
-                      {typeLabels[typeKey]}
-                      <span className="text-[#494847]">（{groups[typeKey].length}）</span>
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {groups[typeKey].map((item) => (
-                        <div
-                          key={item.id}
-                          className="rounded-xl border bg-[#1a1919] p-3"
-                          style={{ borderColor: item.rarityColor || RARITY_COLORS[item.rarity] || '#494847' }}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="text-3xl">{item.icon}</div>
-                            <span
-                              className="text-sm font-bold px-2 py-0.5 rounded-full"
-                              style={{
-                                backgroundColor: `${item.rarityColor || RARITY_COLORS[item.rarity]}30`,
-                                color: item.rarityColor || RARITY_COLORS[item.rarity],
-                              }}
-                            >
-                              x{item.quantity}
-                            </span>
-                          </div>
-                          <div className="mt-2 text-sm font-black truncate">{item.name}</div>
-                          <div className="text-sm text-[#adaaaa] line-clamp-2 min-h-[28px]">
-                            {item.description}
-                          </div>
-                          {item.consumable && (
-                            <div className="mt-2 flex items-center gap-1">
-                              <div className="flex items-center border border-[#494847]/40 rounded-lg overflow-hidden flex-shrink-0">
-                                <button
-                                  onClick={() =>
-                                    setUseQty((prev) => ({
-                                      ...prev,
-                                      [item.id]: Math.max(1, (prev[item.id] || 1) - 1),
-                                    }))
-                                  }
-                                  className="w-7 h-7 flex items-center justify-center text-sm text-[#adaaaa] hover:text-white hover:bg-[#494847]/40 transition-colors"
-                                >
-                                  −
-                                </button>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={item.quantity}
-                                  value={useQty[item.id] || 1}
-                                  onChange={(e) => {
-                                    const v = parseInt(e.target.value) || 1;
-                                    setUseQty((prev) => ({
-                                      ...prev,
-                                      [item.id]: Math.max(1, Math.min(item.quantity, v)),
-                                    }));
-                                  }}
-                                  className="w-10 bg-[#0e0e0e] text-white text-sm font-bold text-center border-x border-[#494847]/40
-                                    focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                />
-                                <button
-                                  onClick={() =>
-                                    setUseQty((prev) => ({
-                                      ...prev,
-                                      [item.id]: Math.min(item.quantity, (prev[item.id] || 1) + 1),
-                                    }))
-                                  }
-                                  className="w-7 h-7 flex items-center justify-center text-sm text-[#adaaaa] hover:text-white hover:bg-[#494847]/40 transition-colors"
-                                >
-                                  +
-                                </button>
-                              </div>
-                              <button
-                                onClick={() => useItem(item.id, useQty[item.id] || 1)}
-                                className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]"
-                              >
-                                使用
-                              </button>
-                              <button
-                                onClick={() =>
-                                  setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })
-                                }
-                                className="border border-[#fcc025] text-[#fcc025] font-black text-sm px-3 py-2 rounded-lg hover:bg-[#fcc025]/10"
-                              >
-                                贈送
-                              </button>
-                            </div>
-                          )}
-                          {!item.consumable && (item.type === 'avatar' || item.type === 'title') && (
-                            <div className="mt-2 flex gap-1">
-                              <button
-                                onClick={() => useItem(item.id)}
-                                className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025] hover:text-black"
-                              >
-                                裝備
-                              </button>
-                              <button
-                                onClick={() =>
-                                  setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })
-                                }
-                                className="border border-[#fcc025] text-[#fcc025] font-black text-sm px-3 py-2 rounded-lg hover:bg-[#fcc025]/10"
-                              >
-                                贈送
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {chests.map((chest) => {
+              const keys = displayKeyCounts[chest.id] || 0;
+              const currentPity = displayPity[chest.id] || 0;
+              const canOpen = keys >= openQty;
+
+              return (
+                <div key={chest.id} className="group relative overflow-hidden rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-5 transition-all hover:border-[#fcc025]/30">
+                  <div className="mb-4 flex items-start justify-between">
+                    <div>
+                      <h3 className="text-lg font-black text-white">{chest.name}</h3>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="rounded bg-[#fcc025]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#fcc025]">
+                          {keys} 把鑰匙
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-4xl">📦</div>
+                  </div>
+
+                  <div className="mb-6 space-y-2">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">
+                      <span>保底進度</span>
+                      <span className="text-[#fcc025]">{currentPity} / {chest.pityThreshold}</span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#0e0e0e]">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(currentPity / chest.pityThreshold) * 100}%` }}
+                        className="h-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]"
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            );
-          })()
-        )}
-      </section>
 
-      {/* Chest Detail Modal */}
-      <AnimatePresence>
-        {selectedChest && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => !isOpening && setSelectedChest(null)}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#1a1919] rounded-2xl p-6 max-w-md w-full border border-[#494847]/30"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-2xl font-black italic">{selectedChest.name}</h2>
-                  <p className="text-sm text-[#adaaaa]">{selectedChest.nameEn}</p>
-                </div>
-                <button onClick={() => setSelectedChest(null)}>
-                  <X className="w-5 h-5 text-[#adaaaa]" />
-                </button>
-              </div>
-
-              <motion.div
-                animate={isOpening ? { rotate: [0, -15, 15, -10, 10, 0], scale: [1, 1.1, 1] } : {}}
-                transition={{ duration: 1.5 }}
-                className="text-center my-6"
-              >
-                <Gift className="w-24 h-24 mx-auto text-[#fcc025]" />
-              </motion.div>
-
-              <div className="space-y-2 mb-4 text-sm">
-                <h3 className="font-black text-[#adaaaa] uppercase tracking-widest">掉落機率</h3>
-                {selectedChest.rarities.map((r) => (
-                  <div key={r.rarity} className="flex justify-between items-center">
-                    <span className="font-bold" style={{ color: r.color }}>
-                      {r.name}
-                    </span>
-                    <span className="text-[#adaaaa]">{r.chance}%</span>
-                  </div>
-                ))}
-                <div className="text-sm text-[#adaaaa] pt-2 border-t border-[#494847]/20">
-                  每次掉落 {selectedChest.dropCount.min}-{selectedChest.dropCount.max} 件，保底 {selectedChest.pityThreshold} 次
-                </div>
-              </div>
-
-              {/* Quantity selector for opening */}
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <button
-                  onClick={() => setOpenQty(Math.max(1, openQty - 1))}
-                  disabled={openQty <= 1}
-                  className="w-8 h-8 rounded-full bg-[#494847]/40 text-[#fcc025] font-bold text-lg
-                    flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
-                    hover:bg-[#494847]/60 transition-colors"
-                >
-                  −
-                </button>
-                <div className="text-center">
-                  <input
-                    type="number"
-                    min={1}
-                    max={displayKeyCounts[selectedChest.id] || 99}
-                    value={openQty}
-                    onChange={(e) => {
-                      const v = parseInt(e.target.value) || 1;
-                      const max = displayKeyCounts[selectedChest.id] || 99;
-                      setOpenQty(Math.max(1, Math.min(max, v)));
-                    }}
-                    className="w-16 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-lg text-center
-                      focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <div className="text-sm text-[#adaaaa]">
-                    鑰匙 {displayKeyCounts[selectedChest.id] || 0} 把
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    const max = displayKeyCounts[selectedChest.id] || 99;
-                    setOpenQty(Math.min(max, openQty + 1));
-                  }}
-                  disabled={openQty >= (displayKeyCounts[selectedChest.id] || 99)}
-                  className="w-8 h-8 rounded-full bg-[#494847]/40 text-[#fcc025] font-bold text-lg
-                    flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
-                    hover:bg-[#494847]/60 transition-colors"
+                  <button
+                    onClick={() => handleOpen(chest.id, openQty)}
+                    disabled={!canOpen || opening}
+                    className={`w-full rounded-xl py-3 text-xs font-black uppercase tracking-widest transition-all ${
+                      canOpen
+                        ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20 hover:brightness-110 active:scale-[0.98]'
+                        : 'bg-[#494847]/20 text-[#494847] cursor-not-allowed border border-[#494847]/10'
+                    }`}
                   >
-                  +
-                </button>
-              </div>
+                    {opening ? '解鎖中...' : `開啟 ${openQty} 個`}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
-              <button
-                onClick={() => openChest(selectedChest.id)}
-                disabled={isOpening}
-                className="w-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03] text-black font-black
-                  py-4 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed
-                  flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
-              >
-                {isOpening ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
-                      <Sparkles className="w-5 h-5" />
-                    </motion.div>
-                    開啟中...
-                  </>
-                ) : (
-                  <>
-                    <Gift className="w-5 h-5" />
-                    開啟{openQty > 1 ? ` ${openQty} 個` : '寶箱'}
-                  </>
-                )}
-              </button>
-              <Link
-                to="/app/shop"
-                className="mt-2 block w-full text-center text-sm font-bold text-[#adaaaa] hover:text-[#fcc025] transition-colors"
-              >
-                前往商店購買寶箱 ↗
-              </Link>
-            </motion.div>
+        {/* Inventory Items */}
+        <section className="space-y-6">
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">我的物資</h2>
+          {chests.length > 0 && inventory.items.length === 0 ? (
+             <div className="rounded-2xl border-2 border-dashed border-[#494847]/20 py-12 text-center">
+                <Package className="mx-auto mb-4 h-12 w-12 text-[#494847]/40" />
+                <p className="text-sm font-bold text-[#adaaaa]">目前沒有任何物資</p>
+             </div>
+          ) : (
+            <div className="space-y-8">
+              {Object.entries(groupedItems).map(([type, items]) => (
+                <div key={type} className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-[#494847]/20" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#adaaaa]">
+                      {itemTypeLabels[type] || type}
+                    </span>
+                    <div className="h-px flex-1 bg-[#494847]/20" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3 transition-colors hover:border-[#fcc025]/10">
+                        <div className="mb-2 flex items-start justify-between">
+                          <span className="text-2xl">{item.icon}</span>
+                          <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">
+                            x{item.quantity}
+                          </span>
+                        </div>
+                        <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
+                        <p className="mb-3 line-clamp-2 text-[10px] font-bold text-[#adaaaa] opacity-60 leading-relaxed min-h-[2.4em]">
+                          {item.description}
+                        </p>
+
+                        {item.consumable && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <input
+                              type="number"
+                              min="1"
+                              max={item.quantity}
+                              value={useQty[item.id] || 1}
+                              onChange={(e) => {
+                                const v = parseInt(e.target.value) || 1;
+                                setUseQty(prev => ({ ...prev, [item.id]: Math.max(1, Math.min(item.quantity, v)) }));
+                              }}
+                              className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
+                            />
+                            <button
+                              onClick={() => useItem(item.id, useQty[item.id] || 1)}
+                              className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]"
+                            >
+                              使用
+                            </button>
+                            <button
+                              onClick={() =>
+                                setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })
+                              }
+                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10"
+                            >
+                              贈送
+                            </button>
+                          </div>
+                        )}
+                        {!item.consumable && (item.type === 'avatar' || item.type === 'title') && (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <button
+                              onClick={() => useItem(item.id)}
+                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025] hover:text-black"
+                            >
+                              裝備
+                            </button>
+                            <button
+                              onClick={() =>
+                                setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })
+                              }
+                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10"
+                            >
+                              贈送
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+
+      <AppBottomNav current="none" />
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] bg-[#fcc025] text-black px-6 py-3 rounded-full font-black shadow-2xl"
+          >
+            {toastMsg}
           </motion.div>
         )}
       </AnimatePresence>
@@ -720,15 +596,20 @@ export default function ChestView() {
                 </button>
               </div>
 
-              <label className="block text-sm font-bold text-[#adaaaa] mb-1">接收地址</label>
-              <input
-                type="text"
+              <label className="block text-sm font-bold text-[#adaaaa] mb-1">接收者</label>
+              <select
                 value={giftAddress}
                 onChange={(e) => setGiftAddress(e.target.value)}
-                placeholder="0x..."
                 className="w-full bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-sm
                   focus:outline-none focus:border-[#fcc025] mb-4"
-              />
+              >
+                <option value="">選擇接收者...</option>
+                {recipients.map(r => (
+                  <option key={r.address} value={r.address}>
+                    {r.displayName} ({r.address.slice(0, 6)}...{r.address.slice(-4)})
+                  </option>
+                ))}
+              </select>
 
               <label className="block text-sm font-bold text-[#adaaaa] mb-1">數量</label>
               <div className="flex items-center gap-2 mb-4">
@@ -779,7 +660,7 @@ export default function ChestView() {
                     setGiftSending(true);
                     try {
                       const res = await api.post('/api/v1/gift/send', {
-                        recipient: giftAddress.trim(),
+                        toAddress: giftAddress.trim(),
                         itemId: giftDialog.itemId,
                         quantity: giftQty,
                       });

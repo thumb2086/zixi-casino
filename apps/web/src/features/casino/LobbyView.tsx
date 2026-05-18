@@ -113,7 +113,7 @@ export default function LobbyView() {
     queryKey: ['market-account-preview'],
     queryFn: async () => {
       const res = await api.get('/api/v1/market/me');
-      return res.data?.data as { bankBalance?: number; stockValue?: number } | undefined;
+      return res.data?.data?.account as { bankBalance?: number; stockValue?: number } | undefined;
     },
     refetchInterval: 30000,
   });
