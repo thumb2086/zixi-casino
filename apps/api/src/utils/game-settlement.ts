@@ -20,7 +20,7 @@ import {
   UserRepository,
   ChainClient,
 } from "@repo/infrastructure";
-import { consumePreventLossBuff, restorePreventLossBuff, grantBundleToUser, loadInventoryState } from "./inventory.js";
+import { consumePreventLossBuff, restorePreventLossBuff, grantBundleToUser, loadInventoryState, ALL_ITEMS } from "./inventory.js";
 import { getOnChainConfig, SettlementServiceImpl, ViemRepository, VipBetLevelService, BetPayoutService } from "@repo/on-chain";
 import type { Game, TokenSymbol } from "@repo/shared";
 import type { TxIntent } from "@repo/shared";
@@ -635,6 +635,30 @@ export class GameSettlementWrapper {
       if (newTitles.length === 0) return;
 
       await grantBundleToUser(userId, { titles: newTitles }, address);
+
+      // Send global notification
+      try {
+        const { kv } = await import("@repo/infrastructure");
+        const titleLabels = newTitles.map((t: string) => {
+          const def = ALL_ITEMS[t];
+          return def?.name || t;
+        });
+        const msg = {
+          id: crypto.randomUUID(),
+          userId: "system",
+          address: "",
+          displayName: "🎉 系統",
+          text: `玩家獲得稱號：${titleLabels.join("、")}！`,
+          createdAt: Date.now(),
+        };
+        const messages = (await kv.get<any[]>("chat:global:messages")) || [];
+        messages.push(msg);
+        if (messages.length > 50) messages.shift();
+        await kv.set("chat:global:messages", messages);
+      } catch (err) {
+        console.error("Failed to send title unlock notification:", err);
+      }
+
       await this.opsRepo.logEvent({
         channel: "rewards",
         severity: "info",

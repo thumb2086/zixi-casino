@@ -128,7 +128,7 @@ export async function blackjackRoutes(fastify: FastifyInstance) {
         );
 
         // 4. Update total bet
-        await gameSettlement.updateTotalBet(address, betAmount);
+        await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
 
         // 5. Record game session
         const db = await requireDb();
