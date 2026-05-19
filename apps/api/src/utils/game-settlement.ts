@@ -89,7 +89,7 @@ export class GameSettlementWrapper {
   }
 
   private isAsyncSettlementEnabled(): boolean {
-    const raw = String(process.env.GAME_SETTLEMENT_ASYNC ?? "true").toLowerCase();
+    const raw = String(process.env.GAME_SETTLEMENT_ASYNC ?? "false").toLowerCase();
     return raw !== "false" && raw !== "0";
   }
 
