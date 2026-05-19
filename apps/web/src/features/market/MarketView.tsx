@@ -361,6 +361,44 @@ export default function MarketView() {
                     </button>
                   ))}
                 </div>
+
+                {/* Selected stock detail with chart */}
+                {selectedQuote && (() => {
+                  const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
+                  const isUp = (selectedQuote.changePct || 0) >= 0;
+                  const color = isUp ? '#00f59b' : '#ff6d6d';
+                  const path = history.length > 1 ? (() => {
+                    const w = 600, h = 160;
+                    const min = Math.min(...history), max = Math.max(...history);
+                    const range = max - min || 1;
+                    return history.map((v, i) => {
+                      const x = (i / (history.length - 1)) * w;
+                      const y = h - ((v - min) / range) * (h - 16) - 8;
+                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+                    }).join(' ');
+                  })() : '';
+                  return (
+                    <div className="mt-4 rounded-2xl border border-[#494847]/10 bg-[#101010] p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-sm font-black uppercase tracking-[0.14em] text-white">{selectedQuote.symbol} — {selectedQuote.name}</p>
+                          <p className="text-xs text-[#adaaaa]">{selectedQuote.type} · {selectedQuote.sector}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(selectedQuote.price || 0))}</p>
+                          <p className={`text-sm font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                            {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
+                          </p>
+                        </div>
+                      </div>
+                      {path && (
+                        <svg viewBox="0 0 600 160" className="w-full h-40">
+                          <path d={path} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
