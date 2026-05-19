@@ -26,6 +26,8 @@ export default function ChatRoom() {
 
   const { sessionId, address } = useAuthStore();
 
+  const messagesLenRef = useRef(0);
+
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
       await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
@@ -39,9 +41,6 @@ export default function ChatRoom() {
         createdAt: Date.now(),
       };
       setLocalMessages((prev) => [...prev, optimisticMsg]);
-    },
-    onSuccess: () => {
-      setLocalMessages([]);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
@@ -60,9 +59,11 @@ export default function ChatRoom() {
   }, [serverMessages, localMessages]);
 
   useEffect(() => {
-    if (scrollRef.current) {
+    // Only auto-scroll when messages grow (new msg), not when they shrink (dedup)
+    if (messages.length > messagesLenRef.current && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+    messagesLenRef.current = messages.length;
   }, [messages]);
 
   return (
