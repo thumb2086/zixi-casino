@@ -89,7 +89,7 @@ export class GameSettlementWrapper {
   }
 
   private isAsyncSettlementEnabled(): boolean {
-    const raw = String(process.env.GAME_SETTLEMENT_ASYNC ?? "false").toLowerCase();
+    const raw = String(process.env.GAME_SETTLEMENT_ASYNC ?? "true").toLowerCase();
     return raw !== "false" && raw !== "0";
   }
 
@@ -580,10 +580,6 @@ export class GameSettlementWrapper {
     currentBalance: string,
     payout: number
   ): Promise<string> {
-    if (this.isAsyncSettlementEnabled()) {
-      return currentBalance;
-    }
-
     const finalBalance = (parseFloat(currentBalance) + payout).toString();
     await this.setBalance(address, token, finalBalance);
     return finalBalance;
