@@ -77,11 +77,12 @@ export default function LobbyView() {
     queryKey: ['my-profile'],
     queryFn: async () => {
       const res = await api.get('/api/v1/me/profile');
-      return res.data?.data?.profile as { isAdmin?: boolean } | undefined;
+      return res.data?.data?.profile as { isAdmin?: boolean; vipLevel?: string; maxBet?: number } | undefined;
     },
     staleTime: 60000,
   });
   const isAdmin = Boolean(profileData?.isAdmin);
+  const vipLevel = profileData?.vipLevel || '普通會員';
   const liveBalance = resolvePreferredBalance({
     onchainBalance: summary.data?.onchain?.zxc?.balance,
     onchainAvailable: summary.data?.onchain?.zxc?.available,
@@ -163,9 +164,12 @@ export default function LobbyView() {
               <h2 className="text-4xl font-extrabold uppercase italic tracking-tight">
                 {username || (address ? address.slice(0, 8) : t('lobby.anonymous'))}
               </h2>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[#fcc025]" />
-                <span className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+              <div className="mt-2 flex items-center gap-3">
+                <span className="rounded-lg bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-emerald-400">
+                  {vipLevel}
+                </span>
+                <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#adaaaa]">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-[#fcc025]" />
                   {t('lobby.encryption_active')}
                 </span>
               </div>

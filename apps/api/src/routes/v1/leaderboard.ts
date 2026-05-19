@@ -3,7 +3,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { eq, sql } from "drizzle-orm";
-import { createApiEnvelope, ITEM_DROP_TABLES } from "@repo/shared";
+import { createApiEnvelope, ITEM_DROP_TABLES, LEVEL_TIERS } from "@repo/shared";
 import { LeaderboardManager } from "@repo/domain/leaderboard/leaderboard-manager.js";
 import { OnchainWalletManager } from "@repo/domain";
 import * as schema from "@repo/infrastructure/db/schema.js";
@@ -63,6 +63,17 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       entry.activeAvatarIcon = av?.icon ?? null;
       entry.activeTitleId = ti?.id ?? null;
       entry.activeTitleLabel = ti?.label ?? null;
+
+      // Compute VIP level from amount (total bet)
+      const betAmount = Number(entry?.amount || 0);
+      let vipLevel = LEVEL_TIERS[0]?.label || "普通會員";
+      for (let i = LEVEL_TIERS.length - 1; i >= 0; i--) {
+        if (betAmount >= LEVEL_TIERS[i].threshold) {
+          vipLevel = LEVEL_TIERS[i].label;
+          break;
+        }
+      }
+      entry.vipLevel = vipLevel;
     }));
   };
 

@@ -9,6 +9,7 @@ export interface LeaderboardEntry {
   displayName: string | null;
   amount: number;
   balance?: number;
+  vipLevel?: string;
 }
 
 export interface LeaderboardResult {
