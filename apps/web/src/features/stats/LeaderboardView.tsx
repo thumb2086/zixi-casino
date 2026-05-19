@@ -122,7 +122,7 @@ export default function LeaderboardView() {
   const timeRemaining = useMemo(() => getTimeRemaining(currentType), [currentType]);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
@@ -179,7 +179,7 @@ export default function LeaderboardView() {
                 </span>
               </div>
               <div className="text-3xl font-black italic tracking-tighter text-white shadow-[0_0_30px_rgba(252,192,37,0.1)]">
-                {showTimeRemaining ? timeRemaining : '∞'}
+                {showTimeRemaining ? timeRemaining : '??}
               </div>
             </section>
 

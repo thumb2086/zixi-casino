@@ -34,7 +34,7 @@ export default function HealthView() {
   const events = txData?.events || [];
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-['Manrope'] pb-32">
+    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
       {/* Top Bar */}
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="app-shell flex items-center justify-between py-4">

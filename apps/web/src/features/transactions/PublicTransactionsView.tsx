@@ -99,7 +99,7 @@ export default function PublicTransactionsView() {
   const marketWinRatePct = Math.max(0, 100 - (summary?.failed ?? 0) * 100 / Math.max(summary?.total || 1, 1));
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="app-shell flex items-center gap-3 py-4">
           <Activity className="text-[#fcc025]" />
@@ -112,9 +112,9 @@ export default function PublicTransactionsView() {
       <main className="app-shell pt-24">
         {/* Personal Status */}
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 flex items-center gap-6 mb-6">
-          <div className="text-5xl shrink-0">{avatarItem?.icon || 'ğŸ§‘'}</div>
+          <div className="text-5xl shrink-0">{avatarItem?.icon || '??'}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-black text-white truncate">{username || 'æœªè¨­å®š'}</p>
+            <p className="text-lg font-black text-white truncate">{username || '?ªè¨­å®?}</p>
             {titleItem && <p className="text-xs font-bold text-[#fcc025]">{titleItem.icon} {titleItem.name}</p>}
             <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
           </div>
@@ -123,29 +123,29 @@ export default function PublicTransactionsView() {
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-[#fcc025]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC é¤˜é¡</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC é¤˜é?</span>
             </div>
             <p className="text-xl font-black italic text-[#fcc025]">{Number(balance).toLocaleString()}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-[#fcc025]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">æ´»èºé ­åƒ</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">æ´»è??­å?</span>
             </div>
             <p className="text-sm font-bold text-white truncate">{avatarItem?.name || activeAvatar}</p>
           </div>
         </div>
         <section className="mb-6 rounded-2xl border border-[#494847]/20 bg-[#1a1919] divide-y divide-[#494847]/10">
           <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">é“å…·èƒŒåŒ…</span>
+            <span className="text-sm font-bold">?“å…·?Œå?</span>
             <ChevronRight size={16} className="text-[#adaaaa]" />
           </Link>
           <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">ç‰©å“åœ–é‘‘</span>
+            <span className="text-sm font-bold">?©å??–é?</span>
             <ChevronRight size={16} className="text-[#adaaaa]" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">è¨­å®š</span>
+            <span className="text-sm font-bold">è¨­å?</span>
             <ChevronRight size={16} className="text-[#adaaaa]" />
           </Link>
         </section>
@@ -288,7 +288,7 @@ export default function PublicTransactionsView() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-white">
-                      {`${item.type?.toUpperCase?.() || 'TX'} â€¢ ${formatNumber(Number(item.amount))} ${item.tokenSymbol || ''}`}
+                      {`${item.type?.toUpperCase?.() || 'TX'} ??${formatNumber(Number(item.amount))} ${item.tokenSymbol || ''}`}
                     </p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
                       {item.userAddress} / round {String(item.roundId)}

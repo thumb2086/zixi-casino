@@ -43,14 +43,14 @@ export default function CollectionView() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-['Manrope'] pb-32">
+    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="flex items-center gap-3 px-6 py-4 max-w-2xl mx-auto">
           <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
             <ChevronLeft size={24} />
           </Link>
           <Archive className="text-[#fcc025]" />
-          <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">æ”¶è—æ«ƒ</h1>
+          <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">?¶è?æ«?/h1>
         </div>
       </header>
 
@@ -62,8 +62,8 @@ export default function CollectionView() {
         ) : items.length === 0 ? (
           <div className="rounded-xl border border-[#494847]/20 bg-[#1a1919] p-12 text-center mt-8">
             <Archive className="w-12 h-12 mx-auto text-[#494847] mb-4" />
-            <p className="text-sm text-[#adaaaa]">å°šæœªæ”¶è—ä»»ä½•ç‰©å“</p>
-            <p className="text-xs text-[#494847] mt-1">é–‹å•Ÿå¯¶ç®±æœ‰æ©Ÿæœƒç²å¾—ç¨€æœ‰æ”¶è—å“</p>
+            <p className="text-sm text-[#adaaaa]">å°šæœª?¶è?ä»»ä??©å?</p>
+            <p className="text-xs text-[#494847] mt-1">?‹å?å¯¶ç®±?‰æ??ƒç²å¾—ç??‰æ”¶?å?</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
@@ -73,7 +73,7 @@ export default function CollectionView() {
                 className="rounded-2xl border-2 bg-[#1a1919] p-6 text-center transition-transform hover:scale-[1.02]"
                 style={{ borderColor: RARITY_COLORS[item.rarity] || '#494847' }}
               >
-                <div className="text-5xl mb-3">{item.icon || 'ğŸ“¦'}</div>
+                <div className="text-5xl mb-3">{item.icon || '?“¦'}</div>
                 <h3 className="font-bold text-sm mb-1">{item.name}</h3>
                 <p className="text-xs text-[#adaaaa]">{item.description || ''}</p>
                 <span

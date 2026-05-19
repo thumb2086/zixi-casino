@@ -11,7 +11,7 @@ export default function Layout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0e0e0e] font-['Manrope'] text-white">
+    <div className="min-h-screen flex flex-col bg-[#0e0e0e] font-manrope-emoji text-white">
       <main className="app-shell flex flex-1 py-6 lg:py-10">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -51,7 +51,7 @@ export default function Layout() {
 
               <footer className="py-4 text-center">
                 <p className="text-xs font-black uppercase tracking-[0.5em] text-[#494847]">
-                  &copy; 2026 子熙模擬器 - Aureum Edition
+                  &copy; 2026 子�?模擬??- Aureum Edition
                 </p>
               </footer>
             </aside>
