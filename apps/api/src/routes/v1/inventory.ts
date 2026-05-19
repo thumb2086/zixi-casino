@@ -284,6 +284,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         }
       }
 
+      const isVipPass = itemId === 'vip_pass' || itemId === 'vip2_pass';
       const bundle = subItems
         ? { items: subItems.map((i: any) => ({ id: i.id, qty: i.qty || 1 })) }
         : { items: [{ id: itemId, qty: 1 }] };
@@ -310,7 +311,6 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         meta: { itemId, price },
       });
 
-      const isVipPass = itemId === 'vip_pass' || itemId === 'vip2_pass';
       return createApiEnvelope(
         { success: true, itemId, name: catalogItem.name, price, token: paymentToken, balanceAfter: isVipPass ? balanceStr : (balance - price).toString() },
         request.id,
