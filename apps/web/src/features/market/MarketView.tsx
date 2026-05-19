@@ -302,7 +302,24 @@ export default function MarketView() {
                   <BarChart3 className="text-[#fcc025]" size={18} />
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
                 </div>
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {/* Mobile: horizontal scroll */}
+                <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none md:hidden pb-2">
+                  {stockSymbols.map((quote) => (
+                    <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
+                      className={`snap-start shrink-0 w-44 rounded-2xl border p-4 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212] shadow-[0_0_24px_rgba(252,192,37,0.08)]' : 'border-[#494847]/10 bg-[#141414]'}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-black uppercase tracking-[0.14em] text-white">{quote.symbol}</p>
+                        {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={14} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={14} />}
+                      </div>
+                      <p className="text-lg font-black italic leading-none tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0))}</p>
+                      <p className={`mt-1 text-xs font-black ${(quote.changePct || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                        {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
+                      </p>
+                    </button>
+                  ))}
+                </div>
+                {/* Desktop: grid */}
+                <div className="hidden md:grid gap-3 md:grid-cols-2">
                   {stockSymbols.map((quote) => (
                     <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
                       className={`rounded-[1.6rem] border p-5 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212] shadow-[0_0_24px_rgba(252,192,37,0.08)]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
