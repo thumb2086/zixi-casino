@@ -119,6 +119,7 @@ export default function ChestView() {
     ownedTitles: [],
   });
   const [useStatusMessage, setUseStatusMessage] = useState<string | null>(null);
+  const [usingAllTokens, setUsingAllTokens] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [useQty, setUseQty] = useState<Record<string, number>>({});
   const [giftDialog, setGiftDialog] = useState<{ itemId: string; name: string; maxQty: number } | null>(null);
@@ -222,6 +223,29 @@ export default function ChestView() {
       showToast(err?.response?.data?.error || '網路錯誤');
     } finally {
       setOpening(false);
+    }
+  };
+
+  const useAllTokens = async () => {
+    setUsingAllTokens(true);
+    setUseStatusMessage('正在兌換全部代幣...');
+    try {
+      const res = await api.post('/api/v1/inventory/use-all-tokens');
+      if (res.data?.success) {
+        const d = res.data.data;
+        const parts: string[] = [];
+        if (d.totalZxc > 0) parts.push(`${d.totalZxc.toLocaleString()} ZXC`);
+        if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
+        showToast(`成功使用 ${d.itemCount} 個物品，獲得 ${parts.join(' + ')}`);
+        await refreshInventory();
+      } else {
+        showToast(res.data?.error || '兌換失敗');
+      }
+    } catch (err: any) {
+      showToast(err?.response?.data?.error || '兌換失敗');
+    } finally {
+      setUsingAllTokens(false);
+      setUseStatusMessage(null);
     }
   };
 
@@ -402,7 +426,13 @@ export default function ChestView() {
              </div>
           ) : (
             <div className="space-y-8">
-              {Object.entries(groupedItems).map(([type, items]) => (
+              {Object.entries(groupedItems).map(([type, items]) => {
+                const isToken = type === 'token';
+                const totalTokens = isToken ? items.reduce((sum, i) => {
+                  const v = i.effect?.value || 0;
+                  return sum + v * i.quantity;
+                }, 0) : 0;
+                return (
                 <div key={type} className="space-y-4">
                   <div className="flex items-center gap-2">
                     <div className="h-px flex-1 bg-[#494847]/20" />
@@ -410,6 +440,15 @@ export default function ChestView() {
                       {itemTypeLabels[type] || type}
                     </span>
                     <div className="h-px flex-1 bg-[#494847]/20" />
+                    {isToken && items.length > 0 && (
+                      <button
+                        onClick={useAllTokens}
+                        disabled={usingAllTokens}
+                        className="shrink-0 text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
+                      >
+                        {usingAllTokens ? '處理中...' : `全部使用 (≈${totalTokens.toLocaleString()} ZXC)`}
+                      </button>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -439,6 +478,14 @@ export default function ChestView() {
                               }}
                               className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
                             />
+                            {item.type === 'token' && (
+                              <button
+                                onClick={() => setUseQty(prev => ({ ...prev, [item.id]: item.quantity }))}
+                                className="text-[10px] font-black uppercase tracking-wider bg-[#494847]/20 text-[#adaaaa] px-1.5 py-1 rounded-lg hover:bg-[#494847]/40"
+                              >
+                                Max
+                              </button>
+                            )}
                             <button
                               onClick={() => useItem(item.id, useQty[item.id] || 1)}
                               className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]"
@@ -477,7 +524,8 @@ export default function ChestView() {
                     ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
