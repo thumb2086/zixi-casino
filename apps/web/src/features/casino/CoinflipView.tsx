@@ -61,8 +61,10 @@ export const CoinflipView: React.FC = () => {
   const serverNow = localNow + clockOffset;
   const currentRoundId = serverRound?.roundId ?? Math.floor(serverNow / COINFLIP_ROUND_MS);
   const closesAt = serverRound?.closesAt ?? ((currentRoundId + 1) * COINFLIP_ROUND_MS);
-  const isBettingOpen = serverNow < (serverRound?.bettingClosesAt ?? (closesAt - COINFLIP_LOCK_MS));
-  const secLeft = Math.max(0, Math.ceil((closesAt - serverNow) / 1000));
+  const bettingClosesAt = serverRound?.bettingClosesAt ?? (closesAt - COINFLIP_LOCK_MS);
+  const isBettingOpen = serverNow < bettingClosesAt;
+  const countdownTarget = isBettingOpen ? bettingClosesAt : closesAt;
+  const secLeft = Math.max(0, Math.ceil((countdownTarget - serverNow) / 1000));
 
   const [lastRoundId, setLastRoundId] = useState<number | null>(null);
 
