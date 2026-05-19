@@ -55,6 +55,7 @@ export default function MarketView() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [chartOpen, setChartOpen] = useState(true);
 
   useEffect(() => {
     if (actionNotice) { const t = setTimeout(() => setActionNotice(null), 3000); return () => clearTimeout(t); }
@@ -373,7 +374,6 @@ export default function MarketView() {
 
                   {/* Detail chart panel (right side, collapsible) */}
                   {selectedQuote && (() => {
-                    const [chartOpen, setChartOpen] = useState(true);
                     const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
                     const isUp = (selectedQuote.changePct || 0) >= 0;
                     const color = isUp ? '#00f59b' : '#ff6d6d';
