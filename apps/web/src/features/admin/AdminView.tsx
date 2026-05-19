@@ -128,6 +128,7 @@ export default function AdminView() {
   const [announcementTitle, setAnnouncementTitle] = useState('');
   const [announcementContent, setAnnouncementContent] = useState('');
   const [announcementPinned, setAnnouncementPinned] = useState(false);
+  const [announcementType, setAnnouncementType] = useState<'info' | 'warning' | 'urgent'>('info');
 
   const [catalogItemId, setCatalogItemId] = useState('');
   const [catalogType, setCatalogType] = useState<'avatar' | 'title' | 'buff' | 'chest' | 'key' | 'collectible'>('avatar');
@@ -400,13 +401,15 @@ export default function AdminView() {
         sessionId,
         title: announcementTitle.trim(),
         content: announcementContent.trim(),
-        isPinned: announcementPinned,
+        isPinned: announcementPinned || announcementType === 'urgent',
         isActive: true,
+        type: announcementType,
       });
-      show(`公告已發布：${announcementTitle}`);
+      show(`公告已發布：${announcementTitle} [${announcementType}]`);
       setAnnouncementTitle('');
       setAnnouncementContent('');
       setAnnouncementPinned(false);
+      setAnnouncementType('info');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -925,6 +928,12 @@ export default function AdminView() {
               <form onSubmit={handleAnnouncementCreate} className="space-y-3">
                 <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="標題" maxLength={100} />
                 <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder="內容" maxLength={2000} />
+                <div className="flex gap-2">
+                  {(['info', 'warning', 'urgent'] as const).map((t) => (
+                    <button key={t} type="button" onClick={() => setAnnouncementType(t)}
+                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${announcementType === t ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] border border-[#494847]/30'}`}>{t}</button>
+                  ))}
+                </div>
                 <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />發佈時即釘選於最上方</label>
                 <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">發佈公告</button>
               </form>
