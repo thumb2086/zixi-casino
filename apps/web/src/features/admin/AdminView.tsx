@@ -499,7 +499,7 @@ export default function AdminView() {
   async function handleSubmissionApprove(sub: any) {
     if (!window.confirm(`確定通過「${sub.name}」？通過後會加入到稱號頭像清單`)) return;
     try {
-      await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.submissionId)}/approve`, { sessionId });
+      await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.id || sub.submissionId)}/approve`, { sessionId });
       show('已通過');
       refresh();
     } catch (err: any) {
@@ -511,7 +511,7 @@ export default function AdminView() {
     const reason = window.prompt('拒絕原因（可留空）：') ?? '';
     if (!window.confirm(`確定拒絕「${sub.name}」？`)) return;
     try {
-      await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.submissionId)}/reject`, {
+      await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.id || sub.submissionId)}/reject`, {
         sessionId,
         reviewNote: reason,
       });
