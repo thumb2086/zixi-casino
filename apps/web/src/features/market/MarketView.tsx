@@ -322,7 +322,22 @@ export default function MarketView() {
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold text-[#adaaaa]">合約</span>
-                    <span className="text-xs font-black text-[#adaaaa]">保證金：{formatNumber(summary.usedFuturesMargin || 0)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-[#adaaaa]">保證金：{formatNumber(summary.usedFuturesMargin || 0)}</span>
+                      {summary.futuresPositions.length > 1 && (
+                        <button onClick={async () => {
+                          let lastErr: any = null;
+                          for (const pos of summary.futuresPositions) {
+                            try { await execute.mutateAsync({ type: 'futures_close', positionId: pos.id } as any); }
+                            catch (e: any) { lastErr = e; }
+                          }
+                          setActionNotice({ type: lastErr ? 'error' : 'success', message: lastErr?.message || `${summary.futuresPositions.length} 倉位已全平` });
+                        }} disabled={execute.isPending}
+                          className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
+                          全平
+                        </button>
+                      )}
+                    </div>
                   </div>
                   {summary.futuresUnrealizedPnl !== undefined && (
                     <div className={`text-xs font-bold mb-2 ${(summary.futuresUnrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
