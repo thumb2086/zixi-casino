@@ -42,7 +42,9 @@ export default function ChatRoom() {
       };
       setLocalMessages((prev) => [...prev, optimisticMsg]);
     },
-    onSettled: () => {
+    onSuccess: () => {
+      setLocalMessages([]);
+      // Immediately refetch so real message shows without waiting for 3s interval
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
     },
     onError: (_err) => {
