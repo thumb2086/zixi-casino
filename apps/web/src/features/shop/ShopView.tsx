@@ -34,6 +34,30 @@ for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TA
   }
 }
 
+function Sparkline({ values, color }: { values: number[]; color: string }) {
+  const path = (() => {
+    if (!values.length) return '';
+    const width = 180;
+    const height = 56;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    return values
+      .map((value, index) => {
+        const x = (index / Math.max(values.length - 1, 1)) * width;
+        const y = height - ((value - min) / range) * (height - 8) - 4;
+        return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+      })
+      .join(' ');
+  })();
+  if (!path) return null;
+  return (
+    <svg viewBox="0 0 180 56" className="h-10 w-full overflow-visible">
+      <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function formatBalance(raw: string | undefined, mode: 'short' | 'full' = 'short'): string {
   if (!raw) return '0';
   const n = Number(raw);
@@ -60,7 +84,7 @@ export default function ShopView() {
   const [sellingId, setSellingId] = useState<string | null>(null);
   const [pawnTab, setPawnTab] = useState<'items' | 'stocks'>('items');
   const [stockHoldings, setStockHoldings] = useState<any[]>([]);
-  const [stockPrices, setStockPrices] = useState<Record<string, any>>({});
+  const [stockHistory, setStockHistory] = useState<Record<string, number[]>>({});
   const [sellingStock, setSellingStock] = useState<string | null>(null);
 
   // ── YJC exchange state ────────────────────────────────────────────────────
@@ -97,12 +121,18 @@ export default function ShopView() {
       }
       // Fetch stock holdings for pawn
       try {
-        const marketRes = await api.get('/api/v1/market/me', { params: { sessionId } });
+        const [marketRes, snapshotRes] = await Promise.all([
+          api.get('/api/v1/market/me', { params: { sessionId } }),
+          api.get('/api/v1/market/snapshot').catch(() => null),
+        ]);
         const acct = marketRes.data?.data?.account;
         if (acct?.stockPositions) {
           setStockHoldings(acct.stockPositions);
         } else if (acct?.stockHoldings) {
           setStockHoldings(Object.entries(acct.stockHoldings).map(([symbol, h]: any) => ({ symbol, ...h })));
+        }
+        if (snapshotRes?.data?.data?.history) {
+          setStockHistory(snapshotRes.data.data.history);
         }
       } catch {}
     } catch {
@@ -553,36 +583,99 @@ export default function ShopView() {
           {stockHoldings.length === 0 ? (
             <p className="text-sm text-[#adaaaa] text-center py-8">暫無持股</p>
           ) : (
+            <>
+            {/* ── Portfolio Summary ── */}
+            <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20 mb-4">
+              <div className="text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-2">持倉總覽</div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {(() => {
+                  const totalValue = stockHoldings.reduce((s, st) => s + (st.price || 0) * st.qty, 0);
+                  const totalCost = stockHoldings.reduce((s, st) => s + (st.avgPrice || 0) * st.qty, 0);
+                  const totalPnl = stockHoldings.reduce((s, st) => s + (st.unrealizedPnl || 0), 0);
+                  const totalPayout = stockHoldings.reduce((s, st) => s + Math.round((st.price || 0) * 0.7) * st.qty, 0);
+                  return (
+                    <>
+                      <div>
+                        <span className="text-[#adaaaa]">市值</span>
+                        <p className="font-black text-white">{totalValue.toLocaleString()} ZXC</p>
+                      </div>
+                      <div>
+                        <span className="text-[#adaaaa]">即時變現</span>
+                        <p className="font-black text-emerald-400">{totalPayout.toLocaleString()} ZXC</p>
+                      </div>
+                      <div>
+                        <span className="text-[#adaaaa]">損益</span>
+                        <p className={`font-black ${totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {totalPnl >= 0 ? '+' : ''}{totalPnl.toLocaleString()} ZXC
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[#adaaaa]">成本</span>
+                        <p className="font-black text-[#adaaaa]">{totalCost.toLocaleString()} ZXC</p>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
             <div className="space-y-3">
               {stockHoldings.map((stock: any) => {
                 const marketPrice = stock.price || stock.marketPrice || 0;
                 const payoutPerUnit = Math.round(marketPrice * 0.7);
                 const totalPayout = payoutPerUnit * stock.qty;
+                const dayChange = stock.dayChangePct || 0;
+                const pnl = stock.unrealizedPnl || 0;
+                const pnlPct = stock.roiPct || 0;
+                const isUp = dayChange >= 0;
+                const history = stockHistory[stock.symbol] || [];
                 return (
-                  <div key={stock.symbol} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-                    <div className="text-2xl shrink-0">📈</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{stock.symbol}</p>
-                      <p className="text-sm text-[#adaaaa]">{stock.qty} 股 · 均價 {Number(stock.avgPrice || 0).toLocaleString()} ZXC</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-[#adaaaa]">市值 {Math.round(marketPrice * stock.qty).toLocaleString()} ZXC</span>
-                        <span className="text-sm text-emerald-400">→ {totalPayout.toLocaleString()} ZXC</span>
+                  <div key={stock.symbol} className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl shrink-0">📈</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-white">{stock.symbol}</p>
+                          {stock.name && <span className="text-[10px] text-[#adaaaa] truncate">{stock.name}</span>}
+                          {stock.sector && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#adaaaa] bg-[#494847]/20 px-1.5 py-0.5 rounded">{stock.sector}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-sm font-black text-white">{marketPrice.toLocaleString()} ZXC</span>
+                          <span className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {isUp ? '▲' : '▼'} {Math.abs(dayChange).toFixed(2)}%
+                          </span>
+                          <span className="text-xs text-[#adaaaa]">{stock.qty} 股</span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          <span className={`text-xs font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {pnl >= 0 ? '+' : ''}{pnl.toLocaleString()} ZXC ({pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%)
+                          </span>
+                          <span className="text-xs text-[#adaaaa]">均價 {Number(stock.avgPrice || 0).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className="text-sm font-black text-emerald-400">+{totalPayout.toLocaleString()} ZXC</span>
+                        <span className="text-[10px] text-[#adaaaa]">(70% 變現)</span>
+                        <button
+                          onClick={() => handleStockSell(stock.symbol, stock.qty)}
+                          disabled={sellingStock === stock.symbol || !sessionId}
+                          className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
+                        >
+                          {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '出售'}
+                        </button>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-sm font-black text-emerald-400">+{totalPayout.toLocaleString()} ZXC</span>
-                      <button
-                        onClick={() => handleStockSell(stock.symbol, stock.qty)}
-                        disabled={sellingStock === stock.symbol || !sessionId}
-                        className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
-                      >
-                        {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '出售'}
-                      </button>
-                    </div>
+                    {history.length > 1 && (
+                      <div className="mt-2 -mb-2">
+                        <Sparkline values={history} color={isUp ? '#00f59b' : '#ff6d6d'} />
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
+            </>
           )}
           </>
           )}
