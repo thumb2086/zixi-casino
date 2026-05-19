@@ -34,7 +34,11 @@ export const PokerView: React.FC = () => {
         action: "deal",
         token: "yjc",
       });
-      setResult(unwrapGameEnvelope<PokerResult>(res.data));
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
+        throw new Error(extractGameError(payload));
+      }
+      setResult(unwrapGameEnvelope<PokerResult>(payload));
       setStatus("settled");
     } catch (e: unknown) {
       setError(extractGameError(e));
