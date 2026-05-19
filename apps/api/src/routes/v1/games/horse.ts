@@ -154,7 +154,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
       );
 
       // 5. Update total bet
-      await gameSettlement.updateTotalBet(address, betAmount);
+      await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
 
       // 6. Record game session
       const db = await requireDb();

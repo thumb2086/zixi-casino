@@ -97,7 +97,7 @@ export async function playShootDragonGateRound(params: {
       settlement.finalPayout
     );
 
-    await gameSettlement.updateTotalBet(address, betAmount);
+    await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
 
     const db = await requireDb();
     const sessionManager = new GameSessionManager(db);

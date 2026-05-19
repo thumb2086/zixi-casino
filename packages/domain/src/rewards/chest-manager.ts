@@ -72,7 +72,8 @@ export class ChestManager {
   }
 
   private pickItemFromRarity(rarity: Rarity, seed: string, customTables?: Record<string, ItemDefinition[]>): ItemDefinition {
-    const items = customTables?.[rarity] ?? ITEM_DROP_TABLES[rarity];
+    const items = (customTables?.[rarity] ?? ITEM_DROP_TABLES[rarity])
+      .filter(item => !item.id.startsWith('title_member_'));
     const hash = this.fnv1a32(seed + rarity);
     const index = hash % items.length;
     return items[index];
