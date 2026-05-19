@@ -45,6 +45,7 @@ export class VipManager {
       .limit(1);
     const dbBalance = Number(yjcRow[0]?.balance ?? 0);
 
+    // Try on-chain balance; if available and differs from DB, sync DB
     try {
       const runtime = this.onchainWallet.getRuntimeConfig();
       const yjcRuntime = runtime.tokens.yjc;
@@ -59,6 +60,35 @@ export class VipManager {
       if (!Number.isFinite(onchainBalance)) {
         return dbBalance;
       }
+
+      // Sync on-chain balance to DB if different
+      if (onchainBalance !== dbBalance) {
+        try {
+          const userRow = await db
+            .select({ id: schema.users.id })
+            .from(schema.users)
+            .where(eq(schema.users.address, addr))
+            .limit(1);
+          if (userRow[0]?.id) {
+            await db
+              .insert(schema.walletAccounts)
+              .values({
+                userId: userRow[0].id,
+                address: addr,
+                token: "yjc",
+                balance: String(onchainBalance),
+                updatedAt: new Date(),
+              })
+              .onConflictDoUpdate({
+                target: [schema.walletAccounts.address, schema.walletAccounts.token],
+                set: { balance: String(onchainBalance), updatedAt: new Date() },
+              });
+          }
+        } catch {
+          // DB sync failure is non-fatal, return on-chain balance anyway
+        }
+      }
+
       return onchainBalance;
     } catch {
       return dbBalance;
