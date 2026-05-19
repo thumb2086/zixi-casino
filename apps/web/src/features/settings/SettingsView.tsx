@@ -12,7 +12,7 @@ import {
   Volume2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { formatNumber } from '@repo/shared';
+import { formatNumber, APP_VERSION } from '@repo/shared';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useUserStore } from '../../store/useUserStore';
 import { api } from '../../store/api';
@@ -199,7 +199,7 @@ export default function SettingsView() {
             </h1>
           </div>
           <div className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-            {saving ? t('settings.syncing') : 'v1.0.0'}
+            {saving ? t('settings.syncing') : `v${APP_VERSION}`}
           </div>
         </div>
       </header>
