@@ -75,8 +75,8 @@ export default function Layout() {
         </AnimatePresence>
       </main>
 
-      {/* Global chat bar (mobile and desktop) - fixed above bottom nav */}
-      <div className="fixed bottom-20 inset-x-0 z-40 lg:bottom-0 lg:right-0 lg:left-auto lg:w-96 lg:top-24 lg:z-auto">
+      {/* Global chat bar (mobile only - desktop uses sidebar) */}
+      <div className="fixed bottom-20 inset-x-0 z-40 lg:hidden">
         {chatOpen ? (
           <div className="mx-2 mb-2 lg:mb-4 lg:mr-4">
             <div className="flex items-center justify-between bg-[#1a1919] rounded-t-xl border border-[#494847]/20 px-4 py-2">
