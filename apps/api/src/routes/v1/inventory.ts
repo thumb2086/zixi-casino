@@ -247,7 +247,10 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         }
       }
 
-      await gameSettlement.setBalance(ctx.address, paymentToken, (balance - price).toString());
+      // VIP passes: verify YJC holding but don't deduct (on-chain is source of truth)
+      if (itemId !== 'vip_pass' && itemId !== 'vip2_pass') {
+        await gameSettlement.setBalance(ctx.address, paymentToken, (balance - price).toString());
+      }
 
       // VIP passes: grant permanent buff in user_profiles
       if (itemId === 'vip_pass' || itemId === 'vip2_pass') {
@@ -292,7 +295,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           await persistInventoryState(ctx.userId, state);
         }
       } catch (err: any) {
-        await gameSettlement.setBalance(ctx.address, paymentToken, balanceStr);
+        if (!isVipPass) await gameSettlement.setBalance(ctx.address, paymentToken, balanceStr);
         return createApiEnvelope({ success: false }, request.id, false, "GRANT_FAILED");
       }
 
@@ -307,8 +310,9 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         meta: { itemId, price },
       });
 
+      const isVipPass = itemId === 'vip_pass' || itemId === 'vip2_pass';
       return createApiEnvelope(
-        { success: true, itemId, name: catalogItem.name, price, token: paymentToken, balanceAfter: (balance - price).toString() },
+        { success: true, itemId, name: catalogItem.name, price, token: paymentToken, balanceAfter: isVipPass ? balanceStr : (balance - price).toString() },
         request.id,
       );
     },
