@@ -2,8 +2,9 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
-import { MarketManager, OnchainWalletManager } from "@repo/domain";
+import { MarketManager, OnchainWalletManager, WalletManager } from "@repo/domain";
 import { ChainClient, SessionRepository, UserRepository, MarketRepository, WalletRepository, kv } from "@repo/infrastructure";
+import { gameSettlement } from "../../utils/game-settlement.js";
 import { randomUUID } from "crypto";
 
 export async function marketRoutes(fastify: FastifyInstance) {
@@ -141,6 +142,26 @@ export async function marketRoutes(fastify: FastifyInstance) {
     const snapshot = marketManager.buildSnapshot(nowTs);
     const account = await hydrateAccount(ctx.session.address, ctx.user.id, nowTs);
     marketManager.settleLiquidations(account, snapshot);
+    const address = ctx.session.address.toLowerCase();
+    const userId = ctx.user.id;
+
+    // Helper to resolve amount
+    const resolveAmt = (v: any): number => {
+      const n = v === "all" ? account.cash : Number(v ?? 0);
+      return Number.isFinite(n) ? Math.max(0, n) : 0;
+    };
+
+    // Pre-check wallet balance for cost actions
+    const isCostAction = ["stock_buy", "bank_deposit", "futures_open", "loan_repay"].includes(type);
+    if (isCostAction) {
+      const estCost = type === "stock_buy"
+        ? resolveAmt(quantity) * (snapshot.symbols?.[symbol || ""]?.price || 0) * (1 + 0.001) // incl fee
+        : resolveAmt(amount);
+      const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
+      if (currentBalance < estCost) {
+        return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `錢包餘額不足，需要 ${Math.ceil(estCost).toLocaleString()} ZXC，目前 ${Math.floor(currentBalance).toLocaleString()} ZXC` } }, request.id);
+      }
+    }
 
     let result: any;
     try {
@@ -153,11 +174,35 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "futures_open") result = marketManager.openFutures(account, snapshot, { symbol, side, margin: amount, leverage });
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
       else throw new Error("Unsupported market action payload");
-      await marketRepo.saveAccount(ctx.session.address, ctx.user.id, account);
+
+      // Deduct/credit real wallet balance based on actual result
+      const walletAction = new WalletManager();
+      const walletDeduction = Math.abs(result?.total || result?.net || result?.amount || result?.margin || result?.refund || 0);
+      if (isCostAction && walletDeduction > 0) {
+        const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
+        const newBalance = Math.max(0, currentBalance - walletDeduction);
+        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+        const intent = walletAction.createTxIntent(userId, "ZXC", "admin_debit", walletDeduction.toString());
+        intent.address = address;
+        intent.meta = { source: "market", action: type, symbol: symbol || null };
+        await walletRepo.saveTxIntent(intent);
+      }
+      const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow"].includes(type);
+      if (isReturnAction && walletDeduction > 0) {
+        const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
+        const newBalance = currentBalance + walletDeduction;
+        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+        const intent = walletAction.createTxIntent(userId, "ZXC", "admin_credit", walletDeduction.toString());
+        intent.address = address;
+        intent.meta = { source: "market", action: type, symbol: symbol || null };
+        await walletRepo.saveTxIntent(intent);
+      }
+
+      await marketRepo.saveAccount(address, userId, account);
       await marketRepo.saveTrade({
         id: randomUUID(),
-        userId: ctx.user.id,
-        address: ctx.session.address,
+        userId,
+        address,
         type,
         symbol: result?.symbol || symbol || null,
         quantity: result?.quantity ?? null,
