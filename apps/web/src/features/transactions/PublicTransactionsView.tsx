@@ -96,6 +96,12 @@ export default function PublicTransactionsView() {
   ).slice(0, 8);
   const serviceStats = healthData?.stats;
   const events = txData?.events || [];
+  const allActivity = [...events.map((e: any) => ({
+    id: e.id, type: e.type, amount: e.amount,
+    tokenSymbol: (e.token || 'ZXC').toUpperCase(),
+    userAddress: e.address?.slice(0, 10) || '',
+    roundId: '', status: 'confirmed', createdAt: e.createdAt,
+  })), ...items].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 50);
 
   const { address, username, balance, activeAvatar, activeTitle } = useUserStore();
   const avatarItem = avatarMap[activeAvatar];
@@ -297,12 +303,12 @@ export default function PublicTransactionsView() {
           </p>
           <div className="mt-4 space-y-3">
             {isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
-            {!isLoading && !items.length && (
+            {!isLoading && !allActivity.length && (
               <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
                 {t('transactions.empty')}
               </div>
             )}
-            {items.map((item) => (
+            {allActivity.map((item: any) => (
               <div key={item.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
