@@ -203,7 +203,6 @@ export async function walletRoutes(fastify: FastifyInstance) {
           const onChainNum = parseFloat(balance);
 
           if (token === "zhixi") {
-            if (onChainNum > 0) balances.ZXC = balance;
             onchain.zxc = {
               available: true,
               balance,
@@ -212,7 +211,6 @@ export async function walletRoutes(fastify: FastifyInstance) {
               error: null,
             };
           } else {
-            if (onChainNum > 0) balances.YJC = balance;
             onchain.yjc = {
               available: true,
               balance,
