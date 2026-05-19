@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BarChart3,
@@ -32,30 +32,6 @@ type MarketActionParams =
   | { type: 'futures_open'; symbol: string; side: string; amount: string; leverage: string }
   | { type: 'futures_close'; positionId: string };
 
-function Sparkline({ values, color }: { values: number[]; color: string }) {
-  const path = useMemo(() => {
-    if (!values.length) return '';
-    const width = 180;
-    const height = 56;
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const range = max - min || 1;
-    return values
-      .map((value, index) => {
-        const x = (index / Math.max(values.length - 1, 1)) * width;
-        const y = height - ((value - min) / range) * (height - 8) - 4;
-        return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
-      })
-      .join(' ');
-  }, [values]);
-  if (!path) return null;
-  return (
-    <svg viewBox="0 0 180 56" className="h-14 w-full overflow-visible">
-      <path d={path} fill="none" stroke={color} strokeWidth="2.25" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 export default function MarketView() {
   const { t } = useTranslation();
   const { snapshot, account, execute } = useMarket();
@@ -64,7 +40,6 @@ export default function MarketView() {
   const marketSnapshot = snapshot.data;
   const summary = account.data;
   const stockSymbols: Quote[] = Object.values(marketSnapshot?.symbols || {});
-  const historyBySymbol: Record<string, number[]> = marketSnapshot?.history || {};
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL');
   const selectedQuote = stockSymbols.find((q) => q.symbol === selectedSymbol) || null;
   const [tradeQuantity, setTradeQuantity] = useState('1');
@@ -295,52 +270,94 @@ export default function MarketView() {
             </div>
           </section>
 
+          {/* Portfolio summary - above everything */}
+          {(summary?.futuresPositions?.length > 0 || summary?.stockPositions?.length > 0) && (
+            <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa] mb-4">我的持倉</h2>
+              {summary?.futuresPositions?.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-[#adaaaa]">合約</span>
+                    <span className="text-xs font-black text-[#adaaaa]">保證金：{formatNumber(summary.usedFuturesMargin || 0)}</span>
+                  </div>
+                  {summary.futuresUnrealizedPnl !== undefined && (
+                    <div className={`text-xs font-bold mb-2 ${(summary.futuresUnrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      未實現損益：{(summary.futuresUnrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(summary.futuresUnrealizedPnl || 0, numberMode)} ZXC
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    {summary.futuresPositions.map((pos: any) => (
+                      <div key={pos.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="min-w-0 flex items-center gap-2">
+                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+                              {pos.side === 'long' ? '多' : '空'}
+                            </span>
+                            <p className="text-xs font-black text-white">{pos.symbol}</p>
+                            <span className="text-[10px] text-[#adaaaa]">{pos.leverage}x</span>
+                          </div>
+                          <div className="text-right shrink-0 ml-2 flex items-center gap-2">
+                            <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(pos.unrealizedPnl || 0, numberMode)}
+                            </p>
+                            <button onClick={() => runAction({ type: 'futures_close', positionId: pos.id }, '倉位已平倉')}
+                              disabled={execute.isPending}
+                              className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
+                              平倉
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-[#adaaaa] mt-1">
+                          入場 {formatNumber(pos.entryPrice)} · 標記 {formatNumber(pos.price || 0)} · 強平 {formatNumber(pos.liquidationPrice)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {summary?.stockPositions?.length > 0 && (
+                <div>
+                  <span className="text-[10px] font-bold text-[#adaaaa] block mb-2">股票</span>
+                  <div className="space-y-2">
+                    {summary.stockPositions.map((pos: any) => (
+                      <div key={pos.symbol} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-black text-white">{pos.symbol} <span className="text-[10px] font-bold text-[#adaaaa]">×{formatNumber(pos.quantity)}</span></p>
+                          <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(pos.unrealizedPnl || 0, numberMode)}
+                          </p>
+                        </div>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">市值 {formatNumber(pos.marketValue, numberMode)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+
           <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-6">
               <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mb-4">
                   <BarChart3 className="text-[#fcc025]" size={18} />
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
                 </div>
-                {/* Mobile: horizontal scroll */}
-                <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none md:hidden pb-2">
+                <div className="grid grid-cols-2 gap-3">
                   {stockSymbols.map((quote) => (
                     <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
-                      className={`snap-start shrink-0 w-44 rounded-2xl border p-4 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212] shadow-[0_0_24px_rgba(252,192,37,0.08)]' : 'border-[#494847]/10 bg-[#141414]'}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-black uppercase tracking-[0.14em] text-white">{quote.symbol}</p>
+                      className={`rounded-2xl border p-4 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212] shadow-[0_0_24px_rgba(252,192,37,0.08)]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0">
+                          <p className="text-xs font-black uppercase tracking-[0.14em] text-white truncate">{quote.symbol}</p>
+                          <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                        </div>
                         {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={14} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={14} />}
                       </div>
-                      <p className="text-lg font-black italic leading-none tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0))}</p>
+                      <p className="mt-3 text-lg font-black italic leading-none tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0))}</p>
                       <p className={`mt-1 text-xs font-black ${(quote.changePct || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
                         {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
                       </p>
-                    </button>
-                  ))}
-                </div>
-                {/* Desktop: grid */}
-                <div className="hidden md:grid gap-3 md:grid-cols-2">
-                  {stockSymbols.map((quote) => (
-                    <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
-                      className={`rounded-[1.6rem] border p-5 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212] shadow-[0_0_24px_rgba(252,192,37,0.08)]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.14em] text-white">{quote.symbol}</p>
-                          <p className="mt-1 text-[13px] text-[#aeb7c9]">{quote.name}</p>
-                        </div>
-                        {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400" size={16} /> : <TrendingDown className="text-[#ff7351]" size={16} />}
-                      </div>
-                      <p className="mt-5 text-[2rem] font-black italic leading-none tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0))}</p>
-                      <p className={`mt-2 text-[14px] font-black tracking-tight ${(quote.changePct || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                        {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <span className="rounded-full bg-[#232323] px-3 py-1 text-xs font-bold text-[#aeb7c9]">{t('market.type')} <span className="ml-1 text-white">{quote.type}</span></span>
-                        <span className="rounded-full bg-[#232323] px-3 py-1 text-xs font-bold text-[#aeb7c9]">{t('market.sector')} <span className="ml-1 text-white">{quote.sector}</span></span>
-                      </div>
-                      <div className="mt-5 overflow-hidden rounded-xl border border-[#494847]/10 bg-[#101010] px-3 py-2">
-                        <Sparkline values={(historyBySymbol[quote.symbol] || []) as number[]} color={(quote.changePct || 0) >= 0 ? '#00f59b' : '#ff6d6d'} />
-                      </div>
                     </button>
                   ))}
                 </div>
@@ -348,85 +365,6 @@ export default function MarketView() {
             </div>
 
             <div className="space-y-6">
-              {/* Futures Positions */}
-              <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">合約持倉</h2>
-                  {summary?.futuresPositions?.length > 0 && (
-                    <span className="text-xs font-black uppercase tracking-wider text-[#adaaaa]">
-                      保證金：{formatNumber(summary.usedFuturesMargin || 0)}
-                    </span>
-                  )}
-                </div>
-                {summary?.futuresUnrealizedPnl !== undefined && (
-                  <div className={`text-xs font-bold mb-3 ${(summary.futuresUnrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                    未實現損益：{(summary.futuresUnrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(summary.futuresUnrealizedPnl || 0, numberMode)} ZXC
-                  </div>
-                )}
-                <div className="mt-2 space-y-3">
-                  {summary?.futuresPositions?.length ? (
-                    summary.futuresPositions.map((pos: any) => (
-                      <div key={pos.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded ${pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                                {pos.side === 'long' ? '多' : '空'}
-                              </span>
-                              <p className="text-xs font-black text-white">{pos.symbol}</p>
-                              <span className="text-[10px] text-[#adaaaa]">{pos.leverage}x</span>
-                            </div>
-                            <p className="text-[10px] text-[#adaaaa] mt-1">
-                              數量 {formatNumber(pos.quantity)} · 入場 {formatNumber(pos.entryPrice)} · 標記 {formatNumber(pos.price || 0)}
-                            </p>
-                            <p className="text-[10px] text-[#adaaaa]">
-                              強平 {formatNumber(pos.liquidationPrice)}
-                            </p>
-                          </div>
-                          <div className="text-right shrink-0 ml-2">
-                            <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(pos.unrealizedPnl || 0, numberMode)}
-                            </p>
-                            <button onClick={() => runAction({ type: 'futures_close', positionId: pos.id }, '倉位已平倉')}
-                              disabled={execute.isPending}
-                              className="mt-1 text-[10px] font-black uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50 hover:bg-red-500/30">
-                              平倉
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">暫無合約持倉</div>
-                  )}
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.portfolio')}</h2>
-                <div className="mt-4 space-y-3">
-                  {summary?.stockPositions?.length ? (
-                    summary.stockPositions.map((position: any) => (
-                      <div key={position.symbol} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs font-black uppercase tracking-[0.12em] text-white">{position.symbol}</p>
-                            <p className="text-xs font-bold text-[#adaaaa]">{t('market.quantity')} {formatNumber(position.quantity)} {t('market.units')}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs font-black text-[#fcc025]">{formatNumber(position.marketValue, numberMode)}</p>
-                            <p className={`text-xs font-black ${(position.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                              {(position.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(position.unrealizedPnl || 0, numberMode)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">{t('market.no_positions')}</div>
-                  )}
-                </div>
-              </section>
 
               <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
                 <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.recent_activity')}</h2>
