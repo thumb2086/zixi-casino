@@ -50,7 +50,7 @@ function GlassCard({
   return (
     <Link
       to={to}
-      className={`rounded-xl bg-[#1a1919] p-6 transition-all hover:bg-[#262626] active:scale-95 ${
+      className={`relative rounded-xl bg-[#1a1919] p-6 transition-all hover:bg-[#262626] active:scale-95 ${
         border ? 'border-l-4 border-l-[#fcc025]/40' : 'border border-[#494847]/10'
       }`}
     >
@@ -211,6 +211,7 @@ export default function LobbyView() {
               icon={Building2}
               title={isZh ? '我的公司' : 'My Company'}
               subtitle={isZh ? 'AI / 晶片模擬' : 'AI / Chip Simulation'}>
+              <div className="absolute top-2 right-2 bg-[#fcc025] text-[#0e0e0e] text-[8px] font-black px-2 py-0.5 rounded-full">BETA</div>
               <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
                 {isZh ? '創辦公司、雇用員工、研發產品' : 'Start, hire, research, and profit.'}
               </p>
