@@ -40,7 +40,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
     const state = await loadInventoryState(ctx.userId);
 
     const items = Object.entries(state.inventory)
-      .filter(([itemId, qty]) => qty > 0 && !itemId.startsWith('chest_key_'))
+      .filter(([itemId, qty]) => qty > 0 && !itemId.startsWith('chest_key_') && !itemId.startsWith('combo_'))
       .map(([itemId, quantity]) => {
         const def = ITEM_INDEX[itemId];
         if (!def) {
