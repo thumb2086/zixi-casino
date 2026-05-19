@@ -56,6 +56,7 @@ export default function MarketView() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [chartOpen, setChartOpen] = useState(true);
+  const [panelTab, setPanelTab] = useState<'spot' | 'futures' | 'bank'>('spot');
 
   useEffect(() => {
     if (actionNotice) { const t = setTimeout(() => setActionNotice(null), 3000); return () => clearTimeout(t); }
@@ -70,42 +71,48 @@ export default function MarketView() {
     }
   };
 
+  const tabCls = (tab: 'spot' | 'futures' | 'bank') =>
+    `flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${panelTab === tab ? 'bg-[#fcc025] text-black shadow' : 'text-[#adaaaa]'}`;
+
   const executionPanel = (
     <div className="h-full flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <LineChart className="text-[#fcc025]" size={18} />
-        <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.execution_panel')}</h2>
+      {/* Tabs: Spot / Futures / Bank */}
+      <div className="flex gap-1 rounded-xl bg-[#0e0e0e] p-1 border border-[#494847]/20">
+        <button onClick={() => setPanelTab('spot')} className={tabCls('spot')}>現貨</button>
+        <button onClick={() => setPanelTab('futures')} className={tabCls('futures')}>合約</button>
+        <button onClick={() => setPanelTab('bank')} className={tabCls('bank')}>銀行</button>
       </div>
+
       <select value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)}
         className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none">
         {stockSymbols.map((q) => (
           <option key={q.symbol} value={q.symbol}>{q.symbol} — {q.name}</option>
         ))}
       </select>
-      <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
-        placeholder={t('market.quantity_placeholder')}
-        className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
-      <div className="grid grid-cols-2 gap-2">
-        <button type="button" disabled={execute.isPending}
-          onClick={() => runAction({ type: 'stock_buy', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.buy_success'))}
-          className="rounded-2xl bg-[#fcc025] px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:opacity-50">
-          {t('market.buy')} {selectedQuote?.symbol || selectedSymbol}
-        </button>
-        <button type="button" disabled={execute.isPending}
-          onClick={() => runAction({ type: 'stock_sell', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.sell_success'))}
-          className="rounded-2xl bg-[#ff7351] px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-white disabled:opacity-50">
-          {t('market.sell')} {selectedQuote?.symbol || selectedSymbol}
-        </button>
-      </div>
-      {/* Mode toggle: Spot / Futures */}
-      <div className="flex gap-1 rounded-xl bg-[#0e0e0e] p-1 border border-[#494847]/20">
-        <button onClick={() => setTradeMode('spot')}
-          className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${tradeMode === 'spot' ? 'bg-[#fcc025] text-black shadow' : 'text-[#adaaaa]'}`}>現貨</button>
-        <button onClick={() => setTradeMode('futures')}
-          className={`flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${tradeMode === 'futures' ? 'bg-[#fcc025] text-black shadow' : 'text-[#adaaaa]'}`}>合約</button>
-      </div>
 
-      {tradeMode === 'futures' && (
+      {/* --- Spot tab --- */}
+      {panelTab === 'spot' && (
+        <div className="space-y-3">
+          <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
+            placeholder={t('market.quantity_placeholder')}
+            className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" disabled={execute.isPending}
+              onClick={() => runAction({ type: 'stock_buy', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.buy_success'))}
+              className="rounded-2xl bg-[#fcc025] px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:opacity-50">
+              買入 {selectedQuote?.symbol || selectedSymbol}
+            </button>
+            <button type="button" disabled={execute.isPending}
+              onClick={() => runAction({ type: 'stock_sell', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.sell_success'))}
+              className="rounded-2xl bg-[#ff7351] px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-white disabled:opacity-50">
+              賣出 {selectedQuote?.symbol || selectedSymbol}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- Futures tab --- */}
+      {panelTab === 'futures' && (
         <div className="space-y-3">
           <div className="flex gap-2">
             <button onClick={() => setFuturesSide('long')}
@@ -141,24 +148,23 @@ export default function MarketView() {
         </div>
       )}
 
-      <div className="border-t border-[#494847]/10 pt-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Landmark size={16} className="text-[#fcc025]" />
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">銀行</span>
+      {/* --- Bank tab --- */}
+      {panelTab === 'bank' && (
+        <div className="space-y-3">
+          <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
+            placeholder="金額" className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          <div className="grid grid-cols-2 gap-2">
+            <button type="button" disabled={execute.isPending}
+              onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
+              className="rounded-xl bg-emerald-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-emerald-500">存入</button>
+            <button type="button" disabled={execute.isPending}
+              onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
+              className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">提款</button>
+          </div>
         </div>
-        <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
-          placeholder="金額" className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <button type="button" disabled={execute.isPending}
-            onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
-            className="rounded-xl bg-emerald-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-emerald-500">存入</button>
-          <button type="button" disabled={execute.isPending}
-            onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
-            className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">提款</button>
-        </div>
-      </div>
+      )}
 
-      {/* Stock detail chart below execution panel */}
+      {/* Stock detail chart (always visible when selected) */}
       {selectedQuote && chartOpen && (() => {
         const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
         const isUp = (selectedQuote.changePct || 0) >= 0;
