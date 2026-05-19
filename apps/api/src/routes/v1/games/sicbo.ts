@@ -6,7 +6,6 @@ import { createApiEnvelope } from "@repo/shared";
 import { GameSessionManager } from "@repo/domain/games/game-session-manager.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import { GameManager } from "@repo/domain/games/game-manager.js";
-import { getRoundInfo, hashInt } from "@repo/domain/games/auto-round.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
 
 const BetSchema = z.object({
@@ -65,23 +64,7 @@ export async function sicboRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统一分局)
-    const roundInfo = getRoundInfo('sicbo');
-    if (!roundInfo.isBettingOpen) {
-      return createApiEnvelope(
-        { 
-          success: false, 
-          roundId: roundInfo.roundId,
-          closesAt: roundInfo.closesAt,
-          bettingClosesAt: roundInfo.bettingClosesAt,
-        },
-        request.id,
-        false,
-        "本局开奖中，请等待下一局"
-      );
-    }
-
-    const roundId = String(roundInfo.roundId);
+    const roundId = `sicbo_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const amountStr = betAmount.toString();
 
     // 1. Validate and deduct balance
@@ -102,35 +85,10 @@ export async function sicboRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // 2. Resolve game using deterministic hash based on roundId
-      // Generate 3 dice (1-6 each)
-      const seed = hashInt(`sicbo:${roundInfo.roundId}`);
-      const dice1 = ((seed & 0xFF) % 6) + 1;
-      const dice2 = ((seed >> 8) & 0xFF) % 6 + 1;
-      const dice3 = ((seed >> 16) & 0xFF) % 6 + 1;
-      const dice = [dice1, dice2, dice3];
-      const total = dice1 + dice2 + dice3;
-      const isBig = total >= 11 && total <= 17;
-      
-      // Calculate payout based on bets
-      let totalPayoutMultiplier = 0;
-      for (const bet of bets) {
-        if (bet.type === 'big' && isBig) {
-          totalPayoutMultiplier += 2; // 1:1 payout
-        } else if (bet.type === 'small' && total >= 4 && total <= 10) {
-          totalPayoutMultiplier += 2; // 1:1 payout
-        } else if (bet.type === 'total' && bet.value === total) {
-          // Payout varies based on the total value
-          const totalPayouts: Record<number, number> = {
-            4: 60, 5: 30, 6: 18, 7: 12, 8: 8, 9: 7, 10: 6,
-            11: 6, 12: 7, 13: 8, 14: 12, 15: 18, 16: 30, 17: 60
-          };
-          totalPayoutMultiplier += totalPayouts[total] || 6;
-        }
-      }
-      
-      const isWin = totalPayoutMultiplier > 0;
-      const payout = isWin ? betAmount * totalPayoutMultiplier : 0;
+      // 2. Resolve game
+      const gameResult = gameManager.resolveSicbo(bets, roundId);
+      const isWin = gameResult.totalPayoutMultiplier > 0;
+      const payout = isWin ? betAmount * gameResult.totalPayoutMultiplier : 0;
       const payoutStr = payout.toString();
 
       // 3. Execute on-chain settlement
@@ -146,7 +104,6 @@ export async function sicboRoutes(fastify: FastifyInstance) {
       });
 
       if (!settlement.success) {
-        // Rollback balance on settlement error
         await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
         return createApiEnvelope(
           { success: false },
@@ -179,14 +136,12 @@ export async function sicboRoutes(fastify: FastifyInstance) {
           result: settlement.isWin ? "win" : "lose",
           payout: settlement.finalPayout,
           meta: { 
-            dice,
-            total,
-            isBig,
+            dice: gameResult.dice,
+            total: gameResult.total,
+            isBig: gameResult.isBig,
             betTxHash: settlement.betTxHash,
             payoutTxHash: settlement.payoutTxHash,
             fee: settlement.feeAmount,
-            roundId: roundInfo.roundId,
-            closesAt: roundInfo.closesAt,
           },
         },
       });
@@ -200,39 +155,31 @@ export async function sicboRoutes(fastify: FastifyInstance) {
         payout: settlement.finalPayout.toString(),
         fee: settlement.feeAmount.toString(),
         isWin: settlement.isWin,
-        multiplier: totalPayoutMultiplier,
+        multiplier: gameResult.totalPayoutMultiplier,
         betTxHash: settlement.betTxHash,
         payoutTxHash: settlement.payoutTxHash,
         roundId,
       });
 
       // 8. Save round
-      await gameSettlement.saveRound("sicbo", roundId, {
-        dice,
-        total,
-        isBig,
-        isWin,
-        roundInfo,
-      });
+      await gameSettlement.saveRound("sicbo", roundId, gameResult);
 
       return createApiEnvelope({
         success: true,
         data: {
           sessionId: session.id,
-          roundId: roundInfo.roundId,
-          dice,
-          total,
-          isBig,
+          roundId,
+          dice: gameResult.dice,
+          total: gameResult.total,
+          isBig: gameResult.isBig,
           result: settlement.isWin ? "win" : "lose",
           payout: settlement.finalPayout,
           betAmount,
-          multiplier: totalPayoutMultiplier,
+          multiplier: gameResult.totalPayoutMultiplier,
           fee: settlement.feeAmount,
           balance: finalBalance,
           betTxHash: settlement.betTxHash,
           payoutTxHash: settlement.payoutTxHash,
-          closesAt: roundInfo.closesAt,
-          bettingClosesAt: roundInfo.bettingClosesAt,
         }
       }, request.id);
 

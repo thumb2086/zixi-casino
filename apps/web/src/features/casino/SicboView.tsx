@@ -17,7 +17,6 @@ export const SicboView: React.FC = () => {
   const [statusColor, setStatusColor] = useState('#ffd36a');
   const [dicePreview, setDicePreview] = useState([1, 1, 1]);
   const [isRevealing, setIsRevealing] = useState(false);
-  const [roundNo, setRoundNo] = useState(1);
 
   const betMutation = useMutation({
     mutationFn: async () => {
@@ -43,9 +42,8 @@ export const SicboView: React.FC = () => {
       window.setTimeout(() => {
         setResult(data);
         setDicePreview(data.dice || [1, 1, 1]);
-        setStatus(`🎯 第 ${roundNo} 局開獎總點 ${data.total}（${data.isBig ? '大' : '小'}）`);
+        setStatus(`🎯 開獎總點 ${data.total}（${data.isBig ? '大' : '小'}）`);
         setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
-        setRoundNo((prev) => prev + 1);
         setIsRevealing(false);
         queryClient.invalidateQueries({ queryKey: ['user'] });
       }, 1100);
