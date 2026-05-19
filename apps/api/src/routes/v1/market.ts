@@ -86,7 +86,8 @@ export async function marketRoutes(fastify: FastifyInstance) {
     }
 
     const normalized = marketManager.normalizeAccount(storedAccount, nowTs);
-    if (true) { // Always sync cash from live wallet
+    // Only set initial cash from wallet for brand-new empty accounts
+    if (normalized.cash === 0 && Number(liveWalletBalance || 0) > 0) {
       normalized.cash = Number(liveWalletBalance || 0);
     }
     normalized.updatedAt = new Date(nowTs).toISOString();
@@ -153,7 +154,6 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
       else throw new Error("Unsupported market action payload");
       await marketRepo.saveAccount(ctx.session.address, ctx.user.id, account);
-      await walletRepo.updateBalance(ctx.session.address, String(account.cash), "zhixi");
       await marketRepo.saveTrade({
         id: randomUUID(),
         userId: ctx.user.id,
