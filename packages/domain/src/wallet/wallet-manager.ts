@@ -87,9 +87,10 @@ export class WalletManager implements WalletDomain {
   }
 
   buildSummary(address: string, balances: Record<TokenSymbol, string>, ledger: WalletLedgerEntry[]): WalletSummary {
+    const ZXC_PER_YJC = 100_000_000;
     const zxc = parseFloat(balances.ZXC || "0");
     const yjc = parseFloat(balances.YJC || "0");
-    const totalBalance = (zxc + yjc).toFixed(4);
+    const totalBalance = (zxc + yjc * ZXC_PER_YJC).toFixed(4);
 
     const recentTransactions = [...ledger]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
