@@ -87,10 +87,8 @@ export async function marketRoutes(fastify: FastifyInstance) {
     }
 
     const normalized = marketManager.normalizeAccount(storedAccount, nowTs);
-    // Only set initial cash from wallet for brand-new empty accounts
-    if (normalized.cash === 0 && Number(liveWalletBalance || 0) > 0) {
-      normalized.cash = Number(liveWalletBalance || 0);
-    }
+    // Sync cash from wallet (source of truth — synced from on-chain)
+    normalized.cash = Number(liveWalletBalance || 0);
     normalized.updatedAt = new Date(nowTs).toISOString();
     return normalized;
   };
