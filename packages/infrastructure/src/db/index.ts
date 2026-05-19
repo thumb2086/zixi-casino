@@ -223,6 +223,28 @@ const ensureCoreSchema = async () => {
           await sql`CREATE INDEX IF NOT EXISTS game_sessions_address_idx ON game_sessions (address)`.catch(() => {});
           await sql`CREATE INDEX IF NOT EXISTS game_sessions_game_idx ON game_sessions (game)`.catch(() => {});
           await sql`CREATE INDEX IF NOT EXISTS game_sessions_created_at_idx ON game_sessions (created_at)`.catch(() => {});
+          await sql`CREATE TABLE IF NOT EXISTS market_listings (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            seller_id UUID NOT NULL REFERENCES users(id),
+            seller_address TEXT NOT NULL,
+            item_id TEXT NOT NULL,
+            quantity INTEGER NOT NULL DEFAULT 1,
+            price NUMERIC NOT NULL,
+            token TEXT NOT NULL DEFAULT 'zhixi',
+            status TEXT NOT NULL DEFAULT 'active',
+            buyer_id UUID,
+            buyer_address TEXT,
+            sold_at TIMESTAMP,
+            cancelled_at TIMESTAMP,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )`.catch(() => {});
+          await sql`CREATE TABLE IF NOT EXISTS system_config (
+            key TEXT PRIMARY KEY,
+            value JSONB,
+            updated_by TEXT,
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )`.catch(() => {});
           return;
         }
         await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
