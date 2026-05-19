@@ -462,8 +462,10 @@ export default function ShopView() {
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-sm font-black text-[#fcc025]">{price.toLocaleString()} ZXC</span>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="text-sm font-black text-[#fcc025]">
+                      {price.toLocaleString()} {item.meta?.token === 'yjc' ? 'YJC' : 'ZXC'}
+                    </span>
                     <button
                       onClick={() => handleBuy(item.itemId)}
                       disabled={buyingId === item.itemId || !sessionId}
