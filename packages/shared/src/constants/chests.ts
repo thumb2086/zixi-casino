@@ -1,8 +1,8 @@
 // Chest and Item System Constants (Brawl Stars Style)
 
-export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic";
+export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic" | "oracle";
 export type ItemType = "avatar" | "title" | "token" | "buff" | "collectible";
-export type ChestType = "common" | "rare" | "epic" | "legendary" | "mythic";
+export type ChestType = "common" | "rare" | "epic" | "legendary" | "mythic" | "oracle";
 
 export interface ChestConfig {
   id: ChestType;
@@ -49,6 +49,7 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       epic: 45,
       legendary: 5,
       mythic: 0,
+      oracle: 0,
     },
   },
   rare: {
@@ -65,6 +66,7 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       epic: 130,
       legendary: 19,
       mythic: 1,
+      oracle: 0,
     },
   },
   epic: {
@@ -81,6 +83,7 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       epic: 320,
       legendary: 75,
       mythic: 5,
+      oracle: 0,
     },
   },
   legendary: {
@@ -97,6 +100,7 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       epic: 400,
       legendary: 450,
       mythic: 50,
+      oracle: 0,
     },
   },
   mythic: {
@@ -113,6 +117,24 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       epic: 0,
       legendary: 300,
       mythic: 700,
+      oracle: 0,
+    },
+  },
+  oracle: {
+    id: "oracle",
+    name: "神諭寶箱",
+    nameEn: "Oracle Chest",
+    price: 100_000_000,
+    guaranteedRarity: "oracle",
+    pityThreshold: 1,
+    dropCount: { min: 8, max: 12 },
+    weights: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 200,
+      mythic: 500,
+      oracle: 300,
     },
   },
 };
@@ -268,6 +290,18 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "collectible_egg", name: "鳳凰蛋", nameEn: "Phoenix Egg", type: "collectible", rarity: "mythic", description: "蘊含重生之火的鳳凰蛋", icon: "🥚", tradable: false, consumable: false },
     { id: "collectible_anchor", name: "深海之錨", nameEn: "Abyss Anchor", type: "collectible", rarity: "mythic", description: "來自深海遺跡的遠古船錨", icon: "⚓", tradable: false, consumable: false },
   ],
+  oracle: [
+    { id: "token_1000000000", name: "10 億 ZXC", nameEn: "1B ZXC", type: "token", rarity: "oracle", description: "10 億子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 1000000000 } },
+    { id: "token_10000000000", name: "100 億 ZXC", nameEn: "10B ZXC", type: "token", rarity: "oracle", description: "100 億子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 10000000000 } },
+    { id: "token_100000000000", name: "1,000 億 ZXC", nameEn: "100B ZXC", type: "token", rarity: "oracle", description: "1,000 億子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 100000000000 } },
+    { id: "avatar_oracle", name: "神諭", nameEn: "Oracle", type: "avatar", rarity: "oracle", description: "洞悉萬物的神諭頭像", icon: "🔮", tradable: true, consumable: false },
+    { id: "avatar_cosmos", name: "宇宙", nameEn: "Cosmos", type: "avatar", rarity: "oracle", description: "蘊含宇宙奧秘的頭像", icon: "🌌", tradable: true, consumable: false },
+    { id: "title_oracle", name: "神諭者", nameEn: "Oracle Seer", type: "title", rarity: "oracle", description: "預知未來的傳說之人", icon: "🔮", tradable: false, consumable: false },
+    { id: "title_cosmic", name: "宇宙主宰", nameEn: "Cosmic Ruler", type: "title", rarity: "oracle", description: "掌控宇宙的至高存在", icon: "👑", tradable: false, consumable: false },
+    { id: "collectible_blackhole", name: "黑洞", nameEn: "Black Hole", type: "collectible", rarity: "oracle", description: "吞噬一切的神秘黑洞", icon: "🕳️", tradable: false, consumable: false },
+    { id: "collectible_galaxy", name: "銀河", nameEn: "Galaxy", type: "collectible", rarity: "oracle", description: "旋轉的璀璨銀河", icon: "🌌", tradable: false, consumable: false },
+    { id: "collectible_singularity", name: "奇點", nameEn: "Singularity", type: "collectible", rarity: "oracle", description: "宇宙初始的奇異點", icon: "✨", tradable: false, consumable: false },
+  ],
 };
 
 // Special items (shop-only, not in chest drops)
@@ -308,16 +342,19 @@ export const COLLECTIBLE_VALUE_BY_RARITY: Record<Rarity, number> = {
   epic: 250,
   legendary: 1000,
   mythic: 10000,
+  oracle: 1000000000,
 };
 
-// Base price for buffs / non-token items
 export const BUFF_PAWN_PRICES: Record<Rarity, number> = {
   common: 3,
   rare: 5,
   epic: 10,
   legendary: 25,
   mythic: 50,
+  oracle: 500,
 };
+
+
 
 export function getItemPawnValue(item: ItemDefinition): number {
   if (item.type === "token" && item.effect?.type === "currency" && item.effect?.value != null) {
@@ -336,6 +373,7 @@ export const RARITY_NAMES: Record<Rarity, { name: string; nameEn: string; color:
   epic: { name: "史詩", nameEn: "Epic", color: "#ba68c8" },
   legendary: { name: "傳奇", nameEn: "Legendary", color: "#ffd54f" },
   mythic: { name: "神話", nameEn: "Mythic", color: "#ff6f00" },
+  oracle: { name: "神諭", nameEn: "Oracle", color: "#ff0044" },
 };
 
 // Chest Animation Duration (ms)
