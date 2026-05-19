@@ -27,7 +27,6 @@ import PublicTransactionsView from './features/transactions/PublicTransactionsVi
 import TransactionsDashboardView from './features/dashboard/TransactionsDashboardView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
-import DanmakuOverlay from './components/DanmakuOverlay';
 import { useSyncUser } from './hooks/useSyncUser';
 import Layout from './components/Layout';
 import VIPLevelsView from './features/info/VIPLevelsView';
@@ -118,7 +117,6 @@ function AppContent() {
       <FontSizeApplier />
       <SoundPlayer />
       {isAuthorized && <TransactionQueueIndicator />}
-      {isAuthorized && <DanmakuOverlay />}
       <Routes>
         {!isAuthorized ? (
           <Route path="*" element={<LoginView />} />

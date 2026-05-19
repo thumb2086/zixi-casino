@@ -94,7 +94,9 @@ export async function playShootDragonGateRound(params: {
       address,
       token,
       validation.balanceAfter,
-      settlement.finalPayout
+      settlement.finalPayout,
+      'shoot_dragon_gate',
+      userId
     );
 
     await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);

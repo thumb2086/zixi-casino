@@ -21,5 +21,4 @@ export * from "./rewards/chest-manager.js";
 export * from "./settlement/settlement-manager.js";
 export * from "./settlement/onchain-settlement-manager.js";
 export * from "./support/support-manager.js";
-export * from "./danmaku/danmaku-manager.js";
 export * from "./meta-manager.js";
