@@ -175,14 +175,18 @@ export async function marketRoutes(fastify: FastifyInstance) {
 
       // Deduct/credit real wallet balance based on actual result
       const walletAction = new WalletManager();
-      const walletDeduction = Math.abs(result?.total || result?.net || result?.amount || result?.margin || result?.refund || 0);
       const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow"].includes(type);
-      if (walletDeduction > 0) {
+      const walletAmount = isReturnAction
+        ? (result?.refund || result?.total || result?.amount || 0)
+        : (result?.total || result?.margin || result?.amount || 0);
+      const walletAbs = Math.abs(Number(walletAmount));
+      if (walletAbs > 0) {
         const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-        const newBalance = isCostAction ? Math.max(0, currentBalance - walletDeduction) : currentBalance + walletDeduction;
+        const newBalance = isCostAction ? Math.max(0, currentBalance - walletAbs) : currentBalance + walletAbs;
         await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
         const intentType = isCostAction ? "admin_debit" : "admin_credit";
-        const intent = walletAction.createTxIntent(userId, "ZXC", intentType, walletDeduction.toString());
+        const signedAmount = isCostAction ? walletAbs : walletAbs;
+        const intent = walletAction.createTxIntent(userId, "ZXC", intentType, String(signedAmount));
         intent.address = address;
         intent.meta = { source: "market", action: type, symbol: symbol || null };
         await walletRepo.saveTxIntent(intent);
@@ -193,7 +197,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
           address,
           token: "zhixi",
           type: `market_${type}`,
-          amount: walletDeduction.toString(),
+          amount: (isCostAction ? -walletAbs : walletAbs).toString(),
           balanceBefore: currentBalance.toString(),
           balanceAfter: newBalance.toString(),
           meta: { symbol: symbol || null, result },
