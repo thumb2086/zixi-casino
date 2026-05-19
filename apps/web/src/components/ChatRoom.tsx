@@ -42,9 +42,8 @@ export default function ChatRoom() {
       };
       setLocalMessages((prev) => [...prev, optimisticMsg]);
     },
-    onSuccess: () => {
-      setLocalMessages([]);
-      // Immediately refetch so real message shows without waiting for 3s interval
+    onSettled: () => {
+      // Immediately refetch so real messages arrive quickly
       queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
     },
     onError: (_err) => {
@@ -54,9 +53,16 @@ export default function ChatRoom() {
 
   const serverMessages = chatData?.messages || [];
   const messages = useMemo(() => {
-    const optimistic = localMessages.filter(
-      (lm) => !serverMessages.some((sm: any) => sm.id === lm.id)
-    );
+    // Deduplicate: remove optimistic messages that have been confirmed by server
+    // Match by same text + same sender address + close timestamp (<5s apart)
+    const optimistic = localMessages.filter((lm) => {
+      if (!lm.id.startsWith('temp-')) return true;
+      return !serverMessages.some((sm: any) =>
+        sm.text === lm.text &&
+        sm.address?.toLowerCase() === lm.address?.toLowerCase() &&
+        Math.abs((sm.createdAt || 0) - (lm.createdAt || 0)) < 5000
+      );
+    });
     return [...serverMessages, ...optimistic];
   }, [serverMessages, localMessages]);
 
