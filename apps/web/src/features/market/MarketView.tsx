@@ -147,9 +147,8 @@ export default function MarketView() {
           <span className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">銀行</span>
         </div>
         <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
-          placeholder="金額"
-          className="w-full mb-2 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
-        <div className="grid grid-cols-2 gap-2">
+          placeholder="金額" className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+        <div className="mt-2 grid grid-cols-2 gap-2">
           <button type="button" disabled={execute.isPending}
             onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
             className="rounded-xl bg-emerald-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-emerald-500">存入</button>
@@ -158,6 +157,41 @@ export default function MarketView() {
             className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">提款</button>
         </div>
       </div>
+
+      {/* Stock detail chart below execution panel */}
+      {selectedQuote && chartOpen && (() => {
+        const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
+        const isUp = (selectedQuote.changePct || 0) >= 0;
+        const color = isUp ? '#00f59b' : '#ff6d6d';
+        const path = history.length > 1 ? (() => {
+          const w = 600, h = 160;
+          const min = Math.min(...history), max = Math.max(...history);
+          const range = max - min || 1;
+          return history.map((v, i) => {
+            const x = (i / (history.length - 1)) * w;
+            const y = h - ((v - min) / range) * (h - 16) - 8;
+            return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+          }).join(' ');
+        })() : '';
+        return (
+          <div className="border-t border-[#494847]/10 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol} — {selectedQuote.name}</span>
+              <div className="text-right">
+                <p className="text-sm font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(selectedQuote.price || 0))}</p>
+                <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                  {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
+                </p>
+              </div>
+            </div>
+            {path && (
+              <svg viewBox="0 0 600 160" className="w-full h-32">
+                <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 
@@ -340,13 +374,13 @@ export default function MarketView() {
 
           <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-6">
-              {/* Stock grid */}
+              {/* Stock grid (chart moved to execution panel sidebar) */}
               <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <BarChart3 className="text-[#fcc025]" size={18} />
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
                   {selectedQuote && (
-                    <button onClick={() => { setChartOpen(!chartOpen); setSelectedSymbol(selectedQuote.symbol); }}
+                    <button onClick={() => setChartOpen(!chartOpen)}
                       className="ml-auto text-[10px] font-bold text-[#fcc025] bg-[#fcc025]/10 px-2.5 py-1 rounded-lg hover:bg-[#fcc025]/20 transition-colors">
                       詳圖 {chartOpen ? '▲' : '▼'}
                     </button>
@@ -373,49 +407,10 @@ export default function MarketView() {
                     </button>
                   ))}
                 </div>
-
-                {/* Detail chart panel (separate section below grid) */}
-                {selectedQuote && chartOpen && (() => {
-                  const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
-                  const isUp = (selectedQuote.changePct || 0) >= 0;
-                  const color = isUp ? '#00f59b' : '#ff6d6d';
-                  const path = history.length > 1 ? (() => {
-                    const w = 600, h = 160;
-                    const min = Math.min(...history), max = Math.max(...history);
-                    const range = max - min || 1;
-                    return history.map((v, i) => {
-                      const x = (i / (history.length - 1)) * w;
-                      const y = h - ((v - min) / range) * (h - 16) - 8;
-                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-                    }).join(' ');
-                  })() : '';
-                  return (
-                    <div className="mt-4 rounded-xl border border-[#494847]/10 bg-[#101010] p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-sm font-black uppercase text-white">{selectedQuote.symbol} — {selectedQuote.name}</p>
-                          <p className="text-[10px] text-[#adaaaa]">{selectedQuote.type} · {selectedQuote.sector}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(selectedQuote.price || 0))}</p>
-                          <p className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                            {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
-                          </p>
-                        </div>
-                      </div>
-                      {path && (
-                        <svg viewBox="0 0 600 160" className="w-full h-36">
-                          <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </div>
-                  );
-                })()}
               </div>
             </div>
 
             <div className="space-y-6">
-
               <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
                 <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.recent_activity')}</h2>
                 <div className="mt-4 space-y-3">
