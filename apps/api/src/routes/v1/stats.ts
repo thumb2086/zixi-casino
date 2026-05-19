@@ -2,7 +2,8 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
-import { StatsRepository, kv, OpsRepository } from "@repo/infrastructure";
+import { StatsRepository, WalletRepository, kv, OpsRepository } from "@repo/infrastructure";
+import { requireDb } from "@repo/infrastructure/db/index.js";
 
 export async function statsRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -82,6 +83,26 @@ export async function statsRoutes(fastify: FastifyInstance) {
       return createApiEnvelope({ stats }, request.id);
     } catch (e: any) {
       return createApiEnvelope(null, request.id, false, e.message);
+    }
+  });
+
+  typedFastify.get("/recent-txs", async (request) => {
+    try {
+      const walletRepo = new WalletRepository();
+      const ledger = await walletRepo.listLedgerEntries({ limit: 50 });
+      const events = ledger.map((entry: any) => ({
+        id: entry.id,
+        type: entry.type,
+        amount: entry.amount,
+        token: entry.token || "ZXC",
+        address: entry.address,
+        balanceBefore: entry.balanceBefore,
+        balanceAfter: entry.balanceAfter,
+        createdAt: entry.createdAt,
+      }));
+      return createApiEnvelope({ events }, request.id);
+    } catch (e: any) {
+      return createApiEnvelope({ events: [] }, request.id);
     }
   });
 }

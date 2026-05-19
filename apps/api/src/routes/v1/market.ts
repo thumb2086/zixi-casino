@@ -194,7 +194,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
           token: "zhixi",
           type: `market_${type}`,
           amount: walletDeduction.toString(),
-          balanceBefore: (isCostAction ? currentBalance : (currentBalance - walletDeduction)).toString(),
+          balanceBefore: currentBalance.toString(),
           balanceAfter: newBalance.toString(),
           meta: { symbol: symbol || null, result },
           createdAt: new Date(),
