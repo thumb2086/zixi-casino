@@ -138,6 +138,7 @@ const isCoreSchemaReady = async (sql: any) => {
       to_regclass('public.reward_catalog') IS NOT NULL AS "rewardCatalogExists",
       to_regclass('public.reward_campaigns') IS NOT NULL AS "rewardCampaignsExists",
       to_regclass('public.reward_grants') IS NOT NULL AS "rewardGrantsExists",
+      to_regclass('public.game_sessions') IS NOT NULL AS "gameSessionsExists",
       EXISTS (
         SELECT 1
         FROM information_schema.columns
@@ -168,6 +169,7 @@ const isCoreSchemaReady = async (sql: any) => {
     row?.rewardCatalogExists &&
     row?.rewardCampaignsExists &&
     row?.rewardGrantsExists &&
+    row?.gameSessionsExists &&
     row?.soundPrefsExists
   );
 };
@@ -205,6 +207,22 @@ const ensureCoreSchema = async () => {
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS token_amount NUMERIC`.catch(() => {});
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP`.catch(() => {});
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS meta JSONB`.catch(() => {});
+
+          // Create new tables that may not exist yet (added after initial schema deploy)
+          await sql`CREATE TABLE IF NOT EXISTS game_sessions (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL REFERENCES users(id),
+            address TEXT NOT NULL,
+            game TEXT NOT NULL,
+            bet_amount NUMERIC NOT NULL,
+            result TEXT NOT NULL,
+            payout NUMERIC NOT NULL DEFAULT '0',
+            meta JSONB DEFAULT '{}',
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          )`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS game_sessions_address_idx ON game_sessions (address)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS game_sessions_game_idx ON game_sessions (game)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS game_sessions_created_at_idx ON game_sessions (created_at)`.catch(() => {});
           return;
         }
         await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
@@ -523,22 +541,6 @@ const ensureCoreSchema = async () => {
             created_at TIMESTAMP NOT NULL DEFAULT NOW()
           )
         `;
-        await sql`
-          CREATE TABLE IF NOT EXISTS game_sessions (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id UUID NOT NULL REFERENCES users(id),
-            address TEXT NOT NULL,
-            game TEXT NOT NULL,
-            bet_amount NUMERIC NOT NULL,
-            result TEXT NOT NULL,
-            payout NUMERIC NOT NULL DEFAULT '0',
-            meta JSONB DEFAULT '{}',
-            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-          )
-        `;
-        await sql`CREATE INDEX IF NOT EXISTS game_sessions_address_idx ON game_sessions (address)`;
-        await sql`CREATE INDEX IF NOT EXISTS game_sessions_game_idx ON game_sessions (game)`;
-        await sql`CREATE INDEX IF NOT EXISTS game_sessions_created_at_idx ON game_sessions (created_at)`;
         await normalizeLegacyIdentityData(sql);
       } finally {
         await sql.end();
