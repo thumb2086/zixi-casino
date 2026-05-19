@@ -523,6 +523,22 @@ const ensureCoreSchema = async () => {
             created_at TIMESTAMP NOT NULL DEFAULT NOW()
           )
         `;
+        await sql`
+          CREATE TABLE IF NOT EXISTS game_sessions (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL REFERENCES users(id),
+            address TEXT NOT NULL,
+            game TEXT NOT NULL,
+            bet_amount NUMERIC NOT NULL,
+            result TEXT NOT NULL,
+            payout NUMERIC NOT NULL DEFAULT '0',
+            meta JSONB DEFAULT '{}',
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          )
+        `;
+        await sql`CREATE INDEX IF NOT EXISTS game_sessions_address_idx ON game_sessions (address)`;
+        await sql`CREATE INDEX IF NOT EXISTS game_sessions_game_idx ON game_sessions (game)`;
+        await sql`CREATE INDEX IF NOT EXISTS game_sessions_created_at_idx ON game_sessions (created_at)`;
         await normalizeLegacyIdentityData(sql);
       } finally {
         await sql.end();
