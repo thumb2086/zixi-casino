@@ -68,7 +68,8 @@ function GlassCard({
 }
 
 export default function LobbyView() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isZh = i18n.language.startsWith('zh');
   const { username, address, balance } = useUserStore();
   const { summary } = useWallet();
   const { data: leaderboardData } = useLeaderboard('all', 50);
