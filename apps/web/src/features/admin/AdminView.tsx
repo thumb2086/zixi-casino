@@ -74,31 +74,31 @@ interface CatalogItem {
 type TabId = 'dashboard' | 'maintenance' | 'usermgr' | 'catalog' | 'submissions' | 'campaigns' | 'tickets';
 
 const TABS: { id: TabId; label: string; icon: typeof ShieldAlert }[] = [
-  { id: 'dashboard', label: '?�表板', icon: Activity },
+  { id: 'dashboard', label: '儀表板', icon: Activity },
   { id: 'maintenance', label: '維護', icon: AlertOctagon },
-  { id: 'usermgr', label: '使用?�管??, icon: UserSearch },
-  { id: 'catalog', label: '?�勵?��?', icon: Package },
-  { id: 'submissions', label: '?�稿審核', icon: Inbox },
-  { id: 'campaigns', label: '活�?', icon: CalendarClock },
+  { id: 'usermgr', label: '使用者管理', icon: UserSearch },
+  { id: 'catalog', label: '獎勵目錄', icon: Package },
+  { id: 'submissions', label: '投稿審核', icon: Inbox },
+  { id: 'campaigns', label: '活動', icon: CalendarClock },
   { id: 'tickets', label: '工單', icon: MessageCircle },
 ];
 
 const RARITY_LABEL: Record<string, string> = {
-  common: '?��?,
-  rare: '稀??,
-  epic: '?�詩',
-  legendary: '?�說',
+  common: '普通',
+  rare: '稀有',
+  epic: '史詩',
+  legendary: '傳說',
   mythic: '神話',
   vip: 'VIP',
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  avatar: '?��?',
-  title: '稱�?',
-  buff: '增�?',
+  avatar: '頭像',
+  title: '稱號',
+  buff: '增益',
   chest: '寶箱',
-  key: '?��?',
-  collectible: '?��?',
+  key: '鑰匙',
+  collectible: '收藏',
 };
 
 export default function AdminView() {
@@ -171,11 +171,11 @@ export default function AdminView() {
   const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
 
   const CHEST_KEY_ITEMS = [
-    { id: 'chest_key_common', name: '?�通寶箱鑰??, icon: '??�?, rarity: 'common', type: 'chest_key' },
-    { id: 'chest_key_rare', name: '稀?�寶箱鑰??, icon: '??�?, rarity: 'rare', type: 'chest_key' },
-    { id: 'chest_key_epic', name: '?�詩寶箱?��?', icon: '??�?, rarity: 'epic', type: 'chest_key' },
-    { id: 'chest_key_legendary', name: '?��?寶箱?��?', icon: '??�?, rarity: 'legendary', type: 'chest_key' },
-    { id: 'chest_key_mythic', name: '神話寶箱?��?', icon: '??�?, rarity: 'mythic', type: 'chest_key' },
+    { id: 'chest_key_common', name: '普通寶箱鑰匙', icon: '🗝️', rarity: 'common', type: 'chest_key' },
+    { id: 'chest_key_rare', name: '稀有寶箱鑰匙', icon: '🗝️', rarity: 'rare', type: 'chest_key' },
+    { id: 'chest_key_epic', name: '史詩寶箱鑰匙', icon: '🗝️', rarity: 'epic', type: 'chest_key' },
+    { id: 'chest_key_legendary', name: '傳奇寶箱鑰匙', icon: '🗝️', rarity: 'legendary', type: 'chest_key' },
+    { id: 'chest_key_mythic', name: '神話寶箱鑰匙', icon: '🗝️', rarity: 'mythic', type: 'chest_key' },
   ];
 
   useEffect(() => {
@@ -250,7 +250,7 @@ export default function AdminView() {
       const [healthRes, eventsRes, annRes, catRes, subsRes, campRes] = await Promise.all([
         api.get('/api/v1/admin/ops/health').catch((err) => {
           if (err?.response?.status === 401 || err?.response?.status === 403) {
-            setAuthErr('你�??�管?�員?�未?�入');
+            setAuthErr('你不是管理員或未登入');
           }
           return null;
         }),
@@ -276,7 +276,7 @@ export default function AdminView() {
         .find((e) => e && e.code);
       if (firstErr) {
         const reason = firstErr.message || firstErr.reason || firstErr.code;
-        setAuthErr(`管�??��??��??�失?��?${reason}`);
+        setAuthErr(`管理員資料讀取失敗：${reason}`);
       } else {
         setAuthErr(null);
       }
@@ -317,7 +317,7 @@ export default function AdminView() {
       const res = await api.get('/api/v1/admin/blacklist', { params: { sessionId } });
       if (res?.data?.data?.blacklist) setBlacklist(res.data.data.blacklist);
     } catch {
-      // swallow ??UI shows empty list
+      // swallow — UI shows empty list
     }
   }
 
@@ -333,7 +333,7 @@ export default function AdminView() {
   }
 
   function errMsg(err: any) {
-    return err?.response?.data?.data?.error?.message || err?.message || '?��?失�?';
+    return err?.response?.data?.data?.error?.message || err?.message || '操作失敗';
   }
 
   async function handleMaintenance(e: FormEvent) {
@@ -345,7 +345,7 @@ export default function AdminView() {
         message: maintenanceMessage || undefined,
       });
       setMaintenanceOn(!maintenanceOn);
-      show(!maintenanceOn ? '維護模�?已�??? : '維護模�?已�???);
+      show(!maintenanceOn ? '維護模式已啟用' : '維護模式已停用');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -362,7 +362,7 @@ export default function AdminView() {
         reason: blacklistReason.trim() || undefined,
         action: 'add',
       });
-      show(`已�??��??�單�?{blacklistAddress}`);
+      show(`已加入黑名單：${blacklistAddress}`);
       setBlacklistAddress('');
       setBlacklistReason('');
       refresh();
@@ -383,7 +383,7 @@ export default function AdminView() {
         reason: adjustReason.trim() || 'admin_adjust',
       });
       const data = res.data?.data;
-      show(`餘�?已調?��??��?額�?${data?.newBalance ?? '?'} ${adjustToken.toUpperCase()}`);
+      show(`餘額已調整，新餘額：${data?.newBalance ?? '?'} ${adjustToken.toUpperCase()}`);
       setAdjustAmount('');
       setAdjustReason('');
       refresh();
@@ -403,7 +403,7 @@ export default function AdminView() {
         isPinned: announcementPinned,
         isActive: true,
       });
-      show(`?��?已發布�?${announcementTitle}`);
+      show(`公告已發布：${announcementTitle}`);
       setAnnouncementTitle('');
       setAnnouncementContent('');
       setAnnouncementPinned(false);
@@ -421,7 +421,7 @@ export default function AdminView() {
         sessionId,
         [field]: !ann[field],
       });
-      show(`已更?�公?��?${ann.title}`);
+      show(`已更新公告：${ann.title}`);
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -431,10 +431,10 @@ export default function AdminView() {
   async function handleAnnouncementDelete(ann: Announcement) {
     const id = ann.announcementId || ann.id;
     if (!id) return;
-    if (!window.confirm(`確�??�除?��???{ann.title}?��?`)) return;
+    if (!window.confirm(`確定刪除公告「${ann.title}」？`)) return;
     try {
       await api.delete(`/api/v1/admin/announcements/${encodeURIComponent(id)}`, { data: { sessionId } });
-      show('?��?已刪??);
+      show('公告已刪除');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -458,7 +458,7 @@ export default function AdminView() {
         icon: catalogIcon.trim() || undefined,
         isActive: true,
       });
-      show(`已新�?/ ?�新�?{name}�?{autoId}）`);
+      show(`已新增 / 更新：${name}（${autoId}）`);
       setCatalogItemId('');
       setCatalogName('');
       setCatalogIcon('');
@@ -475,7 +475,7 @@ export default function AdminView() {
         sessionId,
         isActive: !item.isActive,
       });
-      show(`已更?��?${item.name}`);
+      show(`已更新：${item.name}`);
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -483,10 +483,10 @@ export default function AdminView() {
   }
 
   async function handleCatalogDelete(item: CatalogItem) {
-    if (!window.confirm(`確�??�除??{item.name}?��?`)) return;
+    if (!window.confirm(`確定刪除「${item.name}」？`)) return;
     try {
       await api.delete(`/api/v1/admin/reward-catalog/${encodeURIComponent(item.itemId)}`, { data: { sessionId } });
-      show('已刪??);
+      show('已刪除');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -494,10 +494,10 @@ export default function AdminView() {
   }
 
   async function handleSubmissionApprove(sub: any) {
-    if (!window.confirm(`確�??��???{sub.name}?��??��?後�??�入?�稱?�頭?��??�`)) return;
+    if (!window.confirm(`確定通過「${sub.name}」？通過後會加入到稱號頭像清單`)) return;
     try {
       await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.submissionId)}/approve`, { sessionId });
-      show('已通�?');
+      show('已通過');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -505,14 +505,14 @@ export default function AdminView() {
   }
 
   async function handleSubmissionReject(sub: any) {
-    const reason = window.prompt('?��??��?（可?�空）�?') ?? '';
-    if (!window.confirm(`確�??��???{sub.name}?��?`)) return;
+    const reason = window.prompt('拒絕原因（可留空）：') ?? '';
+    if (!window.confirm(`確定拒絕「${sub.name}」？`)) return;
     try {
       await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.submissionId)}/reject`, {
         sessionId,
         reviewNote: reason,
       });
-      show('已�?�?);
+      show('已拒絕');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -524,14 +524,14 @@ export default function AdminView() {
     setUserInspect(null);
     const addr = userQueryAddress.trim();
     if (!addr) {
-      setUserInspectErr('請輸?�地?�');
+      setUserInspectErr('請輸入地址');
       return;
     }
     try {
       const res = await api.get(`/api/v1/admin/users/${encodeURIComponent(addr)}`);
       const data = res.data?.data;
       if (!data || !data.user) {
-        setUserInspectErr('?�無使用??);
+        setUserInspectErr('查無使用者');
         return;
       }
       setUserInspect(data);
@@ -552,7 +552,7 @@ export default function AdminView() {
     } else {
       bias = Number(raw);
       if (!Number.isFinite(bias) || bias < 0 || bias > 1) {
-        show('?��??�置必�?介於 0 ??1 之�?，�?空�?清除');
+        show('勝率偏置必須介於 0 到 1 之間，留空則清除');
         return;
       }
     }
@@ -561,7 +561,7 @@ export default function AdminView() {
         `/api/v1/admin/users/${encodeURIComponent(userInspect.user.address)}/win-bias`,
         { sessionId, bias },
       );
-      show(bias === null ? '已�??��??��?�? : `已設定�??��?�?${bias}`);
+      show(bias === null ? '已清除勝率偏置' : `已設定勝率偏置 ${bias}`);
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -576,7 +576,7 @@ export default function AdminView() {
         { data: { sessionId } },
       );
       setUserBiasInput('');
-      show('已�??��??��?�?);
+      show('已清除勝率偏置');
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -590,7 +590,7 @@ export default function AdminView() {
         `/api/v1/admin/users/${encodeURIComponent(userInspect.user.address)}/vip`,
         { sessionId, level },
       );
-      show(`已設�?VIP 等�???${level}`);
+      show(`已設定 VIP 等級為 ${level}`);
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -599,13 +599,13 @@ export default function AdminView() {
 
   async function handleResetTotalBet() {
     if (!userInspect?.user?.address) return;
-    if (!window.confirm('確�?要�??��?使用?��?累�?下注歸零?��?')) return;
+    if (!window.confirm('確定要把這位使用者的累積下注歸零嗎？')) return;
     try {
       await api.post(
         `/api/v1/admin/users/${encodeURIComponent(userInspect.user.address)}/reset-total-bet`,
         { sessionId },
       );
-      show('累�?下注已歸??);
+      show('累積下注已歸零');
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -615,7 +615,7 @@ export default function AdminView() {
   async function handleCampaignSave() {
     const title = campaignTitle.trim();
     if (!title) {
-      show('請輸?�活?��?�?);
+      show('請輸入活動名稱');
       return;
     }
     const rewards: any = {};
@@ -650,8 +650,8 @@ export default function AdminView() {
         rewards,
       });
       const data = res.data?.data;
-      if (data?.error) throw new Error(data.error.message || data.error.code || '?��?失�?');
-      show('活�?已儲�?);
+      if (data?.error) throw new Error(data.error.message || data.error.code || '儲存失敗');
+      show('活動已儲存');
       setCampaignDraftId('');
       setCampaignTitle('');
       setCampaignDescription('');
@@ -671,7 +671,7 @@ export default function AdminView() {
 
   async function handleCampaignToggle(c: any) {
     try {
-      // Preserve startAt / endAt / requiredLevel when toggling isActive ??without
+      // Preserve startAt / endAt / requiredLevel when toggling isActive — without
       // these the backend upsert stores null and wipes the time window.
       await api.post('/api/v1/admin/campaigns', {
         sessionId,
@@ -692,10 +692,10 @@ export default function AdminView() {
   }
 
   async function handleCampaignDelete(campaignId: string) {
-    if (!confirm('確�??�除?�個活?��?�?)) return;
+    if (!confirm('確定刪除這個活動嗎？')) return;
     try {
       await api.delete(`/api/v1/admin/campaigns/${encodeURIComponent(campaignId)}`);
-      show('已刪??);
+      show('已刪除');
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -705,7 +705,7 @@ export default function AdminView() {
   async function handleGrantSubmit() {
     const addr = grantAddress.trim();
     if (!addr) {
-      show('請輸?�使?�者地?�');
+      show('請輸入使用者地址');
       return;
     }
     const body: any = { sessionId, address: addr, note: grantNote.trim() || undefined };
@@ -726,14 +726,14 @@ export default function AdminView() {
     if (grantTitleId.trim()) body.titles = [grantTitleId.trim()];
 
     if (!body.zxc && !body.yjc && !body.items && !body.avatars && !body.titles) {
-      show('請至少填一?��??��?�?);
+      show('請至少填一個獎勵欄位');
       return;
     }
     try {
       const res = await api.post('/api/v1/admin/grant', body);
       const data = res.data?.data;
-      if (data?.error) throw new Error(data.error.message || data.error.code || '贈送失??);
-      show(`??已送出?�勵�?${addr}`);
+      if (data?.error) throw new Error(data.error.message || data.error.code || '贈送失敗');
+      show(`✅ 已送出獎勵給 ${addr}`);
       setGrantZxc('');
       setGrantYjc('');
       setGrantItemId('');
@@ -748,10 +748,10 @@ export default function AdminView() {
 
   const healthCards = useMemo(
     () => [
-      { label: '待�??�交??, value: health?.queuedTxIntents ?? '-' },
-      { label: '待�?算數', value: health?.pendingSettlements ?? '-' },
-      { label: '?��?工單', value: health?.openTickets ?? '-' },
-      { label: '維護?�??, value: maintenanceOn ? '?�用�? : '?��?' },
+      { label: '待處理交易', value: health?.queuedTxIntents ?? '-' },
+      { label: '待結算數', value: health?.pendingSettlements ?? '-' },
+      { label: '未結工單', value: health?.openTickets ?? '-' },
+      { label: '維護狀態', value: maintenanceOn ? '啟用中' : '關閉' },
     ],
     [health, maintenanceOn],
   );
@@ -767,9 +767,9 @@ export default function AdminView() {
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <ShieldAlert className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">管�?中�?</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">管理中心</h1>
           </div>
-          <button onClick={refresh} className="p-2 rounded-lg border border-[#494847]/30 hover:bg-[#262626]" aria-label="?�新?��?">
+          <button onClick={refresh} className="p-2 rounded-lg border border-[#494847]/30 hover:bg-[#262626]" aria-label="重新整理">
             <RefreshCw size={16} className={loading ? 'animate-spin text-[#fcc025]' : 'text-[#adaaaa]'} />
           </button>
         </div>
@@ -778,7 +778,7 @@ export default function AdminView() {
       <main className="app-shell space-y-6 pt-24">
         {!isAuthorized && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
-            <p className="text-sm text-[#adaaaa]">請�??�入以使?�管?��??��?/p>
+            <p className="text-sm text-[#adaaaa]">請先登入以使用管理功能。</p>
           </section>
         )}
 
@@ -821,7 +821,7 @@ export default function AdminView() {
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
               <div className="flex items-center gap-2 mb-4">
                 <Activity size={18} className="text-[#fcc025]" />
-                <h3 className="text-sm font-black tracking-wide text-white">系統?�??/h3>
+                <h3 className="text-sm font-black tracking-wide text-white">系統狀態</h3>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {healthCards.map((s) => (
@@ -837,40 +837,40 @@ export default function AdminView() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <ScrollText size={18} className="text-[#fcc025]" />
-                  <h3 className="text-sm font-black tracking-wide text-white">事件紀?��?{events.length}�?/h3>
+                  <h3 className="text-sm font-black tracking-wide text-white">事件紀錄（{events.length}）</h3>
                 </div>
-                <button type="button" onClick={refresh} className="text-xs text-[#fcc025] hover:underline">?�新?��?</button>
+                <button type="button" onClick={refresh} className="text-xs text-[#fcc025] hover:underline">重新整理</button>
               </div>
               {loading && events.length === 0 ? (
-                <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> 載入�?..</div>
+                <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> 載入中...</div>
               ) : events.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">沒�?事件</p>
+                <p className="text-xs text-[#adaaaa]">沒有事件</p>
               ) : (
                 <ul className="space-y-2 text-xs max-h-96 overflow-y-auto">
                   {events.map((evt, i) => (
                     <li key={evt.id || i} className="border-l-2 border-[#fcc025]/40 pl-3 py-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={`text-xs font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-[#fcc025]/10 text-[#fcc025]' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                          {({ error: '?�誤', warn: '警�?', info: '資�?', important: '?��?' } as Record<string, string>)[evt.severity] || evt.severity || '資�?'}
+                          {({ error: '錯誤', warn: '警告', info: '資訊', important: '重要' } as Record<string, string>)[evt.severity] || evt.severity || '資訊'}
                         </span>
                         <span className="text-xs font-bold text-[#adaaaa]">
                           {({
-                            'rewards/item_pawned': '?�具?�當',
-                            'rewards/chests_opened_bulk': '大�??�箱',
-                            'rewards/chests_opened': '?�箱',
-                            'wallet/airdrop_claimed': '空�??��?',
-                            'wallet/zxc_to_yjc_confirmed': 'ZXC?�YJC ?��?',
+                            'rewards/item_pawned': '道具典當',
+                            'rewards/chests_opened_bulk': '大量開箱',
+                            'rewards/chests_opened': '開箱',
+                            'wallet/airdrop_claimed': '空投領取',
+                            'wallet/zxc_to_yjc_confirmed': 'ZXC→YJC 兌換',
                             'wallet/transfer': '轉帳',
-                            'game/play_completed': '?�戲結�?',
-                            'admin/campaign_upsert': '活�??��?',
-                            'admin/grant': '管�??��???,
-                            'admin/maintenance': '維護模�?變更',
-                            'admin/blacklist': '黑�??��???,
-                            'admin/announcement': '?��??��?',
-                            'admin/reward_catalog': '?�勵?��?變更',
-                            'admin/submission': '?�稿審核',
-                            'support/ticket_created': '工單建�?',
-                            'support/ticket_updated': '工單?�新',
+                            'game/play_completed': '遊戲結算',
+                            'admin/campaign_upsert': '活動異動',
+                            'admin/grant': '管理員贈送',
+                            'admin/maintenance': '維護模式變更',
+                            'admin/blacklist': '黑名單變更',
+                            'admin/announcement': '公告異動',
+                            'admin/reward_catalog': '獎勵目錄變更',
+                            'admin/submission': '投稿審核',
+                            'support/ticket_created': '工單建立',
+                            'support/ticket_updated': '工單更新',
                           })[`${evt.channel}/${evt.kind}`] || `${evt.channel}/${evt.kind}`}
                         </span>
                       </div>
@@ -879,22 +879,22 @@ export default function AdminView() {
                           const msgLabels: Record<string, (m: string) => string> = {
                             'rewards/chests_opened_bulk': (m) => {
                               const match = m.match(/Opened (\d+) x (\w+) chests/);
-                              return match ? `大�??�箱 ${match[1]} x ${match[2]} 寶箱` : m;
+                              return match ? `大量開箱 ${match[1]} x ${match[2]} 寶箱` : m;
                             },
                             'rewards/chests_opened': (m) => {
                               const match = m.match(/Opened (\w+) chest/);
-                              return match ? `?��? ${match[1]} 寶箱` : m;
+                              return match ? `開啟 ${match[1]} 寶箱` : m;
                             },
                             'rewards/item_pawned': (m) => {
                               const match = m.match(/Pawned (\d+)x (\w+) for ([\d.]+) ZXC/);
-                              return match ? `?�當 ${match[2]} x${match[1]}，獲�?${match[3]} ZXC` : m;
+                              return match ? `典當 ${match[2]} x${match[1]}，獲得 ${match[3]} ZXC` : m;
                             },
                             'game/play_completed': (m) => {
                               const match = m.match(/User played (\w+): bet ([\d.]+), payout ([\d.]+)/);
-                              return match ? `?�玩 ${match[1]}：�?�?${match[2]}，獲�?${match[3]}` : m;
+                              return match ? `遊玩 ${match[1]}：下注 ${match[2]}，獲得 ${match[3]}` : m;
                             },
                             'wallet/transfer': (m) => m.replace('Transfer', '轉帳'),
-                            'wallet/airdrop_claimed': (m) => m.replace(/airdrop/g, '空�?'),
+                            'wallet/airdrop_claimed': (m) => m.replace(/airdrop/g, '空投'),
                           };
                           const key = `${evt.channel}/${evt.kind}`;
                           const fn = msgLabels[key];
@@ -913,25 +913,25 @@ export default function AdminView() {
         {activeTab === 'maintenance' && (
           <section className="space-y-6">
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><AlertOctagon size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">維護模�?</h3></div>
-              <p className="text-xs text-[#adaaaa] mb-3">?�用後�??��?顯示維護?�知，阻?�進場?�當?��??��?<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? '?�用�? : '?��?'}</span></p>
+              <div className="flex items-center gap-2 mb-4"><AlertOctagon size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">維護模式</h3></div>
+              <p className="text-xs text-[#adaaaa] mb-3">啟用後前台會顯示維護通知，阻擋進場。當前狀態：<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? '啟用中' : '關閉'}</span></p>
               <form onSubmit={handleMaintenance} className="space-y-3">
-                <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="維護訊息（可?��?" maxLength={200} />
-                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-[#fcc025] text-[#0e0e0e]'}`}>{maintenanceOn ? '?�用維護模�?' : '?�用維護模�?'}</button>
+                <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="維護訊息（可選）" maxLength={200} />
+                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-[#fcc025] text-[#0e0e0e]'}`}>{maintenanceOn ? '停用維護模式' : '啟用維護模式'}</button>
               </form>
             </div>
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">?��??�公??/h3></div>
+              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">發佈新公告</h3></div>
               <form onSubmit={handleAnnouncementCreate} className="space-y-3">
-                <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="標�?" maxLength={100} />
-                <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder="?�容" maxLength={2000} />
-                <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />?��??�即?�選?��?上方</label>
-                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">?��??��?</button>
+                <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="標題" maxLength={100} />
+                <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder="內容" maxLength={2000} />
+                <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />發佈時即釘選於最上方</label>
+                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">發佈公告</button>
               </form>
             </div>
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <h3 className="text-sm font-black tracking-wide text-white mb-4">?��??��?（{announcements.length}�?/h3>
-              {announcements.length === 0 ? (<p className="text-xs text-[#adaaaa]">?��?沒�??��?</p>) : (
+              <h3 className="text-sm font-black tracking-wide text-white mb-4">現有公告（{announcements.length}）</h3>
+              {announcements.length === 0 ? (<p className="text-xs text-[#adaaaa]">目前沒有公告</p>) : (
                 <ul className="space-y-3">{announcements.map((ann) => {
                   const id = ann.announcementId || ann.id || ann.title;
                   return (<li key={id} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-3">
@@ -942,9 +942,9 @@ export default function AdminView() {
                         <p className="text-xs text-[#494847] mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
-                        <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? '?��??�選' : '置�?'}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
-                        <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isActive ? '?��?' : '顯示'}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}</button>
-                        <button onClick={() => handleAnnouncementDelete(ann)} className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10" title="?�除"><Trash2 size={14} className="text-red-400" /></button>
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? '取消釘選' : '置頂'}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isActive ? '隱藏' : '顯示'}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}</button>
+                        <button onClick={() => handleAnnouncementDelete(ann)} className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10" title="刪除"><Trash2 size={14} className="text-red-400" /></button>
                       </div>
                     </div>
                   </li>);
@@ -958,56 +958,56 @@ export default function AdminView() {
           <section className="space-y-6">
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-              <h3 className="text-sm font-black tracking-wide text-white">使用?�查�?/h3>
+              <h3 className="text-sm font-black tracking-wide text-white">使用者查詢</h3>
               <div className="flex gap-2">
-                <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder="輸入使用?�地?� 0x..." className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110">?�詢</button>
+                <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder="輸入使用者地址 0x..." className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110">查詢</button>
               </div>
               {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
               {userInspect && (
                 <div className="space-y-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-4">
-                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">?��?�?/span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
-                  {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">顯示?�稱�?/span><span className="text-white">{userInspect.user.displayName}</span></div>}
+                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">地址：</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
+                  {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">顯示名稱：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
                   {userInspect.balances && (
                     <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
-                      <div><p className="text-xs text-[#494847]">ZXC 餘�?</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">YJC 餘�?</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">累�?下注</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">ZXC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">YJC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">累積下注</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p></div>
                     </div>
                   )}
-                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">?��??��??�置�?/span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : '?�設定�??�系統�?設�?'}</span></div>
+                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">目前勝率偏置：</span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : '未設定（採系統預設）'}</span></div>
                   <div className="flex gap-2">
-                    <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder="0.0 - 1.0（�?空�??��?" className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                    <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder="0.0 - 1.0（留空清除）" className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
                     <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> 套用</button>
                     <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300">清除</button>
                   </div>
                   <div className="space-y-2 border-t border-[#494847]/20 pt-3">
-                    <p className="text-xs text-[#adaaaa]">VIP 等�?�?span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
+                    <p className="text-xs text-[#adaaaa]">VIP 等級：<span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
                     <div className="flex flex-wrap gap-1">{[0, 1, 2, 3, 4, 5].map((lv) => (
                       <button key={lv} type="button" onClick={() => handleSetVipLevel(lv)} className={`px-3 py-1 rounded text-xs font-bold ${(userInspect.vipLevel ?? -1) === lv ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] hover:bg-[#1a1919]'}`}>T{lv}</button>
                     ))}</div>
                   </div>
                   <div className="flex gap-2 pt-2 border-t border-[#494847]/20">
-                    <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10">?�設下注統�?</button>
+                    <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10">重設下注統計</button>
                   </div>
                 </div>
               )}
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">黑�???/h3></div>
+              <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">黑名單</h3></div>
               <form onSubmit={handleBlacklist} className="space-y-3">
-                <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="?��??��? 0x..." />
-                <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="?��?（可?��?" maxLength={200} />
-                <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">?�入黑�???/button>
+                <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="錢包地址 0x..." />
+                <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="原因（可選）" maxLength={200} />
+                <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">加入黑名單</button>
               </form>
               <div className="mt-6 pt-4 border-t border-[#494847]/30">
-                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">?��?黑�??��?{blacklist.length}�?/h4><button type="button" onClick={refreshBlacklist} className="text-xs text-[#fcc025] hover:underline">?�新?��?</button></div>
-                {blacklist.length === 0 ? <p className="text-xs text-[#adaaaa]">尚無黑�??��??��?/p> : (
+                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">目前黑名單（{blacklist.length}）</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-[#fcc025] hover:underline">重新整理</button></div>
+                {blacklist.length === 0 ? <p className="text-xs text-[#adaaaa]">尚無黑名單紀錄。</p> : (
                   <ul className="space-y-2 max-h-64 overflow-y-auto">{blacklist.map((b: any, i: number) => (
                     <li key={b.address || b.key || i} className="flex items-center justify-between bg-[#0e0e0e] rounded-lg px-3 py-2 text-xs">
-                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}??/div>{b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}</div>
-                      <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show('已移?��??�單'); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">移除</button>
+                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}…</div>{b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}</div>
+                      <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show('已移除黑名單'); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">移除</button>
                     </li>
                   ))}</ul>
                 )}
@@ -1015,33 +1015,33 @@ export default function AdminView() {
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">贈送�???/h3><p className="text-xs text-[#adaaaa]">?�接??ZXC / YJC / ?�具 / 稱�? / ?��?給�?定使?��?/p></div>
+              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3><p className="text-xs text-[#adaaaa]">直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者</p></div>
               <div className="relative">
-                <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder="?��?使用?��?稱�??��?..." className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder="搜尋使用者名稱或地址..." className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
                 {userResults.length > 0 && (
                   <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-[#494847]/30 bg-[#1a1919] shadow-xl">
-                    {userResults.map((u) => (<button key={u.address} type="button" onClick={() => { setGrantAddress(u.address); setUserSearch(''); setUserResults([]); }} className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"><span className="font-bold">{u.displayName || u.username || '?�知'}</span><span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span></button>))}
+                    {userResults.map((u) => (<button key={u.address} type="button" onClick={() => { setGrantAddress(u.address); setUserSearch(''); setUserResults([]); }} className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"><span className="font-bold">{u.displayName || u.username || '未知'}</span><span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span></button>))}
                   </div>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="number" value={grantZxc} onChange={(e) => setGrantZxc(e.target.value)} placeholder="ZXC ?��?（可負�?" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                <input type="number" value={grantYjc} onChange={(e) => setGrantYjc(e.target.value)} placeholder="YJC ?��?（可負�?" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" value={grantZxc} onChange={(e) => setGrantZxc(e.target.value)} placeholder="ZXC 數量（可負）" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" value={grantYjc} onChange={(e) => setGrantYjc(e.target.value)} placeholder="YJC 數量（可負）" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <select value={grantItemId} onChange={(e) => setGrantItemId(e.target.value)} className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
-                  <option value="">???�具 ??/option>{allItemsList.filter((i) => i.type !== 'avatar' && i.type !== 'title').map((item) => (<option key={item.id} value={item.id}>{item.icon || ''} {item.name || item.id} [{item.rarity || ''}]</option>))}
+                  <option value="">— 道具 —</option>{allItemsList.filter((i) => i.type !== 'avatar' && i.type !== 'title').map((item) => (<option key={item.id} value={item.id}>{item.icon || ''} {item.name || item.id} [{item.rarity || ''}]</option>))}
                 </select>
-                <input type="number" min="1" value={grantItemQty} onChange={(e) => setGrantItemQty(e.target.value)} placeholder="?��?" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" min="1" value={grantItemQty} onChange={(e) => setGrantItemQty(e.target.value)} placeholder="數量" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
               </div>
               <select value={grantAvatarId} onChange={(e) => setGrantAvatarId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
-                <option value="">???��? ??/option>{allAvatars.map((av) => (<option key={av.id} value={av.id}>{av.icon || ''} {av.name || av.id}</option>))}
+                <option value="">— 頭像 —</option>{allAvatars.map((av) => (<option key={av.id} value={av.id}>{av.icon || ''} {av.name || av.id}</option>))}
               </select>
               <select value={grantTitleId} onChange={(e) => setGrantTitleId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
-                <option value="">??稱�? ??/option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.label || t.id}</option>))}
+                <option value="">— 稱號 —</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.label || t.id}</option>))}
               </select>
-              <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder="?�註（選填�?" className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> ?�出?�勵</button>
+              <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder="備註（選填）" className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> 送出獎勵</button>
             </div>
           </section>
         )}
@@ -1050,7 +1050,7 @@ export default function AdminView() {
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-4">
               <Ban size={18} className="text-[#fcc025]" />
-              <h3 className="text-sm font-black tracking-wide text-white">黑�???/h3>
+              <h3 className="text-sm font-black tracking-wide text-white">黑名單</h3>
             </div>
             <form onSubmit={handleBlacklist} className="space-y-3">
               <input
@@ -1058,34 +1058,34 @@ export default function AdminView() {
                 value={blacklistAddress}
                 onChange={(e) => setBlacklistAddress(e.target.value)}
                 className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                placeholder="?��??��? 0x..."
+                placeholder="錢包地址 0x..."
               />
               <input
                 type="text"
                 value={blacklistReason}
                 onChange={(e) => setBlacklistReason(e.target.value)}
                 className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                placeholder="?��?（可?��?"
+                placeholder="原因（可選）"
                 maxLength={200}
               />
               <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">
-                ?�入黑�???
+                加入黑名單
               </button>
             </form>
 
             <div className="mt-6 pt-4 border-t border-[#494847]/30">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-black tracking-wide text-white">?��?黑�??��?{blacklist.length}�?/h4>
+                <h4 className="text-xs font-black tracking-wide text-white">目前黑名單（{blacklist.length}）</h4>
                 <button
                   type="button"
                   onClick={refreshBlacklist}
                   className="text-xs text-[#fcc025] hover:underline"
                 >
-                  ?�新?��?
+                  重新整理
                 </button>
               </div>
               {blacklist.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">尚無黑�??��??��?/p>
+                <p className="text-xs text-[#adaaaa]">尚無黑名單紀錄。</p>
               ) : (
                 <ul className="space-y-2 max-h-64 overflow-y-auto">
                   {blacklist.map((b: any, i: number) => (
@@ -1095,7 +1095,7 @@ export default function AdminView() {
                     >
                       <div>
                         <div className="text-white font-mono">
-                          {String(b.address || b.key || '').slice(0, 10)}??
+                          {String(b.address || b.key || '').slice(0, 10)}…
                         </div>
                         {b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}
                       </div>
@@ -1108,7 +1108,7 @@ export default function AdminView() {
                               action: 'remove',
                               address: b.address,
                             });
-                            show('已移?��??�單');
+                            show('已移除黑名單');
                             refreshBlacklist();
                           } catch (err: any) {
                             show(errMsg(err));
@@ -1128,16 +1128,16 @@ export default function AdminView() {
 
         {activeTab === 'users' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-            <h3 className="text-sm font-black tracking-wide text-white">使用?�查詢�??��??�置</h3>
+            <h3 className="text-sm font-black tracking-wide text-white">使用者查詢與勝率偏置</h3>
             <p className="text-xs text-[#adaaaa]">
-              ?�詢使用?��??�並?�調?��??��?置�?0 ??1 之�?，�?高代表�?容�?贏�??�空?�出?��??��?
+              查詢使用者資料並可調整勝率偏置（0 到 1 之間，越高代表越容易贏；留空送出則清除）
             </p>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={userQueryAddress}
                 onChange={(e) => setUserQueryAddress(e.target.value)}
-                placeholder="輸入使用?�地?� 0x..."
+                placeholder="輸入使用者地址 0x..."
                 className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <button
@@ -1145,42 +1145,42 @@ export default function AdminView() {
                 onClick={handleUserInspect}
                 className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110"
               >
-                ?�詢
+                查詢
               </button>
             </div>
             {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
             {userInspect && (
               <div className="space-y-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-4">
                 <div className="text-xs text-[#adaaaa]">
-                  <span className="text-[#494847]">?��?�?/span>
+                  <span className="text-[#494847]">地址：</span>
                   <span className="font-mono text-white break-all">{userInspect.user.address}</span>
                 </div>
                 {userInspect.user.displayName && (
                   <div className="text-xs text-[#adaaaa]">
-                    <span className="text-[#494847]">顯示?�稱�?/span>
+                    <span className="text-[#494847]">顯示名稱：</span>
                     <span className="text-white">{userInspect.user.displayName}</span>
                   </div>
                 )}
                 {userInspect.balances && (
                   <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
                     <div>
-                      <p className="text-xs text-[#494847]">ZXC 餘�?</p>
+                      <p className="text-xs text-[#494847]">ZXC 餘額</p>
                       <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#494847]">YJC 餘�?</p>
+                      <p className="text-xs text-[#494847]">YJC 餘額</p>
                       <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#494847]">累�?下注</p>
+                      <p className="text-xs text-[#494847]">累積下注</p>
                       <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p>
                     </div>
                   </div>
                 )}
                 <div className="text-xs text-[#adaaaa]">
-                  <span className="text-[#494847]">?��??��??�置�?/span>
+                  <span className="text-[#494847]">目前勝率偏置：</span>
                   <span className="text-[#fcc025] font-black">
-                    {userInspect.profile?.winBias != null ? userInspect.profile.winBias : '?�設定�??�系統�?設�?'}
+                    {userInspect.profile?.winBias != null ? userInspect.profile.winBias : '未設定（採系統預設）'}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -1188,7 +1188,7 @@ export default function AdminView() {
                     type="text"
                     value={userBiasInput}
                     onChange={(e) => setUserBiasInput(e.target.value)}
-                    placeholder="0.0 - 1.0（�?空�??��?"
+                    placeholder="0.0 - 1.0（留空清除）"
                     className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                   />
                   <button
@@ -1209,7 +1209,7 @@ export default function AdminView() {
 
                 <div className="space-y-2 border-t border-[#494847]/20 pt-3">
                   <p className="text-xs text-[#adaaaa]">
-                    VIP 等�?�?
+                    VIP 等級：
                     <span className="ml-1 font-black text-[#fcc025]">
                       {typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}
                     </span>
@@ -1234,7 +1234,7 @@ export default function AdminView() {
                     onClick={handleResetTotalBet}
                     className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-black text-red-300 hover:bg-red-500/20"
                   >
-                    歸零累�?下注
+                    歸零累積下注
                   </button>
                 </div>
               </div>
@@ -1250,10 +1250,10 @@ export default function AdminView() {
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
               <div className="flex items-center gap-2 mb-4">
                 <Package size={18} className="text-[#fcc025]" />
-                <h3 className="text-sm font-black tracking-wide text-white">?��? / 編輯 稱�??�頭??/h3>
+                <h3 className="text-sm font-black tracking-wide text-white">新增 / 編輯 稱號・頭像</h3>
               </div>
               <p className="text-xs text-[#adaaaa] mb-3">
-                �?<code className="bg-[#0e0e0e] px-1 rounded">itemId</code> ?�唯一?��???id ?�直?��??�既?��??�。新增�??�目?�在?�說?�中�????��??��??�出?��?
+                以 <code className="bg-[#0e0e0e] px-1 rounded">itemId</code> 為唯一鍵，同 id 會直接覆蓋既有項目。新增的項目會在「說明中心 → 物品圖鑑」出現。
               </p>
               <form onSubmit={handleCatalogCreate} className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
@@ -1262,19 +1262,19 @@ export default function AdminView() {
                     value={catalogItemId}
                     onChange={(e) => setCatalogItemId(e.target.value)}
                     className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                    placeholder="itemId（�?空自?�產?��?"
+                    placeholder="itemId（留空自動產生）"
                   />
                   <select
                     value={catalogType}
                     onChange={(e) => setCatalogType(e.target.value as any)}
                     className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="avatar">?��?</option>
-                    <option value="title">稱�?</option>
-                    <option value="buff">增�?</option>
+                    <option value="avatar">頭像</option>
+                    <option value="title">稱號</option>
+                    <option value="buff">增益</option>
                     <option value="chest">寶箱</option>
-                    <option value="key">?��?</option>
-                    <option value="collectible">?��?</option>
+                    <option value="key">鑰匙</option>
+                    <option value="collectible">收藏</option>
                   </select>
                 </div>
                 <input
@@ -1282,7 +1282,7 @@ export default function AdminView() {
                   value={catalogName}
                   onChange={(e) => setCatalogName(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                  placeholder="顯示?�稱（中??ok�?
+                  placeholder="顯示名稱（中文 ok）"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <select
@@ -1301,28 +1301,28 @@ export default function AdminView() {
                     value={catalogIcon}
                     onChange={(e) => setCatalogIcon(e.target.value)}
                     className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                    placeholder="Emoji / ?�示（可?��?"
+                    placeholder="Emoji / 圖示（可選）"
                   />
                 </div>
                 <textarea
                   value={catalogDescription}
                   onChange={(e) => setCatalogDescription(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-16"
-                  placeholder="說�?（可?��?"
+                  placeholder="說明（可選）"
                   maxLength={500}
                 />
                 <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">
-                  ?��??�目
+                  儲存項目
                 </button>
               </form>
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
               <h3 className="text-sm font-black tracking-wide text-white mb-4">
-                已登?��??��?稱�? / ?��?（{avatarsAndTitles.length}�?
+                已登錄的自訂稱號 / 頭像（{avatarsAndTitles.length}）
               </h3>
               {avatarsAndTitles.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">?��?沒�??��??�目</p>
+                <p className="text-xs text-[#adaaaa]">目前沒有自訂項目</p>
               ) : (
                 <ul className="space-y-2">
                   {avatarsAndTitles.map((item) => (
@@ -1330,7 +1330,7 @@ export default function AdminView() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-lg">{item.icon || (item.type === 'avatar' ? '?��' : '?���?)}</span>
+                            <span className="text-lg">{item.icon || (item.type === 'avatar' ? '👤' : '🏷️')}</span>
                             <p className={`text-sm font-bold ${item.isActive ? 'text-white' : 'text-[#494847] line-through'}`}>
                               {item.name}
                             </p>
@@ -1347,14 +1347,14 @@ export default function AdminView() {
                           <button
                             onClick={() => handleCatalogToggle(item)}
                             className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]"
-                            title={item.isActive ? '?�用' : '?�用'}
+                            title={item.isActive ? '停用' : '啟用'}
                           >
                             {item.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}
                           </button>
                           <button
                             onClick={() => handleCatalogDelete(item)}
                             className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10"
-                            title="?�除"
+                            title="刪除"
                           >
                             <Trash2 size={14} className="text-red-400" />
                           </button>
@@ -1370,9 +1370,9 @@ export default function AdminView() {
 
         {activeTab === 'submissions' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-            <h3 className="text-sm font-black tracking-wide text-white mb-4">使用?��?稿�?{submissions.length}�?/h3>
+            <h3 className="text-sm font-black tracking-wide text-white mb-4">使用者投稿（{submissions.length}）</h3>
             {submissions.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">?��?沒�??�稿</p>
+              <p className="text-xs text-[#adaaaa]">目前沒有投稿</p>
             ) : (
               <ul className="space-y-3">
                 {submissions.map((sub) => (
@@ -1383,13 +1383,13 @@ export default function AdminView() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1a1919] text-2xl">
-                          {sub.icon || (sub.type === 'avatar' ? '?��' : '?��')}
+                          {sub.icon || (sub.type === 'avatar' ? '👤' : '🏷')}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-black text-white">{sub.name}</span>
                             <span className="text-xs font-bold uppercase text-[#fcc025]">
-                              {sub.type === 'avatar' ? '?��?' : '稱�?'}
+                              {sub.type === 'avatar' ? '頭像' : '稱號'}
                             </span>
                             <span className={`text-xs font-bold uppercase ${
                               sub.status === 'pending'
@@ -1398,7 +1398,7 @@ export default function AdminView() {
                                 ? 'text-emerald-400'
                                 : 'text-red-400'
                             }`}>
-                              {sub.status === 'pending' ? '待審?? : sub.status === 'approved' ? '已通�?' : '已�?�?}
+                              {sub.status === 'pending' ? '待審核' : sub.status === 'approved' ? '已通過' : '已拒絕'}
                             </span>
                             <span className="text-xs font-bold uppercase text-[#adaaaa]">
                               {RARITY_LABEL[sub.rarity] || sub.rarity}
@@ -1408,10 +1408,10 @@ export default function AdminView() {
                             <p className="mt-1 text-xs text-[#adaaaa] break-words">{sub.description}</p>
                           )}
                           <p className="mt-1 text-xs text-[#494847] break-all">
-                            ?�稿?��?{sub.address?.slice(0, 10)}...{sub.address?.slice(-6)}
+                            投稿者：{sub.address?.slice(0, 10)}...{sub.address?.slice(-6)}
                           </p>
                           {sub.reviewNote && (
-                            <p className="mt-1 text-xs text-[#adaaaa]">審核?�註：{sub.reviewNote}</p>
+                            <p className="mt-1 text-xs text-[#adaaaa]">審核備註：{sub.reviewNote}</p>
                           )}
                         </div>
                       </div>
@@ -1421,7 +1421,7 @@ export default function AdminView() {
                             type="button"
                             onClick={() => handleSubmissionApprove(sub)}
                             className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20"
-                            title="?��?"
+                            title="通過"
                           >
                             <Check size={14} className="text-emerald-400" />
                           </button>
@@ -1429,7 +1429,7 @@ export default function AdminView() {
                             type="button"
                             onClick={() => handleSubmissionReject(sub)}
                             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 hover:bg-red-500/20"
-                            title="?��?"
+                            title="拒絕"
                           >
                             <X size={14} className="text-red-400" />
                           </button>
@@ -1446,32 +1446,32 @@ export default function AdminView() {
         {activeTab === 'campaigns' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-6">
             <div>
-              <h3 className="text-sm font-black tracking-wide text-white mb-1">活�?管�?</h3>
+              <h3 className="text-sm font-black tracking-wide text-white mb-1">活動管理</h3>
               <p className="text-xs text-[#adaaaa]">
-                建�?活�?讓使?�者到?�勵?��??��?ZXC / YJC / 稱�? / ?��? / ?�具�?
+                建立活動讓使用者到獎勵頁領取（ZXC / YJC / 稱號 / 頭像 / 道具）
               </p>
             </div>
 
             <div className="rounded-lg border border-[#494847]/20 bg-[#262626] p-4 space-y-3">
-              <div className="text-xs font-black text-[#fcc025]">?��?／編輯活??/div>
+              <div className="text-xs font-black text-[#fcc025]">新增／編輯活動</div>
               <input
                 type="text"
                 value={campaignDraftId}
                 onChange={(e) => setCampaignDraftId(e.target.value)}
-                placeholder="活�? ID（�?空自?�產?��?"
+                placeholder="活動 ID（留空自動產生）"
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <input
                 type="text"
                 value={campaignTitle}
                 onChange={(e) => setCampaignTitle(e.target.value)}
-                placeholder="活�??�稱"
+                placeholder="活動名稱"
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <textarea
                 value={campaignDescription}
                 onChange={(e) => setCampaignDescription(e.target.value)}
-                placeholder="活�?說�?"
+                placeholder="活動說明"
                 rows={4}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
@@ -1502,14 +1502,14 @@ export default function AdminView() {
                   type="number"
                   value={campaignRewardZxc}
                   onChange={(e) => setCampaignRewardZxc(e.target.value)}
-                  placeholder="ZXC ?�勵"
+                  placeholder="ZXC 獎勵"
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
                 <input
                   type="number"
                   value={campaignRewardYjc}
                   onChange={(e) => setCampaignRewardYjc(e.target.value)}
-                  placeholder="YJC ?�勵"
+                  placeholder="YJC 獎勵"
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
               </div>
@@ -1519,7 +1519,7 @@ export default function AdminView() {
                   onChange={(e) => setCampaignRewardItemId(e.target.value)}
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 >
-                  <option value="">???�具?�勵 ??/option>
+                  <option value="">— 道具獎勵 —</option>
                   {allItemsList
                     .filter((i) => i.type !== 'avatar' && i.type !== 'title')
                     .map((item) => (
@@ -1533,7 +1533,7 @@ export default function AdminView() {
                   min="1"
                   value={campaignRewardItemQty}
                   onChange={(e) => setCampaignRewardItemQty(e.target.value)}
-                  placeholder="?��?"
+                  placeholder="數量"
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
               </div>
@@ -1542,7 +1542,7 @@ export default function AdminView() {
                 onChange={(e) => setCampaignRewardAvatarId(e.target.value)}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               >
-                <option value="">???��??�勵 ??/option>
+                <option value="">— 頭像獎勵 —</option>
                 {allAvatars.map((av) => (
                   <option key={av.id} value={av.id}>
                     {av.icon || ''} {av.name || av.id}
@@ -1554,7 +1554,7 @@ export default function AdminView() {
                 onChange={(e) => setCampaignRewardTitleId(e.target.value)}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               >
-                <option value="">??稱�??�勵 ??/option>
+                <option value="">— 稱號獎勵 —</option>
                 {allTitles.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.icon || ''} {t.name || t.id}
@@ -1567,21 +1567,21 @@ export default function AdminView() {
                   checked={campaignIsActive}
                   onChange={(e) => setCampaignIsActive(e.target.checked)}
                 />
-                建�?後即?�用
+                建立後即啟用
               </label>
               <button
                 type="button"
                 onClick={handleCampaignSave}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-3 py-2 text-xs font-black text-black hover:brightness-110"
               >
-                <CalendarClock size={12} /> ?��?活�?
+                <CalendarClock size={12} /> 儲存活動
               </button>
             </div>
 
             <div>
-              <h4 className="mb-2 text-xs font-black text-white">?��?活�?（{campaigns.length}�?/h4>
+              <h4 className="mb-2 text-xs font-black text-white">目前活動（{campaigns.length}）</h4>
               {campaigns.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">尚未建�?任�?活�?</p>
+                <p className="text-xs text-[#adaaaa]">尚未建立任何活動</p>
               ) : (
                 <ul className="space-y-2">
                   {campaigns.map((c) => (
@@ -1600,7 +1600,7 @@ export default function AdminView() {
                                   : 'bg-[#494847]/30 text-[#adaaaa]'
                               }`}
                             >
-                              {c.isActive ? '?�用' : '?�用'}
+                              {c.isActive ? '啟用' : '停用'}
                             </span>
                           </div>
                           <p className="mt-1 text-xs text-[#adaaaa] break-words">
@@ -1641,7 +1641,7 @@ export default function AdminView() {
                             type="button"
                             onClick={() => handleCampaignToggle(c)}
                             className="rounded-lg bg-[#1a1919] p-2 hover:bg-[#fcc025]/10"
-                            title={c.isActive ? '?�用' : '?�用'}
+                            title={c.isActive ? '停用' : '啟用'}
                           >
                             {c.isActive ? <EyeOff size={12} /> : <Eye size={12} />}
                           </button>
@@ -1665,9 +1665,9 @@ export default function AdminView() {
         {activeTab === 'grant' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
             <div>
-              <h3 className="text-sm font-black tracking-wide text-white mb-1">贈送�???/h3>
+              <h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3>
               <p className="text-xs text-[#adaaaa]">
-                ?�接??ZXC / YJC / ?�具 / 稱�? / ?��?給�?定使?��?
+                直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者
               </p>
             </div>
             <div className="relative">
@@ -1678,7 +1678,7 @@ export default function AdminView() {
                   setGrantAddress(e.target.value);
                   setUserSearch(e.target.value);
                 }}
-                placeholder="?��?使用?��?稱�??��?..."
+                placeholder="搜尋使用者名稱或地址..."
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               {showUserDropdown && (
@@ -1694,7 +1694,7 @@ export default function AdminView() {
                       }}
                       className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"
                     >
-                      <span className="font-bold">{u.displayName || u.username || '?�知'}</span>
+                      <span className="font-bold">{u.displayName || u.username || '未知'}</span>
                       <span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span>
                     </button>
                   ))}
@@ -1706,14 +1706,14 @@ export default function AdminView() {
                 type="number"
                 value={grantZxc}
                 onChange={(e) => setGrantZxc(e.target.value)}
-                placeholder="ZXC ?��?（可負�?"
+                placeholder="ZXC 數量（可負）"
                 className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <input
                 type="number"
                 value={grantYjc}
                 onChange={(e) => setGrantYjc(e.target.value)}
-                placeholder="YJC ?��?（可負�?"
+                placeholder="YJC 數量（可負）"
                 className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
             </div>
@@ -1723,7 +1723,7 @@ export default function AdminView() {
                 onChange={(e) => setGrantItemId(e.target.value)}
                 className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               >
-                <option value="">???�具 ??/option>
+                <option value="">— 道具 —</option>
                 {allItemsList
                   .filter((i) => i.type !== 'avatar' && i.type !== 'title')
                   .map((item) => (
@@ -1737,7 +1737,7 @@ export default function AdminView() {
                 min="1"
                 value={grantItemQty}
                 onChange={(e) => setGrantItemQty(e.target.value)}
-                placeholder="?��?"
+                placeholder="數量"
                 className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
             </div>
@@ -1746,7 +1746,7 @@ export default function AdminView() {
               onChange={(e) => setGrantAvatarId(e.target.value)}
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
             >
-              <option value="">???��? ??/option>
+              <option value="">— 頭像 —</option>
               {allAvatars.map((av) => (
                 <option key={av.id} value={av.id}>
                   {av.icon || ''} {av.name || av.id}
@@ -1758,7 +1758,7 @@ export default function AdminView() {
               onChange={(e) => setGrantTitleId(e.target.value)}
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
             >
-              <option value="">??稱�? ??/option>
+              <option value="">— 稱號 —</option>
               {allTitles.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.icon || ''} {t.name || t.id}
@@ -1769,7 +1769,7 @@ export default function AdminView() {
               type="text"
               value={grantNote}
               onChange={(e) => setGrantNote(e.target.value)}
-              placeholder="?�註（選填�?"
+              placeholder="備註（選填）"
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
             />
             <button
@@ -1777,7 +1777,7 @@ export default function AdminView() {
               onClick={handleGrantSubmit}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"
             >
-              <Send size={12} /> ?�出?�勵
+              <Send size={12} /> 送出獎勵
             </button>
           </section>
         )}
@@ -1786,7 +1786,7 @@ export default function AdminView() {
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
             <div className="flex items-center gap-2">
               <MessageCircle size={18} className="text-[#fcc025]" />
-              <h3 className="text-sm font-black tracking-wide text-white">客�?工單（{tickets.length}�?/h3>
+              <h3 className="text-sm font-black tracking-wide text-white">客服工單（{tickets.length}）</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               <select
@@ -1794,17 +1794,17 @@ export default function AdminView() {
                 onChange={(e) => setTicketStatusFilter(e.target.value)}
                 className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white"
               >
-                <option value="">?�?��???/option>
-                <option value="open">待�???/option>
-                <option value="in_progress">?��?�?/option>
-                <option value="resolved">已解�?/option>
-                <option value="closed">已�???/option>
+                <option value="">所有狀態</option>
+                <option value="open">待處理</option>
+                <option value="in_progress">處理中</option>
+                <option value="resolved">已解決</option>
+                <option value="closed">已關閉</option>
               </select>
               <input
                 type="text"
                 value={ticketKeyword}
                 onChange={(e) => setTicketKeyword(e.target.value)}
-                placeholder="?�鍵字�?�?.."
+                placeholder="關鍵字搜尋..."
                 className="flex-1 min-w-[160px] bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white"
               />
               <button
@@ -1812,20 +1812,20 @@ export default function AdminView() {
                 onClick={refreshTickets}
                 className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110"
               >
-                ?�詢
+                查詢
               </button>
             </div>
             {tickets.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">?��?沒�?符�?條件?�工?��?/p>
+              <p className="text-xs text-[#adaaaa]">目前沒有符合條件的工單。</p>
             ) : (
               <ul className="space-y-3 max-h-[60vh] overflow-y-auto">
                 {tickets.map((t: any) => (
                   <li key={t.reportId} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
-                        <p className="text-sm font-black text-white">{t.title || '（無標�?�?}</p>
+                        <p className="text-sm font-black text-white">{t.title || '（無標題）'}</p>
                         <p className="text-xs text-[#adaaaa]">
-                          {t.category || '?��?'} · {t.address ? `${String(t.address).slice(0, 10)}?�` : '?��?'}
+                          {t.category || '其他'} · {t.address ? `${String(t.address).slice(0, 10)}…` : '匿名'}
                           {t.createdAt && ` · ${new Date(t.createdAt).toLocaleString()}`}
                         </p>
                       </div>
@@ -1841,27 +1841,27 @@ export default function AdminView() {
                         }`}
                       >
                         {t.status === 'open'
-                          ? '待�???
+                          ? '待處理'
                           : t.status === 'in_progress'
-                          ? '?��?�?
+                          ? '處理中'
                           : t.status === 'resolved'
-                          ? '已解�?
+                          ? '已解決'
                           : t.status === 'closed'
-                          ? '已�???
+                          ? '已關閉'
                           : t.status}
                       </span>
                     </div>
                     {t.message && <p className="text-xs text-white whitespace-pre-wrap break-words">{t.message}</p>}
                     {t.adminUpdate && (
                       <div className="rounded bg-[#fcc025]/10 border border-[#fcc025]/30 p-2">
-                        <p className="text-xs font-black text-[#fcc025] mb-1">管�??��?�?/p>
+                        <p className="text-xs font-black text-[#fcc025] mb-1">管理員回覆</p>
                         <p className="text-xs text-white whitespace-pre-wrap break-words">{t.adminUpdate}</p>
                       </div>
                     )}
                     <textarea
                       value={ticketReplyDraft[t.reportId] ?? ''}
                       onChange={(e) => setTicketReplyDraft((prev) => ({ ...prev, [t.reportId]: e.target.value }))}
-                      placeholder="輸入?��??�容..."
+                      placeholder="輸入回覆內容..."
                       className="w-full bg-[#1a1919] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white resize-y"
                       rows={2}
                     />
@@ -1877,7 +1877,7 @@ export default function AdminView() {
                                 status: s,
                                 adminUpdate: ticketReplyDraft[t.reportId] || t.adminUpdate || undefined,
                               });
-                              show('工單已更??);
+                              show('工單已更新');
                               setTicketReplyDraft((prev) => ({ ...prev, [t.reportId]: '' }));
                               refreshTickets();
                             } catch (err: any) {
@@ -1890,7 +1890,7 @@ export default function AdminView() {
                               : 'border-[#494847]/40 text-[#adaaaa] hover:border-[#fcc025]/60 hover:text-[#fcc025]'
                           }`}
                         >
-                          {s === 'open' ? '待�??? : s === 'in_progress' ? '?��?�? : s === 'resolved' ? '已解�? : '已�???}
+                          {s === 'open' ? '待處理' : s === 'in_progress' ? '處理中' : s === 'resolved' ? '已解決' : '已關閉'}
                         </button>
                       ))}
                     </div>
@@ -1937,7 +1937,7 @@ export function AnnouncementManager() {
       setForm({ title: '', content: '', type: 'info', active: true });
       fetchAnns();
     } catch (err: any) {
-      alert(err?.response?.data?.message || '?��?失�?');
+      alert(err?.response?.data?.message || '操作失敗');
     } finally {
       setLoading(false);
     }
@@ -1946,18 +1946,18 @@ export function AnnouncementManager() {
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="bg-[#1a1919] p-4 rounded-xl border border-[#494847]/30 space-y-3">
-        <h3 className="text-sm font-black text-[#fcc025]">{editing ? '編輯?��?' : '?��??��?'}</h3>
+        <h3 className="text-sm font-black text-[#fcc025]">{editing ? '編輯公告' : '新增公告'}</h3>
         <input
           value={form.title}
           onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
-          placeholder="標�?"
+          placeholder="標題"
           className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
           required
         />
         <textarea
           value={form.content}
           onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))}
-          placeholder="?�容"
+          placeholder="內容"
           className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white min-h-[100px]"
           required
         />
@@ -1967,9 +1967,9 @@ export function AnnouncementManager() {
             onChange={e => setForm(prev => ({ ...prev, type: e.target.value }))}
             className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
           >
-            <option value="info">一??/option>
+            <option value="info">一般</option>
             <option value="warning">維護</option>
-            <option value="urgent">緊�?/option>
+            <option value="urgent">緊急</option>
           </select>
           <label className="flex items-center gap-2 text-sm text-[#adaaaa]">
             <input
@@ -1977,12 +1977,12 @@ export function AnnouncementManager() {
               checked={form.active}
               onChange={e => setForm(prev => ({ ...prev, active: e.target.checked }))}
             />
-            ?�用
+            啟用
           </label>
         </div>
         <div className="flex gap-2">
           <button type="submit" disabled={loading} className="flex-1 bg-[#fcc025] text-black font-black py-2 rounded-lg">
-            {loading ? '?��?�?..' : '?��??��?'}
+            {loading ? '處理中...' : '儲存公告'}
           </button>
           {editing && (
             <button
@@ -1990,7 +1990,7 @@ export function AnnouncementManager() {
               onClick={() => { setEditing(null); setForm({ title: '', content: '', type: 'info', active: true }); }}
               className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg"
             >
-              ?��?
+              取消
             </button>
           )}
         </div>
@@ -2001,7 +2001,7 @@ export function AnnouncementManager() {
           <div key={ann.id} className="bg-[#1a1919] p-3 rounded-xl border border-[#494847]/20 flex justify-between items-center">
             <div>
               <p className="text-sm font-bold text-white">{ann.title}</p>
-              <p className="text-xs text-[#adaaaa]">{ann.type} · {ann.active ? '已�??? : '已�???}</p>
+              <p className="text-xs text-[#adaaaa]">{ann.type} · {ann.active ? '已啟用' : '已停用'}</p>
             </div>
             <button
               onClick={() => {

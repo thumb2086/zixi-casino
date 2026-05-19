@@ -344,7 +344,7 @@ export default function SettingsView() {
           <div className="flex items-center gap-3">
             <Type className="text-[#fcc025]" size={18} />
             <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
-              Â≠óÈ?Â§ßÂ?
+              Â≠óÈ´îÂ§ßÂ∞è
             </h3>
           </div>
           <div className="mt-4 flex gap-2">
@@ -357,7 +357,7 @@ export default function SettingsView() {
                   fontSize === level ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
                 }`}
               >
-                {level === 'small' ? 'Â∞? : level === 'medium' ? '‰∏? : 'Â§?}
+                {level === 'small' ? 'Â∞è' : level === 'medium' ? '‰∏≠' : 'Â§ß'}
               </button>
             ))}
           </div>

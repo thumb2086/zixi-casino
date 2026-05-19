@@ -60,7 +60,7 @@ export default function WalletView() {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      /* ignore ??clipboard API may be blocked in some environments */
+      /* ignore — clipboard API may be blocked in some environments */
     }
   };
 

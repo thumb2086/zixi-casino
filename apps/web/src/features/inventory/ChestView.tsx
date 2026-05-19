@@ -88,10 +88,10 @@ const RARITY_COLORS: Record<string, string> = {
 };
 
 const BUFF_TYPE_LABEL: Record<string, string> = {
-  prevent_loss: '?�輸護符',
-  xp_boost: '經�??��?',
-  luck_boost: '幸�??��?',
-  vip_trial: 'VIP 體�?',
+  prevent_loss: '免輸護符',
+  xp_boost: '經驗加成',
+  luck_boost: '幸運加成',
+  vip_trial: 'VIP 體驗',
   buff: 'Buff',
 };
 
@@ -100,11 +100,11 @@ function formatExpires(expiresAt?: string | null): string {
   const ts = Date.parse(expiresAt);
   if (!Number.isFinite(ts)) return '';
   const diff = ts - Date.now();
-  if (diff <= 0) return '已�???;
+  if (diff <= 0) return '已過期';
   const mins = Math.ceil(diff / 60000);
-  if (mins < 60) return `?��? ${mins} ?��?`;
+  if (mins < 60) return `剩餘 ${mins} 分鐘`;
   const hrs = Math.ceil(mins / 60);
-  return `?��? ${hrs} 小�?`;
+  return `剩餘 ${hrs} 小時`;
 }
 
 export default function ChestView() {
@@ -216,28 +216,28 @@ export default function ChestView() {
         await refreshInventory();
         await refreshStatus();
       } else {
-        showToast(res.data?.error || '?��?失�?');
+        showToast(res.data?.error || '開啟失敗');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '網路?�誤');
+      showToast(err?.response?.data?.error || '網路錯誤');
     } finally {
       setOpening(false);
     }
   };
 
   const useItem = async (itemId: string, quantity: number = 1) => {
-    setUseStatusMessage('�?��?��?...');
+    setUseStatusMessage('正在處理...');
     try {
       const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
-        showToast(`?��?使用 ${res.data.data.usedCount} ?�物?�`);
+        showToast(`成功使用 ${res.data.data.usedCount} 個物品`);
         if (res.data.data.message) showToast(res.data.data.message);
         await refreshInventory();
       } else {
-        showToast(res.data?.error || '使用失�?');
+        showToast(res.data?.error || '使用失敗');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '使用失�?');
+      showToast(err?.response?.data?.error || '使用失敗');
     } finally {
       setUseStatusMessage(null);
     }
@@ -250,12 +250,12 @@ export default function ChestView() {
   }, {} as Record<string, InventoryEntry[]>);
 
   const itemTypeLabels: Record<string, string> = {
-    chest_key: '?��?',
-    token: '�?��',
-    buff: '?��?',
-    avatar: '?��?',
-    title: '稱�?',
-    collectible: '?��???,
+    chest_key: '鑰匙',
+    token: '代幣',
+    buff: '加成',
+    avatar: '頭像',
+    title: '稱號',
+    collectible: '收藏品',
   };
 
   return (
@@ -266,15 +266,15 @@ export default function ChestView() {
             <Package className="text-[#fcc025]" />
             <div>
               <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
-                ?��?中�?
+                物資中心
               </h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
-                ?��??��?�?
+                背包與補給
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">空�?</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">空間</p>
             <p className="text-sm font-black text-white">
               {status?.inventorySlotsUsed || 0}
               <span className="mx-1 text-[#494847]">/</span>
@@ -296,7 +296,7 @@ export default function ChestView() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-wider text-[#adaaaa]">
-                      {BUFF_TYPE_LABEL[buff.type] || '?��?'}
+                      {BUFF_TYPE_LABEL[buff.type] || '加成'}
                     </p>
                     <p className="text-xs font-black text-white">
                       {buff.type === 'prevent_loss' ? `x${buff.remaining}` : `+${buff.value * 100}%`}
@@ -304,7 +304,7 @@ export default function ChestView() {
                   </div>
                 </div>
                 <div className="mt-2 text-[10px] font-bold text-[#adaaaa] opacity-60">
-                  {buff.expiresAt ? formatExpires(buff.expiresAt) : '?��?�?}
+                  {buff.expiresAt ? formatExpires(buff.expiresAt) : '生效中'}
                 </div>
               </div>
             ))}
@@ -314,7 +314,7 @@ export default function ChestView() {
         {/* Chests */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">?��??�寶�?/h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">可開啟寶箱</h2>
             <div className="flex items-center gap-2">
               {[1, 5, 10, 100, 999].map((q) => (
                 <button
@@ -354,16 +354,16 @@ export default function ChestView() {
                       <h3 className="text-lg font-black text-white">{chest.name}</h3>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="rounded bg-[#fcc025]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#fcc025]">
-                          {keys} ?�鑰??
+                          {keys} 把鑰匙
                         </span>
                       </div>
                     </div>
-                    <div className="text-4xl">?��</div>
+                    <div className="text-4xl">📦</div>
                   </div>
 
                   <div className="mb-6 space-y-2">
                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">
-                      <span>保�??�度</span>
+                      <span>保底進度</span>
                       <span className="text-[#fcc025]">{currentPity} / {chest.pityThreshold}</span>
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#0e0e0e]">
@@ -384,7 +384,7 @@ export default function ChestView() {
                         : 'bg-[#494847]/20 text-[#494847] cursor-not-allowed border border-[#494847]/10'
                     }`}
                   >
-                    {opening ? '�??�?..' : `?��? ${openQty} ?�`}
+                    {opening ? '解鎖中...' : `開啟 ${openQty} 個`}
                   </button>
                 </div>
               );
@@ -394,11 +394,11 @@ export default function ChestView() {
 
         {/* Inventory Items */}
         <section className="space-y-6">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">?��??��?</h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">我的物資</h2>
           {chests.length > 0 && inventory.items.length === 0 ? (
              <div className="rounded-2xl border-2 border-dashed border-[#494847]/20 py-12 text-center">
                 <Package className="mx-auto mb-4 h-12 w-12 text-[#494847]/40" />
-                <p className="text-sm font-bold text-[#adaaaa]">?��?沒�?任�??��?</p>
+                <p className="text-sm font-bold text-[#adaaaa]">目前沒有任何物資</p>
              </div>
           ) : (
             <div className="space-y-8">
@@ -451,7 +451,7 @@ export default function ChestView() {
                               }
                               className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10"
                             >
-                              贈�?
+                              贈送
                             </button>
                           </div>
                         )}
@@ -461,7 +461,7 @@ export default function ChestView() {
                               onClick={() => useItem(item.id)}
                               className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025] hover:text-black"
                             >
-                              裝�?
+                              裝備
                             </button>
                             <button
                               onClick={() =>
@@ -469,7 +469,7 @@ export default function ChestView() {
                               }
                               className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10"
                             >
-                              贈�?
+                              贈送
                             </button>
                           </div>
                         )}
@@ -514,7 +514,7 @@ export default function ChestView() {
               className="max-w-3xl w-full max-h-[75vh] flex flex-col"
             >
               <h2 className="text-3xl font-black italic text-center text-[#fcc025] mb-6">
-                ?��??��?!
+                恭喜獲得!
               </h2>
 
               <div className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 pr-1 scrollbar-thin">
@@ -566,10 +566,10 @@ export default function ChestView() {
                 <div className="text-center mb-4">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-br from-[#fcc025]/20 to-[#e6ad03]/10 border border-[#fcc025]/40 rounded-2xl px-6 py-4 shadow-lg shadow-[#fcc025]/5">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fcc025] to-[#e6ad03] flex items-center justify-center shadow-lg">
-                      <span className="text-lg">??</span>
+                      <span className="text-lg">🪙</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">?��?補�?</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>
                       <p className="text-lg font-black italic text-[#fcc025]">+{openCompensation} ZXC</p>
                     </div>
                   </div>
@@ -586,7 +586,7 @@ export default function ChestView() {
                   className="bg-[#494847] hover:bg-[#5a5858] text-white font-bold px-8 py-3
                     rounded-xl transition-colors inline-flex items-center gap-2"
                 >
-                  繼�?
+                  繼續
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
@@ -613,20 +613,20 @@ export default function ChestView() {
               className="bg-[#1a1919] rounded-2xl p-6 max-w-sm w-full border border-[#494847]/30"
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-black">贈�?{giftDialog.name}</h2>
+                <h2 className="text-lg font-black">贈送 {giftDialog.name}</h2>
                 <button onClick={() => setGiftDialog(null)}>
                   <X className="w-5 h-5 text-[#adaaaa]" />
                 </button>
               </div>
 
-              <label className="block text-sm font-bold text-[#adaaaa] mb-1">?�收??/label>
+              <label className="block text-sm font-bold text-[#adaaaa] mb-1">接收者</label>
               <select
                 value={giftAddress}
                 onChange={(e) => setGiftAddress(e.target.value)}
                 className="w-full bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-sm
                   focus:outline-none focus:border-[#fcc025] mb-4"
               >
-                <option value="">?��??�收??..</option>
+                <option value="">選擇接收者...</option>
                 {recipients.map(r => (
                   <option key={r.address} value={r.address}>
                     {r.displayName} ({r.address.slice(0, 6)}...{r.address.slice(-4)})
@@ -634,7 +634,7 @@ export default function ChestView() {
                 ))}
               </select>
 
-              <label className="block text-sm font-bold text-[#adaaaa] mb-1">?��?</label>
+              <label className="block text-sm font-bold text-[#adaaaa] mb-1">數量</label>
               <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => setGiftQty(Math.max(1, giftQty - 1))}
@@ -643,7 +643,7 @@ export default function ChestView() {
                     flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
                     hover:bg-[#494847]/60 transition-colors"
                 >
-                  ??
+                  −
                 </button>
                 <input
                   type="number"
@@ -674,7 +674,7 @@ export default function ChestView() {
                   onClick={() => setGiftDialog(null)}
                   className="flex-1 border border-[#494847]/40 text-[#adaaaa] font-bold text-sm py-2 rounded-lg hover:bg-[#494847]/20"
                 >
-                  ?��?
+                  取消
                 </button>
                 <button
                   disabled={giftSending || !giftAddress.trim()}
@@ -688,16 +688,16 @@ export default function ChestView() {
                         quantity: giftQty,
                       });
                       if (res.data?.success) {
-                        showToast('贈送�??��?');
+                        showToast('贈送成功！');
                         setGiftDialog(null);
                         setGiftAddress('');
                         setGiftQty(1);
                         await refreshInventory();
                       } else {
-                        showToast(res.data?.error || '贈送失??);
+                        showToast(res.data?.error || '贈送失敗');
                       }
                     } catch (err: any) {
-                      showToast(err?.response?.data?.data?.error || err?.response?.data?.error || '贈送失??);
+                      showToast(err?.response?.data?.data?.error || err?.response?.data?.error || '贈送失敗');
                     } finally {
                       setGiftSending(false);
                     }
@@ -705,7 +705,7 @@ export default function ChestView() {
                   className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg
                     disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6ad03]"
                 >
-                  {giftSending ? '?�送中...' : '確�?贈�?}
+                  {giftSending ? '發送中...' : '確認贈送'}
                 </button>
               </div>
             </motion.div>
