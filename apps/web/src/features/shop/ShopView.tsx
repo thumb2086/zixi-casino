@@ -78,7 +78,7 @@ export default function ShopView() {
   const { sessionId, isAuthorized } = useAuthStore();
   const { amountDisplay } = usePreferencesStore();
   const numberMode = amountDisplay === 'full' ? 'full' : 'short' as const;
-  const [tab, setTab] = useState<'shop' | 'pawn'>('shop');
+  const [tab, setTab] = useState<'shop' | 'pawn' | 'market'>('shop');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState<string | null>(null);
@@ -95,6 +95,18 @@ export default function ShopView() {
   const [stockHoldings, setStockHoldings] = useState<any[]>([]);
   const [stockHistory, setStockHistory] = useState<Record<string, number[]>>({});
   const [sellingStock, setSellingStock] = useState<string | null>(null);
+
+  // ── Market state ───────────────────────────────────────────────────────────
+  const [listings, setListings] = useState<any[]>([]);
+  const [myListings, setMyListings] = useState<any[]>([]);
+  const [marketLoading, setMarketLoading] = useState(false);
+  const [buyingListing, setBuyingListing] = useState<string | null>(null);
+  const [marketMsg, setMarketMsg] = useState<string | null>(null);
+  const [marketTab, setMarketTab] = useState<'browse' | 'mine'>('browse');
+  const [sellItemId, setSellItemId] = useState('');
+  const [sellQty, setSellQty] = useState(1);
+  const [sellPrice, setSellPrice] = useState('');
+  const [showSellForm, setShowSellForm] = useState(false);
 
   // ── YJC exchange state ────────────────────────────────────────────────────
   const [yjcBalance, setYjcBalance] = useState('0');
@@ -290,6 +302,84 @@ export default function ShopView() {
     }
   }
 
+  // ── Market handlers ──────────────────────────────────────────────────────
+  const fetchListings = async () => {
+    setMarketLoading(true);
+    try {
+      const res = await api.get('/api/v1/market-listings');
+      if (res.data?.success) setListings(res.data.data || []);
+    } catch { setListings([]); }
+    finally { setMarketLoading(false); }
+  };
+
+  const fetchMyListings = async () => {
+    setMarketLoading(true);
+    try {
+      const res = await api.get('/api/v1/market-listings/mine', { params: { sessionId } });
+      if (res.data?.success) setMyListings(res.data.data || []);
+    } catch { setMyListings([]); }
+    finally { setMarketLoading(false); }
+  };
+
+  const handleCreateListing = async () => {
+    if (!sessionId || !sellItemId || !sellPrice) return;
+    setMarketLoading(true);
+    setMarketMsg(null);
+    try {
+      const res = await api.post('/api/v1/market-listings', { sessionId, itemId: sellItemId, quantity: sellQty, price: Number(sellPrice) });
+      if (res.data?.success) {
+        setMarketMsg('✅ 掛賣成功！');
+        setSellItemId('');
+        setSellPrice('');
+        setSellQty(1);
+        setShowSellForm(false);
+        fetchListings();
+      } else {
+        setMarketMsg(`❌ ${res.data?.error || '掛賣失敗'}`);
+      }
+    } catch (err: any) {
+      setMarketMsg(`❌ ${err?.response?.data?.data?.error || err?.message || '掛賣失敗'}`);
+    } finally {
+      setMarketLoading(false);
+      setTimeout(() => setMarketMsg(null), 4000);
+    }
+  };
+
+  const handleBuyListing = async (listingId: string) => {
+    if (!sessionId || buyingListing) return;
+    setBuyingListing(listingId);
+    try {
+      const res = await api.post(`/api/v1/market-listings/${listingId}/buy`, { sessionId });
+      if (res.data?.success) {
+        setMsg(`✅ 購買成功！`);
+        fetchListings();
+        fetchItems();
+      } else {
+        setMsg(`❌ ${res.data?.error || '購買失敗'}`);
+      }
+    } catch (err: any) {
+      setMsg(`❌ ${err?.response?.data?.data?.error || err?.message || '購買失敗'}`);
+    } finally {
+      setBuyingListing(null);
+      setTimeout(() => setMsg(null), 4000);
+    }
+  };
+
+  const handleCancelListing = async (listingId: string) => {
+    if (!sessionId) return;
+    try {
+      const res = await api.delete(`/api/v1/market-listings/${listingId}`, { data: { sessionId } });
+      if (res.data?.success) {
+        setMsg('✅ 已取消掛賣');
+        fetchMyListings();
+      } else {
+        setMsg(`❌ ${res.data?.error || '取消失敗'}`);
+      }
+    } catch (err: any) {
+      setMsg(`❌ ${err?.response?.data?.data?.error || err?.message || '取消失敗'}`);
+    }
+  };
+
   async function handleStockSell(symbol: string, qty: number) {
     if (!sessionId || sellingStock) return;
     setSellingStock(symbol);
@@ -351,6 +441,12 @@ export default function ShopView() {
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
           >
             當舖
+          </button>
+          <button
+            onClick={() => setTab('market')}
+            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'market' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
+          >
+            交易市場
           </button>
         </div>
       </header>
@@ -685,6 +781,98 @@ export default function ShopView() {
               })}
             </div>
             </>
+          )}
+          </>
+          )}
+        </section>
+        )}
+
+        {/* ── Trading Market Tab ──────────────────────────────────────────────── */}
+        {tab === 'market' && (
+        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-lg">🏪</span>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">交易市場</h2>
+          </div>
+          <div className="flex gap-2 mb-4">
+            <button onClick={() => { setMarketTab('browse'); fetchListings(); }}
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'browse' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}>瀏覽</button>
+            <button onClick={() => { setMarketTab('mine'); fetchMyListings(); }}
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'mine' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}>我的掛賣</button>
+          </div>
+
+          {marketTab === 'browse' && (
+          <>
+          <button onClick={() => setShowSellForm(o => !o)}
+            className="w-full mb-4 text-sm font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg hover:bg-emerald-500/30">
+            {showSellForm ? '收起' : '+ 我要賣'}
+          </button>
+
+          {showSellForm && (
+            <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20 mb-4 space-y-3">
+              <input placeholder="道具 ID (ex: token_1000)" value={sellItemId} onChange={e => setSellItemId(e.target.value)}
+                className="w-full bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]" />
+              <div className="flex gap-2">
+                <input type="number" min={1} placeholder="數量" value={sellQty} onChange={e => setSellQty(parseInt(e.target.value) || 1)}
+                  className="w-20 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]" />
+                <input type="number" min={1} placeholder="價格 (ZXC)" value={sellPrice} onChange={e => setSellPrice(e.target.value)}
+                  className="flex-1 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]" />
+              </div>
+              <button onClick={handleCreateListing} disabled={!sellItemId || !sellPrice}
+                className="w-full bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg disabled:opacity-50">掛賣</button>
+              {marketMsg && <p className="text-xs font-bold text-emerald-400">{marketMsg}</p>}
+            </div>
+          )}
+
+          {marketLoading ? (
+            <Loader2 size={16} className="animate-spin mx-auto text-[#fcc025]" />
+          ) : listings.length === 0 ? (
+            <p className="text-sm text-[#adaaaa] text-center py-8">目前無人在賣</p>
+          ) : (
+            <div className="space-y-3">
+              {listings.map((l: any) => (
+                <div key={l.id} className="flex items-center gap-3 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                  <span className="text-2xl shrink-0">{l.itemIcon || '📦'}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white truncate">{l.itemName || l.itemId}</p>
+                    <p className="text-xs text-[#adaaaa]">{l.quantity} 個 · {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="text-sm font-black text-[#fcc025]">{Number(l.price).toLocaleString()} ZXC</span>
+                    <button onClick={() => handleBuyListing(l.id)} disabled={buyingListing === l.id}
+                      className="text-xs font-black uppercase tracking-widest bg-[#fcc025] text-black px-3 py-1.5 rounded-lg disabled:opacity-50">
+                      {buyingListing === l.id ? <Loader2 size={10} className="animate-spin" /> : '購買'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          </>
+          )}
+
+          {marketTab === 'mine' && (
+          <>
+          <p className="text-sm text-[#adaaaa] mb-4">你可以在這裡管理你的掛賣物品</p>
+          {myListings.length === 0 ? (
+            <p className="text-sm text-[#adaaaa] text-center py-8">尚無掛賣</p>
+          ) : (
+            <div className="space-y-3">
+              {myListings.map((l: any) => (
+                <div key={l.id} className="flex items-center gap-3 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                  <span className="text-2xl shrink-0">📦</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white">{l.itemId}</p>
+                    <p className="text-xs text-[#adaaaa]">{l.quantity} 個 · {Number(l.price).toLocaleString()} ZXC</p>
+                    <span className={`text-[10px] font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-[#adaaaa]'}`}>{l.status}</span>
+                  </div>
+                  {l.status === 'active' && (
+                    <button onClick={() => handleCancelListing(l.id)}
+                      className="text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg">取消</button>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
           </>
           )}

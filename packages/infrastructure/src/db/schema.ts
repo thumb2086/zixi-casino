@@ -473,6 +473,25 @@ export const systemConfig = pgTable("system_config", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// ─── Player Trading Market ─────────────────────────────────────────────────────
+
+export const marketListings = pgTable("market_listings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sellerId: uuid("seller_id").notNull().references(() => users.id),
+  sellerAddress: text("seller_address").notNull(),
+  itemId: text("item_id").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  price: numeric("price").notNull(),
+  token: text("token").notNull().default("zhixi"),
+  status: text("status").notNull().default("active"), // active, sold, cancelled
+  buyerId: uuid("buyer_id"),
+  buyerAddress: text("buyer_address"),
+  soldAt: timestamp("sold_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // ─── KV Persistence Fallback ──────────────────────────────────────────────────
 
 export const kvStore = pgTable("kv_store", {
