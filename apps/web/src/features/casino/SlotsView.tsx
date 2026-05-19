@@ -35,7 +35,7 @@ export const SlotsView: React.FC = () => {
       return unwrapGameEnvelope<any>(payload);
     },
     onSuccess: async (result) => {
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       setIsSpinning(false);
 

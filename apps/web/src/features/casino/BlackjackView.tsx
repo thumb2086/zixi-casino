@@ -72,7 +72,7 @@ export const BlackjackView: React.FC = () => {
         }));
         // Reveal hidden cards one by one
         for (let i = 0; i < allDealerCards.length; i++) {
-          await new Promise(r => setTimeout(r, 600));
+          await new Promise(r => setTimeout(r, 200));
           setGameState(prev => ({
             ...prev,
             dealerCards: allDealerCards.slice(0, i + 1).concat(
