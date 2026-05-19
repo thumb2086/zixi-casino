@@ -9,6 +9,9 @@ import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser } from "../../utils/inventory.js";
+import { requireDb } from "@repo/infrastructure/db/index.js";
+import * as schema from "@repo/infrastructure/db/schema.js";
+import { eq, sql } from "drizzle-orm";
 
 function buildItemIndex(): Record<string, ItemDefinition & { rarity: Rarity }> {
   const out: Record<string, ItemDefinition & { rarity: Rarity }> = {};
@@ -236,6 +239,38 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
 
       await gameSettlement.setBalance(ctx.address, paymentToken, (balance - price).toString());
 
+      // VIP passes: grant permanent buff in user_profiles
+      if (itemId === 'vip_pass' || itemId === 'vip2_pass') {
+        try {
+          const db = await requireDb();
+          const tier = itemId === 'vip2_pass' ? 'vip_2_permanent' : 'vip_1_permanent';
+          await db.execute(sql`
+            UPDATE user_profiles
+            SET active_buffs = COALESCE(active_buffs, '[]'::jsonb) || ${JSON.stringify([{
+              id: tier,
+              label: itemId === 'vip2_pass' ? 'VIP 2 永久' : 'VIP 1 永久',
+              source: 'shop',
+              acquiredAt: new Date().toISOString(),
+            }])}::jsonb,
+            updated_at = NOW()
+            WHERE user_id = ${ctx.userId} AND address = ${ctx.address.toLowerCase()}
+          `);
+          await opsRepo.logEvent({
+            channel: "rewards",
+            severity: "info",
+            source: "inventory",
+            kind: "vip_pass_purchased",
+            userId: ctx.userId,
+            address: ctx.address,
+            message: `Purchased ${itemId}`,
+            meta: { itemId, price, token: paymentToken },
+          });
+        } catch (err: any) {
+          // Non-fatal: purchase still succeeded, buff just not persisted
+          console.error("Failed to grant VIP buff:", err.message);
+        }
+      }
+
       const bundle = subItems
         ? { items: subItems.map((i: any) => ({ id: i.id, qty: i.qty || 1 })) }
         : { items: [{ id: itemId, qty: 1 }] };
@@ -247,7 +282,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           await persistInventoryState(ctx.userId, state);
         }
       } catch (err: any) {
-        await gameSettlement.setBalance(ctx.address, "zhixi", balanceStr);
+        await gameSettlement.setBalance(ctx.address, paymentToken, balanceStr);
         return createApiEnvelope({ success: false }, request.id, false, "GRANT_FAILED");
       }
 

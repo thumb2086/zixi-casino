@@ -151,8 +151,8 @@ export class VipManager {
     const level = this.getVipTierByScore(score);
     const nextLevel = this.getNextLevel(level);
 
-    // 5. Determine YJC VIP tier (based on YJC balance) - separate system!
-    const yjcVipTier = this.getYjcVipTier(yjcBalance);
+    // 5. Determine YJC VIP tier (based on YJC balance + purchased buffs) - separate system!
+    const yjcVipTier = await this.getYjcVipTier(yjcBalance, addr);
 
     // 6. Calculate progress to next level
     let progressPct = 100;
@@ -180,8 +180,26 @@ export class VipManager {
     };
   }
 
-  // Get YJC VIP tier based on YJC balance (separate from level system)
-  private getYjcVipTier(yjcBalance: number): YjcVipTier {
+  // Get YJC VIP tier based on YJC balance + purchased VIP buffs
+  private async getYjcVipTier(yjcBalance: number, address?: string): Promise<YjcVipTier> {
+    // Check for permanent VIP buffs purchased from shop
+    if (address) {
+      try {
+        const db = await this.getDb();
+        const profile = await db
+          .select({ activeBuffs: schema.userProfiles.activeBuffs })
+          .from(schema.userProfiles)
+          .where(eq(schema.userProfiles.address, address.toLowerCase()))
+          .limit(1);
+        const buffs: any[] = (profile[0]?.activeBuffs as any[]) || [];
+        const hasVip2 = buffs.some((b: any) => b.id === 'vip_2_permanent');
+        const hasVip1 = buffs.some((b: any) => b.id === 'vip_1_permanent');
+        if (hasVip2) return YJC_VIP_TIERS[2];
+        if (hasVip1) return YJC_VIP_TIERS[1];
+      } catch {
+        // fall through to normal YJC balance check
+      }
+    }
     for (let i = YJC_VIP_TIERS.length - 1; i >= 0; i--) {
       if (yjcBalance >= YJC_VIP_TIERS[i].minBalance) {
         return YJC_VIP_TIERS[i];
@@ -196,7 +214,7 @@ export class VipManager {
     const db = await this.getDb();
 
     const yjcBalance = await this.resolveYjcBalance(db, addr);
-    return this.getYjcVipTier(yjcBalance);
+    return this.getYjcVipTier(yjcBalance, addr);
   }
 
   // Check if user has VIP2 (for zero game fees)
