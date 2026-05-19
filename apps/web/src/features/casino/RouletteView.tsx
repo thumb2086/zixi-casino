@@ -52,6 +52,7 @@ export function RouletteView() {
   const queryClient = useQueryClient();
   const [betAmount, setBetAmount] = useState('10');
   const [bets, setBets] = useState<PlacedBet[]>([]);
+  const [lastBets, setLastBets] = useState<PlacedBet[]>([]);
   const [rotation, setRotation] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState<{ number: number; color: string } | null>(null);
@@ -94,9 +95,10 @@ export function RouletteView() {
       return unwrapGameEnvelope<any>(payload);
     },
     onSuccess: (data) => {
+      setLastBets([...bets]);
+      setBets([]);
       if (typeof data?.winningNumber === 'number') {
         animateWheel(data.winningNumber);
-        setBets([]);
       }
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
@@ -225,8 +227,15 @@ export function RouletteView() {
         {error && <div className="mt-4 p-3 rounded-lg bg-red-900/50 border border-red-700 text-red-300 text-sm">{error}</div>}
 
         {result && !isSpinning && (
-          <div className="mt-4 p-4 rounded-lg bg-slate-900/80 border border-slate-700 text-center">
-            <p className="text-lg font-bold text-white">結果: <span className={`text-${result.color === 'red' ? 'red' : result.color === 'black' ? 'white' : 'emerald'}-400`}>{result.number} ({result.color})</span></p>
+          <div className="mt-4 p-4 rounded-lg bg-slate-900/80 border border-slate-700">
+            <div className="text-center mb-2">
+              <p className="text-lg font-bold text-white">結果: <span className={`text-${result.color === 'red' ? 'red' : result.color === 'black' ? 'white' : 'emerald'}-400`}>{result.number} ({result.color})</span></p>
+            </div>
+            {lastBets.length > 0 && (
+              <div className="text-xs text-slate-400 text-center">
+                你的下注: {lastBets.map(b => b.label).join('、')}
+              </div>
+            )}
           </div>
         )}
       </div>
