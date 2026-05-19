@@ -13,6 +13,18 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const gameManager = new GameManager();
 
+  // GET /api/v1/games/coinflip/round - Get current round info (no auth needed for clock sync)
+  typedFastify.get("/round", async (request) => {
+    const roundInfo = getRoundInfo("coinflip");
+    return createApiEnvelope({
+      success: true,
+      data: {
+        serverNow: Date.now(),
+        ...roundInfo,
+      },
+    }, request.id);
+  });
+
   const getContext = async (req: any) => {
     const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
     if (!sessionId) return null;

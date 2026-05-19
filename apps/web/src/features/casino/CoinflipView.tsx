@@ -24,17 +24,45 @@ export const CoinflipView: React.FC = () => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const coinRef = useRef<HTMLDivElement>(null);
 
-  // Timer logic for round tracking
-  const [now, setNow] = useState(Date.now());
+  // Server-synced round info
+  const [serverRound, setServerRound] = useState<{
+    roundId: number;
+    closesAt: number;
+    bettingClosesAt: number;
+    isBettingOpen: boolean;
+    msLeft: number;
+  } | null>(null);
+  const [clockOffset, setClockOffset] = useState(0);
+
+  // Fetch round info from server on mount and periodically
   useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 1000);
+    const fetchRound = async () => {
+      try {
+        const res = await api.get("/api/v1/games/coinflip/round");
+        const env = res.data?.data?.data ?? res.data?.data;
+        if (env?.roundId !== undefined) {
+          setServerRound(env);
+          setClockOffset(env.serverNow - Date.now());
+        }
+      } catch {}
+    };
+    fetchRound();
+    const interval = setInterval(fetchRound, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const currentRoundId = Math.floor(now / COINFLIP_ROUND_MS);
-  const closesAt = (currentRoundId + 1) * COINFLIP_ROUND_MS;
-  const isBettingOpen = now < (closesAt - COINFLIP_LOCK_MS);
-  const secLeft = Math.max(0, Math.ceil((closesAt - now) / 1000));
+  // Local clock synced to server time
+  const [localNow, setLocalNow] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setLocalNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const serverNow = localNow + clockOffset;
+  const currentRoundId = serverRound?.roundId ?? Math.floor(serverNow / COINFLIP_ROUND_MS);
+  const closesAt = serverRound?.closesAt ?? ((currentRoundId + 1) * COINFLIP_ROUND_MS);
+  const isBettingOpen = serverNow < (serverRound?.bettingClosesAt ?? (closesAt - COINFLIP_LOCK_MS));
+  const secLeft = Math.max(0, Math.ceil((closesAt - serverNow) / 1000));
 
   const [lastRoundId, setLastRoundId] = useState<number | null>(null);
 
