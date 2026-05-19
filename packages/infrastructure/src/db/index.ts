@@ -245,6 +245,26 @@ const ensureCoreSchema = async () => {
             updated_by TEXT,
             updated_at TIMESTAMP NOT NULL DEFAULT NOW()
           )`.catch(() => {});
+          await sql`CREATE TABLE IF NOT EXISTS company_accounts (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id UUID NOT NULL REFERENCES users(id) UNIQUE,
+            company_type TEXT NOT NULL,
+            company_name TEXT NOT NULL,
+            level INTEGER NOT NULL DEFAULT 1,
+            data JSONB NOT NULL DEFAULT '{}',
+            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )`.catch(() => {});
+          await sql`CREATE TABLE IF NOT EXISTS company_investments (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            investor_id UUID NOT NULL REFERENCES users(id),
+            company_id UUID NOT NULL REFERENCES company_accounts(id),
+            amount NUMERIC NOT NULL,
+            share_pct NUMERIC NOT NULL,
+            start_at TIMESTAMP NOT NULL DEFAULT NOW(),
+            end_at TIMESTAMP,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )`.catch(() => {});
           return;
         }
         await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;

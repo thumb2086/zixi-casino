@@ -492,6 +492,30 @@ export const marketListings = pgTable("market_listings", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+// ─── Company Simulation ────────────────────────────────────────────────────────
+
+export const companyAccounts = pgTable("company_accounts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id).unique(),
+  companyType: text("company_type").notNull(), // 'ai' | 'chip'
+  companyName: text("company_name").notNull(),
+  level: integer("level").notNull().default(1),
+  data: jsonb("data").notNull().default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const companyInvestments = pgTable("company_investments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  investorId: uuid("investor_id").notNull().references(() => users.id),
+  companyId: uuid("company_id").notNull().references(() => companyAccounts.id),
+  amount: numeric("amount").notNull(),
+  sharePct: numeric("share_pct").notNull(), // 0-100
+  startAt: timestamp("start_at").notNull().defaultNow(),
+  endAt: timestamp("end_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 // ─── KV Persistence Fallback ──────────────────────────────────────────────────
 
 export const kvStore = pgTable("kv_store", {
