@@ -105,9 +105,7 @@ export const MARKET_SYMBOLS: Record<string, MarketSymbolMeta> = {
   SILVER: { name: "Silver", type: "commodity", sector: "commodity", basePrice: 24.5, volatility: 0.023, phase: 97 },
 };
 
-const TRADEABLE_STOCKS = new Set(
-  Object.keys(MARKET_SYMBOLS).filter((s) => MARKET_SYMBOLS[s].type === "stock")
-);
+const TRADEABLE_STOCKS = new Set(Object.keys(MARKET_SYMBOLS));
 const TRADEABLE_FUTURES = new Set(Object.keys(MARKET_SYMBOLS));
 
 // ─── Pure helpers ─────────────────────────────────────────────────────────────
