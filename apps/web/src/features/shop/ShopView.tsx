@@ -5,6 +5,7 @@ import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import { formatNumber, ITEM_DROP_TABLES, RARITY_NAMES } from '@repo/shared';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 
 const ITEM_MAP: Record<string, { name: string; icon: string; rarity: string; color: string }> = {};
 for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TABLES)[]) {
@@ -34,15 +35,17 @@ const PAWN_PRICES: Record<string, number> = {
   mythic: 5000,
 };
 
-function formatBalance(raw: string | undefined): string {
+function formatBalance(raw: string | undefined, mode: 'short' | 'full' = 'short'): string {
   if (!raw) return '0';
   const n = Number(raw);
   if (!Number.isFinite(n)) return raw;
-  return n.toLocaleString('en-US', { maximumFractionDigits: 6 });
+  return formatNumber(n, mode);
 }
 
 export default function ShopView() {
   const { sessionId, isAuthorized } = useAuthStore();
+  const { amountDisplay } = usePreferencesStore();
+  const numberMode = amountDisplay === 'full' ? 'full' : 'short' as const;
   const [tab, setTab] = useState<'shop' | 'pawn'>('shop');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +55,7 @@ export default function ShopView() {
   const [ownedAvatars, setOwnedAvatars] = useState<string[]>([]);
   const [ownedTitles, setOwnedTitles] = useState<string[]>([]);
 
-  // ?€?€ Pawn state ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+  // ?ï¿½?ï¿½ Pawn state ?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½
   const [invItems, setInvItems] = useState<any[]>([]);
   const [pawnLoading, setPawnLoading] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
@@ -61,7 +64,7 @@ export default function ShopView() {
   const [stockPrices, setStockPrices] = useState<Record<string, any>>({});
   const [sellingStock, setSellingStock] = useState<string | null>(null);
 
-  // ?€?€ YJC exchange state ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+  // ?ï¿½?ï¿½ YJC exchange state ?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½
   const [yjcBalance, setYjcBalance] = useState('0');
   const [convertZxc, setConvertZxc] = useState('');
   const [convertYjc, setConvertYjc] = useState('');
@@ -131,7 +134,7 @@ export default function ShopView() {
 
   async function handleBuyChest(chestType: string, quantity: number = 1) {
     if (!sessionId) return;
-    const label = chestType === 'common' ? '?®é€? : chestType === 'rare' ? 'ç¨€?? : chestType === 'epic' ? '?²è©©' : '?³å?';
+    const label = chestType === 'common' ? '?ï¿½ï¿½? : chestType === 'rare' ? 'ç¨€?? : chestType === 'epic' ? '?ï¿½è©©' : '?ï¿½ï¿½?';
     setBuyingChest(chestType);
     setMsg(null);
     try {
@@ -139,15 +142,15 @@ export default function ShopView() {
       if (res.data?.success) {
         const d = res.data.data;
         const discountText = d.discount > 0 ? ` (??${(d.discount * 100).toFixed(0)}%)` : '';
-        setMsg(`??${quantity} x ${label}å¯¶ç®± å·²æ”¾?¥è??…ï?${discountText}`);
+        setMsg(`??${quantity} x ${label}å¯¶ç®± å·²æ”¾?ï¿½ï¿½??ï¿½ï¿½?${discountText}`);
         if (d.balanceAfter) setBalance(d.balanceAfter);
         setTimeout(() => setMsg(null), 3000);
       } else {
-        setMsg(`??${res.data?.error || 'è³¼è²·å¤±æ?'}`);
+        setMsg(`??${res.data?.error || 'è³¼è²·å¤±ï¿½?'}`);
         setTimeout(() => setMsg(null), 3000);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ?'}`);
+      setMsg(`??${err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±ï¿½?'}`);
       setTimeout(() => setMsg(null), 3000);
     } finally {
       setBuyingChest(null);
@@ -158,7 +161,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const amount = parseInt(convertZxc, 10);
     if (!amount || amount < CONVERSION_RATE) {
-      setMsg(`???€ä½å???${CONVERSION_RATE.toLocaleString()} ZXC`);
+      setMsg(`???ï¿½ä½ï¿½???${CONVERSION_RATE.toLocaleString()} ZXC`);
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -167,14 +170,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(amount) });
       if (res.data?.success) {
-        setMsg(`???å??Œæ? ${res.data.data?.yjcAmount || (amount / CONVERSION_RATE)} YJC`);
+        setMsg(`???ï¿½ï¿½??ï¿½ï¿½? ${res.data.data?.yjcAmount || (amount / CONVERSION_RATE)} YJC`);
         setConvertZxc('');
         fetchItems();
       } else {
-        setMsg(`??${res.data?.error?.message || res.data?.error || '?Œæ?å¤±æ?'}`);
+        setMsg(`??${res.data?.error?.message || res.data?.error || '?ï¿½ï¿½?å¤±ï¿½?'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?Œæ?å¤±æ?'}`);
+      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?ï¿½ï¿½?å¤±ï¿½?'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -185,7 +188,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const yjcNum = parseFloat(convertYjc);
     if (!yjcNum || yjcNum <= 0) {
-      setMsg('??è«‹è¼¸?¥å¤§??0 ??YJC ?¸é?');
+      setMsg('??è«‹è¼¸?ï¿½å¤§??0 ??YJC ?ï¿½ï¿½?');
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -194,14 +197,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', { sessionId, yjcAmount: String(yjcNum) });
       if (res.data?.success) {
-        setMsg(`???å??Œæ? ${res.data.data?.zxcAmount || (yjcNum * CONVERSION_RATE).toLocaleString()} ZXC`);
+        setMsg(`???ï¿½ï¿½??ï¿½ï¿½? ${res.data.data?.zxcAmount || (yjcNum * CONVERSION_RATE).toLocaleString()} ZXC`);
         setConvertYjc('');
         fetchItems();
       } else {
-        setMsg(`??${res.data?.error?.message || res.data?.error || '?Œæ?å¤±æ?'}`);
+        setMsg(`??${res.data?.error?.message || res.data?.error || '?ï¿½ï¿½?å¤±ï¿½?'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?Œæ?å¤±æ?'}`);
+      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?ï¿½ï¿½?å¤±ï¿½?'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -215,15 +218,15 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/inventory/buy', { sessionId, itemId });
       if (res.data?.success) {
-        setMsg(`${res.data.data?.name || itemId} è³¼è²·?å?ï¼`);
+        setMsg(`${res.data.data?.name || itemId} è³¼è²·?ï¿½ï¿½?ï¼`);
         const newBal = res.data.data?.balanceAfter;
         if (newBal) setBalance(newBal);
         fetchItems();
       } else {
-        setMsg(res.data?.error || 'è³¼è²·å¤±æ?');
+        setMsg(res.data?.error || 'è³¼è²·å¤±ï¿½?');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ?');
+      setMsg(err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±ï¿½?');
     } finally {
       setBuyingId(null);
     }
@@ -236,14 +239,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/sell', { sessionId, itemId, quantity });
       if (res.data?.success) {
-        setMsg(`?¸ç•¶?å?ï¼ç²å¾?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`?ï¿½ç•¶?ï¿½ï¿½?ï¼ç²ï¿½?+${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(res.data?.error || '?¸ç•¶å¤±æ?');
+        setMsg(res.data?.error || '?ï¿½ç•¶å¤±ï¿½?');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || '?¸ç•¶å¤±æ?');
+      setMsg(err?.response?.data?.data?.error || err?.message || '?ï¿½ç•¶å¤±ï¿½?');
     } finally {
       setSellingId(null);
     }
@@ -256,14 +259,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/stock-sell', { sessionId, symbol, quantity: qty });
       if (res.data?.success) {
-        setMsg(`???å??ºå”® ${qty} ??${symbol}ï¼Œç²å¾?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`???ï¿½ï¿½??ï¿½å”® ${qty} ??${symbol}ï¼Œç²ï¿½?+${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(`??${res.data?.error || '?ºå”®å¤±æ?'}`);
+        setMsg(`??${res.data?.error || '?ï¿½å”®å¤±ï¿½?'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.data?.error || err?.message || '?ºå”®å¤±æ?'}`);
+      setMsg(`??${err?.response?.data?.data?.error || err?.message || '?ï¿½å”®å¤±ï¿½?'}`);
     } finally {
       setSellingStock(null);
       setTimeout(() => setMsg(null), 4000);
@@ -295,7 +298,7 @@ export default function ShopView() {
               <ChevronLeft size={24} />
             </Link>
             <ShoppingBag className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">?†å?</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">?ï¿½ï¿½?</h1>
           </div>
         </div>
         <div className="flex max-w-2xl mx-auto px-6 gap-4">
@@ -303,13 +306,13 @@ export default function ShopView() {
             onClick={() => setTab('shop')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
           >
-            ?†å?
+            ?ï¿½ï¿½?
           </button>
           <button
             onClick={() => setTab('pawn')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
           >
-            ?¶è?
+            ?ï¿½ï¿½?
           </button>
         </div>
       </header>
@@ -318,28 +321,28 @@ export default function ShopView() {
         <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#fcc025]" />
-            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ZXC é¤˜é?</span>
+            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ZXC é¤˜ï¿½?</span>
           </div>
-          <span className="text-lg font-black italic text-[#fcc025]">{formatBalance(balance)}</span>
+            <span className="text-lg font-black italic text-[#fcc025]">{formatBalance(balance, numberMode)}</span>
         </section>
 
         <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-lg">??</span>
-            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ä½‘æˆ©å¹?YJC</span>
-            <span className="text-sm font-black italic text-[#4fc3f7] ml-auto">{formatBalance(yjcBalance)}</span>
+            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ä½‘æˆ©ï¿½?YJC</span>
+            <span className="text-sm font-black italic text-[#4fc3f7] ml-auto">{formatBalance(yjcBalance, numberMode)}</span>
           </div>
           <div className="text-sm text-[#adaaaa] mb-2">1 YJC = {CONVERSION_RATE.toLocaleString()} ZXC</div>
           <div className="flex items-center gap-2">
-            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`?€å°?${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`?ï¿½ï¿½?${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertYjc} disabled={converting || !convertZxc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
-              {converting ? <Loader2 size={12} className="animate-spin" /> : '?Œæ?'}
+              {converting ? <Loader2 size={12} className="animate-spin" /> : '?ï¿½ï¿½?'}
             </button>
           </div>
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#494847]/20">
-            <input type="number" min="0.0001" step="0.0001" placeholder="YJC ?¸é?" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <input type="number" min="0.0001" step="0.0001" placeholder="YJC ?ï¿½ï¿½?" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertZxcFromYjc} disabled={converting || !convertYjc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#fcc025] text-black px-4 py-2 rounded-lg disabled:opacity-50">
-              {converting ? <Loader2 size={12} className="animate-spin" /> : '?å??Œæ?'}
+              {converting ? <Loader2 size={12} className="animate-spin" /> : '?ï¿½ï¿½??ï¿½ï¿½?'}
             </button>
           </div>
         </section>
@@ -385,7 +388,7 @@ export default function ShopView() {
                     disabled={boughtHere}
                     className="mt-2 w-full bg-[#fcc025] text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
                   >
-                    {boughtHere ? 'è³¼è²·ä¸?..' : 'è³¼è²·'}
+                    {boughtHere ? 'è³¼è²·ï¿½?..' : 'è³¼è²·'}
                   </button>
                 </div>
               );
@@ -395,7 +398,7 @@ export default function ShopView() {
 
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">?†å??†å?</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">?ï¿½ï¿½??ï¿½ï¿½?</h2>
             <button onClick={fetchItems} className="text-[#adaaaa] hover:text-white transition-colors">
               <RefreshCw size={14} />
             </button>
@@ -408,7 +411,7 @@ export default function ShopView() {
           )}
 
           {!loading && visibleItems.length === 0 && (
-            <p className="text-sm text-[#adaaaa] text-center py-8">?®å??«ç„¡?†å?</p>
+            <p className="text-sm text-[#adaaaa] text-center py-8">?ï¿½ï¿½??ï¿½ç„¡?ï¿½ï¿½?</p>
           )}
 
           <div className="space-y-3">
@@ -421,7 +424,7 @@ export default function ShopView() {
 
               return (
                 <div key={item.itemId} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-                  <div className="text-2xl shrink-0">{item.icon || '?“¦'}</div>
+                  <div className="text-2xl shrink-0">{item.icon || '?ï¿½ï¿½'}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{item.name}</p>
                     <p className="text-sm text-[#adaaaa] truncate">{item.description || ''}</p>
@@ -430,7 +433,7 @@ export default function ShopView() {
                         {item.rarity}
                       </span>
                       {bundle && (
-                        <span className="text-sm font-bold text-emerald-400">?“¦ çµ„å???/span>
+                        <span className="text-sm font-bold text-emerald-400">?ï¿½ï¿½ çµ„ï¿½???/span>
                       )}
                     </div>
                     {bundle && (
@@ -487,35 +490,35 @@ export default function ShopView() {
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-4">
             <Trash2 size={16} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">?¶è?</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">?ï¿½ï¿½?</h2>
           </div>
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setPawnTab('items')}
               className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'items' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
             >
-              ?“å…·
+              ?ï¿½å…·
             </button>
             <button
               onClick={() => setPawnTab('stocks')}
               className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'stocks' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
             >
-              ?¡ç¥¨
+              ?ï¿½ç¥¨
             </button>
           </div>
 
           {pawnTab === 'items' && (
           <>
-          <p className="text-sm text-[#adaaaa] mb-4">å°‡ä??€è¦ç??“å…·?¸ç•¶?›å? ZXC</p>
+          <p className="text-sm text-[#adaaaa] mb-4">å°‡ï¿½??ï¿½è¦ï¿½??ï¿½å…·?ï¿½ç•¶?ï¿½ï¿½? ZXC</p>
           {invItems.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">?«ç„¡?¯å…¸?¶ç??“å…·</p>
+            <p className="text-sm text-[#adaaaa] text-center py-8">?ï¿½ç„¡?ï¿½å…¸?ï¿½ï¿½??ï¿½å…·</p>
           ) : (
             <div className="space-y-3">
               {invItems.map((item: any) => {
                 const price = PAWN_PRICES[item.rarity] || 5;
                 return (
                   <div key={item.id} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-                    <div className="text-2xl shrink-0">{item.icon || '?“¦'}</div>
+                    <div className="text-2xl shrink-0">{item.icon || '?ï¿½ï¿½'}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white truncate">{item.name}</p>
                       <p className="text-sm text-[#adaaaa] truncate">{item.description || ''}</p>
@@ -533,7 +536,7 @@ export default function ShopView() {
                         disabled={sellingId === item.id || !sessionId}
                         className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
                       >
-                        {sellingId === item.id ? <Loader2 size={10} className="animate-spin" /> : '?¸ç•¶'}
+                        {sellingId === item.id ? <Loader2 size={10} className="animate-spin" /> : '?ï¿½ç•¶'}
                       </button>
                     </div>
                   </div>
@@ -546,9 +549,9 @@ export default function ShopView() {
 
           {pawnTab === 'stocks' && (
           <>
-          <p className="text-sm text-[#adaaaa] mb-4">ä»¥å???70% ?ºå”®?¡ç¥¨ï¼Œç??³è???ZXC</p>
+          <p className="text-sm text-[#adaaaa] mb-4">ä»¥ï¿½???70% ?ï¿½å”®?ï¿½ç¥¨ï¼Œï¿½??ï¿½ï¿½???ZXC</p>
           {stockHoldings.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">?«ç„¡?è‚¡</p>
+            <p className="text-sm text-[#adaaaa] text-center py-8">?ï¿½ç„¡?ï¿½è‚¡</p>
           ) : (
             <div className="space-y-3">
               {stockHoldings.map((stock: any) => {
@@ -560,9 +563,9 @@ export default function ShopView() {
                     <div className="text-2xl shrink-0">??</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white truncate">{stock.symbol}</p>
-                      <p className="text-sm text-[#adaaaa]">{stock.qty} ??Â· ?‡åƒ¹ {Number(stock.avgPrice || 0).toLocaleString()} ZXC</p>
+                      <p className="text-sm text-[#adaaaa]">{stock.qty} ??Â· ?ï¿½åƒ¹ {Number(stock.avgPrice || 0).toLocaleString()} ZXC</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-[#adaaaa]">å¸‚å€?{Math.round(marketPrice * stock.qty).toLocaleString()} ZXC</span>
+                        <span className="text-sm text-[#adaaaa]">å¸‚ï¿½?{Math.round(marketPrice * stock.qty).toLocaleString()} ZXC</span>
                         <span className="text-sm text-emerald-400">??{totalPayout.toLocaleString()} ZXC</span>
                       </div>
                     </div>
@@ -573,7 +576,7 @@ export default function ShopView() {
                         disabled={sellingStock === stock.symbol || !sessionId}
                         className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
                       >
-                        {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '?ºå”®'}
+                        {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '?ï¿½å”®'}
                       </button>
                     </div>
                   </div>
