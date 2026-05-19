@@ -538,6 +538,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         reviewNote: z.string().optional(),
         rarityOverride: z.string().optional(),
+        price: z.number().min(0).optional(),
+        listedInShop: z.boolean().optional().default(false),
       }),
     },
   }, async (request) => {
@@ -545,7 +547,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
     const { submissionId } = request.params as { submissionId: string };
-    const { reviewNote, rarityOverride } = request.body as any;
+    const { reviewNote, rarityOverride, price, listedInShop } = request.body as any;
 
     const sub = await submissionRepo.getById(submissionId);
     if (!sub) return createApiEnvelope({ error: { code: "NOT_FOUND" } }, request.id);
@@ -558,7 +560,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
       type: sub.type,
       name: sub.name,
       rarity: rarityOverride ?? sub.rarity ?? "common",
-      source: "user",
+      source: listedInShop ? "shop" : "user",
+      price: price ?? undefined,
       description: sub.description ?? undefined,
       icon: sub.icon ?? undefined,
       isActive: true,
