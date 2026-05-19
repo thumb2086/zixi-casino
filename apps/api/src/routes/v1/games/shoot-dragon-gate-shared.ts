@@ -158,8 +158,11 @@ export async function playShootDragonGateRound(params: {
         payoutTxHash: settlement.payoutTxHash,
       },
     };
-  } catch (err) {
+  } catch (err: any) {
     await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
-    throw err;
+    return {
+      ok: false as const,
+      error: err?.message || "Unexpected error",
+    };
   }
 }

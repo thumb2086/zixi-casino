@@ -199,9 +199,13 @@ export async function duelRoutes(fastify: FastifyInstance) {
       }, request.id);
 
     } catch (err: any) {
-      // Rollback on any unexpected error
       await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
-      throw err;
+      return createApiEnvelope(
+        { success: false },
+        request.id,
+        false,
+        err?.message || "Unexpected error"
+      );
     }
   });
 

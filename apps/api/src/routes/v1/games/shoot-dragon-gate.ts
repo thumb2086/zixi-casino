@@ -189,7 +189,12 @@ export async function shootDragonGateRoutes(fastify: FastifyInstance) {
         data: result.data,
       }, request.id);
     } catch (err: any) {
-      throw err;
+      return createApiEnvelope(
+        { success: false },
+        request.id,
+        false,
+        err?.message || "Unexpected error"
+      );
     }
   });
 
