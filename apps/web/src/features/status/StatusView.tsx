@@ -18,12 +18,12 @@ export default function StatusView() {
   const titleItem = titleMap[activeTitle];
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-['Manrope'] pb-32">
+    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-3">
             <User className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">å€‹äººç‹€æ…‹</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">?‹äºº?€??/h1>
           </div>
         </div>
       </header>
@@ -31,9 +31,9 @@ export default function StatusView() {
       <main className="pt-20 px-6 max-w-2xl mx-auto space-y-6">
         {/* Avatar + Title */}
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 flex items-center gap-6">
-          <div className="text-5xl shrink-0">{avatarItem?.icon || 'ğŸ§‘'}</div>
+          <div className="text-5xl shrink-0">{avatarItem?.icon || '??'}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-black text-white truncate">{username || 'æœªè¨­å®š'}</p>
+            <p className="text-lg font-black text-white truncate">{username || '?ªè¨­å®?}</p>
             {titleItem && <p className="text-xs font-bold text-[#fcc025]">{titleItem.icon} {titleItem.name}</p>}
             <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
           </div>
@@ -44,14 +44,14 @@ export default function StatusView() {
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-[#fcc025]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC é¤˜é¡</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC é¤˜é?</span>
             </div>
             <p className="text-xl font-black italic text-[#fcc025]">{Number(balance).toLocaleString()}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-[#fcc025]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">æ´»èºé ­åƒ</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">æ´»è??­å?</span>
             </div>
             <p className="text-sm font-bold text-white truncate">{avatarItem?.name || activeAvatar}</p>
           </div>
@@ -60,15 +60,15 @@ export default function StatusView() {
         {/* Quick Links */}
         <section className="bg-[#1a1919] rounded-2xl border border-[#494847]/20 divide-y divide-[#494847]/10">
           <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">é“å…·èƒŒåŒ…</span>
+            <span className="text-sm font-bold">?“å…·?Œå?</span>
             <ChevronRight size={16} className="text-[#adaaaa]" />
           </Link>
           <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">ç‰©å“åœ–é‘‘</span>
+            <span className="text-sm font-bold">?©å??–é?</span>
             <ChevronRight size={16} className="text-[#adaaaa]" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">è¨­å®š</span>
+            <span className="text-sm font-bold">è¨­å?</span>
             <ChevronRight size={16} className="text-[#adaaaa]" />
           </Link>
         </section>

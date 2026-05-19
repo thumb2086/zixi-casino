@@ -16,9 +16,9 @@ interface CatalogItem {
 }
 
 const RARITY_COLORS = {
-  common: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', label: '普通' },
-  rare: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', label: '稀有' },
-  legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', label: '傳說' },
+  common: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', label: '?��? },
+  rare: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', label: '稀?? },
+  legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', label: '?�說' },
   mythic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: '神話' },
   vip: { bg: 'bg-[#fcc025]/20', text: 'text-[#fcc025]', border: 'border-[#fcc025]/30', label: 'VIP' },
 };
@@ -37,7 +37,7 @@ export default function ItemsCatalogView() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    // 從 API 獲取目錄數據
+    // �?API ?��??��??��?
     Promise.all([
       api.get('/api/v1/rewards/avatars/catalog').catch(() => ({ data: { data: [] } })),
       api.get('/api/v1/rewards/titles/catalog').catch(() => ({ data: { data: [] } })),
@@ -46,16 +46,16 @@ export default function ItemsCatalogView() {
         const avatars = (avatarsRes.data.data || []).map((item: any) => ({
           ...item,
           type: 'avatar' as const,
-          howToGet: item.source === 'shop' ? '商店購買' : 
-                   item.source === 'admin' ? '管理員授予' : 
-                   item.source === 'chest' ? '寶箱開啟' : '活動獲得',
+          howToGet: item.source === 'shop' ? '?��?購買' : 
+                   item.source === 'admin' ? '管�??��?�? : 
+                   item.source === 'chest' ? '寶箱?��?' : '活�??��?',
         }));
         const titles = (titlesRes.data.data || []).map((item: any) => ({
           ...item,
           type: 'title' as const,
-          howToGet: item.source === 'shop' ? '商店購買' : 
-                   item.source === 'admin' ? '管理員授予' : 
-                   item.source === 'chest' ? '寶箱開啟' : '活動獲得',
+          howToGet: item.source === 'shop' ? '?��?購買' : 
+                   item.source === 'admin' ? '管�??��?�? : 
+                   item.source === 'chest' ? '寶箱?��?' : '活�??��?',
         }));
         setItems([...avatars, ...titles]);
       })
@@ -70,7 +70,7 @@ export default function ItemsCatalogView() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
@@ -79,14 +79,14 @@ export default function ItemsCatalogView() {
             </Link>
             <Package className="text-[#fcc025]" />
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
-              物品圖鑑
+              ?��??��?
             </h1>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-6 pt-24">
-        {/* 搜尋和篩選 */}
+        {/* ?��??�篩??*/}
         <section className="mb-6 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#494847]" />
@@ -94,7 +94,7 @@ export default function ItemsCatalogView() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="搜尋物品名稱..."
+              placeholder="?��??��??�稱..."
               className="w-full rounded-xl border border-[#494847]/20 bg-[#1a1919] py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-[#494847] focus:outline-none focus:border-[#fcc025]/50"
             />
           </div>
@@ -110,18 +110,18 @@ export default function ItemsCatalogView() {
                     : 'bg-[#1a1919] text-[#adaaaa] border border-[#494847]/20'
                 }`}
               >
-                {type === 'all' ? '全部' : 
-                 type === 'avatar' ? '頭像' : 
-                 type === 'title' ? '稱號' : '道具'}
+                {type === 'all' ? '?�部' : 
+                 type === 'avatar' ? '?��?' : 
+                 type === 'title' ? '稱�?' : '?�具'}
               </button>
             ))}
           </div>
         </section>
 
-        {/* 稀有度說明 */}
+        {/* 稀?�度說�? */}
         <section className="mb-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-4">
           <h2 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-            稀有度說明
+            稀?�度說�?
           </h2>
           <div className="flex flex-wrap gap-2">
             {Object.entries(RARITY_COLORS).map(([key, colors]) => (
@@ -136,19 +136,19 @@ export default function ItemsCatalogView() {
           </div>
         </section>
 
-        {/* 物品列表 */}
+        {/* ?��??�表 */}
         <section className="space-y-3">
           {loading && (
             <div className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-8 text-center">
               <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[#494847] border-t-[#fcc025]" />
-              <p className="text-sm font-bold text-[#adaaaa]">載入物品目錄...</p>
+              <p className="text-sm font-bold text-[#adaaaa]">載入?��??��?...</p>
             </div>
           )}
 
           {!loading && filteredItems.length === 0 && (
             <div className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-8 text-center">
               <Package className="mx-auto mb-3 h-12 w-12 text-[#494847]" />
-              <p className="text-sm font-bold text-[#adaaaa]">暫無符合條件的物品</p>
+              <p className="text-sm font-bold text-[#adaaaa]">?�無符�?條件?�物??/p>
             </div>
           )}
 
@@ -178,9 +178,9 @@ export default function ItemsCatalogView() {
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="flex items-center gap-1 rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#adaaaa]">
                         <TypeIcon className="h-3 w-3" />
-                        {item.type === 'avatar' ? '頭像' : 
-                         item.type === 'title' ? '稱號' : 
-                         item.type === 'buff' ? '增益' : '道具'}
+                        {item.type === 'avatar' ? '?��?' : 
+                         item.type === 'title' ? '稱�?' : 
+                         item.type === 'buff' ? '增�?' : '?�具'}
                       </span>
                       <span className="rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#fcc025]">
                         {item.howToGet}
@@ -193,10 +193,10 @@ export default function ItemsCatalogView() {
           })}
         </section>
 
-        {/* 獲取方式總覽 */}
+        {/* ?��??��?總覽 */}
         <section className="mt-8 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
           <h2 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-            物品獲取方式
+            ?��??��??��?
           </h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
@@ -204,8 +204,8 @@ export default function ItemsCatalogView() {
                 <Gift className="h-4 w-4 text-[#fcc025]" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">商店購買</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">使用子熙幣在獎勵商店購買限定頭像與稱號</p>
+                <h3 className="text-sm font-bold text-white">?��?購買</h3>
+                <p className="text-xs font-bold text-[#adaaaa]">使用子�?�?��?�勵?��?購買?��??��??�稱??/p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -213,8 +213,8 @@ export default function ItemsCatalogView() {
                 <Crown className="h-4 w-4 text-purple-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">管理員授予</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">特殊活動或貢獻獲得的限定物品</p>
+                <h3 className="text-sm font-bold text-white">管�??��?�?/h3>
+                <p className="text-xs font-bold text-[#adaaaa]">?��?活�??�貢?�獲得�??��??��?</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -222,8 +222,8 @@ export default function ItemsCatalogView() {
                 <Sword className="h-4 w-4 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">寶箱開啟</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">遊戲內獲得的寶箱有機率開出稀有物品</p>
+                <h3 className="text-sm font-bold text-white">寶箱?��?</h3>
+                <p className="text-xs font-bold text-[#adaaaa]">?�戲?�獲得�?寶箱?��??��??��??�物??/p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -231,8 +231,8 @@ export default function ItemsCatalogView() {
                 <Heart className="h-4 w-4 text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">活動獲得</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">參與限時活動完成任務獲得專屬獎勵</p>
+                <h3 className="text-sm font-bold text-white">活�??��?</h3>
+                <p className="text-xs font-bold text-[#adaaaa]">?��??��?活�?完�?任�??��?專屬?�勵</p>
               </div>
             </div>
           </div>

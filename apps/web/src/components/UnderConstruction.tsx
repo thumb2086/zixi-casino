@@ -11,12 +11,12 @@ interface UnderConstructionProps {
 }
 
 export default function UnderConstruction({ 
-  title = '開發中',
-  description = '此功能正在開發中，敬請期待！',
+  title = '?�發�?,
+  description = '此�??�正?��??�中，敬請�?待�?',
   current = 'none'
 }: UnderConstructionProps) {
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center gap-4 px-6 py-4">
           <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
@@ -37,7 +37,7 @@ export default function UnderConstruction({
         </div>
 
         <h2 className="mt-8 text-2xl font-black uppercase italic tracking-tight text-white">
-          開發中
+          ?�發�?
         </h2>
         <p className="mt-4 text-center text-sm font-bold text-[#adaaaa]">
           {description}
@@ -45,20 +45,20 @@ export default function UnderConstruction({
 
         <div className="mt-8 rounded-xl border border-[#494847]/20 bg-[#1a1919] p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-[#494847]">
-            預計上線功能
+            ?��?上�??�能
           </p>
           <ul className="mt-4 space-y-2 text-sm font-bold text-[#adaaaa]">
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
-              完整數據串接
+              完整?��?串接
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
-              即時互動功能
+              ?��?互�??�能
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
-              歷史記錄查詢
+              歷史記�??�詢
             </li>
           </ul>
         </div>
@@ -67,7 +67,7 @@ export default function UnderConstruction({
           to="/app"
           className="mt-8 rounded-xl bg-[#fcc025] px-8 py-4 text-sm font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
         >
-          返回首頁
+          返�?首�?
         </Link>
       </main>
 

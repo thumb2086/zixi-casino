@@ -94,7 +94,7 @@ export default function MarketView() {
       <select value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)}
         className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none">
         {stockSymbols.map((q) => (
-          <option key={q.symbol} value={q.symbol}>{q.symbol} — {q.name}</option>
+          <option key={q.symbol} value={q.symbol}>{q.symbol} ??{q.name}</option>
         ))}
       </select>
       <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
@@ -115,10 +115,10 @@ export default function MarketView() {
       <div className="border-t border-[#494847]/10 pt-4">
         <div className="flex items-center gap-2 mb-3">
           <Landmark size={16} className="text-[#fcc025]" />
-          <span className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">銀行</span>
+          <span className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">?��?/span>
         </div>
         <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
-          placeholder="金額"
+          placeholder="?��?"
           className="w-full mb-2 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
         <div className="grid grid-cols-2 gap-2">
           <button type="button" disabled={execute.isPending}
@@ -126,14 +126,14 @@ export default function MarketView() {
             className="rounded-xl bg-emerald-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-emerald-500">存入</button>
           <button type="button" disabled={execute.isPending}
             onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
-            className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">提款</button>
+            className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">?�款</button>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
@@ -143,7 +143,7 @@ export default function MarketView() {
           <div className="flex items-center gap-4">
             {/* Mobile: trade drawer toggle */}
             <button onClick={() => setMobileDrawerOpen(o => !o)} className="lg:hidden text-xs font-black uppercase tracking-[0.18em] text-[#fcc025]">
-              {mobileDrawerOpen ? '關閉下單' : '下單'}
+              {mobileDrawerOpen ? '?��?下單' : '下單'}
             </button>
             <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('market.public_feed')}
@@ -158,7 +158,7 @@ export default function MarketView() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileDrawerOpen(false)} />
           <div className="absolute left-0 top-16 bottom-24 w-80 max-w-[85vw] bg-[#1a1919] border-r border-[#494847]/10 p-5 overflow-y-auto shadow-2xl">
             <div className="flex justify-end mb-3">
-              <button onClick={() => setMobileDrawerOpen(false)} className="text-xs text-[#adaaaa]">✕ 關閉</button>
+              <button onClick={() => setMobileDrawerOpen(false)} className="text-xs text-[#adaaaa]">???��?</button>
             </div>
             {executionPanel}
           </div>
@@ -166,7 +166,7 @@ export default function MarketView() {
       )}
 
       <main className="mx-auto flex max-w-7xl gap-6 px-6 pt-24">
-        {/* Desktop left sidebar — collapsible */}
+        {/* Desktop left sidebar ??collapsible */}
         <aside className={`hidden lg:flex flex-col shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
           <div className={`sticky top-24 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl ${sidebarOpen ? '' : 'hidden'}`}>
             <div className="flex justify-end mb-1">
@@ -192,7 +192,7 @@ export default function MarketView() {
             <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border shadow-lg shadow-black/50 text-sm font-bold animate-[fadeIn_0.3s_ease-out] whitespace-nowrap ${
               actionNotice.type === 'success' ? 'border-emerald-400/40 text-emerald-300' : 'border-red-400/40 text-red-400'
             }`}>
-              {actionNotice.type === 'success' ? '✅ ' : '❌ '}{actionNotice.message}
+              {actionNotice.type === 'success' ? '??' : '??'}{actionNotice.message}
             </div>
           )}
 

@@ -9,9 +9,9 @@ import VIPTab from './tabs/VIPTab';
 type TabId = 'items' | 'odds' | 'vip';
 
 const TABS = [
-  { id: 'items' as TabId, label: '物品圖鑑', icon: Package },
-  { id: 'odds' as TabId, label: '遊戲機率', icon: Calculator },
-  { id: 'vip' as TabId, label: 'VIP 說明', icon: Crown },
+  { id: 'items' as TabId, label: '?��??��?', icon: Package },
+  { id: 'odds' as TabId, label: '?�戲機�?', icon: Calculator },
+  { id: 'vip' as TabId, label: 'VIP 說�?', icon: Crown },
 ];
 
 export default function InfoView() {
@@ -28,7 +28,7 @@ export default function InfoView() {
   }, [location.search]);
 
   const activeLabel = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.label ?? '說明中心',
+    () => TABS.find((tab) => tab.id === activeTab)?.label ?? '說�?中�?',
     [activeTab],
   );
 
@@ -38,7 +38,7 @@ export default function InfoView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
@@ -47,7 +47,7 @@ export default function InfoView() {
             </Link>
             <Sparkles className="text-[#fcc025]" />
             <div>
-              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">說明中心</h1>
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">說�?中�?</h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">{activeLabel}</p>
             </div>
           </div>

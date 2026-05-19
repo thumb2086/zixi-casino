@@ -131,7 +131,7 @@ export default function LobbyView() {
   const stockValue = marketAccount?.stockValue?.toFixed(2) || '0';
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-24 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-24 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between gap-4 py-4">
           <div className="min-w-0 flex items-center gap-4">
@@ -184,7 +184,7 @@ export default function LobbyView() {
                 </span>
                 <span className="flex items-center gap-1">
                   <TrendingUp size={12} className="text-emerald-400" />
-                  è‚¡ç¥¨: {formatNumber(stockValue)}
+                  ?¡ç¥¨: {formatNumber(stockValue)}
                 </span>
               </div>
             </div>
@@ -203,8 +203,8 @@ export default function LobbyView() {
           <GlassCard
             to="/app/events"
             icon={CalendarClock}
-            title="æ´»å‹•"
-            subtitle="é€²è¡Œä¸­æ´»å‹•èˆ‡çå‹µ"
+            title="æ´»å?"
+            subtitle="?²è?ä¸­æ´»?•è??å‹µ"
           >
           </GlassCard>
 
@@ -263,11 +263,11 @@ export default function LobbyView() {
           >
             <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
               <div className="flex gap-2">
-                <span className="text-[#fcc025]">ğŸ›’</span>
+                <span className="text-[#fcc025]">??</span>
                 {t('lobby.buy_chest_keys')}
               </div>
               <div className="flex gap-2">
-                <span className="text-[#fcc025]">ğŸ“¦</span>
+                <span className="text-[#fcc025]">?“¦</span>
                 {t('lobby.limited_bundles')}
               </div>
             </div>
@@ -324,11 +324,11 @@ export default function LobbyView() {
           <GlassCard
             to="/app/collection"
             icon={Archive}
-            title="æ”¶è—æ«ƒ"
-            subtitle="é ­åƒã€ç¨±è™Ÿèˆ‡çè—å“"
+            title="?¶è?æ«?
+            subtitle="?­å??ç¨±?Ÿè??è???
           >
             <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
-              æª¢è¦–å·²ç²å¾—çš„é ­åƒã€ç¨±è™Ÿèˆ‡æ”¶è—å“
+              æª¢è?å·²ç²å¾—ç??­å??ç¨±?Ÿè??¶è???
             </p>
           </GlassCard>
           {isAdmin && (

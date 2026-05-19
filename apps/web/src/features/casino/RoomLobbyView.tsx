@@ -27,18 +27,18 @@ export default function RoomLobbyView() {
   const { session } = useAuth();
 
   const games: GameCard[] = [
-    { id: 'coinflip', name: 'Coinflip', nameZh: 'çŒœç¡¬å¹£', icon: 'ğŸª™' },
-    { id: 'slots', name: 'Slots', nameZh: 'è€è™æ©Ÿ', icon: 'ğŸ°' },
-    { id: 'roulette', name: 'Roulette', nameZh: 'è¼ªç›¤', icon: 'ğŸ¡' },
-    { id: 'blackjack', name: 'Blackjack', nameZh: '21 é»', icon: 'ğŸƒ' },
-    { id: 'horse', name: 'Horse Racing', nameZh: 'è³½é¦¬', icon: 'ğŸ‡' },
-    { id: 'dragon', name: 'Shoot Dragon Gate', nameZh: 'å°„é¾é–€', icon: ['é¾', 'é–€'] },
-    { id: 'sicbo', name: 'Sicbo', nameZh: 'éª°å¯¶', icon: 'ğŸ²' },
-    { id: 'bingo', name: 'Bingo', nameZh: 'è³“æœ', icon: 'ğŸ±' },
-    { id: 'crash', name: 'Crash', nameZh: 'æš´è¡', icon: 'ğŸ“ˆ' },
-    { id: 'duel', name: 'Duel', nameZh: 'å°æ±º', icon: 'âš”ï¸' },
-    { id: 'poker', name: 'Poker', nameZh: 'æ’²å…‹', icon: 'ğŸƒ', vipOnly: true },
-    { id: 'bluffdice', name: 'Bluff Dice', nameZh: 'å¹ç‰›', icon: 'ğŸ²', vipOnly: true },
+    { id: 'coinflip', name: 'Coinflip', nameZh: '?œç¡¬å¹?, icon: '??' },
+    { id: 'slots', name: 'Slots', nameZh: '?è?æ©?, icon: '?°' },
+    { id: 'roulette', name: 'Roulette', nameZh: 'è¼ªç›¤', icon: '?¡' },
+    { id: 'blackjack', name: 'Blackjack', nameZh: '21 é»?, icon: '??' },
+    { id: 'horse', name: 'Horse Racing', nameZh: 'è³½é¦¬', icon: '??' },
+    { id: 'dragon', name: 'Shoot Dragon Gate', nameZh: 'å°„é??€', icon: ['é¾?, '?€'] },
+    { id: 'sicbo', name: 'Sicbo', nameZh: 'éª°å¯¶', icon: '?²' },
+    { id: 'bingo', name: 'Bingo', nameZh: 'è³“æ?', icon: '?±' },
+    { id: 'crash', name: 'Crash', nameZh: '?´è?', icon: '??' },
+    { id: 'duel', name: 'Duel', nameZh: 'å°æ±º', icon: '?”ï?' },
+    { id: 'poker', name: 'Poker', nameZh: '?²å?', icon: '??', vipOnly: true },
+    { id: 'bluffdice', name: 'Bluff Dice', nameZh: '?¹ç?', icon: '?²', vipOnly: true },
   ];
 
   const roomsQuery = useQuery({
@@ -106,7 +106,7 @@ export default function RoomLobbyView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-4">

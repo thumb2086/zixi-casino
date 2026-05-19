@@ -13,7 +13,7 @@ html[data-font-size="large"]  { --base-font-size: 20px; }
 * { box-sizing: border-box; }
 body {
   margin: 0;
-  font-family: 'Manrope', sans-serif;
+  font-family: 'Manrope', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
   background-color: #0e0e0e;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
@@ -50,4 +50,8 @@ body {
 
 .glass-card {
   @apply backdrop-blur-md;
+}
+
+.font-manrope-emoji {
+  font-family: 'Manrope', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
 }

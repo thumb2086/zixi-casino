@@ -60,7 +60,7 @@ export default function WalletView() {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      /* ignore — clipboard API may be blocked in some environments */
+      /* ignore ??clipboard API may be blocked in some environments */
     }
   };
 
@@ -91,7 +91,7 @@ export default function WalletView() {
   }, [canClaimAirdrop, nextAirdropAt, t]);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-40 font-['Manrope'] text-white">
+    <div className="min-h-screen bg-[#0e0e0e] pb-40 font-manrope-emoji text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">

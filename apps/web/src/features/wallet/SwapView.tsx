@@ -58,21 +58,21 @@ function SwapPanel({
   return (
     <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-black uppercase tracking-widest text-white">å…Œæ›</h2>
+        <h2 className="text-sm font-black uppercase tracking-widest text-white">?Œæ?</h2>
         <p className="text-xs font-black uppercase tracking-widest text-[#fcc025]">
-          å›ºå®šåŒ¯ç‡ï¼š1 YJC = {ZXC_PER_YJC.toLocaleString()} ZXC
+          ?ºå??¯ç?ï¼? YJC = {ZXC_PER_YJC.toLocaleString()} ZXC
         </p>
       </div>
 
       {!isAuthorized && (
-        <p className="text-sm text-[#adaaaa] mb-4">è«‹å…ˆç™»å…¥å¾Œå†å…Œæ›ã€‚</p>
+        <p className="text-sm text-[#adaaaa] mb-4">è«‹å??»å…¥å¾Œå??Œæ???/p>
       )}
 
       <form onSubmit={handleSwap} className="space-y-4">
         <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">æ”¯ä»˜</span>
-            <span className="text-xs text-[#adaaaa]">é¤˜é¡ {formatBalance(fromBalance)} {fromSymbol}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">?¯ä?</span>
+            <span className="text-xs text-[#adaaaa]">é¤˜é? {formatBalance(fromBalance)} {fromSymbol}</span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -92,7 +92,7 @@ function SwapPanel({
             type="button"
             onClick={toggle}
             className="w-10 h-10 rounded-full bg-[#fcc025] text-[#0e0e0e] flex items-center justify-center"
-            aria-label="åˆ‡æ›æ–¹å‘"
+            aria-label="?‡æ??¹å?"
           >
             <ArrowDownUp size={16} />
           </button>
@@ -100,8 +100,8 @@ function SwapPanel({
 
         <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">æ”¶åˆ°</span>
-            <span className="text-xs text-[#adaaaa]">é¤˜é¡ {formatBalance(toBalance)} {toSymbol}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">?¶åˆ°</span>
+            <span className="text-xs text-[#adaaaa]">é¤˜é? {formatBalance(toBalance)} {toSymbol}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="flex-1 text-2xl font-black italic text-[#fcc025]">
@@ -117,7 +117,7 @@ function SwapPanel({
           className="w-full bg-[#fcc025] text-[#0e0e0e] font-black uppercase tracking-widest text-xs py-3 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
-          ç¢ºèªå…Œæ›
+          ç¢ºè??Œæ?
         </button>
 
         {result && (
@@ -128,10 +128,10 @@ function SwapPanel({
       </form>
 
       <div className="mt-4 text-xs text-[#adaaaa] space-y-1">
-        <p>â€¢ åŒ¯ç‡å›ºå®šç‚º 1 YJC = {ZXC_PER_YJC.toLocaleString()} ZXCï¼ˆ1 å„„å­ç†™å¹£ï¼‰</p>
-        <p>â€¢ æ‰‹çºŒè²»ï¼š0</p>
-        <p>â€¢ é›™å‘å…Œæ›ï¼Œå…Œæ›ä»¥æ•´æ•¸ç‚ºå–®ä½ï¼Œå°æ•¸éƒ¨åˆ†è‡ªå‹•æ¨å»</p>
-        <p>â€¢ å…Œæ›ç›´æ¥ä¸Šéˆï¼Œæœ€çµ‚é‡‘é¡ä»¥éˆä¸Šäº¤æ˜“ç‚ºæº–</p>
+        <p>???¯ç??ºå???1 YJC = {ZXC_PER_YJC.toLocaleString()} ZXCï¼? ?„å??™å¹£ï¼?/p>
+        <p>???‹ç?è²»ï?0</p>
+        <p>???™å??Œæ?ï¼Œå??›ä»¥?´æ•¸?ºå–®ä½ï?å°æ•¸?¨å??ªå??¨å»</p>
+        <p>???Œæ??´æ¥ä¸Šé?ï¼Œæ?çµ‚é?é¡ä»¥?ˆä?äº¤æ??ºæ?</p>
       </div>
     </section>
   );
@@ -165,19 +165,19 @@ export default function SwapView() {
   async function handleSwap(e: FormEvent) {
     e.preventDefault();
     if (!sessionId) {
-      setResult('è«‹å…ˆç™»å…¥');
+      setResult('è«‹å??»å…¥');
       return;
     }
     if (inputNumeric <= 0) {
-      setResult('è«‹è¼¸å…¥é‡‘é¡');
+      setResult('è«‹è¼¸?¥é?é¡?);
       return;
     }
     if (direction === 'zxc_to_yjc' && inputNumeric < ZXC_PER_YJC) {
-      setResult(`æœ€å°‘ ${ZXC_PER_YJC.toLocaleString()} ZXC æ‰èƒ½å…Œæ› 1 YJC`);
+      setResult(`?€å°?${ZXC_PER_YJC.toLocaleString()} ZXC ?èƒ½?Œæ? 1 YJC`);
       return;
     }
     if (direction === 'yjc_to_zxc' && inputNumeric < 1) {
-      setResult('æœ€å°‘ 1 YJC æ‰èƒ½å…Œæ›');
+      setResult('?€å°?1 YJC ?èƒ½?Œæ?');
       return;
     }
 
@@ -186,7 +186,7 @@ export default function SwapView() {
     try {
       if (direction === 'zxc_to_yjc') {
         const data = await convert.mutateAsync({ zxcAmount: String(Math.floor(inputNumeric)) });
-        setResult(`å…Œæ›æˆåŠŸï¼š${data.requiredZxc} ZXC â†’ ${data.yjcAmount} YJC`);
+        setResult(`?Œæ??å?ï¼?{data.requiredZxc} ZXC ??${data.yjcAmount} YJC`);
         setInputAmount('');
       } else {
         const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', {
@@ -195,26 +195,26 @@ export default function SwapView() {
         });
         const data = res.data?.data;
         if (data?.success) {
-          setResult(`å…Œæ›æˆåŠŸï¼š${data.yjcAmount} YJC â†’ ${Number(data.zxcAmount).toLocaleString()} ZXC`);
+          setResult(`?Œæ??å?ï¼?{data.yjcAmount} YJC ??${Number(data.zxcAmount).toLocaleString()} ZXC`);
           setInputAmount('');
         } else {
-          setResult(data?.error?.message || 'å…Œæ›å¤±æ•—');
+          setResult(data?.error?.message || '?Œæ?å¤±æ?');
         }
       }
     } catch (err: any) {
-      setResult(err?.response?.data?.data?.error?.message || err?.message || 'å…Œæ›å¤±æ•—');
+      setResult(err?.response?.data?.data?.error?.message || err?.message || '?Œæ?å¤±æ?');
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-['Manrope'] pb-32">
+    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-4">
             <ArrowDownUp className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">å…Œæ›</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">?Œæ?</h1>
           </div>
         </div>
       </header>
@@ -223,15 +223,15 @@ export default function SwapView() {
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 mt-16">
           <div className="flex items-center gap-2 mb-4">
             <Coins size={18} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">ç›®å‰é¤˜é¡</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">?®å?é¤˜é?</h2>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC å­ç†™å¹£</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC å­ç?å¹?/p>
               <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(zxcBalance)}</p>
             </div>
             <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">YJC ä½‘æˆ©å¹£</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">YJC ä½‘æˆ©å¹?/p>
               <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(yjcBalance)}</p>
             </div>
           </div>

@@ -34,7 +34,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-6 font-['Manrope'] text-white selection:bg-[#fcc025]/30">
+    <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-6 font-manrope-emoji text-white selection:bg-[#fcc025]/30">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
