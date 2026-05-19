@@ -82,6 +82,9 @@ export async function processIntents() {
         if (intent.type === "admin_credit" || intent.type === "deposit") {
           fromAddress = explicitFromAddress || treasuryAddress;
           toAddress = userAddress;
+        } else if (intent.type === "admin_debit") {
+          fromAddress = userAddress;
+          toAddress = treasuryAddress;
         } else if (intent.type === "payout") {
           fromAddress = explicitFromAddress || treasuryAddress;
           toAddress = userAddress;
