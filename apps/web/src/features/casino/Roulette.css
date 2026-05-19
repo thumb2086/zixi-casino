@@ -88,15 +88,18 @@
 .wheel-inner.win-green { color: #00ff88; box-shadow: 0 0 22px rgba(0, 255, 136, 0.5); }
 
 .bg-gold { background-color: #d4af37; }
+.bg-gold:hover { opacity: 0.9; }
+
+.roulette-container .text-red-400 { color: #f87171; }
+.roulette-container .text-emerald-400 { color: #34d399; }
+
+.outside-bet-btn {
+  min-height: 40px;
+  font-size: 0.7rem;
+}
 
 
 @media (max-width: 640px) {
   .roulette-stage { padding: 12px; }
   .wheel-container { width: 220px; height: 220px; }
-  .bet-controls {
-    padding: 14px !important;
-  }
-  .bet-controls .quick-bet-row {
-    margin-top: 0;
-  }
 }

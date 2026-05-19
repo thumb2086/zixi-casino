@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { api } from './store/api';
 import CasinoView from './features/casino/CasinoView';
-import { RouletteView } from './features/casino/RouletteView';
 import WalletView from './features/wallet/WalletView';
 import SwapView from './features/wallet/SwapView';
 import LoginView from './features/auth/LoginView';
@@ -128,7 +127,6 @@ function AppContent() {
         ) : (
           <Route path="/app" element={<Layout />}>
             <Route index element={<LobbyView />} />
-            <Route path="casino/roulette" element={<RouletteView />} />
             <Route path="casino/:game" element={<CasinoView />} />
             <Route path="casino/lobby" element={<RoomLobbyView />} />
             <Route path="wallet" element={<WalletView />} />
