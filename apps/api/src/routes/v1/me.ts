@@ -87,9 +87,10 @@ export async function meRoutes(fastify: FastifyInstance) {
          avatar: avatarIcon || "🪙",
          avatarId: activeAvatarId,
          titleId: activeTitleId,
-         mode: ctx.session.mode,
-         createdAt: ctx.user.createdAt
-       }
+          isAdmin: Boolean(ctx.user.isAdmin),
+          mode: ctx.session.mode,
+          createdAt: ctx.user.createdAt
+        }
     }, request.id);
   });
 
