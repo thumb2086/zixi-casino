@@ -575,6 +575,17 @@ export async function adminRoutes(fastify: FastifyInstance) {
       approvedItemId: itemId,
     });
 
+    // Auto-grant to submitter
+    try {
+      await grantBundleToUser(sub.userId, {
+        items: sub.type === "avatar" ? [] : [{ id: itemId, qty: 1 }],
+        avatars: sub.type === "avatar" ? [itemId] : [],
+        titles: sub.type === "title" ? [itemId] : [],
+      }, sub.address);
+    } catch (grantErr: any) {
+      request.log.warn({ grantErr: grantErr.message }, "Auto-grant after approval failed");
+    }
+
     await opsRepo.logEvent({
       channel: "admin",
       severity: "info",
