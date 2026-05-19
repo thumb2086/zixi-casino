@@ -49,9 +49,9 @@ export async function companyRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { companyType, companyName } = request.body;
     const [existing] = await q(`SELECT id FROM company_accounts WHERE user_id = $1 LIMIT 1`, [ctx.user.id]);
-    if (existing) return createApiEnvelope({ error: { code: "ALREADY_EXISTS", message: "你已經�?一?�公?��?" } }, request.id);
+    if (existing) return createApiEnvelope({ error: { code: "ALREADY_EXISTS" } }, request.id);
     const balance = parseFloat(await gameSettlement.getBalance(ctx.session.address, "zhixi"));
-    if (balance < STARTUP_FEE) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `?�辦?��?${STARTUP_FEE} ZXC` } }, request.id);
+    if (balance < STARTUP_FEE) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
     await gameSettlement.setBalance(ctx.session.address, "zhixi", (balance - STARTUP_FEE).toString());
     const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", STARTUP_FEE.toString());
     intent.address = ctx.session.address; intent.meta = { source: "company_create" };
@@ -123,7 +123,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
     const cost = upgradeLevelCost(data.level);
-    if (data.cash < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS", message: `?�司資�?不足，�?�?${cost} ZXC` } }, request.id);
+    if (data.cash < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
     data.cash -= cost; data.level++;
     await q(`UPDATE company_accounts SET level = $1, data = $2, updated_at = NOW() WHERE id = $3`, [data.level, JSON.stringify(data), row.id]);
     return createApiEnvelope({ success: true, level: data.level }, request.id);
@@ -137,7 +137,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
     const cost = researchCost();
     const balance = parseFloat(await gameSettlement.getBalance(ctx.session.address, "zhixi"));
-    if (balance < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `?��?${cost} ZXC` } }, request.id);
+    if (balance < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
     await gameSettlement.setBalance(ctx.session.address, "zhixi", (balance - cost).toString());
     const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", cost.toString());
     intent.address = ctx.session.address; intent.meta = { source: "company_research" };
