@@ -14,7 +14,7 @@ export const useMarket = () => {
       const res = await api.get(`${API_BASE}/snapshot`);
       return res.data.data.snapshot;
     },
-    refetchInterval: 30000
+    refetchInterval: 5000
   });
 
   const getMyAccount = useQuery({
@@ -23,7 +23,7 @@ export const useMarket = () => {
       const res = await api.get(`${API_BASE}/me`, { params: { sessionId } });
       return res.data.data.account;
     },
-    refetchInterval: 30000
+    refetchInterval: 5000
   });
 
   const actionMutation = useMutation({
@@ -36,6 +36,12 @@ export const useMarket = () => {
       queryClient.invalidateQueries({ queryKey: ['market-me'] });
       queryClient.invalidateQueries({ queryKey: ['user-me'] });
       queryClient.invalidateQueries({ queryKey: ['market-snapshot'] });
+    },
+    onSettled: () => {
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ['market-me'] });
+        queryClient.refetchQueries({ queryKey: ['market-snapshot'] });
+      }, 500);
     }
   });
 
