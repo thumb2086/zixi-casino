@@ -179,7 +179,7 @@ export default function LeaderboardView() {
                 </span>
               </div>
               <div className="text-3xl font-black italic tracking-tighter text-white shadow-[0_0_30px_rgba(252,192,37,0.1)]">
-                {showTimeRemaining ? timeRemaining : '??}
+                {showTimeRemaining ? timeRemaining : '∞'}
               </div>
             </section>
 

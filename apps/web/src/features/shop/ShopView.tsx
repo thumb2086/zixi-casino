@@ -55,7 +55,7 @@ export default function ShopView() {
   const [ownedAvatars, setOwnedAvatars] = useState<string[]>([]);
   const [ownedTitles, setOwnedTitles] = useState<string[]>([]);
 
-  // ?�?� Pawn state ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+  // ── Pawn state ───────────────────────────────────────────────────────────
   const [invItems, setInvItems] = useState<any[]>([]);
   const [pawnLoading, setPawnLoading] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
@@ -64,7 +64,7 @@ export default function ShopView() {
   const [stockPrices, setStockPrices] = useState<Record<string, any>>({});
   const [sellingStock, setSellingStock] = useState<string | null>(null);
 
-  // ?�?� YJC exchange state ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+  // ── YJC exchange state ────────────────────────────────────────────────────
   const [yjcBalance, setYjcBalance] = useState('0');
   const [convertZxc, setConvertZxc] = useState('');
   const [convertYjc, setConvertYjc] = useState('');
@@ -134,23 +134,23 @@ export default function ShopView() {
 
   async function handleBuyChest(chestType: string, quantity: number = 1) {
     if (!sessionId) return;
-    const label = chestType === 'common' ? '?��? : chestType === 'rare' ? '稀?? : chestType === 'epic' ? '?�詩' : '?��?';
+    const label = chestType === 'common' ? '普通' : chestType === 'rare' ? '稀有' : chestType === 'epic' ? '史詩' : '傳奇';
     setBuyingChest(chestType);
     setMsg(null);
     try {
       const res = await api.post('/api/v1/chests/buy', { sessionId, chestType, quantity });
       if (res.data?.success) {
         const d = res.data.data;
-        const discountText = d.discount > 0 ? ` (??${(d.discount * 100).toFixed(0)}%)` : '';
-        setMsg(`??${quantity} x ${label}寶箱 已放?��??��?${discountText}`);
+        const discountText = d.discount > 0 ? ` (省 ${(d.discount * 100).toFixed(0)}%)` : '';
+        setMsg(`✅ ${quantity} x ${label}寶箱 已放入背包！${discountText}`);
         if (d.balanceAfter) setBalance(d.balanceAfter);
         setTimeout(() => setMsg(null), 3000);
       } else {
-        setMsg(`??${res.data?.error || '購買失�?'}`);
+        setMsg(`❌ ${res.data?.error || '購買失敗'}`);
         setTimeout(() => setMsg(null), 3000);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.data?.error || err?.message || '購買失�?'}`);
+      setMsg(`❌ ${err?.response?.data?.data?.error || err?.message || '購買失敗'}`);
       setTimeout(() => setMsg(null), 3000);
     } finally {
       setBuyingChest(null);
@@ -161,7 +161,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const amount = parseInt(convertZxc, 10);
     if (!amount || amount < CONVERSION_RATE) {
-      setMsg(`???�低�???${CONVERSION_RATE.toLocaleString()} ZXC`);
+      setMsg(`❌ 最低兌換 ${CONVERSION_RATE.toLocaleString()} ZXC`);
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -170,14 +170,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(amount) });
       if (res.data?.success) {
-        setMsg(`???��??��? ${res.data.data?.yjcAmount || (amount / CONVERSION_RATE)} YJC`);
+        setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || (amount / CONVERSION_RATE)} YJC`);
         setConvertZxc('');
         fetchItems();
       } else {
-        setMsg(`??${res.data?.error?.message || res.data?.error || '?��?失�?'}`);
+        setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?��?失�?'}`);
+      setMsg(`❌ ${err?.response?.data?.error?.message || err?.message || '兌換失敗'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -188,7 +188,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const yjcNum = parseFloat(convertYjc);
     if (!yjcNum || yjcNum <= 0) {
-      setMsg('??請輸?�大??0 ??YJC ?��?');
+      setMsg('❌ 請輸入大於 0 的 YJC 數量');
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -197,14 +197,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', { sessionId, yjcAmount: String(yjcNum) });
       if (res.data?.success) {
-        setMsg(`???��??��? ${res.data.data?.zxcAmount || (yjcNum * CONVERSION_RATE).toLocaleString()} ZXC`);
+        setMsg(`✅ 成功兌換 ${res.data.data?.zxcAmount || (yjcNum * CONVERSION_RATE).toLocaleString()} ZXC`);
         setConvertYjc('');
         fetchItems();
       } else {
-        setMsg(`??${res.data?.error?.message || res.data?.error || '?��?失�?'}`);
+        setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?��?失�?'}`);
+      setMsg(`❌ ${err?.response?.data?.error?.message || err?.message || '兌換失敗'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -218,15 +218,15 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/inventory/buy', { sessionId, itemId });
       if (res.data?.success) {
-        setMsg(`${res.data.data?.name || itemId} 購買?��?！`);
+        setMsg(`${res.data.data?.name || itemId} 購買成功！`);
         const newBal = res.data.data?.balanceAfter;
         if (newBal) setBalance(newBal);
         fetchItems();
       } else {
-        setMsg(res.data?.error || '購買失�?');
+        setMsg(res.data?.error || '購買失敗');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || '購買失�?');
+      setMsg(err?.response?.data?.data?.error || err?.message || '購買失敗');
     } finally {
       setBuyingId(null);
     }
@@ -239,14 +239,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/sell', { sessionId, itemId, quantity });
       if (res.data?.success) {
-        setMsg(`?�當?��?！獲�?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`典當成功！獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(res.data?.error || '?�當失�?');
+        setMsg(res.data?.error || '典當失敗');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || '?�當失�?');
+      setMsg(err?.response?.data?.data?.error || err?.message || '典當失敗');
     } finally {
       setSellingId(null);
     }
@@ -259,14 +259,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/stock-sell', { sessionId, symbol, quantity: qty });
       if (res.data?.success) {
-        setMsg(`???��??�售 ${qty} ??${symbol}，獲�?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`✅ 成功出售 ${qty} 股 ${symbol}，獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(`??${res.data?.error || '?�售失�?'}`);
+        setMsg(`❌ ${res.data?.error || '出售失敗'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.data?.error || err?.message || '?�售失�?'}`);
+      setMsg(`❌ ${err?.response?.data?.data?.error || err?.message || '出售失敗'}`);
     } finally {
       setSellingStock(null);
       setTimeout(() => setMsg(null), 4000);
@@ -298,7 +298,7 @@ export default function ShopView() {
               <ChevronLeft size={24} />
             </Link>
             <ShoppingBag className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">?��?</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">商店</h1>
           </div>
         </div>
         <div className="flex max-w-2xl mx-auto px-6 gap-4">
@@ -306,13 +306,13 @@ export default function ShopView() {
             onClick={() => setTab('shop')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
           >
-            ?��?
+            商城
           </button>
           <button
             onClick={() => setTab('pawn')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
           >
-            ?��?
+            當舖
           </button>
         </div>
       </header>
@@ -321,28 +321,28 @@ export default function ShopView() {
         <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#fcc025]" />
-            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘�?</span>
+            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
           </div>
             <span className="text-lg font-black italic text-[#fcc025]">{formatBalance(balance, numberMode)}</span>
         </section>
 
         <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-lg">??</span>
-            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">佑戩�?YJC</span>
+            <span className="text-lg">💎</span>
+            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">佑戩幣 YJC</span>
             <span className="text-sm font-black italic text-[#4fc3f7] ml-auto">{formatBalance(yjcBalance, numberMode)}</span>
           </div>
           <div className="text-sm text-[#adaaaa] mb-2">1 YJC = {CONVERSION_RATE.toLocaleString()} ZXC</div>
           <div className="flex items-center gap-2">
-            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`?��?${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`最少 ${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertYjc} disabled={converting || !convertZxc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
-              {converting ? <Loader2 size={12} className="animate-spin" /> : '?��?'}
+              {converting ? <Loader2 size={12} className="animate-spin" /> : '兌換'}
             </button>
           </div>
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#494847]/20">
-            <input type="number" min="0.0001" step="0.0001" placeholder="YJC ?��?" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <input type="number" min="0.0001" step="0.0001" placeholder="YJC 數量" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertZxcFromYjc} disabled={converting || !convertYjc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#fcc025] text-black px-4 py-2 rounded-lg disabled:opacity-50">
-              {converting ? <Loader2 size={12} className="animate-spin" /> : '?��??��?'}
+              {converting ? <Loader2 size={12} className="animate-spin" /> : '反向兌換'}
             </button>
           </div>
         </section>
@@ -365,7 +365,7 @@ export default function ShopView() {
                   <Gift className="w-8 h-8 mx-auto mb-2 text-[#fcc025]" />
                   <p className="text-sm font-bold text-white text-center truncate">{chest.name}</p>
                   <div className="flex items-center justify-center gap-2 mt-2">
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.max(1, (p[chest.id] || 1) - 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">??/button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.max(1, (p[chest.id] || 1) - 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">−</button>
                     <input
                       type="number"
                       min={1}
@@ -388,7 +388,7 @@ export default function ShopView() {
                     disabled={boughtHere}
                     className="mt-2 w-full bg-[#fcc025] text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
                   >
-                    {boughtHere ? '購買�?..' : '購買'}
+                    {boughtHere ? '購買中...' : '購買'}
                   </button>
                 </div>
               );
@@ -398,7 +398,7 @@ export default function ShopView() {
 
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">?��??��?</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">商城商品</h2>
             <button onClick={fetchItems} className="text-[#adaaaa] hover:text-white transition-colors">
               <RefreshCw size={14} />
             </button>
@@ -411,7 +411,7 @@ export default function ShopView() {
           )}
 
           {!loading && visibleItems.length === 0 && (
-            <p className="text-sm text-[#adaaaa] text-center py-8">?��??�無?��?</p>
+            <p className="text-sm text-[#adaaaa] text-center py-8">目前暫無商品</p>
           )}
 
           <div className="space-y-3">
@@ -424,7 +424,7 @@ export default function ShopView() {
 
               return (
                 <div key={item.itemId} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-                  <div className="text-2xl shrink-0">{item.icon || '?��'}</div>
+                  <div className="text-2xl shrink-0">{item.icon || '📦'}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{item.name}</p>
                     <p className="text-sm text-[#adaaaa] truncate">{item.description || ''}</p>
@@ -433,7 +433,7 @@ export default function ShopView() {
                         {item.rarity}
                       </span>
                       {bundle && (
-                        <span className="text-sm font-bold text-emerald-400">?�� 組�???/span>
+                        <span className="text-sm font-bold text-emerald-400">📦 組合包</span>
                       )}
                     </div>
                     {bundle && (
@@ -443,9 +443,9 @@ export default function ShopView() {
                             const subValue = sub.value || meta?.subItemValues?.[sub.id];
                             return (
                               <div key={i} className="flex items-center gap-1.5 text-sm">
-                                <span className="shrink-0">{info?.icon || '??}</span>
+                                <span className="shrink-0">{info?.icon || '•'}</span>
                                 <span className="text-white font-medium">{info?.name || sub.id}</span>
-                                {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">?{sub.qty}</span>}
+                                {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
                                 {subValue ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{subValue.toLocaleString()} ZXC</span>
                                   : hasDiscount && totalValue > 0 && bundle.length > 1 && (
                                     <span className="text-sm text-[#adaaaa] ml-auto">~{Math.round(totalValue / bundle.length).toLocaleString()} ZXC</span>
@@ -490,35 +490,35 @@ export default function ShopView() {
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-4">
             <Trash2 size={16} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">?��?</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">當舖</h2>
           </div>
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setPawnTab('items')}
               className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'items' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
             >
-              ?�具
+              道具
             </button>
             <button
               onClick={() => setPawnTab('stocks')}
               className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'stocks' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
             >
-              ?�票
+              股票
             </button>
           </div>
 
           {pawnTab === 'items' && (
           <>
-          <p className="text-sm text-[#adaaaa] mb-4">將�??�要�??�具?�當?��? ZXC</p>
+          <p className="text-sm text-[#adaaaa] mb-4">將不需要的道具典當換取 ZXC</p>
           {invItems.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">?�無?�典?��??�具</p>
+            <p className="text-sm text-[#adaaaa] text-center py-8">暫無可典當的道具</p>
           ) : (
             <div className="space-y-3">
               {invItems.map((item: any) => {
                 const price = PAWN_PRICES[item.rarity] || 5;
                 return (
                   <div key={item.id} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-                    <div className="text-2xl shrink-0">{item.icon || '?��'}</div>
+                    <div className="text-2xl shrink-0">{item.icon || '📦'}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white truncate">{item.name}</p>
                       <p className="text-sm text-[#adaaaa] truncate">{item.description || ''}</p>
@@ -526,7 +526,7 @@ export default function ShopView() {
                         <span className="text-sm font-bold uppercase" style={{ color: RARITY_COLORS[item.rarity] || '#b0b0b0' }}>
                           {item.rarity}
                         </span>
-                        <span className="text-sm text-[#adaaaa]">?{item.quantity}</span>
+                        <span className="text-sm text-[#adaaaa]">×{item.quantity}</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -536,7 +536,7 @@ export default function ShopView() {
                         disabled={sellingId === item.id || !sessionId}
                         className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
                       >
-                        {sellingId === item.id ? <Loader2 size={10} className="animate-spin" /> : '?�當'}
+                        {sellingId === item.id ? <Loader2 size={10} className="animate-spin" /> : '典當'}
                       </button>
                     </div>
                   </div>
@@ -549,9 +549,9 @@ export default function ShopView() {
 
           {pawnTab === 'stocks' && (
           <>
-          <p className="text-sm text-[#adaaaa] mb-4">以�???70% ?�售?�票，�??��???ZXC</p>
+          <p className="text-sm text-[#adaaaa] mb-4">以市價 70% 出售股票，立即變現 ZXC</p>
           {stockHoldings.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">?�無?�股</p>
+            <p className="text-sm text-[#adaaaa] text-center py-8">暫無持股</p>
           ) : (
             <div className="space-y-3">
               {stockHoldings.map((stock: any) => {
@@ -560,13 +560,13 @@ export default function ShopView() {
                 const totalPayout = payoutPerUnit * stock.qty;
                 return (
                   <div key={stock.symbol} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-                    <div className="text-2xl shrink-0">??</div>
+                    <div className="text-2xl shrink-0">📈</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white truncate">{stock.symbol}</p>
-                      <p className="text-sm text-[#adaaaa]">{stock.qty} ??· ?�價 {Number(stock.avgPrice || 0).toLocaleString()} ZXC</p>
+                      <p className="text-sm text-[#adaaaa]">{stock.qty} 股 · 均價 {Number(stock.avgPrice || 0).toLocaleString()} ZXC</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-[#adaaaa]">市�?{Math.round(marketPrice * stock.qty).toLocaleString()} ZXC</span>
-                        <span className="text-sm text-emerald-400">??{totalPayout.toLocaleString()} ZXC</span>
+                        <span className="text-sm text-[#adaaaa]">市值 {Math.round(marketPrice * stock.qty).toLocaleString()} ZXC</span>
+                        <span className="text-sm text-emerald-400">→ {totalPayout.toLocaleString()} ZXC</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -576,7 +576,7 @@ export default function ShopView() {
                         disabled={sellingStock === stock.symbol || !sessionId}
                         className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
                       >
-                        {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '?�售'}
+                        {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '出售'}
                       </button>
                     </div>
                   </div>

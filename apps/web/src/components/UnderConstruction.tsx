@@ -11,8 +11,8 @@ interface UnderConstructionProps {
 }
 
 export default function UnderConstruction({ 
-  title = '?�發�?,
-  description = '此�??�正?��??�中，敬請�?待�?',
+  title = '開發中',
+  description = '此功能正在開發中，敬請期待！',
   current = 'none'
 }: UnderConstructionProps) {
   return (
@@ -37,7 +37,7 @@ export default function UnderConstruction({
         </div>
 
         <h2 className="mt-8 text-2xl font-black uppercase italic tracking-tight text-white">
-          ?�發�?
+          開發中
         </h2>
         <p className="mt-4 text-center text-sm font-bold text-[#adaaaa]">
           {description}
@@ -45,20 +45,20 @@ export default function UnderConstruction({
 
         <div className="mt-8 rounded-xl border border-[#494847]/20 bg-[#1a1919] p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-[#494847]">
-            ?��?上�??�能
+            預計上線功能
           </p>
           <ul className="mt-4 space-y-2 text-sm font-bold text-[#adaaaa]">
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
-              完整?��?串接
+              完整數據串接
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
-              ?��?互�??�能
+              即時互動功能
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
-              歷史記�??�詢
+              歷史記錄查詢
             </li>
           </ul>
         </div>
@@ -67,7 +67,7 @@ export default function UnderConstruction({
           to="/app"
           className="mt-8 rounded-xl bg-[#fcc025] px-8 py-4 text-sm font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
         >
-          返�?首�?
+          返回首頁
         </Link>
       </main>
 

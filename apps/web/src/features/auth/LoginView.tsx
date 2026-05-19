@@ -195,13 +195,13 @@ export default function LoginView() {
             {announcements.length === 0 ? (
               <div className="space-y-4">
                 <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
-                  <p className="text-xs font-bold text-white">?? {t('announcement.welcome')}</p>
+                  <p className="text-xs font-bold text-white">ðŸŽ‰ {t('announcement.welcome')}</p>
                   <p className="text-xs text-[#adaaaa] mt-1 leading-relaxed">
                     {t('announcement.welcome_desc')}
                   </p>
                 </div>
                 <div className="rounded-xl bg-[#0e0e0e] p-4 border border-[#494847]/10">
-                  <p className="text-xs font-bold text-white">?’¡ {t('announcement.quick_tips')}</p>
+                  <p className="text-xs font-bold text-white">ðŸ’¡ {t('announcement.quick_tips')}</p>
                   <p className="text-xs text-[#adaaaa] mt-1 leading-relaxed">
                     {t('announcement.tips_desc')}
                   </p>
