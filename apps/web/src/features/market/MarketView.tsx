@@ -347,7 +347,7 @@ export default function MarketView() {
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
                 </div>
 
-                <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex flex-col lg:flex-row gap-4 items-start">
                   {/* Stock grid (left) */}
                   <div className="flex-1 min-w-0">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -388,7 +388,7 @@ export default function MarketView() {
                       }).join(' ');
                     })() : '';
                     return (
-                      <div className="lg:w-80 shrink-0">
+                      <div className="w-full lg:w-80 shrink-0">
                         <div className="rounded-xl border border-[#494847]/10 bg-[#101010] overflow-hidden">
                           <button onClick={() => setChartOpen(!chartOpen)}
                             className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
