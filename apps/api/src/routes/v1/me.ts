@@ -4,8 +4,10 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
-import { IdentityManager, RewardManager, VipManager } from "@repo/domain";
-import { SessionRepository, UserRepository, OpsRepository, RewardCatalogRepository } from "@repo/infrastructure";
+import { WalletManager, IdentityManager, RewardManager, VipManager } from "@repo/domain";
+import { SessionRepository, UserRepository, WalletRepository, OpsRepository, RewardCatalogRepository } from "@repo/infrastructure";
+
+const ZXC_PER_YJC = 100_000_000;
 
 export async function meRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -35,15 +37,21 @@ export async function meRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
     const address = ctx.session.address;
+    const walletRepo = new WalletRepository();
     const vip = await vipManager.getVipStatus(address);
 
-    const [totalBetRow, profile] = await Promise.all([
+    const [totalBetRow, profile, zxcBal, yjcBal] = await Promise.all([
       (await (await import("@repo/infrastructure/db/index.js")).requireDb()).execute(
         (await import("drizzle-orm")).sql`SELECT amount FROM total_bets WHERE period_type='all' AND period_id='' AND address=${address.toLowerCase()}`
       ),
       userRepo.getUserProfile(ctx.user.id),
+      walletRepo.getBalance(address, "zhixi"),
+      walletRepo.getBalance(address, "yjc"),
     ]);
     const totalBet = String(totalBetRow?.[0]?.amount || "0");
+    const zxc = parseFloat(zxcBal || "0");
+    const yjc = parseFloat(yjcBal || "0");
+    const totalAssets = zxc + yjc * ZXC_PER_YJC;
     const activeTitleId = profile?.selectedTitleId || "";
     const activeAvatarId = profile?.selectedAvatarId || "classic_chip";
 
@@ -81,6 +89,9 @@ export async function meRoutes(fastify: FastifyInstance) {
          address,
          displayName: ctx.user.displayName || (ctx.session.accountId ? `@${ctx.session.accountId}` : address.slice(0, 6) + "..." + address.slice(-4)),
          totalBet,
+         balanceZxc: zxcBal || "0",
+         balanceYjc: yjcBal || "0",
+         totalAssetsZxc: totalAssets.toFixed(4),
          vipLevel: vip?.level?.label || "普通會員",
          maxBet: Number(vip?.level?.maxBet || 1000),
          title: titleLabel || "新手",
