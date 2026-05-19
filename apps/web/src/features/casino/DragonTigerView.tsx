@@ -62,7 +62,11 @@ export const DragonTigerView: React.FC = () => {
       const res = await api.post("/api/v1/games/shoot-dragon-gate/open", {
         sessionId: session.id
       });
-      const opened = unwrapGameEnvelope<OpenGateData>(res.data);
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
+        throw new Error(extractGameError(payload));
+      }
+      const opened = unwrapGameEnvelope<OpenGateData>(payload);
       setOpenGate(opened);
       return opened;
     } catch (e: any) {
@@ -87,7 +91,11 @@ export const DragonTigerView: React.FC = () => {
         gateId: gate.gateId,
         token: "zhixi",
       });
-      setResult(unwrapGameEnvelope<DragonResult>(res.data));
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
+        throw new Error(extractGameError(payload));
+      }
+      setResult(unwrapGameEnvelope<DragonResult>(payload));
       setOpenGate(null);
     } catch (e: any) {
       setError(extractGameError(e?.response?.data || e));

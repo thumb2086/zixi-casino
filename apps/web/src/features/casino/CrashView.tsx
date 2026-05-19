@@ -35,7 +35,11 @@ export const CrashView: React.FC = () => {
         roundId: roundId || undefined,
       });
 
-      const payload = unwrapGameEnvelope<any>(res.data);
+      const responseData = res.data;
+      if (!res.status || responseData?.success === false) {
+        throw new Error(extractGameError(responseData));
+      }
+      const payload = unwrapGameEnvelope<any>(responseData);
       setLastResult(payload);
       if (payload.roundId) setRoundId(payload.roundId);
       setCrashPoint(payload.crashPoint || shownMultiplier);
@@ -69,7 +73,11 @@ export const CrashView: React.FC = () => {
         elapsedSeconds: 0,
         cashout: false,
       });
-      const startPayload = unwrapGameEnvelope<any>(startRes.data);
+      const startResponseData = startRes.data;
+      if (!startRes.status || startResponseData?.success === false) {
+        throw new Error(extractGameError(startResponseData));
+      }
+      const startPayload = unwrapGameEnvelope<any>(startResponseData);
       nextCrash = Number(startPayload?.crashPoint || 1.5);
       setRoundId(startPayload?.roundId || null);
     } catch (e: any) {

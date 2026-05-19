@@ -53,7 +53,11 @@ export const BlackjackView: React.FC = () => {
         state: gameState.status === "idle" ? undefined : gameState,
       });
 
-      const payload = unwrapGameEnvelope<any>(res.data);
+      const responseData = res.data;
+      if (!res.status || responseData?.success === false) {
+        throw new Error(extractGameError(responseData));
+      }
+      const payload = unwrapGameEnvelope<any>(responseData);
       setGameState({
         playerCards: payload.playerCards || [],
         dealerCards: payload.dealerCards || [],

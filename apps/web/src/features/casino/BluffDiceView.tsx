@@ -34,7 +34,11 @@ export const BluffDiceView: React.FC = () => {
         action: "roll",
         token: "yjc",
       });
-      setResult(unwrapGameEnvelope<GameResult>(res.data));
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
+        throw new Error(extractGameError(payload));
+      }
+      setResult(unwrapGameEnvelope<GameResult>(payload));
       setStatus("settled");
     } catch (e: unknown) {
       setError(extractGameError(e));
