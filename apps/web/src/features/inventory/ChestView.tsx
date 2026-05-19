@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Gift, Package, Sparkles, ChevronRight, X, Shield, Zap } from 'lucide-react';
+import { Package, ChevronRight, X, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
@@ -118,6 +118,7 @@ export default function ChestView() {
     ownedAvatars: [],
     ownedTitles: [],
   });
+  const [invTab, setInvTab] = useState<'chests' | 'tokens' | 'buffs' | 'collection'>('chests');
   const [useStatusMessage, setUseStatusMessage] = useState<string | null>(null);
   const [usingAllTokens, setUsingAllTokens] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -335,7 +336,23 @@ export default function ChestView() {
           </section>
         )}
 
-        {/* Chests */}
+        {/* Tab Navigation */}
+        <div className="flex gap-2 border-b border-[#494847]/20 pb-3">
+          {(['chests', 'tokens', 'buffs', 'collection'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setInvTab(tab)}
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1.5 rounded-lg transition-colors ${
+                invTab === tab ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/20 text-[#adaaaa] hover:bg-[#494847]/30'
+              }`}
+            >
+              {{ chests: '寶箱', tokens: '代幣', buffs: '加成', collection: '收藏' }[tab]}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab: Chests */}
+        {invTab === 'chests' && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">可開啟寶箱</h2>
@@ -415,120 +432,133 @@ export default function ChestView() {
             })}
           </div>
         </section>
+        )}
 
-        {/* Inventory Items */}
-        <section className="space-y-6">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">我的物資</h2>
-          {chests.length > 0 && inventory.items.length === 0 ? (
-             <div className="rounded-2xl border-2 border-dashed border-[#494847]/20 py-12 text-center">
-                <Package className="mx-auto mb-4 h-12 w-12 text-[#494847]/40" />
-                <p className="text-sm font-bold text-[#adaaaa]">目前沒有任何物資</p>
-             </div>
-          ) : (
-            <div className="space-y-8">
-              {Object.entries(groupedItems).map(([type, items]) => {
-                const isToken = type === 'token';
-                const totalTokens = isToken ? items.reduce((sum, i) => {
-                  const v = i.effect?.value || 0;
-                  return sum + v * i.quantity;
-                }, 0) : 0;
-                return (
-                <div key={type} className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="h-px flex-1 bg-[#494847]/20" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#adaaaa]">
-                      {itemTypeLabels[type] || type}
-                    </span>
-                    <div className="h-px flex-1 bg-[#494847]/20" />
-                    {isToken && items.length > 0 && (
-                      <button
-                        onClick={useAllTokens}
-                        disabled={usingAllTokens}
-                        className="shrink-0 text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
-                      >
-                        {usingAllTokens ? '處理中...' : `全部使用 (≈${totalTokens.toLocaleString()} ZXC)`}
-                      </button>
-                    )}
+        {/* Tab: Tokens */}
+        {invTab === 'tokens' && (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">代幣</h2>
+              {(() => {
+                const tokenItems = groupedItems['token'] || [];
+                const totalTokens = tokenItems.reduce((sum, i) => sum + (i.effect?.value || 0) * i.quantity, 0);
+                return tokenItems.length > 0 ? (
+                  <button
+                    onClick={useAllTokens}
+                    disabled={usingAllTokens}
+                    className="text-xs font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
+                  >
+                    {usingAllTokens ? '處理中...' : `全部使用 (≈${totalTokens.toLocaleString()} ZXC)`}
+                  </button>
+                ) : null;
+              })()}
+            </div>
+            {(!groupedItems['token'] || groupedItems['token'].length === 0) ? (
+              <p className="text-sm text-[#adaaaa] text-center py-8">暫無代幣物品</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {groupedItems['token'].map((item) => (
+                  <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3">
+                    <div className="mb-2 flex items-start justify-between">
+                      <span className="text-2xl">{item.icon}</span>
+                      <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">x{item.quantity}</span>
+                    </div>
+                    <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
+                    <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
+                    <div className="mt-auto flex flex-wrap gap-2">
+                      <input type="number" min="1" max={item.quantity}
+                        value={useQty[item.id] || 1}
+                        onChange={(e) => { const v = parseInt(e.target.value) || 1; setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
+                        className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
+                      />
+                      <button onClick={() => setUseQty(p => ({ ...p, [item.id]: item.quantity }))}
+                        className="text-[10px] font-black bg-[#494847]/20 text-[#adaaaa] px-1.5 py-1 rounded-lg hover:bg-[#494847]/40">Max</button>
+                      <button onClick={() => useItem(item.id, useQty[item.id] || 1)}
+                        className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
+                      <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
+                        className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
+                    </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
+        {/* Tab: Buffs */}
+        {invTab === 'buffs' && (
+          <section className="space-y-4">
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">加成物品</h2>
+            {(!groupedItems['buff'] || groupedItems['buff'].length === 0) ? (
+              <p className="text-sm text-[#adaaaa] text-center py-8">暫無加成物品</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {groupedItems['buff'].map((item) => (
+                  <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3">
+                    <div className="mb-2 flex items-start justify-between">
+                      <span className="text-2xl">{item.icon}</span>
+                      <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">x{item.quantity}</span>
+                    </div>
+                    <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
+                    <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
+                    <div className="mt-auto flex flex-wrap gap-2">
+                      <input type="number" min="1" max={item.quantity}
+                        value={useQty[item.id] || 1}
+                        onChange={(e) => { const v = parseInt(e.target.value) || 1; setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
+                        className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
+                      />
+                      <button onClick={() => useItem(item.id, useQty[item.id] || 1)}
+                        className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
+                      <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
+                        className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Tab: Collection */}
+        {invTab === 'collection' && (
+          <section className="space-y-6">
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">收藏</h2>
+            {(['avatar', 'title', 'collectible', 'chest_key'] as const).map((type) => {
+              const items = groupedItems[type] || [];
+              if (items.length === 0) return null;
+              return (
+                <div key={type} className="space-y-3">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{itemTypeLabels[type] || type}</h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {items.map((item) => (
-                      <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3 transition-colors hover:border-[#fcc025]/10">
+                      <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3">
                         <div className="mb-2 flex items-start justify-between">
                           <span className="text-2xl">{item.icon}</span>
-                          <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">
-                            x{item.quantity}
-                          </span>
+                          {(type === 'chest_key' || item.quantity > 1) && (
+                            <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">x{item.quantity}</span>
+                          )}
                         </div>
                         <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
-                        <p className="mb-3 line-clamp-2 text-[10px] font-bold text-[#adaaaa] opacity-60 leading-relaxed min-h-[2.4em]">
-                          {item.description}
-                        </p>
-
-                        {item.consumable && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <input
-                              type="number"
-                              min="1"
-                              max={item.quantity}
-                              value={useQty[item.id] || 1}
-                              onChange={(e) => {
-                                const v = parseInt(e.target.value) || 1;
-                                setUseQty(prev => ({ ...prev, [item.id]: Math.max(1, Math.min(item.quantity, v)) }));
-                              }}
-                              className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
-                            />
-                            {item.type === 'token' && (
-                              <button
-                                onClick={() => setUseQty(prev => ({ ...prev, [item.id]: item.quantity }))}
-                                className="text-[10px] font-black uppercase tracking-wider bg-[#494847]/20 text-[#adaaaa] px-1.5 py-1 rounded-lg hover:bg-[#494847]/40"
-                              >
-                                Max
-                              </button>
-                            )}
-                            <button
-                              onClick={() => useItem(item.id, useQty[item.id] || 1)}
-                              className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]"
-                            >
-                              使用
-                            </button>
-                            <button
-                              onClick={() =>
-                                setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })
-                              }
-                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10"
-                            >
-                              贈送
-                            </button>
-                          </div>
-                        )}
-                        {!item.consumable && (item.type === 'avatar' || item.type === 'title') && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <button
-                              onClick={() => useItem(item.id)}
-                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025] hover:text-black"
-                            >
-                              裝備
-                            </button>
-                            <button
-                              onClick={() =>
-                                setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })
-                              }
-                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10"
-                            >
-                              贈送
-                            </button>
+                        <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
+                        {(type === 'avatar' || type === 'title') && (
+                          <div className="mt-auto flex gap-2">
+                            <button onClick={() => useItem(item.id)}
+                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025] hover:text-black">裝備</button>
+                            <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
+                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
                 </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
+              );
+            })}
+            {['avatar', 'title', 'collectible', 'chest_key'].every(t => !groupedItems[t]?.length) && (
+              <p className="text-sm text-[#adaaaa] text-center py-8">暫無收藏物品</p>
+            )}
+          </section>
+        )}
       </main>
 
       <AppBottomNav current="none" />

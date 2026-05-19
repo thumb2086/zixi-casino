@@ -511,15 +511,59 @@ sequenceDiagram
 - total bet / total win 累積
 - auto unlock titles
 
-### VIP 與下注限制
+### VIP 制度
 
-- 每次下注都可能受 `VipManager` 的 max bet 限制
-- 部分費率折扣也依 VIP 計算
-- 遊戲結算不是單純 payout，還會影響：
-  - VIP 等級
-  - total bet
-  - total win
-  - member title unlock
+Zixi 有兩套並行的 VIP 系統：
+
+#### A. 會員等級（Level Tier — 32 級）
+
+基於 `totalBet * 0.7 + YJC 持有 * 0.3` 計算分數，決定等級。
+
+| 等級範圍 | 門檻（分數） | 最高單注 | 每日加成 | 費率折扣 |
+|---------|------------|---------|---------|---------|
+| 普通會員 (1) | 0 | 1,000 ZXC | ×1.0 | 0% |
+| 青銅會員 (2) | 10,000 | 5,000 ZXC | ×1.1 | 0% |
+| 白銀會員 (3) | 100,000 | 10,000 ZXC | ×1.2 | 0% |
+| 黃金會員 (4) | 1,000,000 | 50,000 ZXC | ×1.3 | 20% |
+| 鑽石等級 (6) | 50,000,000 | 200,000 ZXC | ×1.5 | 50% |
+| 創世等級 (16) | 100,000,000,000 | 1,000,000,000 ZXC | ×3.0 | 100% |
+
+- 滿 32 級最高「神諭十二階」，門檻 10,000,000,000,000,000 分
+- 費率折扣影響遊戲結算時的平台抽成（base 2%）
+- 達到門檻時自動解鎖對應 `title_member_N` 稱號
+- 會員稱號不會從寶箱中掉落
+
+#### B. YJC VIP 等級（YJC VIP Tier — 3 級）
+
+基於 YJC 持有量或購買 VIP 通行證：
+
+| 等級 | YJC 持有 | 特權 |
+|------|---------|------|
+| 未達 VIP | 0 YJC | 無 |
+| VIP 1 | ≥ 1 YJC | 進入 table_1 高額桌 |
+| VIP 2 | ≥ 1,000 YJC | 進入 table_1/table_2 + 零手續費 |
+
+**VIP 通行證（vip_pass / vip2_pass）：**
+- 可在商城購買，直接賦予對應 VIP 資格（不看 YJC 持有）
+- 購買後在 `user_profiles.active_buffs` 寫入永久 buff 記錄
+- 僅限購買一次，不可重複
+- VIP 通行證賦予的資格與 YJC 持有 VIP 等效
+
+#### C. 對遊戲的影響
+
+- `VipManager.getVipLevel(address)` 決定玩家的 maxBet（最高單注金額）
+- `VipManager.getBetLevelFeeDiscount(address)` 決定費率折扣
+- 結算時：`fee = betAmount * 2% * (1 - discountRate)`
+- VIP 2（零手續費）：`hasVip2(address)` 返回 true 時 fee = 0
+
+#### D. 實作結構
+
+- 等級定義：`packages/shared/src/constants.ts`（LEVEL_TIERS, YJC_VIP_TIERS）
+- 核心邏輯：`packages/domain/src/levels/vip-manager.ts`（VipManager）
+- 費率計算：`packages/on-chain/src/services/VipBetLevelService.ts`
+- API：`apps/api/src/routes/v1/vip.ts`（GET /me, /levels, /:address）
+- 前端：`apps/web/src/features/info/tabs/VIPTab.tsx`（等級 + VIP 兩分頁）
+- 通行證購買：`apps/api/src/routes/v1/inventory.ts`（/buy）
 
 ### 防輸 buff
 

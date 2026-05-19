@@ -270,6 +270,34 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
   ],
 };
 
+// Special items (shop-only, not in chest drops)
+export const SPECIAL_ITEMS: ItemDefinition[] = [
+  {
+    id: "vip_pass",
+    name: "VIP 1 通行證",
+    nameEn: "VIP 1 Pass",
+    type: "buff",
+    rarity: "legendary",
+    description: "永久 VIP 1 資格，享專屬特權與折扣",
+    icon: "👑",
+    tradable: false,
+    consumable: true,
+    effect: { type: "vip_tier", value: 1 },
+  },
+  {
+    id: "vip2_pass",
+    name: "VIP 2 通行證",
+    nameEn: "VIP 2 Pass",
+    type: "buff",
+    rarity: "mythic",
+    description: "永久 VIP 2 資格，享最高特權與零手續費",
+    icon: "💎",
+    tradable: false,
+    consumable: true,
+    effect: { type: "vip_tier", value: 2 },
+  },
+];
+
 // Pawn / Sell pricing
 export const PAWN_DISCOUNT_RATE = 0.7;
 

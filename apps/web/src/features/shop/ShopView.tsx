@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
-import { formatNumber, ITEM_DROP_TABLES, RARITY_NAMES, getItemPawnValue } from '@repo/shared';
+import { formatNumber, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, getItemPawnValue } from '@repo/shared';
 import { usePreferencesStore } from '../../store/usePreferencesStore';
 
 const ITEM_MAP: Record<string, { name: string; icon: string; rarity: string; color: string }> = {};
@@ -17,6 +17,14 @@ for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TA
       color: RARITY_NAMES[rarity]?.color || '#b0b0b0',
     };
   }
+}
+for (const item of SPECIAL_ITEMS) {
+  ITEM_MAP[item.id] = {
+    name: item.name,
+    icon: item.icon,
+    rarity: item.rarity,
+    color: RARITY_NAMES[item.rarity as keyof typeof RARITY_NAMES]?.color || '#b0b0b0',
+  };
 }
 
 const RARITY_COLORS: Record<string, string> = {

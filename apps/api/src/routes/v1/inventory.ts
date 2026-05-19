@@ -4,7 +4,7 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { createApiEnvelope, ITEM_DROP_TABLES, RARITY_NAMES, type ItemDefinition, type Rarity } from "@repo/shared";
+import { createApiEnvelope, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, type ItemDefinition, type Rarity } from "@repo/shared";
 import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
@@ -19,6 +19,9 @@ function buildItemIndex(): Record<string, ItemDefinition & { rarity: Rarity }> {
     for (const item of ITEM_DROP_TABLES[rarity]) {
       out[item.id] = { ...item, rarity };
     }
+  }
+  for (const item of SPECIAL_ITEMS) {
+    out[item.id] = { ...item, rarity: item.rarity as Rarity };
   }
   return out;
 }
@@ -300,10 +303,8 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         }
       }
 
-      // VIP passes: verify YJC holding but don't deduct (on-chain is source of truth)
-      if (itemId !== 'vip_pass' && itemId !== 'vip2_pass') {
-        await gameSettlement.setBalance(ctx.address, paymentToken, (balance - price).toString());
-      }
+      // Deduct balance for ALL items (including VIP passes)
+      await gameSettlement.setBalance(ctx.address, paymentToken, (balance - price).toString());
 
       // VIP passes: grant permanent buff in user_profiles
       if (itemId === 'vip_pass' || itemId === 'vip2_pass') {
