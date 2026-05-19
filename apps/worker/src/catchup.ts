@@ -242,8 +242,10 @@ async function main() {
             tokenAddress: tokenRuntime.contractAddress,
           });
         } else {
-          const toAddress = intent.type === "deposit" || intent.type === "admin_credit" ? userAddress : FIXED_TREASURY_ADDRESS;
-          const fromAddr = intent.type === "deposit" || intent.type === "admin_credit" ? FIXED_TREASURY_ADDRESS : userAddress;
+          const isCredit = intent.type === "deposit" || intent.type === "admin_credit";
+          const isDebit = intent.type === "admin_debit";
+          const toAddress = isCredit ? userAddress : FIXED_TREASURY_ADDRESS;
+          const fromAddr = isCredit ? FIXED_TREASURY_ADDRESS : userAddress;
           txResult = await settlementService.adminTransfer({
             from: fromAddr,
             to: toAddress,
