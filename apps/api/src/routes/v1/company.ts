@@ -28,7 +28,8 @@ export async function companyRoutes(fastify: FastifyInstance) {
 
   async function q(sqlStr: string, params?: any[]) {
     const conn = await db();
-    return conn.execute(sql.raw(sqlStr), params);
+    const res = await conn.execute(sql.raw(sqlStr), params);
+    return res.rows || res;
   }
 
   typedFastify.get("/", async (request) => {
