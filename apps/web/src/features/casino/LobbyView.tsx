@@ -72,6 +72,16 @@ export default function LobbyView() {
   const { summary } = useWallet();
   const { data: leaderboardData } = useLeaderboard('all', 50);
   const selfRank = leaderboardData?.selfRank?.rank;
+
+  const { data: profileData } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { isAdmin?: boolean } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const isAdmin = Boolean(profileData?.isAdmin);
   const liveBalance = resolvePreferredBalance({
     onchainBalance: summary.data?.onchain?.zxc?.balance,
     onchainAvailable: summary.data?.onchain?.zxc?.available,
@@ -321,22 +331,24 @@ export default function LobbyView() {
               檢視已獲得的頭像、稱號與收藏品
             </p>
           </GlassCard>
-          <GlassCard
-            to="/app/admin"
-            icon={SettingsIcon}
-            title={t('nav.admin')}
-            subtitle={t('lobby.authorized_only')}
-          >
-            <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
-              {t('lobby.admin_summary')}
-            </p>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="h-1 w-1 animate-pulse rounded-full bg-[#fcc025]" />
-              <span className="text-xs font-bold uppercase tracking-widest text-[#fcc025]">
-                {t('lobby.system_secure')}
-              </span>
-            </div>
-          </GlassCard>
+          {isAdmin && (
+            <GlassCard
+              to="/app/admin"
+              icon={SettingsIcon}
+              title={t('nav.admin')}
+              subtitle={t('lobby.authorized_only')}
+            >
+              <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
+                {t('lobby.admin_summary')}
+              </p>
+              <div className="mt-4 flex items-center gap-2">
+                <div className="h-1 w-1 animate-pulse rounded-full bg-[#fcc025]" />
+                <span className="text-xs font-bold uppercase tracking-widest text-[#fcc025]">
+                  {t('lobby.system_secure')}
+                </span>
+              </div>
+            </GlassCard>
+          )}
         </section>
       </main>
 
