@@ -12,6 +12,7 @@ import type { ChestType, ItemDefinition } from "@repo/shared";
 import {
   CHEST_CONFIGS,
   ITEM_DROP_TABLES,
+  SPECIAL_ITEMS,
   DAILY_FREE_CHEST_COOLDOWN_HOURS,
 } from "@repo/shared";
 import { UserRepository } from "@repo/infrastructure";
@@ -29,6 +30,9 @@ export const ALL_ITEMS: Record<string, ItemDefinition> = (() => {
     for (const item of ITEM_DROP_TABLES[rarity]) {
       out[item.id] = item;
     }
+  }
+  for (const item of SPECIAL_ITEMS) {
+    out[item.id] = item;
   }
   return out;
 })();
@@ -343,7 +347,12 @@ export async function useItem(
 
   const state = await loadInventoryState(userId);
   const owned = state.inventory[itemId] || 0;
-  if (owned <= 0) throw new Error(`Item not in inventory: ${itemId}`);
+  const isAvatarOrTitle = def.type === "avatar" || def.type === "title";
+  const isAlreadyOwned = isAvatarOrTitle && (
+    (def.type === "avatar" && state.ownedAvatars.includes(itemId)) ||
+    (def.type === "title" && state.ownedTitles.includes(itemId))
+  );
+  if (owned <= 0 && !isAlreadyOwned) throw new Error(`Item not in inventory: ${itemId}`);
 
   const nextState: ProfileInventoryState = {
     ...state,
