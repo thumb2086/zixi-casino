@@ -208,13 +208,15 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: false }, request.id, false, "ITEM_NOT_PURCHASABLE");
       }
 
-      const balanceStr = await gameSettlement.getBalance(ctx.address, "zhixi");
+      const rawMeta = catalogItem.meta as Record<string, any> | undefined;
+      const paymentToken: "zhixi" | "yjc" = rawMeta?.token === "yjc" ? "yjc" : "zhixi";
+
+      const balanceStr = await gameSettlement.getBalance(ctx.address, paymentToken);
       const balance = parseFloat(balanceStr) || 0;
       if (balance < price) {
         return createApiEnvelope({ success: false }, request.id, false, "INSUFFICIENT_BALANCE");
       }
 
-      const rawMeta = catalogItem.meta as Record<string, any> | undefined;
       const subItems = rawMeta?.bundle as Array<{ id: string; qty?: number }> | undefined;
       const isBundle = !!subItems;
 
@@ -232,7 +234,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         }
       }
 
-      await gameSettlement.setBalance(ctx.address, "zhixi", (balance - price).toString());
+      await gameSettlement.setBalance(ctx.address, paymentToken, (balance - price).toString());
 
       const bundle = subItems
         ? { items: subItems.map((i: any) => ({ id: i.id, qty: i.qty || 1 })) }
@@ -261,7 +263,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       });
 
       return createApiEnvelope(
-        { success: true, itemId, name: catalogItem.name, price, balanceAfter: (balance - price).toString() },
+        { success: true, itemId, name: catalogItem.name, price, token: paymentToken, balanceAfter: (balance - price).toString() },
         request.id,
       );
     },
