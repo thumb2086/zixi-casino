@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, Archive } from 'lucide-react';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
-import { ITEM_DROP_TABLES, RARITY_NAMES } from '@repo/shared';
 
 const RARITY_COLORS: Record<string, string> = {
   common: '#b0b0b0',
@@ -11,6 +10,7 @@ const RARITY_COLORS: Record<string, string> = {
   epic: '#ba68c8',
   legendary: '#ffd54f',
   mythic: '#ff6f00',
+  oracle: '#ff0044',
 };
 
 const RARITY_ORDER: Record<string, number> = {
@@ -19,6 +19,7 @@ const RARITY_ORDER: Record<string, number> = {
   epic: 2,
   legendary: 3,
   mythic: 4,
+  oracle: 5,
 };
 
 export default function CollectionView() {

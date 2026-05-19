@@ -94,7 +94,7 @@ function coerceBuffs(value: unknown): ActiveBuff[] {
 }
 
 function coercePity(value: unknown): Record<ChestType, number> {
-  const defaults: Record<ChestType, number> = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0 };
+  const defaults: Record<ChestType, number> = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0, oracle: 0 };
   if (!value || typeof value !== "object" || Array.isArray(value)) return defaults;
   const rec = value as Record<string, unknown>;
   const out = { ...defaults };

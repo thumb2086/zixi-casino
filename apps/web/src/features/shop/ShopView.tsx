@@ -33,6 +33,7 @@ const RARITY_COLORS: Record<string, string> = {
   epic: '#ba68c8',
   legendary: '#ffd54f',
   mythic: '#ff6f00',
+  oracle: '#ff0044',
 };
 
 const ALL_ITEMS_LOOKUP: Record<string, any> = {};
