@@ -176,24 +176,29 @@ export async function marketRoutes(fastify: FastifyInstance) {
       // Deduct/credit real wallet balance based on actual result
       const walletAction = new WalletManager();
       const walletDeduction = Math.abs(result?.total || result?.net || result?.amount || result?.margin || result?.refund || 0);
-      if (isCostAction && walletDeduction > 0) {
-        const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-        const newBalance = Math.max(0, currentBalance - walletDeduction);
-        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
-        const intent = walletAction.createTxIntent(userId, "ZXC", "admin_debit", walletDeduction.toString());
-        intent.address = address;
-        intent.meta = { source: "market", action: type, symbol: symbol || null };
-        await walletRepo.saveTxIntent(intent);
-      }
       const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow"].includes(type);
-      if (isReturnAction && walletDeduction > 0) {
+      if (walletDeduction > 0) {
         const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-        const newBalance = currentBalance + walletDeduction;
+        const newBalance = isCostAction ? Math.max(0, currentBalance - walletDeduction) : currentBalance + walletDeduction;
         await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
-        const intent = walletAction.createTxIntent(userId, "ZXC", "admin_credit", walletDeduction.toString());
+        const intentType = isCostAction ? "admin_debit" : "admin_credit";
+        const intent = walletAction.createTxIntent(userId, "ZXC", intentType, walletDeduction.toString());
         intent.address = address;
         intent.meta = { source: "market", action: type, symbol: symbol || null };
         await walletRepo.saveTxIntent(intent);
+        // Save wallet ledger entry
+        await walletRepo.saveLedgerEntry({
+          id: randomUUID(),
+          userId,
+          address,
+          token: "zhixi",
+          type: `market_${type}`,
+          amount: walletDeduction.toString(),
+          balanceBefore: (isCostAction ? currentBalance : (currentBalance - walletDeduction)).toString(),
+          balanceAfter: newBalance.toString(),
+          meta: { symbol: symbol || null, result },
+          createdAt: new Date(),
+        });
       }
 
       // Trigger on-chain processing for this tx_intent immediately
