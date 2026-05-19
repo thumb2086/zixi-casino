@@ -1,20 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { createApiEnvelope } from "@repo/shared";
+import { createApiEnvelope, getItemPawnValue } from "@repo/shared";
 import { MarketManager } from "@repo/domain";
 import { SessionRepository, OpsRepository, MarketRepository } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, ALL_ITEMS } from "../../utils/inventory.js";
-
-const PAWN_PRICES: Record<string, number> = {
-  common: 10,
-  rare: 50,
-  epic: 250,
-  legendary: 1000,
-  mythic: 5000,
-};
 
 export async function pawnRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -57,7 +49,7 @@ export async function pawnRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: false }, request.id, false, "頭像與稱號無法典當");
       }
 
-      const pricePerUnit = PAWN_PRICES[def.rarity] || 5;
+      const pricePerUnit = getItemPawnValue(def);
       const totalPayout = pricePerUnit * quantity;
 
       const nextState = { ...state, inventory: { ...state.inventory } };
@@ -114,8 +106,8 @@ export async function pawnRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: false }, request.id, false, "未知道具");
       }
 
-      const pricePerUnit = PAWN_PRICES[def.rarity] || 5;
-      return createApiEnvelope({ itemId, rarity: def.rarity, pricePerUnit }, request.id);
+      const pricePerUnit = getItemPawnValue(def);
+      return createApiEnvelope({ itemId, rarity: def.rarity, pricePerUnit, itemType: def.type }, request.id);
     },
   );
 

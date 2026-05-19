@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
-import { formatNumber, ITEM_DROP_TABLES, RARITY_NAMES } from '@repo/shared';
+import { formatNumber, ITEM_DROP_TABLES, RARITY_NAMES, getItemPawnValue } from '@repo/shared';
 import { usePreferencesStore } from '../../store/usePreferencesStore';
 
 const ITEM_MAP: Record<string, { name: string; icon: string; rarity: string; color: string }> = {};
@@ -27,13 +27,12 @@ const RARITY_COLORS: Record<string, string> = {
   mythic: '#ff6f00',
 };
 
-const PAWN_PRICES: Record<string, number> = {
-  common: 10,
-  rare: 50,
-  epic: 250,
-  legendary: 1000,
-  mythic: 5000,
-};
+const ALL_ITEMS_LOOKUP: Record<string, any> = {};
+for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TABLES)[]) {
+  for (const item of ITEM_DROP_TABLES[rarity]) {
+    ALL_ITEMS_LOOKUP[item.id] = item;
+  }
+}
 
 function formatBalance(raw: string | undefined, mode: 'short' | 'full' = 'short'): string {
   if (!raw) return '0';
@@ -515,7 +514,8 @@ export default function ShopView() {
           ) : (
             <div className="space-y-3">
               {invItems.map((item: any) => {
-                const price = PAWN_PRICES[item.rarity] || 5;
+                const def = ALL_ITEMS_LOOKUP[item.id];
+                const price = def ? getItemPawnValue(def) : 0;
                 return (
                   <div key={item.id} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
                     <div className="text-2xl shrink-0">{item.icon || '📦'}</div>

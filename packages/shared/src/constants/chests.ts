@@ -270,6 +270,37 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
   ],
 };
 
+// Pawn / Sell pricing
+export const PAWN_DISCOUNT_RATE = 0.7;
+
+// Token face value for collectibles by rarity (minimum token of that tier)
+export const COLLECTIBLE_VALUE_BY_RARITY: Record<Rarity, number> = {
+  common: 1,
+  rare: 50,
+  epic: 250,
+  legendary: 1000,
+  mythic: 10000,
+};
+
+// Base price for buffs / non-token items
+export const BUFF_PAWN_PRICES: Record<Rarity, number> = {
+  common: 3,
+  rare: 5,
+  epic: 10,
+  legendary: 25,
+  mythic: 50,
+};
+
+export function getItemPawnValue(item: ItemDefinition): number {
+  if (item.type === "token" && item.effect?.type === "currency" && item.effect?.value != null) {
+    return Math.round(item.effect.value * PAWN_DISCOUNT_RATE);
+  }
+  if (item.type === "collectible") {
+    return Math.round(COLLECTIBLE_VALUE_BY_RARITY[item.rarity] * PAWN_DISCOUNT_RATE);
+  }
+  return BUFF_PAWN_PRICES[item.rarity];
+}
+
 // Rarity Display Names
 export const RARITY_NAMES: Record<Rarity, { name: string; nameEn: string; color: string }> = {
   common: { name: "普通", nameEn: "Common", color: "#b0b0b0" },
