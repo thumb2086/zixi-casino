@@ -3,7 +3,7 @@ import {
   Megaphone,
   AlertTriangle,
   ShieldAlert,
-  ChevronRight,
+  ChevronDown,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../store/api';
@@ -33,6 +33,7 @@ function formatRelativeTime(value: string, t: (key: string, opts?: any) => strin
 export default function AnnouncementCenter() {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<'LATEST' | 'MAINTENANCE' | 'EVENTS'>('LATEST');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [items, setItems] = useState<AnnouncementItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -148,23 +149,29 @@ export default function AnnouncementCenter() {
             </div>
           )}
 
-          {filteredItems.map((item) => (
-            <div key={item.id} className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 flex items-center justify-between group hover:bg-[#201f1f] transition-all cursor-pointer">
-              <div className="flex flex-col gap-3 flex-1">
-                <div className="flex items-center gap-3">
-                  <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm border ${getBadgeStyle(item.type)}`}>
-                    {typeLabel(item.type)}
-                  </span>
-                  <span className="text-xs font-bold text-[#494847] uppercase tracking-widest">{formatRelativeTime(item.createdAt, t)}</span>
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-[#fcc025] transition-colors">{item.title}</h4>
-                  <p className="text-xs text-[#adaaaa] font-bold mt-1 line-clamp-2">{item.content}</p>
+          {filteredItems.map((item) => {
+            const isExpanded = expandedId === item.id;
+            return (
+              <div key={item.id} onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 group hover:bg-[#201f1f] transition-all cursor-pointer">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-3 flex-1 min-w-0">
+                    <div className="flex items-center gap-3">
+                      <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm border ${getBadgeStyle(item.type)}`}>
+                        {typeLabel(item.type)}
+                      </span>
+                      <span className="text-xs font-bold text-[#494847] uppercase tracking-widest">{formatRelativeTime(item.createdAt, t)}</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-[#fcc025] transition-colors">{item.title}</h4>
+                      <p className={`text-xs text-[#adaaaa] font-bold mt-1 ${isExpanded ? '' : 'line-clamp-2'}`}>{item.content}</p>
+                    </div>
+                  </div>
+                  <ChevronDown size={16} className={`shrink-0 text-[#494847] group-hover:text-[#fcc025] transition-all duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
                 </div>
               </div>
-              <ChevronRight size={16} className="text-[#494847] group-hover:text-[#fcc025] group-hover:translate-x-1 transition-all" />
-            </div>
-          ))}
+            );
+          })}
         </section>
       </main>
 
