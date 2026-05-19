@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { formatNumber, ITEM_DROP_TABLES } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
 const allItems = Object.values(ITEM_DROP_TABLES).flat();
@@ -30,6 +31,7 @@ type DashboardTransaction = {
 };
 
 export default function PublicTransactionsView() {
+  const { sessionId } = useAuthStore();
   const { t } = useTranslation();
 
   const { data, isLoading } = useQuery({
@@ -66,6 +68,16 @@ export default function PublicTransactionsView() {
     },
     refetchInterval: 30000,
   });
+
+  const { data: walletSummary } = useQuery({
+    queryKey: ['wallet-summary-tx'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/wallet/summary', { params: { sessionId } });
+      return res.data.data;
+    },
+    refetchInterval: 15000,
+  });
+  const yjcBalance = walletSummary?.summary?.balances?.YJC || walletSummary?.balances?.YJC || '0';
 
   const { data: txData } = useQuery({
     queryKey: ['recent-txs'],
@@ -119,13 +131,20 @@ export default function PublicTransactionsView() {
             <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
           </div>
         </section>
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-[#fcc025]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC</span>
             </div>
             <p className="text-xl font-black italic text-[#fcc025]">{Number(balance).toLocaleString()}</p>
+          </div>
+          <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles size={14} className="text-[#a855f7]" />
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">YJC</span>
+            </div>
+            <p className="text-xl font-black italic text-[#a855f7]">{Number(yjcBalance || 0).toLocaleString()}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">

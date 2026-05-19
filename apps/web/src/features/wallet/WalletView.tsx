@@ -81,8 +81,11 @@ export default function WalletView() {
     onchainAvailable: onchain?.yjc?.available,
     walletBalance: walletSummary?.balances?.YJC,
   });
+  const ZXC_PER_YJC = 100_000_000;
   const marketNetWorth = assets?.market?.overlayNetWorth || assets?.market?.netWorth || '0';
-  const walletOnlyTotal = (Number(zxcBalance || 0) + Number(yjcBalance || 0)).toFixed(4);
+  const zxcNum = Number(zxcBalance || 0);
+  const yjcNum = Number(yjcBalance || 0);
+  const walletOnlyTotal = (zxcNum + yjcNum * ZXC_PER_YJC).toFixed(4);
   const totalBalance = (Number(walletOnlyTotal) + Number(marketNetWorth || 0)).toFixed(4);
 
   const nextAirdropLabel = useMemo(() => {
@@ -124,7 +127,7 @@ export default function WalletView() {
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <AssetCard label={t('vault.zxc_label')} value={formatNumber(zxcBalance, numberMode)} token="ZXC" />
-            <AssetCard label={t('vault.yjc_label')} value={formatNumber(yjcBalance, numberMode)} token="YJC" />
+            <AssetCard label={t('vault.yjc_label')} value={formatNumber(yjcBalance, numberMode)} token={`YJC (≈ ${formatNumber(yjcNum * ZXC_PER_YJC, numberMode)} ZXC)`} />
           </div>
         </section>
 

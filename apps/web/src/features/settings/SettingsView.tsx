@@ -91,12 +91,20 @@ export default function SettingsView() {
 
   const isZh = i18n.language.startsWith('zh');
 
-  const walletPreviewBalance = resolvePreferredBalance({
+  const ZXC_PER_YJC = 100_000_000;
+  const previewZxc = resolvePreferredBalance({
     onchainBalance: walletSummaryQuery.data?.onchain?.zxc?.balance,
     onchainAvailable: walletSummaryQuery.data?.onchain?.zxc?.available,
     walletBalance: walletSummaryQuery.data?.summary?.balances?.ZXC,
     fallbackBalance: balance,
   });
+  const previewYjc = resolvePreferredBalance({
+    onchainBalance: walletSummaryQuery.data?.onchain?.yjc?.balance,
+    onchainAvailable: walletSummaryQuery.data?.onchain?.yjc?.available,
+    walletBalance: walletSummaryQuery.data?.summary?.balances?.YJC,
+    fallbackBalance: '0',
+  });
+  const walletPreviewBalance = (Number(previewZxc || 0) + Number(previewYjc || 0) * ZXC_PER_YJC).toFixed(4);
 
   useEffect(() => {
     setDisplayNameDraft(username || '');
