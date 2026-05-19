@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BarChart3,
+  ChevronDown,
   CircleDollarSign,
   Landmark,
   LineChart,
@@ -338,69 +339,84 @@ export default function MarketView() {
 
           <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-6">
+              {/* Stock grid + detail chart side by side on desktop */}
               <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <BarChart3 className="text-[#fcc025]" size={18} />
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
                 </div>
 
-                {/* Selected stock detail with chart ABOVE the grid */}
-                {selectedQuote && (() => {
-                  const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
-                  const isUp = (selectedQuote.changePct || 0) >= 0;
-                  const color = isUp ? '#00f59b' : '#ff6d6d';
-                  const path = history.length > 1 ? (() => {
-                    const w = 600, h = 160;
-                    const min = Math.min(...history), max = Math.max(...history);
-                    const range = max - min || 1;
-                    return history.map((v, i) => {
-                      const x = (i / (history.length - 1)) * w;
-                      const y = h - ((v - min) / range) * (h - 16) - 8;
-                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-                    }).join(' ');
-                  })() : '';
-                  return (
-                    <div className="mb-4 rounded-2xl border border-[#494847]/10 bg-[#101010] p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-sm font-black uppercase tracking-[0.14em] text-white">{selectedQuote.symbol} — {selectedQuote.name}</p>
-                          <p className="text-xs text-[#adaaaa]">{selectedQuote.type} · {selectedQuote.sector}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(selectedQuote.price || 0))}</p>
-                          <p className={`text-sm font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                            {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
-                          </p>
-                        </div>
-                      </div>
-                      {path && (
-                        <svg viewBox="0 0 600 160" className="w-full h-40">
-                          <path d={path} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </div>
-                  );
-                })()}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {stockSymbols.map((quote) => (
-                    <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
-                      className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
-                              {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
-                            </span>
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Stock grid (left) */}
+                  <div className="flex-1 min-w-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {stockSymbols.map((quote) => (
+                        <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
+                          className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
+                                  {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
+                                </span>
+                              </div>
+                              <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                            </div>
+                            {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
                           </div>
-                          <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                          <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0), numberMode)}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Detail chart panel (right side, collapsible) */}
+                  {selectedQuote && (() => {
+                    const [chartOpen, setChartOpen] = useState(true);
+                    const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
+                    const isUp = (selectedQuote.changePct || 0) >= 0;
+                    const color = isUp ? '#00f59b' : '#ff6d6d';
+                    const path = history.length > 1 ? (() => {
+                      const w = 600, h = 160;
+                      const min = Math.min(...history), max = Math.max(...history);
+                      const range = max - min || 1;
+                      return history.map((v, i) => {
+                        const x = (i / (history.length - 1)) * w;
+                        const y = h - ((v - min) / range) * (h - 16) - 8;
+                        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+                      }).join(' ');
+                    })() : '';
+                    return (
+                      <div className="lg:w-80 shrink-0">
+                        <div className="rounded-xl border border-[#494847]/10 bg-[#101010] overflow-hidden">
+                          <button onClick={() => setChartOpen(!chartOpen)}
+                            className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+                            <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol}</span>
+                            <ChevronDown size={14} className={`text-[#adaaaa] transition-transform ${chartOpen ? '' : '-rotate-90'}`} />
+                          </button>
+                          {chartOpen && (
+                            <div className="px-3 pb-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-[10px] text-[#adaaaa]">{selectedQuote.type} · {selectedQuote.sector}</p>
+                                <div className="text-right">
+                                  <p className="text-sm font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(selectedQuote.price || 0))}</p>
+                                  <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                                    {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
+                                  </p>
+                                </div>
+                              </div>
+                              {path && (
+                                <svg viewBox="0 0 600 160" className="w-full h-32">
+                                  <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
                       </div>
-                      <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0), numberMode)}</p>
-                    </button>
-                  ))}
+                    );
+                  })()}
                 </div>
               </div>
             </div>
