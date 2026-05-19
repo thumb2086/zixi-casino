@@ -91,6 +91,7 @@ export default function LeaderboardView() {
       avatar: getAvatarUrl(entry.displayName || entry.address),
       avatarIcon: entry.activeAvatarIcon ?? null,
       titleLabel: entry.activeTitleLabel ?? null,
+      vipLevel: entry.vipLevel ?? null,
       isSelf: entry.address.toLowerCase() === address?.toLowerCase(),
     }));
 
@@ -108,6 +109,7 @@ export default function LeaderboardView() {
             amount: Number(rawSelf.amount ?? 0),
             avatarIcon: (rawSelf as any).activeAvatarIcon ?? null,
             titleLabel: (rawSelf as any).activeTitleLabel ?? null,
+            vipLevel: (rawSelf as any).vipLevel ?? null,
           }
         : null,
     };
@@ -196,6 +198,9 @@ export default function LeaderboardView() {
                   </div>
                   <div className="flex h-24 w-20 flex-col items-center justify-center rounded-t-xl border-t border-slate-400/30 bg-gradient-to-t from-[#1a1919] to-slate-400/20 p-2 text-center">
                     <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[0].name}</p>
+                    {orderedTopThree[0].vipLevel && (
+                      <p className="w-full truncate text-[8px] font-bold text-emerald-400">{orderedTopThree[0].vipLevel}</p>
+                    )}
                     {orderedTopThree[0].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-[#fcc025]">{orderedTopThree[0].titleLabel}</p>
                     )}
@@ -221,6 +226,9 @@ export default function LeaderboardView() {
                   </div>
                   <div className="flex h-32 w-28 flex-col items-center justify-center rounded-t-2xl border-t border-[#fcc025]/30 bg-gradient-to-t from-[#1a1919] to-[#fcc025]/20 p-4 text-center">
                     <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[1].name}</p>
+                    {orderedTopThree[1].vipLevel && (
+                      <p className="w-full truncate text-[8px] font-bold text-emerald-400">{orderedTopThree[1].vipLevel}</p>
+                    )}
                     {orderedTopThree[1].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-[#fcc025]">{orderedTopThree[1].titleLabel}</p>
                     )}
@@ -243,6 +251,9 @@ export default function LeaderboardView() {
                   </div>
                   <div className="flex h-20 w-20 flex-col items-center justify-center rounded-t-xl border-t border-amber-700/30 bg-gradient-to-t from-[#1a1919] to-amber-700/20 p-2 text-center">
                     <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[2].name}</p>
+                    {orderedTopThree[2].vipLevel && (
+                      <p className="w-full truncate text-[8px] font-bold text-emerald-400">{orderedTopThree[2].vipLevel}</p>
+                    )}
                     {orderedTopThree[2].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-amber-500">{orderedTopThree[2].titleLabel}</p>
                     )}
@@ -298,8 +309,11 @@ export default function LeaderboardView() {
                       <p className={`text-xs font-black ${player.isSelf ? 'text-[#fcc025]' : 'text-white'}`}>
                         {player.name}
                       </p>
+                      {player.vipLevel && (
+                        <p className="mt-0.5 text-[10px] font-bold text-emerald-400">{player.vipLevel}</p>
+                      )}
                       {player.titleLabel && (
-                        <p className="mt-0.5 inline-block rounded bg-[#262626] px-1.5 py-0.5 text-xs font-bold text-[#fcc025]">
+                        <p className="mt-0.5 inline-block rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-bold text-[#fcc025]">
                           {player.titleLabel}
                         </p>
                       )}
@@ -331,6 +345,8 @@ export default function LeaderboardView() {
                     </div>
                     <div>
                       <p className="text-xs font-black uppercase text-white">{selfEntry.name}</p>
+                      {selfEntry.vipLevel && <p className="text-[10px] font-bold text-emerald-400">{selfEntry.vipLevel}</p>}
+                      {selfEntry.titleLabel && <p className="text-[10px] font-bold text-[#fcc025]">{selfEntry.titleLabel}</p>}
                     </div>
                   </div>
                   <div className="text-right">
