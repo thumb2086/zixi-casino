@@ -8,7 +8,7 @@ import { createApiEnvelope, ITEM_DROP_TABLES, RARITY_NAMES, type ItemDefinition,
 import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
-import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser } from "../../utils/inventory.js";
+import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser, useAllTokenItems } from "../../utils/inventory.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import * as schema from "@repo/infrastructure/db/schema.js";
 import { eq, sql } from "drizzle-orm";
@@ -177,6 +177,59 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         },
         request.id,
       );
+    },
+  );
+
+  // ─── Use all token items ──────────────────────────────────────────────────
+
+  typedFastify.post(
+    "/use-all-tokens",
+    {
+      schema: {
+        body: z.object({
+          sessionId: z.string().optional(),
+        }),
+      },
+    },
+    async (request: any) => {
+      const ctx = await getContext(request);
+      if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
+
+      try {
+        const result = await useAllTokenItems(ctx.userId);
+
+        if (result.totalZxc > 0) {
+          const curBal = await gameSettlement.getBalance(ctx.address, "zhixi");
+          await gameSettlement.setBalance(ctx.address, "zhixi", (Number(curBal) + result.totalZxc).toString());
+        }
+        if (result.totalYjc > 0) {
+          const curBal = await gameSettlement.getBalance(ctx.address, "yjc");
+          await gameSettlement.setBalance(ctx.address, "yjc", (Number(curBal) + result.totalYjc).toString());
+        }
+
+        await opsRepo.logEvent({
+          channel: "rewards",
+          severity: "info",
+          source: "inventory",
+          kind: "all_tokens_used",
+          userId: ctx.userId,
+          address: ctx.address,
+          message: `Used all token items: ${result.totalZxc} ZXC, ${result.totalYjc} YJC`,
+          meta: { totalZxc: result.totalZxc, totalYjc: result.totalYjc, items: result.usedItems },
+        });
+
+        return createApiEnvelope(
+          {
+            success: true,
+            totalZxc: result.totalZxc,
+            totalYjc: result.totalYjc,
+            itemCount: result.usedItems.length,
+          },
+          request.id,
+        );
+      } catch (error: any) {
+        return createApiEnvelope({ success: false }, request.id, false, error?.message || "USE_ALL_TOKENS_FAILED");
+      }
     },
   );
 

@@ -293,6 +293,47 @@ export interface UseItemOutcome {
  * for avatar/title it moves the item into the owned list (already there,
  * but kept for safety) and clears inventory count.
  */
+export interface UseAllTokensResult {
+  totalZxc: number;
+  totalYjc: number;
+  usedItems: Array<{ itemId: string; quantity: number; value: number; currency: string }>;
+  state: ProfileInventoryState;
+}
+
+export async function useAllTokenItems(userId: string): Promise<UseAllTokensResult> {
+  const state = await loadInventoryState(userId);
+  const nextState: ProfileInventoryState = {
+    ...state,
+    inventory: { ...state.inventory },
+    ownedAvatars: [...state.ownedAvatars],
+    ownedTitles: [...state.ownedTitles],
+    activeBuffs: [...state.activeBuffs],
+  };
+
+  const usedItems: UseAllTokensResult["usedItems"] = [];
+  let totalZxc = 0;
+  let totalYjc = 0;
+
+  for (const [itemId, qty] of Object.entries(state.inventory)) {
+    if (qty <= 0) continue;
+    const def = ALL_ITEMS[itemId];
+    if (!def || def.type !== "token") continue;
+    if (def.effect?.type !== "currency" || !def.effect?.value) continue;
+
+    const value = Number(def.effect.value);
+    const currency = def.effect?.currency === "yjc" ? "yjc" : "zhixi";
+
+    delete nextState.inventory[itemId];
+
+    usedItems.push({ itemId, quantity: qty, value, currency });
+    if (currency === "yjc") totalYjc += value * qty;
+    else totalZxc += value * qty;
+  }
+
+  await persistInventoryState(userId, nextState);
+  return { totalZxc, totalYjc, usedItems, state: nextState };
+}
+
 export async function useItem(
   userId: string,
   itemId: string
