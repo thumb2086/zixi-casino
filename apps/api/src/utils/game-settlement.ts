@@ -578,11 +578,43 @@ export class GameSettlementWrapper {
     address: string,
     token: "zhixi" | "yjc",
     currentBalance: string,
-    payout: number
+    payout: number,
+    game?: string,
+    userId?: string
   ): Promise<string> {
     const finalBalance = (parseFloat(currentBalance) + payout).toString();
     await this.setBalance(address, token, finalBalance);
+
+    // Broadcast win notification to global chat
+    if (game && userId && payout > 0) {
+      this.broadcastWin(address, game, payout, userId).catch(() => {});
+    }
+
     return finalBalance;
+  }
+
+  private async broadcastWin(address: string, game: string, payout: number, userId: string): Promise<void> {
+    try {
+      const { kv } = await import("@repo/infrastructure");
+      const { UserRepository } = await import("@repo/infrastructure");
+      const userRepo = new UserRepository();
+      const user = await userRepo.getUserById(userId);
+      const displayName = user?.displayName || address.toLowerCase().slice(0, 6);
+      const isBig = payout >= 100000;
+      const msg = {
+        id: crypto.randomUUID(),
+        address: "",
+        displayName: isBig ? "🎉 大獎" : "💫 系統",
+        text: isBig
+          ? `🔥 ${displayName} 在 ${game} 中大獎 ${payout.toLocaleString()} ZXC！`
+          : `${displayName} 在 ${game} 贏得 ${payout.toLocaleString()} ZXC`,
+        createdAt: Date.now(),
+      };
+      const messages: any[] = (await kv.get("chat:global:messages")) || [];
+      messages.push(msg);
+      if (messages.length > 50) messages.shift();
+      await kv.set("chat:global:messages", messages);
+    } catch {}
   }
 
   /**

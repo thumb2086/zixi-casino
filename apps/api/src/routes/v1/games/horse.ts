@@ -150,7 +150,9 @@ export async function horseRoutes(fastify: FastifyInstance) {
         address,
         token,
         validation.balanceAfter,
-        settlement.finalPayout
+        settlement.finalPayout,
+        'horse',
+        userId
       );
 
       // 5. Update total bet

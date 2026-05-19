@@ -118,7 +118,9 @@ export async function sicboRoutes(fastify: FastifyInstance) {
         address,
         token,
         validation.balanceAfter,
-        settlement.finalPayout
+        settlement.finalPayout,
+        'sicbo',
+        userId
       );
 
       // 5. Update total bet

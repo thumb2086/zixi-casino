@@ -115,7 +115,9 @@ export async function slotsRoutes(fastify: FastifyInstance) {
         address,
         token,
         validation.balanceAfter,
-        settlement.finalPayout
+        settlement.finalPayout,
+        'slots',
+        userId
       );
 
       // 5. Update total bet

@@ -175,7 +175,9 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
         address,
         token,
         validation.balanceAfter,
-        settlement.finalPayout
+        settlement.finalPayout,
+        'roulette',
+        userId
       );
 
       // 5. Update total bet

@@ -357,6 +357,31 @@ typedFastify.post(
         },
       });
 
+      // Broadcast chest drops to global chat
+      try {
+        const rareDrops = outcome.result.items.filter(
+          (d: any) => d.item.rarity === "legendary" || d.item.rarity === "mythic" || d.item.rarity === "oracle"
+        );
+        if (rareDrops.length > 0) {
+          const { UserRepository } = await import("@repo/infrastructure");
+          const userRepo = new UserRepository();
+          const user = await userRepo.getUserById(ctx.userId);
+          const name = user?.displayName || ctx.address.toLowerCase().slice(0, 6);
+          const dropTexts = rareDrops.map((d: any) => `${d.item.icon}${d.item.name}`).join("、");
+          const msg = {
+            id: crypto.randomUUID(),
+            address: "",
+            displayName: "📦 寶箱",
+            text: `${name} 從${config.name}中獲得 ${dropTexts}！`,
+            createdAt: Date.now(),
+          };
+          const msgs: any[] = (await kv.get("chat:global:messages")) || [];
+          msgs.push(msg);
+          if (msgs.length > 50) msgs.shift();
+          await kv.set("chat:global:messages", msgs);
+        }
+      } catch {}
+
       const newKeyCounts: Record<string, number> = {};
       for (const ct of Object.keys(CHEST_CONFIGS) as ChestType[]) {
         newKeyCounts[ct] = outcome.state.inventory[`chest_key_${ct}`] || 0;
