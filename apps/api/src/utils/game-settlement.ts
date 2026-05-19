@@ -102,28 +102,32 @@ export class GameSettlementWrapper {
   }
 
   /**
-   * Resolve the playable balance: on-chain when available, otherwise DB wallet.
+   * Read balance from DB (primary source). On-chain is synced in background.
+   * This ensures market operations / game settlements are reflected immediately.
    */
   async getBalance(address: string, token: "zhixi" | "yjc"): Promise<string> {
     const normalizedAddress = address.toLowerCase();
-    const dbBalance = await this.walletRepo.getBalance(normalizedAddress, token);
-    let resolvedBalance = dbBalance || "0";
+    return (await this.walletRepo.getBalance(normalizedAddress, token)) || "0";
+  }
 
+  /**
+   * Sync on-chain balance to DB. Called periodically or explicitly.
+   */
+  async syncOnchainBalance(address: string, token: "zhixi" | "yjc"): Promise<string> {
+    const normalizedAddress = address.toLowerCase();
     try {
       const runtime = this.onchainWallet.getRuntimeConfig();
       const tokenRuntime = runtime.tokens[token];
-      if (tokenRuntime?.enabled && runtime.rpcUrl && runtime.adminPrivateKey) {
-        const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
-        const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
-        const rawBalance = await client.getBalance(normalizedAddress, tokenRuntime.contractAddress);
-        resolvedBalance = client.formatUnits(rawBalance, decimals);
-      }
-    } catch {}
-
-    if (resolvedBalance !== dbBalance) {
-      await this.walletRepo.updateBalance(normalizedAddress, resolvedBalance, token);
+      if (!tokenRuntime?.enabled || !runtime.rpcUrl || !runtime.adminPrivateKey) return "0";
+      const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+      const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
+      const rawBalance = await client.getBalance(normalizedAddress, tokenRuntime.contractAddress);
+      const balance = client.formatUnits(rawBalance, decimals);
+      await this.walletRepo.updateBalance(normalizedAddress, balance, token);
+      return balance;
+    } catch {
+      return (await this.walletRepo.getBalance(normalizedAddress, token)) || "0";
     }
-    return resolvedBalance || "0";
   }
 
   /**
