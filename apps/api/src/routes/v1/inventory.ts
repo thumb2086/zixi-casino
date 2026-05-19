@@ -223,9 +223,19 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       const subItems = rawMeta?.bundle as Array<{ id: string; qty?: number }> | undefined;
       const isBundle = !!subItems;
 
-      // ── Purchase limit: one per user for bundles / unique items ────────────
+      // ── Purchase limit: one per user for bundles / unique items / VIP passes ──
+      const state = await loadInventoryState(ctx.userId);
+      if (itemId === 'vip_pass') {
+        if ((state.activeBuffs || []).some((b: any) => b.id === 'vip_1_permanent')) {
+          return createApiEnvelope({ success: false }, request.id, false, "你已擁有 VIP 1 通行證");
+        }
+      }
+      if (itemId === 'vip2_pass') {
+        if ((state.activeBuffs || []).some((b: any) => b.id === 'vip_2_permanent')) {
+          return createApiEnvelope({ success: false }, request.id, false, "你已擁有 VIP 2 通行證");
+        }
+      }
       if (isBundle || catalogItem.type === "avatar" || catalogItem.type === "title") {
-        const state = await loadInventoryState(ctx.userId);
         if (isBundle) {
           if (state.inventory[itemId] > 0) {
             return createApiEnvelope({ success: false }, request.id, false, "你已購買過此組合包");

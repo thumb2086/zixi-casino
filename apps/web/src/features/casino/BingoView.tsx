@@ -68,24 +68,40 @@ export const BingoView: React.FC = () => {
     },
   });
 
+  const winningNumbersSet = new Set(result?.winningNumbers || []);
+  const hitNumbers = new Set(result?.matches || []);
+
   return (
     <div className="bingo-container">
       <div className="drawn-balls">
         {selectedNumbers.map((n) => (
-          <div key={n} className="bingo-ball">{n}</div>
+          <div key={n} className={`bingo-ball ${hitNumbers.has(n) ? 'bg-emerald-600' : ''}`}>{n}</div>
         ))}
       </div>
 
+      {result && (
+        <div className="text-xs text-slate-400 mb-2 text-center">
+          開獎號碼：{(result.winningNumbers || []).slice(0, 20).join(', ')}
+          {(result.winningNumbers || []).length > 20 && ' ...'}
+        </div>
+      )}
+
       <div className="bingo-grid">
-        {Array.from({ length: 75 }, (_, i) => i + 1).map((n) => (
-          <div
-            key={n}
-            className={`bingo-cell ${selectedNumbers.includes(n) ? 'selected' : ''}`}
-            onClick={() => !isRevealing && !betMutation.isPending && toggleNumber(n)}
-          >
-            {n}
-          </div>
-        ))}
+        {Array.from({ length: 75 }, (_, i) => i + 1).map((n) => {
+          const isHit = hitNumbers.has(n);
+          const isWinNum = winningNumbersSet.has(n) && !isHit;
+          const isSelected = selectedNumbers.includes(n);
+          let cls = 'bingo-cell';
+          if (isHit) cls += ' hit';
+          else if (isWinNum) cls += ' drawn';
+          else if (isSelected) cls += ' selected';
+          return (
+            <div key={n} className={cls}
+              onClick={() => !isRevealing && !betMutation.isPending && toggleNumber(n)}>
+              {n}
+            </div>
+          );
+        })}
       </div>
 
       <div className="bingo-controls">
@@ -112,7 +128,8 @@ export const BingoView: React.FC = () => {
         {status}
         {result && (
           <div className="mt-2 text-sm text-slate-300">
-            命中號碼： {(result.matches || []).join(', ') || 'none'}
+            命中 {(result.matches || []).length} 個號碼：{(result.matches || []).join(', ') || '無'}
+            {result.winningNumbers && <div className="text-xs text-slate-500 mt-1">開獎 {result.winningNumbers.length} 個號碼（綠色標記）</div>}
           </div>
         )}
       </div>
