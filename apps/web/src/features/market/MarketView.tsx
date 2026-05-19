@@ -343,26 +343,8 @@ export default function MarketView() {
                   <BarChart3 className="text-[#fcc025]" size={18} />
                   <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {stockSymbols.map((quote) => (
-                    <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
-                      className={`rounded-2xl border p-4 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212] shadow-[0_0_24px_rgba(252,192,37,0.08)]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="min-w-0">
-                          <p className="text-xs font-black uppercase tracking-[0.14em] text-white truncate">{quote.symbol}</p>
-                          <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
-                        </div>
-                        {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={14} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={14} />}
-                      </div>
-                      <p className="mt-3 text-lg font-black italic leading-none tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0))}</p>
-                      <p className={`mt-1 text-xs font-black ${(quote.changePct || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                        {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
-                      </p>
-                    </button>
-                  ))}
-                </div>
 
-                {/* Selected stock detail with chart */}
+                {/* Selected stock detail with chart ABOVE the grid */}
                 {selectedQuote && (() => {
                   const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
                   const isUp = (selectedQuote.changePct || 0) >= 0;
@@ -378,7 +360,7 @@ export default function MarketView() {
                     }).join(' ');
                   })() : '';
                   return (
-                    <div className="mt-4 rounded-2xl border border-[#494847]/10 bg-[#101010] p-5">
+                    <div className="mb-4 rounded-2xl border border-[#494847]/10 bg-[#101010] p-5">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <p className="text-sm font-black uppercase tracking-[0.14em] text-white">{selectedQuote.symbol} — {selectedQuote.name}</p>
@@ -399,6 +381,25 @@ export default function MarketView() {
                     </div>
                   );
                 })()}
+
+                <div className="grid grid-cols-2 gap-3">
+                  {stockSymbols.map((quote) => (
+                    <button key={quote.symbol} type="button" onClick={() => setSelectedSymbol(quote.symbol)}
+                      className={`rounded-2xl border p-4 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212] shadow-[0_0_24px_rgba(252,192,37,0.08)]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0">
+                          <p className="text-xs font-black uppercase tracking-[0.14em] text-white truncate">{quote.symbol}</p>
+                          <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                        </div>
+                        {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={14} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={14} />}
+                      </div>
+                      <p className="mt-3 text-lg font-black italic leading-none tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0))}</p>
+                      <p className={`mt-1 text-xs font-black ${(quote.changePct || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                        {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
+                      </p>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
