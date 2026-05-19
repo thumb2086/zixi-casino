@@ -39,8 +39,6 @@ export const DragonTigerView: React.FC = () => {
   const [isOpening, setIsOpening] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const multiplier = 2;
-
   const renderCard = (card?: Card) => (
     <div className="card">
       {card ? (
@@ -52,12 +50,12 @@ export const DragonTigerView: React.FC = () => {
     </div>
   );
 
-  const handleOpenGate = async (): Promise<OpenGateData | null> => {
-    if (!session) return null;
-
+  const handleOpenGate = async () => {
+    if (!session) return;
     try {
       setError("");
       setResult(null);
+      setOpenGate(null);
       setIsOpening(true);
       const res = await api.post("/api/v1/games/shoot-dragon-gate/open", {
         sessionId: session.id
@@ -68,27 +66,22 @@ export const DragonTigerView: React.FC = () => {
       }
       const opened = unwrapGameEnvelope<OpenGateData>(payload);
       setOpenGate(opened);
-      return opened;
     } catch (e: any) {
       setError(extractGameError(e?.response?.data || e));
-      return null;
     } finally {
       setIsOpening(false);
     }
   };
 
-  const handlePlay = async (gateFromOpen?: OpenGateData) => {
-    if (!session) return;
-    const gate = gateFromOpen || openGate;
-    if (!gate) return;
-
+  const handlePlay = async () => {
+    if (!session || !openGate) return;
     try {
       setError("");
       setIsPlaying(true);
       const res = await api.post("/api/v1/games/shoot-dragon-gate/play", {
         sessionId: session.id,
         betAmount: Number(betAmount),
-        gateId: gate.gateId,
+        gateId: openGate.gateId,
         token: "zhixi",
       });
       const payload = res.data;
@@ -104,14 +97,6 @@ export const DragonTigerView: React.FC = () => {
     }
   };
 
-  const handleOneClickPlay = async () => {
-    if (!session || isOpening || isPlaying) return;
-    const opened = await handleOpenGate();
-    if (opened) {
-      await handlePlay(opened);
-    }
-  };
-
   const leftCard = openGate ? { rank: openGate.left, suit: SUIT } : result ? { rank: result.left, suit: SUIT } : undefined;
   const rightCard = openGate ? { rank: openGate.right, suit: SUIT } : result ? { rank: result.right, suit: SUIT } : undefined;
   const midCard = result ? { rank: result.mid, suit: SUIT } : undefined;
@@ -124,7 +109,16 @@ export const DragonTigerView: React.FC = () => {
           {leftCard ? renderCard(leftCard) : <div className="card-slot">?</div>}
         </div>
         <div className="gate-multiplier">
-          <span>{multiplier || 0}x 倍率</span>
+          {openGate ? (
+            <>
+              <span className="text-yellow-400 font-bold">{openGate.multiplier}x</span>
+              <span className="text-xs text-gray-400 mt-1">範圍 {openGate.lo}~{openGate.hi}</span>
+            </>
+          ) : result ? (
+            <span className="text-yellow-400 font-bold">2x</span>
+          ) : (
+            <span>?</span>
+          )}
         </div>
         <div className="gate-side right">
           <h3>龍門右牌</h3>
@@ -138,28 +132,48 @@ export const DragonTigerView: React.FC = () => {
       </div>
 
       <div className="controls">
-        <input
-          type="number"
-          value={betAmount}
-          onChange={(e) => setBetAmount(e.target.value)}
-          disabled={isPlaying}
-          placeholder="下注金額"
-        />
-        <button className="gate-btn" onClick={handleOneClickPlay} disabled={isOpening || isPlaying}>
-          {isOpening ? "開門中..." : isPlaying ? "結算中..." : "開門並開射"}
-        </button>
+        {!openGate && !result && (
+          <button className="gate-btn" onClick={handleOpenGate} disabled={isOpening}>
+            {isOpening ? "開門中..." : "開門"}
+          </button>
+        )}
+
+        {openGate && !result && (
+          <>
+            <input
+              type="number"
+              value={betAmount}
+              onChange={(e) => setBetAmount(e.target.value)}
+              disabled={isPlaying}
+              placeholder="下注金額"
+            />
+            <button className="gate-btn" onClick={handlePlay} disabled={isPlaying}>
+              {isPlaying ? "結算中..." : "開射"}
+            </button>
+            <button className="text-sm text-gray-400 hover:text-white" onClick={() => setOpenGate(null)} disabled={isPlaying}>
+              重新開門
+            </button>
+          </>
+        )}
       </div>
 
       {!openGate && !result && !error && (
-        <div className="text-center text-sm text-gray-300">按下按鈕即可完成本局射龍門。</div>
+        <div className="text-center text-sm text-gray-300">點擊「開門」先翻開龍門牌，再決定下注金額。</div>
       )}
 
       {error && <div className="result-banner lose"><h2>{error}</h2></div>}
 
       {result && !error && (
-        <div className={`result-banner ${result.result === "win" ? "win" : result.result === "draw" ? "pillar" : "lose"}`}>
-          <h2>{result.result === "win" ? "贏了！" : result.result === "draw" ? "平手" : "未中"}</h2>
-        </div>
+        <>
+          <div className={`result-banner ${result.result === "win" ? "win" : result.result === "draw" ? "pillar" : "lose"}`}>
+            <h2>{result.result === "win" ? "贏了！" : result.result === "draw" ? "平手" : "未中"}</h2>
+          </div>
+          <div className="text-center mt-4">
+            <button className="gate-btn" onClick={() => { setResult(null); setOpenGate(null); }}>
+              再玩一次
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
