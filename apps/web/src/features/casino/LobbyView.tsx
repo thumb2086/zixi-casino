@@ -83,12 +83,20 @@ export default function LobbyView() {
   });
   const isAdmin = Boolean(profileData?.isAdmin);
   const vipLevel = profileData?.vipLevel || '普通會員';
-  const liveBalance = resolvePreferredBalance({
+  const ZXC_PER_YJC = 100_000_000;
+  const liveZxc = resolvePreferredBalance({
     onchainBalance: summary.data?.onchain?.zxc?.balance,
     onchainAvailable: summary.data?.onchain?.zxc?.available,
     walletBalance: summary.data?.summary?.balances?.ZXC,
     fallbackBalance: balance,
   });
+  const liveYjc = resolvePreferredBalance({
+    onchainBalance: summary.data?.onchain?.yjc?.balance,
+    onchainAvailable: summary.data?.onchain?.yjc?.available,
+    walletBalance: summary.data?.summary?.balances?.YJC,
+    fallbackBalance: '0',
+  });
+  const liveBalance = (Number(liveZxc || 0) + Number(liveYjc || 0) * ZXC_PER_YJC).toFixed(4);
 
   const { data: inventoryData } = useQuery({
     queryKey: ['inventory-preview'],

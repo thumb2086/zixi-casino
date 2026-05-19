@@ -196,6 +196,33 @@ export async function marketRoutes(fastify: FastifyInstance) {
         await walletRepo.saveTxIntent(intent);
       }
 
+      // Trigger on-chain processing for this tx_intent immediately
+      (async () => {
+        try {
+          const { SettlementServiceImpl, ViemRepository } = await import("@repo/on-chain");
+          const runtime = onchainManager.getRuntimeConfig();
+          if (!runtime.rpcUrl || !runtime.adminPrivateKey) return;
+          const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+          const svc = new SettlementServiceImpl(repo);
+          const FIXED_TREASURY = (await import("@repo/on-chain")).getOnChainConfig().treasuryAddress;
+          const pending = await walletRepo.getPendingIntents();
+          for (const intent of pending) {
+            if (intent.address !== address && intent.address !== FIXED_TREASURY) continue;
+            try {
+              const fromAddr = intent.type === "admin_credit" ? FIXED_TREASURY : address;
+              const toAddr = intent.type === "admin_credit" ? address : intent.type === "admin_debit" ? FIXED_TREASURY : address;
+              const txResult = await svc.adminTransfer({
+                from: fromAddr,
+                to: toAddr,
+                amount: String(intent.amount || "0"),
+                tokenAddress: runtime.tokens.zhixi.contractAddress,
+              });
+              await walletRepo.saveTxIntent(new WalletManager().processTxIntent(intent, "confirmed", txResult.txHash));
+            } catch {}
+          }
+        } catch {}
+      })();
+
       await marketRepo.saveAccount(address, userId, account);
       await marketRepo.saveTrade({
         id: randomUUID(),
