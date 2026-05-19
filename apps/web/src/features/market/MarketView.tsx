@@ -83,12 +83,14 @@ export default function MarketView() {
         <button onClick={() => setPanelTab('bank')} className={tabCls('bank')}>銀行</button>
       </div>
 
-      <select value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)}
-        className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none">
-        {stockSymbols.map((q) => (
-          <option key={q.symbol} value={q.symbol}>{q.symbol} — {q.name}</option>
-        ))}
-      </select>
+      {panelTab !== 'bank' && (
+        <select value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)}
+          className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none">
+          {stockSymbols.map((q) => (
+            <option key={q.symbol} value={q.symbol}>{q.symbol} — {q.name}</option>
+          ))}
+        </select>
+      )}
 
       {/* --- Spot tab --- */}
       {panelTab === 'spot' && (
