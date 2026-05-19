@@ -46,7 +46,7 @@ export const SicboView: React.FC = () => {
         setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
         setIsRevealing(false);
         queryClient.invalidateQueries({ queryKey: ['user'] });
-      }, 1100);
+      }, 300);
     },
     onError: (err: Error) => {
       setStatus(`❌ 下注失敗：${err.message}`);

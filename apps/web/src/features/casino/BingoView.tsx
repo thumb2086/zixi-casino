@@ -60,7 +60,7 @@ export const BingoView: React.FC = () => {
         setRoundNo((prev) => prev + 1);
         setIsRevealing(false);
         queryClient.invalidateQueries({ queryKey: ['user'] });
-      }, 1200);
+      }, 300);
     },
     onError: (err: Error) => {
       setStatus(`❌ 下注失敗：${err.message}`);

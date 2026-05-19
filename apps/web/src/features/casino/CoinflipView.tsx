@@ -6,7 +6,7 @@ import { useUserStore } from '../../store/useUserStore';
 import { ChipAnimation } from '../../components/ChipAnimation';
 import './Coinflip.css';
 
-const COINFLIP_ROUND_MS = 15000;
+const COINFLIP_ROUND_MS = 6000;
 const COINFLIP_LOCK_MS = 4000;
 
 export const CoinflipView: React.FC = () => {
@@ -91,7 +91,7 @@ export const CoinflipView: React.FC = () => {
     const targetRotation = baseRotation + (winner === 'heads' ? (360 - (rotation % 360)) : (180 - (rotation % 360) + 360) % 360);
     setRotation(targetRotation);
 
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 400));
 
     const roundBets = pendingBets.filter(b => b.roundId === roundId);
     if (roundBets.length > 0) {
