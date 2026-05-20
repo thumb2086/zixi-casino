@@ -8,7 +8,7 @@ import { useAudio } from '../hooks/useAudio';
 export default function SoundPlayer() {
   const { sessionId, isAuthorized } = useAuthStore();
   const location = useLocation();
-  const { init, playBGM, setPreferences } = useAudio();
+  const { init, destroy, playBGM, setPreferences } = useAudio();
   const hydrated = usePreferencesStore((state) => state.hydrated);
   const replacePrefs = usePreferencesStore((state) => state.replacePrefs);
   const masterVolume = usePreferencesStore((state) => state.masterVolume);
@@ -19,7 +19,8 @@ export default function SoundPlayer() {
 
   useEffect(() => {
     init();
-  }, [init]);
+    return () => destroy();
+  }, [init, destroy]);
 
   useEffect(() => {
     if (!isAuthorized || !sessionId) return;
@@ -56,7 +57,6 @@ export default function SoundPlayer() {
   }, [masterVolume, bgmEnabled, bgmVolume, sfxEnabled, sfxVolume, setPreferences]);
 
   useEffect(() => {
-    // Don't play BGM if not authorized
     if (!isAuthorized) return;
 
     const path = location.pathname.toLowerCase();
@@ -69,7 +69,6 @@ export default function SoundPlayer() {
     } else if (path.startsWith('/app')) {
       track = 'lobby';
     } else if (path.includes('/login')) {
-      // No music on login page
       return;
     }
 

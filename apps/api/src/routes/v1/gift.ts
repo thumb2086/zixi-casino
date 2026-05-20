@@ -105,10 +105,8 @@ export async function giftRoutes(fastify: FastifyInstance) {
         text: `🫵 ${senderName} 贈送 ${summary} 給 ${recipient.displayName || toAddr.slice(0, 6)}`,
         createdAt: Date.now(),
       };
-      const messages: any[] = await kv.get("chat:global:messages") || [];
-      messages.push(chatMsg);
-      if (messages.length > 50) messages.shift();
-      await kv.set("chat:global:messages", messages);
+      await kv.lpush("chat:global:messages", chatMsg);
+      await kv.ltrim("chat:global:messages", 0, 49);
     } catch {}
 
     await opsRepo.logEvent({

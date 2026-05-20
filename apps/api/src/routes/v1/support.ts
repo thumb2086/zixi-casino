@@ -122,7 +122,7 @@ export async function supportRoutes(fastify: FastifyInstance) {
   // ─── Chat Logic ──────────────────────────────────────────────────────────
 
   typedFastify.get("/chat/messages", async (request) => {
-    const messages = await kv.get<any[]>("chat:global:messages") || [];
+    const messages = await kv.lrange<any>("chat:global:messages", 0, 49);
     return createApiEnvelope({ messages }, request.id);
   });
 
@@ -146,11 +146,8 @@ export async function supportRoutes(fastify: FastifyInstance) {
       createdAt: Date.now()
     };
 
-    const messages: any[] = await kv.get("chat:global:messages") || [];
-    messages.push(newMessage);
-    if (messages.length > 50) messages.shift();
-
-    await kv.set("chat:global:messages", messages);
+    await kv.lpush("chat:global:messages", newMessage);
+    await kv.ltrim("chat:global:messages", 0, 49);
 
     return createApiEnvelope({ message: newMessage }, request.id);
   });

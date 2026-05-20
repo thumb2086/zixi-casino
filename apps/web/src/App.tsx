@@ -44,20 +44,24 @@ function useFastLogin() {
   const { setAddress, setBalance, setUsername, setActiveAvatar, setActiveTitle } = useUserStore();
   const [isRestoring, setIsRestoring] = useState(true);
 
+  const [elapsed, setElapsed] = useState(0);
+
   useEffect(() => {
-    const validateSession = async () => {
-      if (!sessionId) {
-        setIsRestoring(false);
-        return;
-      }
+    if (!sessionId) {
+      setIsRestoring(false);
+      return;
+    }
 
-      const rememberMe = localStorage.getItem('custody_remember_me') === 'true';
-      if (!rememberMe) {
-        setIsRestoring(false);
-      }
+    const rememberMe = localStorage.getItem('custody_remember_me') === 'true';
+    if (!rememberMe) {
+      setIsRestoring(false);
+    }
 
-      try {
-        const res = await api.get('/api/v1/auth/me', { params: { sessionId } });
+    const startTime = Date.now();
+    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
+
+    api.get('/api/v1/auth/me', { params: { sessionId } })
+      .then((res) => {
         const data = res.data;
         const payload = data?.data;
 
@@ -72,17 +76,19 @@ function useFastLogin() {
         } else {
           clearAuth();
         }
-      } catch {
+      })
+      .catch(() => {
         clearAuth();
-      } finally {
+      })
+      .finally(() => {
+        clearInterval(timer);
         setIsRestoring(false);
-      }
-    };
+      });
 
-    validateSession();
+    return () => clearInterval(timer);
   }, [sessionId, setAuth, clearAuth, setAddress, setBalance, setUsername, setActiveAvatar, setActiveTitle]);
 
-  return { isRestoring };
+  return { isRestoring, elapsed };
 }
 
 function FontSizeApplier() {
@@ -93,9 +99,20 @@ function FontSizeApplier() {
   return null;
 }
 
+// Keep-alive ping to prevent Render from spinning down
+function useKeepAlive() {
+  useEffect(() => {
+    const ping = () => { api.get('/health').catch(() => {}); };
+    ping();
+    const interval = setInterval(ping, 4 * 60 * 1000); // every 4 minutes
+    return () => clearInterval(interval);
+  }, []);
+}
+
 function AppContent() {
+  useKeepAlive();
   const { isAuthorized } = useAuthStore();
-  const { isRestoring } = useFastLogin();
+  const { isRestoring, elapsed } = useFastLogin();
   const { userData, isLoading } = useSyncUser();
   const username = useUserStore((s) => s.username);
 
@@ -107,7 +124,7 @@ function AppContent() {
       <div className="relative min-h-screen bg-[#0e0e0e] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-[#fcc025]" />
-          <p className="text-sm text-[#adaaaa]">正在恢復登入狀態...</p>
+          <p className="text-sm text-[#adaaaa]">正在恢復登入狀態{elapsed > 0 ? ` (${elapsed}秒)` : '...'}</p>
         </div>
       </div>
     );

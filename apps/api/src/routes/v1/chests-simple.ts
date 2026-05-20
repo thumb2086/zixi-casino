@@ -375,10 +375,8 @@ typedFastify.post(
             text: `${name} 從${config.name}中獲得 ${dropTexts}！`,
             createdAt: Date.now(),
           };
-          const msgs: any[] = (await kv.get("chat:global:messages")) || [];
-          msgs.push(msg);
-          if (msgs.length > 50) msgs.shift();
-          await kv.set("chat:global:messages", msgs);
+          await kv.lpush("chat:global:messages", msg);
+          await kv.ltrim("chat:global:messages", 0, 49);
         }
       } catch {}
 

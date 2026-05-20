@@ -117,13 +117,17 @@ export function checkUnlocks(data: CompanyData, companyType: "ai" | "chip"): voi
 
 export function processTicks(data: CompanyData, companyType: "ai" | "chip"): { ticksProcessed: number; events: CompanyEvent[] } {
   const now = Date.now();
-  const ticks = Math.floor((now - data.lastTickAt) / COMPANY_TICK_MS);
+  const elapsed = now - data.lastTickAt;
+  if (elapsed < COMPANY_TICK_MS) return { ticksProcessed: 0, events: [] };
+  const ticks = Math.floor(elapsed / COMPANY_TICK_MS);
   if (ticks <= 0) return { ticksProcessed: 0, events: [] };
   const events: CompanyEvent[] = [];
 
-  for (let t = 0; t < Math.min(ticks, 100); t++) {
-    const team = computeTeamBonus(data.employees);
-    const teamMult = team.effectiveMultiplier;
+  const maxTicks = Math.min(ticks, 100);
+  const team = computeTeamBonus(data.employees);
+  const teamMult = team.effectiveMultiplier;
+
+  for (let t = 0; t < maxTicks; t++) {
 
     // Pay salaries
     let salaryCost = 0;
@@ -173,8 +177,8 @@ export function processTicks(data: CompanyData, companyType: "ai" | "chip"): { t
     else if (data.reputation < 45) data.reputation += 0.1;
   }
 
-  data.lastTickAt += ticks * COMPANY_TICK_MS;
-  return { ticksProcessed: ticks, events };
+  data.lastTickAt += maxTicks * COMPANY_TICK_MS;
+  return { ticksProcessed: maxTicks, events };
 }
 
 export function computeSummary(data: CompanyData, companyType: "ai" | "chip") {

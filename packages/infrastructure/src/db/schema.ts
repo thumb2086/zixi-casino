@@ -68,6 +68,8 @@ export const userProfiles = pgTable("user_profiles", {
   activeBuffs: jsonb("active_buffs").default([]),
   systemTitleStreaks: jsonb("system_title_streaks").default({}),
   winBias: numeric("win_bias"), // admin-adjustable win bias 0-1
+  xp: numeric("xp").default("0").notNull(),
+  level: integer("level").default(1).notNull(),
   soundPrefs: jsonb("sound_prefs").default({
     amountDisplay: "compact",
     danmuEnabled: true,
