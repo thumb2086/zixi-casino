@@ -42,6 +42,21 @@ export async function horseRoutes(fastify: FastifyInstance) {
     return createApiEnvelope({ success: true, data: HORSES }, request.id);
   });
 
+  typedFastify.get("/round", async (request) => {
+    const roundInfo = getRoundInfo('horse');
+    return createApiEnvelope({
+      success: true,
+      data: {
+        roundId: roundInfo.roundId,
+        closesAt: roundInfo.closesAt,
+        bettingClosesAt: roundInfo.bettingClosesAt,
+        isBettingOpen: roundInfo.isBettingOpen,
+        msLeft: roundInfo.msLeft,
+        serverNow: Date.now(),
+      }
+    }, request.id);
+  });
+
   typedFastify.post("/play", {
     schema: {
       body: z.object({

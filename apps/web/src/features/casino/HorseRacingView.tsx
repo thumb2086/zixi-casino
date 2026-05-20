@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './HorseRacing.css';
@@ -16,61 +16,94 @@ const HORSES = [
   { id: 6, name: '流星', multiplier: 17.0 },
 ];
 
-type HorseResult = {
-  selectedHorse: number;
-  winnerId: number;
-  winnerName: string;
-  result: 'win' | 'lose';
-  payout: number;
-  multiplier: number;
-};
+// Same FNV-1a hash as server (auto-round.ts)
+function fnv1a32(input: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+function hashInt(seed: string): number {
+  return fnv1a32(String(seed));
+}
+
+function pickWinner(roundId: number): typeof HORSES[0] {
+  const weighted = HORSES.map(h => ({ ...h, weight: 1 / h.multiplier }));
+  const totalWeight = weighted.reduce((s, h) => s + h.weight, 0);
+  let cursor = hashInt(`horse:${roundId}`) % Math.ceil(totalWeight);
+  for (const h of weighted) {
+    cursor -= h.weight;
+    if (cursor < 0) return h;
+  }
+  return HORSES[HORSES.length - 1];
+}
 
 export const HorseRacingView: React.FC = () => {
   const { session } = useAuth();
-  const { enqueue, pending, lastResult, setLastResult } = useBetQueue();
+  const { enqueue, pending } = useBetQueue();
   const [selectedHorseId, setSelectedHorseId] = useState(1);
   const [betAmount, setBetAmount] = useState('10');
   const [statusMsg, setStatusMsg] = useState('請選擇馬匹並下注。');
   const [statusColor, setStatusColor] = useState('#ffd36a');
   const [isRacing, setIsRacing] = useState(false);
+  const [winner, setWinner] = useState<typeof HORSES[0] | null>(null);
   const [progress, setProgress] = useState<Record<number, number>>(() =>
     HORSES.reduce((acc, horse) => ({ ...acc, [horse.id]: 0 }), {})
   );
 
-  const doBet = async () => {
-    if (!session) throw new Error('No session');
+  // Sync round info from server
+  const [roundId, setRoundId] = useState<number | null>(null);
+  const [clockOffset, setClockOffset] = useState(0);
 
-    const res = await api.post('/api/v1/games/horse/play', {
-      sessionId: session.id,
-      betAmount: Number(betAmount),
-      horseId: selectedHorseId,
-    });
+  const fetchRound = useCallback(async () => {
+    try {
+      const res = await api.get("/api/v1/games/horse/round");
+      const data = res.data?.data?.data ?? res.data?.data;
+      if (data?.roundId !== undefined) {
+        setRoundId(data.roundId);
+        setClockOffset(data.serverNow - Date.now());
+      }
+    } catch {}
+  }, []);
 
-    const payload = res.data;
-    if (!res.status || payload?.success === false) {
-      throw new Error(extractGameError(payload));
-    }
-
-    return unwrapGameEnvelope<HorseResult>(payload);
-  };
+  useEffect(() => {
+    fetchRound();
+    const interval = setInterval(fetchRound, 10000);
+    return () => clearInterval(interval);
+  }, [fetchRound]);
 
   const handleBet = () => {
+    if (!session || roundId === null) return;
+
+    // Compute winner LOCALLY — instant result
+    const localWinner = pickWinner(roundId);
+    const isWin = localWinner.id === selectedHorseId;
+    const payout = isWin ? Number(betAmount) * localWinner.multiplier : 0;
+
+    setWinner(localWinner);
     setIsRacing(true);
-    setStatusMsg(`🏇 比賽開始！(${pending + 1})`);
-    setStatusColor('#ffd36a');
+    setStatusMsg(`🏇 ${localWinner.name} 獲勝！${isWin ? `🎉 贏得 ${payout} ZXC` : '😢 下次好運！'}`);
+    setStatusColor(isWin ? '#00ff88' : '#ff4d4d');
 
+    // Start race animation
+    setProgress(HORSES.reduce((acc, horse) => ({ ...acc, [horse.id]: 0 }), {}));
+
+    // Fire settlement API in background
     enqueue(async () => {
-      const data = await doBet();
-      setResult(data);
-      return data;
+      const res = await api.post('/api/v1/games/horse/play', {
+        sessionId: session.id,
+        betAmount: Number(betAmount),
+        horseId: selectedHorseId,
+      });
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
+        throw new Error(extractGameError(payload));
+      }
+      return unwrapGameEnvelope(payload);
     });
-  };
-
-  const setResult = (data: HorseResult) => {
-    setLastResult(data);
-    setStatusMsg(`冠軍：${data.winnerName}（${data.multiplier}x）`);
-    setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
-    setIsRacing(false);
   };
 
   // Race animation
@@ -82,32 +115,23 @@ export const HorseRacingView: React.FC = () => {
         let allFinished = true;
         const next: Record<number, number> = {};
         for (const horse of HORSES) {
-          const value = Math.min(100, (prev[horse.id] ?? 0) + 0.75 + Math.random() * 0.5);
+          const speed = winner?.id === horse.id ? 1.6 : 0.75 + Math.random() * 0.5;
+          const value = Math.min(100, (prev[horse.id] ?? 0) + speed);
           next[horse.id] = value;
           if (value < 100) allFinished = false;
         }
-        if (allFinished) {
-          window.clearInterval(raceTimer);
-        }
+        if (allFinished) window.clearInterval(raceTimer);
         return next;
       });
     }, 90);
 
     return () => window.clearInterval(raceTimer);
-  }, [isRacing]);
-
-  // Reset race when new result comes in
-  useEffect(() => {
-    if (!lastResult) return;
-    setProgress(HORSES.reduce((acc, horse) => ({ ...acc, [horse.id]: 0 }), {}));
-    setIsRacing(false);
-    setStatusMsg(`冠軍：${lastResult.winnerName}（${lastResult.multiplier}x）`);
-    setStatusColor(lastResult.result === 'win' ? '#00ff88' : '#ff4d4d');
-  }, [lastResult]);
+  }, [isRacing, winner]);
 
   return (
     <div className="horse-racing-container">
       <h2>賽馬</h2>
+      <p className="text-xs text-[#adaaaa] mb-2">第 {roundId ?? '...'} 局</p>
 
       <div className="horse-choices">
         {HORSES.map((horse) => (
@@ -133,7 +157,7 @@ export const HorseRacingView: React.FC = () => {
           <div key={horse.id} className="lane">
             <span className="lane-tag">#{horse.id}</span>
             <span
-              className={`horse-avatar ${isRacing ? 'running' : ''} ${lastResult?.winnerId === horse.id && !isRacing ? 'winner' : ''}`}
+              className={`horse-avatar ${isRacing ? 'running' : ''} ${winner?.id === horse.id && !isRacing ? 'winner' : ''}`}
               style={{ left: `${Math.min(92, progress[horse.id] ?? 0)}%` }}
             >
               🐎
@@ -142,11 +166,7 @@ export const HorseRacingView: React.FC = () => {
         ))}
         <div className="status-panel" style={{ color: statusColor }}>
           {statusMsg}
-          {lastResult && !isRacing && (
-            <div className="mt-2 text-sm text-slate-300">
-              你選了 #{lastResult.selectedHorse}，派彩 {lastResult.payout}
-            </div>
-          )}
+          {pending > 0 && <p className="text-xs text-[#adaaaa] mt-1">結算中 ({pending})</p>}
         </div>
       </div>
 
@@ -157,7 +177,7 @@ export const HorseRacingView: React.FC = () => {
           onChange={(e) => setBetAmount(e.target.value)}
         />
         <BetQuickActions amount={betAmount} onChange={setBetAmount} />
-        <button className="btn-bet" onClick={handleBet}>
+        <button className="btn-bet" onClick={handleBet} disabled={roundId === null}>
           {pending > 0 ? `下注中 (${pending})` : '立即下注'}
         </button>
       </div>
