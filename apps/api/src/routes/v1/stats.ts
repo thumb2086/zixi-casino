@@ -70,6 +70,9 @@ export async function statsRoutes(fastify: FastifyInstance) {
       const uniqueAddresses = new Set(lastHour.map((e) => e.address).filter(Boolean));
       const activeNodes = uniqueAddresses.size;
       
+      const uptimeSeconds = Math.floor((now - SERVER_STARTED_AT) / 1000);
+      const uptimeMinutes = Math.floor(uptimeSeconds / 60);
+      
       const recentLogs = events.slice(0, 40).map((e) => ({
         id: e.id,
         channel: e.channel,
@@ -94,12 +97,16 @@ export async function statsRoutes(fastify: FastifyInstance) {
         nodes: activeNodes > 0 ? `${activeNodes} ACTIVE` : null,
         secureLayer: 'AES-256',
         startedAt: SERVER_STARTED_AT,
+        serverUptime: uptimeSeconds,
+        serverUptimeLabel: uptimeMinutes >= 60
+          ? `${Math.floor(uptimeMinutes / 60)}h ${uptimeMinutes % 60}m`
+          : `${uptimeMinutes}m`,
         last24h: {
           success: hourly.map((h) => h.success),
           failure: hourly.map((h) => h.failure)
         }
       };
-      
+
       return createApiEnvelope({ stats, logs: recentLogs }, request.id);
     } catch (e: any) {
       return createApiEnvelope(null, request.id, false, e.message);
