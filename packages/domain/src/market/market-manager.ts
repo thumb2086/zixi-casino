@@ -447,20 +447,23 @@ export class MarketManager {
     return { id, symbol, side, leverage, margin, entryPrice: quote.price, liquidationPrice: pos.liquidationPrice, fee };
   }
 
-  closeFutures(account: MarketAccount, market: MarketSnapshot, positionId: string) {
+  closeFutures(account: MarketAccount, market: MarketSnapshot, positionId: string, tick?: number) {
     const idx = account.futuresPositions.findIndex((p) => p.id === positionId);
     if (idx < 0) throw new Error("找不到期貨倉位");
     const pos = account.futuresPositions[idx];
-    const quote = market.symbols[pos.symbol];
-    if (!quote) throw new Error("標的行情不存在");
-    const pnl = positionPnl(pos, quote.price);
+    // Use tick-specific frozen price if provided (frontend's snapshot tick), else current snapshot price
+    const closePrice = tick !== undefined
+      ? priceForTick(pos.symbol, tick)
+      : market.symbols[pos.symbol]?.price;
+    if (!closePrice) throw new Error("標的行情不存在");
+    const pnl = positionPnl(pos, closePrice);
     const realized = round(Math.max(-pos.margin, pnl), 6);
     const refund = round(Math.max(0, pos.margin + realized), 6);
     const fee = round(pos.notional * FUTURES_FEE_RATE, 6);
     account.futuresPositions.splice(idx, 1);
     account.cash = round(account.cash + refund - fee, 6);
-    appendHistory(account, { type: "futures_close", id: pos.id, symbol: pos.symbol, side: pos.side, closePrice: quote.price, pnl: realized, fee });
-    return { id: pos.id, symbol: pos.symbol, side: pos.side, closePrice: quote.price, realizedPnl: realized, refund, fee };
+    appendHistory(account, { type: "futures_close", id: pos.id, symbol: pos.symbol, side: pos.side, closePrice, pnl: realized, fee });
+    return { id: pos.id, symbol: pos.symbol, side: pos.side, closePrice, realizedPnl: realized, refund, fee };
   }
 
   bankDeposit(account: MarketAccount, amountInput: unknown) {
