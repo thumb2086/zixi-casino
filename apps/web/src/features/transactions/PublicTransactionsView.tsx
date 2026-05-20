@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../store/api';
-import { Activity, HeartPulse, Coins, Sparkles, ChevronRight } from 'lucide-react';
+import { Activity, HeartPulse, Coins, Sparkles, ChevronRight, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { formatNumber } from '@repo/shared';
@@ -34,7 +34,7 @@ type DashboardTx = {
 
 export default function PublicTransactionsView() {
   const { t } = useTranslation();
-  const { address, username, balance, activeAvatar, activeTitle } = useUserStore();
+  const { address, username, balance } = useUserStore();
   const { address: authAddress } = useAuthStore();
   const displayAddress = address || authAddress || '';
 
@@ -46,7 +46,7 @@ export default function PublicTransactionsView() {
         api.get('/api/v1/dashboard/summary'),
       ]);
       return {
-        items: txRes.data.data.items as DashboardTx[],
+        items: (txRes.data.data?.items || []) as DashboardTx[],
         summary: summaryRes.data.data as {
           total: number;
           confirmed: number;
@@ -57,6 +57,24 @@ export default function PublicTransactionsView() {
       };
     },
     refetchInterval: 15000,
+  });
+
+  const { data: healthData } = useQuery({
+    queryKey: ['health-stats-inline'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/stats/health');
+      return res.data.data as {
+        stats?: {
+          uptime?: string;
+          failureRate?: string;
+          nodes?: string;
+          startedAt?: number;
+          serverUptime?: number;
+          serverUptimeLabel?: string;
+        };
+      };
+    },
+    refetchInterval: 30000,
   });
 
   const { data: recentTxData } = useQuery({
@@ -71,9 +89,10 @@ export default function PublicTransactionsView() {
   const items = txData?.items || [];
   const summary = txData?.summary;
   const ledgerEvents = recentTxData?.events || [];
+  const serviceStats = healthData?.stats;
 
-  const successRatePct = Number.isFinite((summary?.successRate ?? 0) * 100)
-    ? Number(((summary?.successRate ?? 0) * 100).toFixed(2))
+  const successRatePct = summary?.total
+    ? Number(((summary.confirmed / summary.total) * 100).toFixed(2))
     : 0;
 
   return (
@@ -98,6 +117,20 @@ export default function PublicTransactionsView() {
           </div>
         </section>
 
+        {/* Server Status Bar */}
+        <div className="flex items-center gap-3 mb-6 bg-[#1a1919] rounded-2xl px-5 py-3 border border-[#494847]/10">
+          <Clock size={14} className="text-[#fcc025]" />
+          <span className="text-[10px] font-bold text-[#adaaaa] uppercase tracking-wider">
+            伺服器運行
+          </span>
+          <span className="text-xs font-black text-emerald-400 ml-auto">
+            {serviceStats?.serverUptimeLabel || '...'}
+          </span>
+          <span className="text-[10px] font-bold text-[#adaaaa]">
+            {serviceStats?.uptime ? `可用 ${serviceStats.uptime}` : ''}
+          </span>
+        </div>
+
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
@@ -118,24 +151,9 @@ export default function PublicTransactionsView() {
               <HeartPulse size={14} className="text-[#fcc025]" />
               <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功率</span>
             </div>
-            <p className="text-xl font-black italic text-[#fcc025]">{successRatePct}%</p>
+            <p className="text-xl font-black italic text-[#fcc025]">{summary?.total ? `${successRatePct}%` : '0%'}</p>
           </div>
         </div>
-
-        <section className="mb-6 rounded-2xl border border-[#494847]/20 bg-[#1a1919] divide-y divide-[#494847]/10">
-          <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">道具背包</span>
-            <ChevronRight size={16} className="text-[#adaaaa]" />
-          </Link>
-          <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">物品圖鑑</span>
-            <ChevronRight size={16} className="text-[#adaaaa]" />
-          </Link>
-          <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">設定</span>
-            <ChevronRight size={16} className="text-[#adaaaa]" />
-          </Link>
-        </section>
 
         <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl mb-6">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
@@ -167,6 +185,21 @@ export default function PublicTransactionsView() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section className="mb-6 rounded-2xl border border-[#494847]/20 bg-[#1a1919] divide-y divide-[#494847]/10">
+          <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
+            <span className="text-sm font-bold">道具背包</span>
+            <ChevronRight size={16} className="text-[#adaaaa]" />
+          </Link>
+          <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
+            <span className="text-sm font-bold">物品圖鑑</span>
+            <ChevronRight size={16} className="text-[#adaaaa]" />
+          </Link>
+          <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
+            <span className="text-sm font-bold">設定</span>
+            <ChevronRight size={16} className="text-[#adaaaa]" />
+          </Link>
         </section>
 
         <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">

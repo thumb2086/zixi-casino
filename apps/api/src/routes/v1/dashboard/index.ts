@@ -32,7 +32,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
       limit: q.limit,
     });
 
-    return createApiEnvelope({ success: true, data: result }, request.id);
+    return createApiEnvelope(result, request.id);
   });
 
   typed.get("/summary", {
@@ -43,6 +43,6 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
       dashboard.getSummary(address),
       dashboard.getReconciliationCheckpoint(address),
     ]);
-    return createApiEnvelope({ success: true, data: { ...summary, reconciliation } }, request.id);
+    return createApiEnvelope({ ...summary, reconciliation }, request.id);
   });
 }
