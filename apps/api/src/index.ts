@@ -41,6 +41,7 @@ import { inventoryRoutes } from "./routes/v1/inventory.js";
 import { pawnRoutes } from "./routes/v1/pawn.js";
 import { giftRoutes } from "./routes/v1/gift.js";
 import postgres from "postgres";
+import { registerCachePlugin } from "./plugins/cache.js";
 
 const fastify = Fastify({
   logger: true,
@@ -214,6 +215,9 @@ fastify.get("/api/diag-thumb", async () => {
         }
     };
 });
+
+// API 快取
+registerCachePlugin(fastify).catch(console.error);
 
 // 註冊路由
 fastify.register(legacyRoutes, { prefix: "/api" });
