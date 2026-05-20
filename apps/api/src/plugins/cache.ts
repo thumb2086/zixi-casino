@@ -4,7 +4,6 @@ import { kv } from "@repo/infrastructure";
 type CacheConfig = {
   ttl: number;
   keyFn?: (req: FastifyRequest) => string;
-  skip?: (req: FastifyRequest) => boolean;
 };
 
 const routeCacheConfig: Record<string, CacheConfig> = {
@@ -36,53 +35,44 @@ function getCacheKey(method: string, url: string, config: CacheConfig, req: Fast
 }
 
 export async function registerCachePlugin(fastify: FastifyInstance) {
-  // onRequest: check cache for GET requests
   fastify.addHook("onRequest", async (req: FastifyRequest, reply: FastifyReply) => {
-    if (req.method !== "GET") return;
+    try {
+      if (req.method !== "GET") return;
+      const config = getConfig("GET", req.url);
+      if (!config) return;
 
-    const config = getConfig("GET", req.url);
-    if (!config) return;
-
-    const cacheKey = getCacheKey("GET", req.url, config, req);
-    const cached = await kv.get<string>(cacheKey);
-    if (cached !== null) {
-      reply.header("x-cache", "HIT");
-      reply.type("application/json").send(JSON.parse(cached));
-      // Prevent the route handler from running
-      (reply as any).handled = true;
-      return;
+      const cacheKey = getCacheKey("GET", req.url, config, req);
+      const cached = await kv.get<string>(cacheKey);
+      if (cached !== null) {
+        reply.header("x-cache", "HIT");
+        return reply.type("application/json").send(JSON.parse(cached));
+      }
+    } catch {
+      // Cache miss or error - continue to route handler
     }
   });
 
-  // onSend: store responses in cache
   fastify.addHook("onSend", async (req: FastifyRequest, reply: FastifyReply, payload: any) => {
-    if (req.method !== "GET") return;
-    if ((reply as any).handled) return;
-    if (reply.statusCode >= 400) return;
+    try {
+      if (req.method !== "GET") return;
+      if (reply.statusCode >= 400) return;
+      const config = getConfig("GET", req.url);
+      if (!config || typeof payload !== "string") return;
 
-    const config = getConfig("GET", req.url);
-    if (!config || typeof payload !== "string") return;
-
-    const cacheKey = getCacheKey("GET", req.url, config, req);
-    await kv.set(cacheKey, payload, { ex: config.ttl });
-    reply.header("x-cache", "MISS");
+      const cacheKey = getCacheKey("GET", req.url, config, req);
+      await kv.set(cacheKey, payload, { ex: config.ttl });
+      reply.header("x-cache", "MISS");
+    } catch {
+      // Cache write failure - non-critical
+    }
   });
 }
 
-/**
- * Invalidate all cached responses for routes matching a namespace prefix.
- */
 export async function invalidateCache(namespace: string): Promise<void> {
-  // Delete by common prefixes
   const prefixes = Object.keys(routeCacheConfig)
     .filter((key) => key.includes(namespace))
-    .map((key) => {
-      const [, path] = key.split(":");
-      return `api:GET:${path}:`;
-    });
-
+    .map((key) => `api:GET:${key.split(":")[1]}:`);
   for (const prefix of prefixes) {
-    // Store a version counter so cached entries are effectively invalidated
-    await kv.set(`cache:inv:${prefix}`, Date.now());
+    await kv.set(`cache:inv:${prefix}`, Date.now()).catch(() => {});
   }
 }
