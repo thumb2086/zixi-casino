@@ -144,13 +144,27 @@ class AudioManager {
     if (this.sounds[key]) return this.sounds[key] || null;
 
     const src = this.isBgmKey(key) ? this.bgmConfig[key] : this.soundConfig[key];
+    const isBgm = this.isBgmKey(key);
 
     const sound = new Howl({
       src: [src],
-      html5: this.isBgmKey(key),
+      html5: isBgm,
       preload: true,
       mute: this.isMuted(key),
       volume: this.getEffectiveVolume(key),
+      onend: isBgm ? () => {
+        // HTML5 loop can be unreliable; manually re-seek + replay
+        if (this.currentBgmKey !== key) return; // was stopped
+        sound.seek(0);
+        const id = sound.play();
+        if (id !== -1) this.currentBgmId = id;
+      } : undefined,
+      onloaderror: (_id, err) => {
+        console.warn(`[Audio] load error for ${key}:`, err);
+      },
+      onplayerror: (_id, err) => {
+        console.warn(`[Audio] play error for ${key}:`, err);
+      },
     });
 
     this.sounds[key] = sound;
@@ -201,8 +215,7 @@ class AudioManager {
   stop(key: SoundKey, id?: number | null) {
     const sound = this.sounds[key];
     if (!sound) return;
-    if (id) sound.stop(id);
-    else sound.stop();
+    if (id && id !== -1) sound.stop(id);
 
     if (this.isBgmKey(key) && this.currentBgmKey === key && (!id || this.currentBgmId === id)) {
       this.currentBgmId = null;
@@ -237,6 +250,10 @@ class AudioManager {
     sound.mute(this.isMuted(key));
     sound.volume(this.getEffectiveVolume(key, 1));
     const id = sound.play();
+    if (id === -1) {
+      console.warn(`[Audio] playBGM failed for ${key}`);
+      return null;
+    }
     this.currentBgmKey = key;
     this.currentBgmId = id;
     return id;
