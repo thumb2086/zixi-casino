@@ -191,7 +191,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       schema: {
         body: z.object({
           sessionId: z.string().optional(),
-        }),
+        }).optional(),
       },
     },
     async (request: any) => {
