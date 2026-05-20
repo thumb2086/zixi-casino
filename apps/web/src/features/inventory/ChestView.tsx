@@ -256,7 +256,7 @@ export default function ChestView() {
     try {
       const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
-        showToast(`成功使用 ${res.data.data.usedCount} 個物品`);
+        showToast(`成功使用 ${quantity} 個物品`);
         if (res.data.data.message) showToast(res.data.data.message);
         await refreshInventory();
       } else {

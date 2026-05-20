@@ -33,6 +33,14 @@
     "./levels/vip-manager.js": {
       "import": "./dist/levels/vip-manager.js",
       "types": "./dist/levels/vip-manager.d.ts"
+    },
+    "./company/company-manager.js": {
+      "import": "./dist/company/company-manager.js",
+      "types": "./dist/company/company-manager.d.ts"
+    },
+    "./company/employee-gen.js": {
+      "import": "./dist/company/employee-gen.js",
+      "types": "./dist/company/employee-gen.d.ts"
     }
   },
   "scripts": {

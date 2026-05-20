@@ -7,6 +7,7 @@ import { ChainClient, SessionRepository, UserRepository, MarketRepository, Walle
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { randomUUID } from "crypto";
 
+
 export async function marketRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const marketManager = new MarketManager();
@@ -88,7 +89,9 @@ export async function marketRoutes(fastify: FastifyInstance) {
 
     const normalized = marketManager.normalizeAccount(storedAccount, nowTs);
     // Sync cash from wallet (source of truth — synced from on-chain)
-    normalized.cash = Number(liveWalletBalance || 0);
+    // Subtract locked margin from open futures positions so cash reflects truly available balance
+    const lockedMargin = normalized.futuresPositions.reduce((sum, p) => sum + p.margin, 0);
+    normalized.cash = Math.max(0, Number(liveWalletBalance || 0) - lockedMargin);
     normalized.updatedAt = new Date(nowTs).toISOString();
     return normalized;
   };
@@ -149,16 +152,12 @@ export async function marketRoutes(fastify: FastifyInstance) {
       return Number.isFinite(n) ? Math.max(0, n) : 0;
     };
 
-    // Pre-check wallet balance for cost actions
+    // Pre-check available cash for cost actions (account.cash already deducts locked margin)
     const isCostAction = ["stock_buy", "bank_deposit", "futures_open", "loan_repay"].includes(type);
-    if (isCostAction) {
-      const estCost = type === "stock_buy"
-        ? resolveAmt(quantity) * (snapshot.symbols?.[symbol || ""]?.price || 0) * (1 + 0.001) // incl fee
-        : resolveAmt(amount);
-      const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-      if (currentBalance < estCost) {
-        return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `錢包餘額不足，需要 ${Math.ceil(estCost).toLocaleString()} ZXC，目前 ${Math.floor(currentBalance).toLocaleString()} ZXC` } }, request.id);
-      }
+    if (isCostAction && account.cash < (type === "stock_buy"
+        ? resolveAmt(quantity) * (snapshot.symbols?.[symbol || ""]?.price || 0) * (1 + 0.001)
+        : resolveAmt(amount))) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `可用子熙幣不足，需要 ${Math.ceil(resolveAmt(amount)).toLocaleString()} ZXC，目前 ${Math.floor(account.cash).toLocaleString()} ZXC` } }, request.id);
     }
 
     let result: any;
@@ -173,60 +172,59 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
       else throw new Error("Unsupported market action payload");
 
-      // Deduct/credit real wallet balance based on actual result
+      // On-chain settlement (synchronous — wait for tx confirmation before DB update)
       const walletAction = new WalletManager();
-      const walletDeduction = Math.abs(result?.total || result?.net || result?.amount || result?.margin || result?.refund || 0);
       const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow"].includes(type);
-      if (walletDeduction > 0) {
-        const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-        const newBalance = isCostAction ? Math.max(0, currentBalance - walletDeduction) : currentBalance + walletDeduction;
-        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+      const walletAmount = isReturnAction
+        ? (result?.refund || result?.total || result?.amount || 0)
+        : (result?.total || result?.margin || result?.amount || 0);
+      const walletAbs = Math.abs(Number(walletAmount));
+      let txHash: string | undefined;
+      if (walletAbs > 0) {
         const intentType = isCostAction ? "admin_debit" : "admin_credit";
-        const intent = walletAction.createTxIntent(userId, "ZXC", intentType, walletDeduction.toString());
+        const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
+        const newBalance = isCostAction ? Math.max(0, currentBalance - walletAbs) : currentBalance + walletAbs;
+
+        // Execute on-chain transfer first (before DB update)
+        const runtime = onchainManager.getRuntimeConfig();
+        if (runtime.rpcUrl && runtime.adminPrivateKey) {
+          const { SettlementServiceImpl, ViemRepository } = await import("@repo/on-chain");
+          const { getOnChainConfig } = await import("@repo/on-chain");
+          const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+          const svc = new SettlementServiceImpl(repo);
+          const treasury = getOnChainConfig().treasuryAddress;
+          const fromAddr = intentType === "admin_credit" ? treasury : address;
+          const toAddr = intentType === "admin_credit" ? address : treasury;
+          const txResult = await svc.adminTransfer({
+            from: fromAddr,
+            to: toAddr,
+            amount: String(walletAbs),
+            tokenAddress: runtime.tokens.zhixi.contractAddress,
+          });
+          if (!txResult.confirmed) throw new Error("上鏈交易未確認");
+          txHash = txResult.txHash;
+        }
+
+        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+        const intent = walletAction.createTxIntent(userId, "ZXC", intentType, String(walletAbs));
         intent.address = address;
-        intent.meta = { source: "market", action: type, symbol: symbol || null };
-        await walletRepo.saveTxIntent(intent);
-        // Save wallet ledger entry
+        intent.meta = { source: "market", action: type, symbol: symbol || null, txHash };
+        await walletRepo.saveTxIntent(txHash
+          ? walletAction.processTxIntent(intent, "confirmed", txHash)
+          : intent);
         await walletRepo.saveLedgerEntry({
           id: randomUUID(),
           userId,
           address,
           token: "zhixi",
           type: `market_${type}`,
-          amount: walletDeduction.toString(),
-          balanceBefore: (isCostAction ? currentBalance : (currentBalance - walletDeduction)).toString(),
+          amount: (isCostAction ? -walletAbs : walletAbs).toString(),
+          balanceBefore: currentBalance.toString(),
           balanceAfter: newBalance.toString(),
-          meta: { symbol: symbol || null, result },
+          meta: { symbol: symbol || null, result, txHash },
           createdAt: new Date(),
         });
       }
-
-      // Trigger on-chain processing for this tx_intent immediately
-      (async () => {
-        try {
-          const { SettlementServiceImpl, ViemRepository } = await import("@repo/on-chain");
-          const runtime = onchainManager.getRuntimeConfig();
-          if (!runtime.rpcUrl || !runtime.adminPrivateKey) return;
-          const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
-          const svc = new SettlementServiceImpl(repo);
-          const FIXED_TREASURY = (await import("@repo/on-chain")).getOnChainConfig().treasuryAddress;
-          const pending = await walletRepo.getPendingIntents();
-          for (const intent of pending) {
-            if (intent.address !== address && intent.address !== FIXED_TREASURY) continue;
-            try {
-              const fromAddr = intent.type === "admin_credit" ? FIXED_TREASURY : address;
-              const toAddr = intent.type === "admin_credit" ? address : intent.type === "admin_debit" ? FIXED_TREASURY : address;
-              const txResult = await svc.adminTransfer({
-                from: fromAddr,
-                to: toAddr,
-                amount: String(intent.amount || "0"),
-                tokenAddress: runtime.tokens.zhixi.contractAddress,
-              });
-              await walletRepo.saveTxIntent(new WalletManager().processTxIntent(intent, "confirmed", txResult.txHash));
-            } catch {}
-          }
-        } catch {}
-      })();
 
       await marketRepo.saveAccount(address, userId, account);
       await marketRepo.saveTrade({

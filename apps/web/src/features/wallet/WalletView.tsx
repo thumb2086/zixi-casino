@@ -245,7 +245,8 @@ export default function WalletView() {
                 </div>
               )}
               {walletSummary?.recentTransactions?.map((tx: any) => {
-                const positive = tx.type === 'airdrop' || tx.type === 'transfer_in';
+                const amountNum = Number(tx.amount);
+                const positive = amountNum >= 0;
                 return (
                   <div key={tx.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                     <div className="flex items-center justify-between gap-4">
@@ -258,8 +259,7 @@ export default function WalletView() {
                       </div>
                       <div className="text-right">
                         <p className={`text-lg font-black italic tracking-tight ${positive ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                          {positive ? '+' : '-'}
-                          {formatNumber(tx.amount, numberMode)} {tx.token}
+                          {positive ? '+' : '-'}{formatNumber(Math.abs(amountNum), numberMode)} {tx.token}
                         </p>
                         <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">{tx.status}</p>
                       </div>
