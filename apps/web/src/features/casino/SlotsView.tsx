@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './Slots.css';
@@ -9,6 +9,10 @@ import { useBetQueue } from './useBetQueue';
 
 const SYMBOLS = ['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣'];
 
+function randomSymbols(): string[] {
+  return Array.from({ length: 9 }, () => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]);
+}
+
 export const SlotsView: React.FC = () => {
   const { session } = useAuth();
   const { enqueue, pending } = useBetQueue();
@@ -17,28 +21,28 @@ export const SlotsView: React.FC = () => {
   const [status, setStatus] = useState('🎰 拉霸準備就緒，祝你好運！');
   const [winSymbols, setWinSymbols] = useState<number[]>([]);
 
-  const doSpin = async () => {
-    if (!session) throw new Error('No session');
-
-    const res = await api.post('/api/v1/games/slots/play', {
-      sessionId: session.id,
-      betAmount: Number(betAmount),
-    });
-
-    const payload = res.data;
-    if (!res.status || payload?.success === false) {
-      throw new Error(extractGameError(payload));
-    }
-
-    return unwrapGameEnvelope<any>(payload);
-  };
-
   const handleSpin = () => {
-    setStatus(`🎲 轉動中... (佇列 ${pending + 1})`);
+    if (!session) return;
+
+    // Show mock result IMMEDIATELY (<1ms feedback)
+    const mockSymbols = randomSymbols();
+    setGrid(mockSymbols);
+    setStatus(`🎲 結果計算中...${pending > 0 ? ` (佇列 ${pending + 1})` : ''}`);
     setWinSymbols([]);
 
+    // Fire API in background
     enqueue(async () => {
-      const result = await doSpin();
+      const res = await api.post('/api/v1/games/slots/play', {
+        sessionId: session.id,
+        betAmount: Number(betAmount),
+      });
+      const payload = res.data;
+      if (!res.status || payload?.success === false) {
+        throw new Error(extractGameError(payload));
+      }
+      const result = unwrapGameEnvelope<any>(payload);
+
+      // Replace mock with real result
       const newGrid = [...grid];
       for (let i = 0; i < 9; i++) newGrid[i] = result.symbols[i];
       setGrid(newGrid);
@@ -50,7 +54,6 @@ export const SlotsView: React.FC = () => {
         setStatus('😢 本局未中，下一把再衝！');
         setWinSymbols([]);
       }
-
       return result;
     });
   };
