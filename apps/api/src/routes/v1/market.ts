@@ -6,7 +6,7 @@ import { MarketManager, OnchainWalletManager, WalletManager } from "@repo/domain
 import { ChainClient, SessionRepository, UserRepository, MarketRepository, WalletRepository, kv } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { randomUUID } from "crypto";
-import { getOnChainConfig, SettlementServiceImpl, ViemRepository } from "@repo/on-chain";
+
 
 export async function marketRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -188,6 +188,8 @@ export async function marketRoutes(fastify: FastifyInstance) {
         // Execute on-chain transfer first (before DB update)
         const runtime = onchainManager.getRuntimeConfig();
         if (runtime.rpcUrl && runtime.adminPrivateKey) {
+          const { SettlementServiceImpl, ViemRepository } = await import("@repo/on-chain");
+          const { getOnChainConfig } = await import("@repo/on-chain");
           const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
           const svc = new SettlementServiceImpl(repo);
           const treasury = getOnChainConfig().treasuryAddress;
