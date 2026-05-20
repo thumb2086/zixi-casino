@@ -88,7 +88,9 @@ export async function marketRoutes(fastify: FastifyInstance) {
 
     const normalized = marketManager.normalizeAccount(storedAccount, nowTs);
     // Sync cash from wallet (source of truth — synced from on-chain)
-    normalized.cash = Number(liveWalletBalance || 0);
+    // Subtract locked margin from open futures positions so cash reflects truly available balance
+    const lockedMargin = normalized.futuresPositions.reduce((sum, p) => sum + p.margin, 0);
+    normalized.cash = Math.max(0, Number(liveWalletBalance || 0) - lockedMargin);
     normalized.updatedAt = new Date(nowTs).toISOString();
     return normalized;
   };
@@ -149,16 +151,12 @@ export async function marketRoutes(fastify: FastifyInstance) {
       return Number.isFinite(n) ? Math.max(0, n) : 0;
     };
 
-    // Pre-check wallet balance for cost actions
+    // Pre-check available cash for cost actions (account.cash already deducts locked margin)
     const isCostAction = ["stock_buy", "bank_deposit", "futures_open", "loan_repay"].includes(type);
-    if (isCostAction) {
-      const estCost = type === "stock_buy"
-        ? resolveAmt(quantity) * (snapshot.symbols?.[symbol || ""]?.price || 0) * (1 + 0.001) // incl fee
-        : resolveAmt(amount);
-      const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-      if (currentBalance < estCost) {
-        return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `錢包餘額不足，需要 ${Math.ceil(estCost).toLocaleString()} ZXC，目前 ${Math.floor(currentBalance).toLocaleString()} ZXC` } }, request.id);
-      }
+    if (isCostAction && account.cash < (type === "stock_buy"
+        ? resolveAmt(quantity) * (snapshot.symbols?.[symbol || ""]?.price || 0) * (1 + 0.001)
+        : resolveAmt(amount))) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `可用子熙幣不足，需要 ${Math.ceil(resolveAmt(amount)).toLocaleString()} ZXC，目前 ${Math.floor(account.cash).toLocaleString()} ZXC` } }, request.id);
     }
 
     let result: any;

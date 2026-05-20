@@ -64,8 +64,15 @@ export default function MarketView() {
 
   const runAction = async (params: MarketActionParams, successMsg: string) => {
     try {
-      await execute.mutateAsync(params);
-      setActionNotice({ type: 'success', message: successMsg });
+      const data = await execute.mutateAsync(params);
+      if (params.type === 'futures_close' && data?.result?.realizedPnl !== undefined) {
+        const pnl = data.result.realizedPnl;
+        const sign = pnl >= 0 ? '+' : '';
+        const label = pnl >= 0 ? 'success' : 'error';
+        setActionNotice({ type: label, message: `倉位已平倉 · 實現損益 ${sign}${formatNumber(pnl, numberMode)} ZXC` });
+      } else {
+        setActionNotice({ type: 'success', message: successMsg });
+      }
     } catch (err: any) {
       setActionNotice({ type: 'error', message: err?.message || t('market.action_failed') });
     }
@@ -327,11 +334,14 @@ export default function MarketView() {
                       {summary.futuresPositions.length > 1 && (
                         <button onClick={async () => {
                           let lastErr: any = null;
+                          let totalPnl = 0;
                           for (const pos of summary.futuresPositions) {
-                            try { await execute.mutateAsync({ type: 'futures_close', positionId: pos.id } as any); }
+                            try { const d = await execute.mutateAsync({ type: 'futures_close', positionId: pos.id } as any); if (d?.result?.realizedPnl !== undefined) totalPnl += d.result.realizedPnl; }
                             catch (e: any) { lastErr = e; }
                           }
-                          setActionNotice({ type: lastErr ? 'error' : 'success', message: lastErr?.message || `${summary.futuresPositions.length} 倉位已全平` });
+                          const sign = totalPnl >= 0 ? '+' : '';
+                          const label = totalPnl >= 0 ? 'success' : 'error';
+                          setActionNotice({ type: lastErr ? 'error' : label, message: lastErr?.message || `${summary.futuresPositions.length} 倉位已全平 · 總實現損益 ${sign}${formatNumber(totalPnl, numberMode)} ZXC` });
                         }} disabled={execute.isPending}
                           className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
                           全平
