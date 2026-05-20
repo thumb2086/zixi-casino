@@ -971,10 +971,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
         text: `🛠️ 管理員贈送 ${summaryParts.join(' + ')} 給 ${normalized.slice(0, 6)}`,
         createdAt: Date.now(),
       };
-      const msgs: any[] = await kv.get("chat:global:messages") || [];
-      msgs.push(chatMsg);
-      if (msgs.length > 50) msgs.shift();
-      await kv.set("chat:global:messages", msgs);
+      await kv.lpush("chat:global:messages", chatMsg);
+      await kv.ltrim("chat:global:messages", 0, 49);
     } catch {}
 
     return createApiEnvelope({ success: true, bundle: bundleSummary }, request.id);

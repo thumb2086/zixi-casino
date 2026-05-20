@@ -110,8 +110,10 @@ interface ChestMeta {
   lastFreeChestAt: string | null;
 }
 
-async function loadChestMeta(userId: string): Promise<ChestMeta> {
-  const profile = await userRepo.getUserProfile(userId);
+async function loadChestMeta(userId: string, profile?: any): Promise<ChestMeta> {
+  if (!profile) {
+    profile = await userRepo.getUserProfile(userId);
+  }
   return {
     chestPity: coercePity((profile as any)?.chestPity),
     lastFreeChestAt: typeof (profile as any)?.lastFreeChestAt === "string"
@@ -134,10 +136,8 @@ async function saveChestMeta(userId: string, meta: ChestMeta): Promise<void> {
  * defaults when columns are empty or the profile row is missing.
  */
 export async function loadInventoryState(userId: string): Promise<ProfileInventoryState> {
-  const [profile, meta] = await Promise.all([
-    userRepo.getUserProfile(userId),
-    loadChestMeta(userId),
-  ]);
+  const profile = await userRepo.getUserProfile(userId);
+  const meta = await loadChestMeta(userId, profile);
   return {
     inventory: coerceRecord(profile?.inventory),
     ownedAvatars: coerceStringArray(profile?.ownedAvatars),
@@ -302,6 +302,7 @@ export interface UseAllTokensResult {
   totalYjc: number;
   usedItems: Array<{ itemId: string; quantity: number; value: number; currency: string }>;
   state: ProfileInventoryState;
+  preState: ProfileInventoryState;
 }
 
 export async function useAllTokenItems(userId: string): Promise<UseAllTokensResult> {
@@ -335,7 +336,11 @@ export async function useAllTokenItems(userId: string): Promise<UseAllTokensResu
   }
 
   await persistInventoryState(userId, nextState);
-  return { totalZxc, totalYjc, usedItems, state: nextState };
+  return { totalZxc, totalYjc, usedItems, state: nextState, preState: state };
+}
+
+export async function rollbackUseAllTokens(userId: string, preState: ProfileInventoryState): Promise<void> {
+  await persistInventoryState(userId, preState);
 }
 
 export async function useItem(

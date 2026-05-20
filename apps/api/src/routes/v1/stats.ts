@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
 import { StatsRepository, WalletRepository, kv, OpsRepository } from "@repo/infrastructure";
 import { requireDb } from "@repo/infrastructure/db/index.js";
+import { SERVER_STARTED_AT } from "../../index.js";
 
 export async function statsRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -30,7 +31,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
   typedFastify.get("/health", async (request) => {
     try {
       const opsRepo = new OpsRepository();
-      const events: { createdAt: Date | string; severity: string; address?: string }[] = await opsRepo.listEvents({ limit: 1000 });
+      const events: any[] = await opsRepo.listEvents({ limit: 1000 });
       
       // Filter events from last 24 hours
       const now = Date.now();
@@ -69,18 +70,37 @@ export async function statsRoutes(fastify: FastifyInstance) {
       const uniqueAddresses = new Set(lastHour.map((e) => e.address).filter(Boolean));
       const activeNodes = uniqueAddresses.size;
       
+      const recentLogs = events.slice(0, 40).map((e) => ({
+        id: e.id,
+        channel: e.channel,
+        severity: e.severity,
+        source: e.source,
+        kind: e.kind,
+        message: e.message,
+        address: e.address,
+        game: e.game,
+        token: e.token,
+        roundId: e.roundId,
+        txHash: e.txHash,
+        errorCode: e.errorCode,
+        errorStage: e.errorStage,
+        meta: e.meta,
+        createdAt: e.createdAt,
+      }));
+
       const stats = {
         uptime: successRate ? `${successRate}%` : null,
         failureRate: total > 0 ? `${(errors / total * 100).toFixed(2)}%` : null,
         nodes: activeNodes > 0 ? `${activeNodes} ACTIVE` : null,
         secureLayer: 'AES-256',
+        startedAt: SERVER_STARTED_AT,
         last24h: {
           success: hourly.map((h) => h.success),
           failure: hourly.map((h) => h.failure)
         }
       };
       
-      return createApiEnvelope({ stats }, request.id);
+      return createApiEnvelope({ stats, logs: recentLogs }, request.id);
     } catch (e: any) {
       return createApiEnvelope(null, request.id, false, e.message);
     }

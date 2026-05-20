@@ -14,7 +14,7 @@ export const SlotsView: React.FC = () => {
   const { session } = useAuth();
   const [betAmount, setBetAmount] = useState('10');
   const [isSpinning, setIsSpinning] = useState(false);
-  const [grid, setGrid] = useState<string[]>(['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣', '🍒', '🍋'].slice(0, 9));
+  const [grid, setGrid] = useState<string[]>(['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣', '🍒', '🍋']);
   const [status, setStatus] = useState('🎰 拉霸準備就緒，祝你好運！');
   const [winSymbols, setWinSymbols] = useState<number[]>([]);
 
@@ -34,20 +34,24 @@ export const SlotsView: React.FC = () => {
 
       return unwrapGameEnvelope<any>(payload);
     },
-    onSuccess: async (result) => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
+    onSuccess: (result) => {
       setIsSpinning(false);
 
       const newGrid = [...grid];
-      newGrid[3] = result.symbols[0];
-      newGrid[4] = result.symbols[1];
-      newGrid[5] = result.symbols[2];
+      newGrid[0] = result.symbols[0];
+      newGrid[1] = result.symbols[1];
+      newGrid[2] = result.symbols[2];
+      newGrid[3] = result.symbols[3];
+      newGrid[4] = result.symbols[4];
+      newGrid[5] = result.symbols[5];
+      newGrid[6] = result.symbols[6];
+      newGrid[7] = result.symbols[7];
+      newGrid[8] = result.symbols[8];
       setGrid(newGrid);
 
       if (result.multiplier > 0) {
         setStatus(`🎉 中獎！倍率 ${result.multiplier}x`);
-        setWinSymbols([3, 4, 5]);
+        setWinSymbols(result.winLine || [3, 4, 5]);
       } else {
         setStatus('😢 本局未中，下一把再衝！');
         setWinSymbols([]);

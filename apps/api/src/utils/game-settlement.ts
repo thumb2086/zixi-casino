@@ -614,10 +614,30 @@ export class GameSettlementWrapper {
           : `${displayName} 在 ${game} 贏得 ${payout.toLocaleString()} ZXC`,
         createdAt: Date.now(),
       };
-      const messages: any[] = (await kv.get("chat:global:messages")) || [];
-      messages.push(msg);
-      if (messages.length > 50) messages.shift();
-      await kv.set("chat:global:messages", messages);
+      const { isAutoRoundGame, getRoundInfo } = await import("@repo/domain/games/auto-round.js");
+      const isAutoRound = isAutoRoundGame(game);
+      if (isAutoRound) {
+        const round = getRoundInfo(game);
+        if (Date.now() < round.closesAt) {
+          // Round still open — defer message until round closes
+          const deferredKey = `chat:deferred:${game}:${round.roundId}`;
+          await kv.lpush(deferredKey, msg);
+          return;
+        }
+        // Round closed — flush any deferred messages for this round too
+        const deferredKey = `chat:deferred:${game}:${round.roundId}`;
+        const deferred = await kv.lrange<any>(deferredKey, 0, -1);
+        await kv.del(deferredKey);
+        const allMsgs = [...deferred, msg];
+        for (const m of allMsgs) {
+          await kv.lpush("chat:global:messages", m);
+        }
+        await kv.ltrim("chat:global:messages", 0, 49);
+        return;
+      }
+      // Non auto-round games: post directly
+      await kv.lpush("chat:global:messages", msg);
+      await kv.ltrim("chat:global:messages", 0, 49);
     } catch {}
   }
 
@@ -643,7 +663,29 @@ export class GameSettlementWrapper {
     }
     if (userId) {
       await this.checkAndUnlockTitles(userId, address);
+      // Grant XP based on bet amount
+      await this.grantGameXp(userId, betAmount).catch(() => {});
     }
+  }
+
+  private async grantGameXp(userId: string, betAmount: number): Promise<void> {
+    const { requireDb } = await import("@repo/infrastructure/db/index.js");
+    const db = await requireDb();
+    const { grantXp } = await import("@repo/domain");
+    const { loadInventoryState } = await import("./inventory.js");
+
+    const state = await loadInventoryState(userId);
+    const [profile] = await db.execute(sql`
+      SELECT COALESCE(xp, 0) as xp, COALESCE(level, 1) as level FROM user_profiles WHERE user_id = ${userId}
+    `);
+    const currentXp = Number(profile?.xp || 0);
+    const currentLevel = Number(profile?.level || 1);
+
+    const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs);
+
+    await db.execute(sql`
+      UPDATE user_profiles SET xp = ${result.totalXp}, level = ${result.newLevel}, updated_at = NOW() WHERE user_id = ${userId}
+    `);
   }
 
   async updateTotalWin(address: string, winAmount: number): Promise<void> {

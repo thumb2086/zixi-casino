@@ -8,7 +8,7 @@ import { createApiEnvelope, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, type 
 import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
-import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser, useAllTokenItems } from "../../utils/inventory.js";
+import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser, useAllTokenItems, rollbackUseAllTokens, type UseAllTokensResult } from "../../utils/inventory.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import * as schema from "@repo/infrastructure/db/schema.js";
 import { eq, sql } from "drizzle-orm";
@@ -198,8 +198,10 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       const ctx = await getContext(request);
       if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
 
+      let result: UseAllTokensResult | null = null;
+
       try {
-        const result = await useAllTokenItems(ctx.userId);
+        result = await useAllTokenItems(ctx.userId);
 
         if (result.totalZxc > 0) {
           const curBal = await gameSettlement.getBalance(ctx.address, "zhixi");
@@ -231,6 +233,9 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           request.id,
         );
       } catch (error: any) {
+        if (result?.preState) {
+          rollbackUseAllTokens(ctx.userId, result.preState).catch(() => {});
+        }
         return createApiEnvelope({ success: false }, request.id, false, error?.message || "USE_ALL_TOKENS_FAILED");
       }
     },

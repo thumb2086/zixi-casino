@@ -46,6 +46,8 @@ const fastify = Fastify({
   logger: true,
 }).withTypeProvider<ZodTypeProvider>();
 
+export const SERVER_STARTED_AT = Date.now();
+
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
 

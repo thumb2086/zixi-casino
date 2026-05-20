@@ -38,7 +38,11 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const [row] = await q(`SELECT * FROM company_accounts WHERE user_id = $1 LIMIT 1`, [ctx.user.id]);
     if (!row) return createApiEnvelope({ company: null }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    processTicks(data, row.company_type);
+    try {
+      processTicks(data, row.company_type);
+    } catch (err) {
+      console.error("[Company] processTicks error:", err);
+    }
     await q(`UPDATE company_accounts SET data = $1, updated_at = NOW() WHERE id = $2`, [JSON.stringify(data), row.id]);
     return createApiEnvelope({ company: { ...row, data: computeSummary(data, row.company_type) } }, request.id);
   });

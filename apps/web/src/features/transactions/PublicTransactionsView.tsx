@@ -1,22 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../store/api';
-import { Activity, HeartPulse, User, Coins, Sparkles, ChevronRight, Terminal, Database } from 'lucide-react';
+import { Activity, HeartPulse, Coins, Sparkles, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { formatNumber, ITEM_DROP_TABLES } from '@repo/shared';
+import { formatNumber } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
-const allItems = Object.values(ITEM_DROP_TABLES).flat();
-const avatarMap = Object.fromEntries(
-  allItems.filter((i) => i.type === 'avatar').map((i) => [i.id, i])
-);
-const titleMap = Object.fromEntries(
-  allItems.filter((i) => i.type === 'title').map((i) => [i.id, i])
-);
+type LedgerEntry = {
+  id: string;
+  type: string;
+  amount: string;
+  token: string;
+  address: string;
+  balanceBefore: string;
+  balanceAfter: string;
+  createdAt: string;
+};
 
-type DashboardTransaction = {
+type DashboardTx = {
   id: string;
   roundId: string | number;
   userAddress: string;
@@ -26,15 +29,16 @@ type DashboardTransaction = {
   status: string;
   txHash?: string;
   gameType?: string;
-  extensionMetadata?: Record<string, any>;
   createdAt: string;
 };
 
 export default function PublicTransactionsView() {
-  const { sessionId } = useAuthStore();
   const { t } = useTranslation();
+  const { address, username, balance, activeAvatar, activeTitle } = useUserStore();
+  const { address: authAddress } = useAuthStore();
+  const displayAddress = address || authAddress || '';
 
-  const { data, isLoading } = useQuery({
+  const { data: txData, isLoading } = useQuery({
     queryKey: ['public-transactions'],
     queryFn: async () => {
       const [txRes, summaryRes] = await Promise.all([
@@ -42,7 +46,7 @@ export default function PublicTransactionsView() {
         api.get('/api/v1/dashboard/summary'),
       ]);
       return {
-        items: txRes.data.data.items as DashboardTransaction[],
+        items: txRes.data.data.items as DashboardTx[],
         summary: summaryRes.data.data as {
           total: number;
           confirmed: number;
@@ -55,66 +59,22 @@ export default function PublicTransactionsView() {
     refetchInterval: 15000,
   });
 
-  const { data: healthData } = useQuery({
-    queryKey: ['health-stats-inline'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/stats/health');
-      return res.data.data as {
-        stats?: {
-          uptime?: string;
-          failureRate?: string;
-        };
-      };
-    },
-    refetchInterval: 30000,
-  });
-
-  const { data: walletSummary } = useQuery({
-    queryKey: ['wallet-summary-tx'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/wallet/summary', { params: { sessionId } });
-      return res.data.data;
-    },
-    refetchInterval: 15000,
-  });
-  const yjcBalance = walletSummary?.summary?.balances?.YJC || walletSummary?.balances?.YJC || '0';
-
-  const { data: txData } = useQuery({
-    queryKey: ['recent-txs'],
+  const { data: recentTxData } = useQuery({
+    queryKey: ['recent-txs-inline'],
     queryFn: async () => {
       const res = await api.get('/api/v1/stats/recent-txs');
-      return res.data.data;
+      return res.data.data as { events: LedgerEntry[] };
     },
     refetchInterval: 10000,
   });
 
-  const items = data?.items || [];
-  const summary = data?.summary;
-  const registerBonusItems = items.filter((item) =>
-    item.type?.toLowerCase() === 'register_bonus' ||
-    item.extensionMetadata?.reason === 'register_bonus'
-  ).slice(0, 8);
-  const serviceStats = healthData?.stats;
-  const events = txData?.events || [];
-  const allActivity = [...events.map((e: any) => ({
-    id: e.id, type: e.type, amount: e.amount,
-    tokenSymbol: (e.token || 'ZXC').toUpperCase(),
-    userAddress: e.address?.slice(0, 10) || '',
-    roundId: '', status: 'confirmed', createdAt: e.createdAt,
-  })), ...items].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 50);
-
-  const { address, username, balance, activeAvatar, activeTitle } = useUserStore();
-  const avatarItem = avatarMap[activeAvatar];
-  const titleItem = titleMap[activeTitle];
-
-  const metric = (value: number | null | undefined, suffix = '%') =>
-    typeof value === 'number' ? `${value}${suffix}` : '--';
+  const items = txData?.items || [];
+  const summary = txData?.summary;
+  const ledgerEvents = recentTxData?.events || [];
 
   const successRatePct = Number.isFinite((summary?.successRate ?? 0) * 100)
     ? Number(((summary?.successRate ?? 0) * 100).toFixed(2))
     : 0;
-  const walletExecutionPct = summary?.total ? Math.round((summary.confirmed / summary.total) * 10000) / 100 : 0;
-  const marketWinRatePct = Math.max(0, 100 - (summary?.failed ?? 0) * 100 / Math.max(summary?.total || 1, 1));
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
@@ -128,38 +88,40 @@ export default function PublicTransactionsView() {
       </header>
 
       <main className="app-shell pt-24">
-        {/* Personal Status */}
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 flex items-center gap-6 mb-6">
-          <div className="text-5xl shrink-0">{avatarItem?.icon || '🧑'}</div>
           <div className="flex-1 min-w-0">
             <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
-            {titleItem && <p className="text-xs font-bold text-[#fcc025]">{titleItem.icon} {titleItem.name}</p>}
-            <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{address || ''}</p>
+            <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{displayAddress || ''}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xl font-black italic text-[#fcc025]">{Number(balance || 0).toLocaleString()} ZXC</p>
           </div>
         </section>
+
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-[#fcc025]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC</span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">總交易</span>
             </div>
-            <p className="text-xl font-black italic text-[#fcc025]">{Number(balance).toLocaleString()}</p>
+            <p className="text-xl font-black italic text-[#fcc025]">{formatNumber(summary?.total ?? 0)}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={14} className="text-[#a855f7]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">YJC</span>
+              <Sparkles size={14} className="text-emerald-400" />
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功</span>
             </div>
-            <p className="text-xl font-black italic text-[#a855f7]">{Number(yjcBalance || 0).toLocaleString()}</p>
+            <p className="text-xl font-black italic text-emerald-400">{formatNumber(summary?.confirmed ?? 0)}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={14} className="text-[#fcc025]" />
-              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">活躍頭像</span>
+              <HeartPulse size={14} className="text-[#fcc025]" />
+              <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功率</span>
             </div>
-            <p className="text-sm font-bold text-white truncate">{avatarItem?.name || activeAvatar}</p>
+            <p className="text-xl font-black italic text-[#fcc025]">{successRatePct}%</p>
           </div>
         </div>
+
         <section className="mb-6 rounded-2xl border border-[#494847]/20 bg-[#1a1919] divide-y divide-[#494847]/10">
           <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
             <span className="text-sm font-bold">道具背包</span>
@@ -175,140 +137,18 @@ export default function PublicTransactionsView() {
           </Link>
         </section>
 
-        <section className="mb-10 space-y-6">
-          <div className="flex items-center gap-2">
-            <HeartPulse size={16} className="text-[#fcc025]" />
-            <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {t('transactions.service_status')}
-            </h2>
-          </div>
-
-          {/* Core Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">UPTIME</span>
-              <span className="text-xl font-black italic text-emerald-500">{serviceStats?.uptime ?? (isLoading ? '...' : '--')}</span>
-            </div>
-            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">FAILURE RATE</span>
-              <span className="text-xl font-black italic text-[#fcc025]">{serviceStats?.failureRate ?? (isLoading ? '...' : '--')}</span>
-            </div>
-            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">NODES</span>
-              <span className="text-xl font-black italic text-white">{serviceStats?.nodes ?? (isLoading ? '...' : '--')}</span>
-            </div>
-            <div className="bg-[#1a1919] p-6 rounded-2xl border border-[#494847]/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-[#494847] uppercase tracking-[0.3em]">SECURE LAYER</span>
-              <span className="text-xl font-black italic text-[#fcc025]">{serviceStats?.secureLayer ?? '--'}</span>
-            </div>
-          </div>
-
-          {/* Traffic Graph + Event Log */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/10 space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Activity size={14} className="text-[#fcc025]" />
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SIMULATION THROUGHPUT</h3>
-                </div>
-                <div className="flex items-center gap-3 text-[7px] font-black uppercase">
-                  <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 border border-emerald-500" /> SUCCESS</div>
-                  <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-red-500/60 border border-red-500" /> FAILURE</div>
-                </div>
-              </div>
-              <div className="flex items-end gap-1 h-40">
-                {serviceStats?.last24h?.success?.length > 0 ? (
-                  serviceStats.last24h.success.map((val: number, i: number) => (
-                    <div key={i} className="flex-1 group relative">
-                      <div className="bg-emerald-500/10 w-full rounded-t-sm" style={{ height: `${(val / 50) * 100}%` }} />
-                      <div className="bg-red-500/40 w-full rounded-t-sm -mt-1" style={{ height: `${(serviceStats.last24h.failure[i] / 50) * 100}%` }} />
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center opacity-30">
-                    <Activity size={24} className="text-[#494847]" />
-                    <span className="text-[#494847] text-xs font-bold uppercase ml-2">No Data</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex justify-between text-[7px] font-black text-[#494847] uppercase tracking-[0.3em]">
-                <span>24 HOURS AGO</span>
-                <span>NOW</span>
-              </div>
-            </div>
-
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/10 space-y-4">
-              <div className="flex items-center gap-2">
-                <Terminal size={14} className="text-[#fcc025]" />
-                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">SYSTEM PROTOCOL LOGS</h3>
-              </div>
-              <div className="space-y-3 max-h-[280px] overflow-y-auto pr-2 hide-scrollbar">
-                {events.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 opacity-20">
-                    <Database size={32} />
-                    <p className="text-[8px] font-black uppercase tracking-[0.5em] mt-3">No recent traces</p>
-                  </div>
-                )}
-                {events.map((ev: any, i: number) => (
-                  <div key={i} className="bg-[#0e0e0e] rounded-xl p-3 border border-[#494847]/5 space-y-1.5 hover:border-[#fcc025]/30 transition-all">
-                    <div className="flex items-center justify-between">
-                      <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-sm ${ev.severity === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-[#fcc025]/10 text-[#fcc025]'}`}>
-                        [{ev.kind}]
-                      </span>
-                      <span className="text-[7px] font-bold text-[#494847]">
-                        {new Date(ev.createdAt).toLocaleTimeString([], { hour12: false })}
-                      </span>
-                    </div>
-                    <p className="text-xs font-bold text-white leading-relaxed uppercase italic tracking-tight">{ev.message}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mb-6 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {t('transactions.overall_success_rate')}
-            </p>
-            <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(successRatePct)}</p>
-            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-              {t('transactions.success_summary', { success: formatNumber(summary?.confirmed ?? 0), scored: formatNumber(summary?.total ?? 0) })}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {t('transactions.wallet_execution')}
-            </p>
-            <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(walletExecutionPct)}</p>
-            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-              {t('transactions.confirmed_wallet_intents')}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-              {t('transactions.market_win_rate')}
-            </p>
-            <p className="mt-3 text-3xl font-black italic tracking-tight text-[#fcc025]">{metric(marketWinRatePct)}</p>
-            <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-              {t('transactions.market_outcomes')}
-            </p>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl mb-6">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
             {t('transactions.latest_activity')}
           </p>
           <div className="mt-4 space-y-3">
             {isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
-            {!isLoading && !allActivity.length && (
+            {!isLoading && items.length === 0 && (
               <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
                 {t('transactions.empty')}
               </div>
             )}
-            {allActivity.map((item: any) => (
+            {items.map((item: DashboardTx) => (
               <div key={item.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -316,7 +156,7 @@ export default function PublicTransactionsView() {
                       {`${item.type?.toUpperCase?.() || 'TX'} • ${formatNumber(Number(item.amount))} ${item.tokenSymbol || ''}`}
                     </p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-                      {item.userAddress} / round {String(item.roundId)}
+                      {item.userAddress?.slice(0, 10)}... / round {String(item.roundId)}
                     </p>
                   </div>
                   <div className="text-right">
@@ -329,23 +169,22 @@ export default function PublicTransactionsView() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">Latest REGISTER_BONUS</p>
-          <div className="mt-4 space-y-2">
-            {!registerBonusItems.length && (
-              <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">No register bonus records</div>
+        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity size={14} className="text-[#fcc025]" />
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">錢包動態</p>
+          </div>
+          <div className="space-y-2">
+            {ledgerEvents.length === 0 && (
+              <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">暫無記錄</div>
             )}
-            {registerBonusItems.map((item) => (
-              <div key={item.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3 text-xs text-[#adaaaa]">
+            {ledgerEvents.map((entry: LedgerEntry) => (
+              <div key={entry.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
                 <div className="flex items-center justify-between">
-                  <span>{item.userAddress}</span>
-                  <span className="uppercase text-[#fcc025]">{item.type}</span>
+                  <span className="text-xs font-bold text-white">{entry.type}</span>
+                  <span className="text-xs font-bold text-[#fcc025]">{entry.token} {formatNumber(Number(entry.amount))}</span>
                 </div>
-                <div className="text-[#fcc025]">{formatNumber(Number(item.amount))} {item.tokenSymbol || ''}</div>
-                <div className="mt-1">status: {item.status}</div>
-                <div className="truncate">
-                  tx: {item.txHash ? <a className="text-[#fcc025] underline" href={`https://sepolia.etherscan.io/tx/${item.txHash}`} target="_blank" rel="noreferrer">{item.txHash}</a> : '--'}
-                </div>
+                <p className="text-[10px] text-[#adaaaa] mt-1">{entry.address?.slice(0, 10)}... · {new Date(entry.createdAt).toLocaleString('zh-TW')}</p>
               </div>
             ))}
           </div>

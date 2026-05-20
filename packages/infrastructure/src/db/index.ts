@@ -26,6 +26,7 @@ if (!connectionString && process.env.NODE_ENV === "production") {
 
 let db: any = null;
 let ensureCoreSchemaPromise: Promise<void> | null = null;
+let schemaReady = false;
 
 const normalizeLegacyIdentityData = async (sql: any) => {
   const [{ custodyUsersExists }] = await sql`
@@ -207,6 +208,9 @@ const ensureCoreSchema = async () => {
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS token_amount NUMERIC`.catch(() => {});
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP`.catch(() => {});
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS meta JSONB`.catch(() => {});
+          // XP/level columns for experience system
+          await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS xp NUMERIC DEFAULT '0'`.catch(() => {});
+          await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1`.catch(() => {});
 
           // Create new tables that may not exist yet (added after initial schema deploy)
           await sql`CREATE TABLE IF NOT EXISTS game_sessions (
@@ -598,7 +602,10 @@ const ensureCoreSchema = async () => {
 
 export const requireDb = async () => {
   if (!db) throw new Error("Database not initialized");
-  await ensureCoreSchema();
+  if (!schemaReady) {
+    await ensureCoreSchema();
+    schemaReady = true;
+  }
   return db;
 };
 
@@ -606,7 +613,7 @@ try {
   if (connectionString && !connectionString.includes("mock")) {
     const client = postgres(connectionString, {
         ssl: 'require',
-        max: 10,
+        max: 25,
         idle_timeout: 20,
         connect_timeout: 10
     });
@@ -669,29 +676,25 @@ export class UserRepository implements IUserRepository {
   }
   async saveUserProfile(userId: string, data: any) {
     const conn = await requireDb();
-    const user = await this.getUserById(userId);
-    if (!user?.address) throw new Error("User not found while saving profile");
-    const current = await this.getUserProfile(userId);
-    const nextAddress = current?.address || user.address;
-    const nextPayload = {
+    const payload = {
       ...data,
-      address: nextAddress,
       updatedAt: new Date(),
     };
 
-    if (current?.id) {
-      await conn
-        .update(schema.userProfiles)
-        .set(nextPayload)
-        .where(eq(schema.userProfiles.id, current.id));
-      return;
-    }
+    const result = await conn
+      .update(schema.userProfiles)
+      .set(payload)
+      .where(eq(schema.userProfiles.userId, userId));
 
-    await conn.insert(schema.userProfiles).values({
-      userId,
-      address: nextAddress,
-      ...data,
-    });
+    if (result?.length === 0 || result?.rowCount === 0) {
+      const user = await this.getUserById(userId);
+      const address = user?.address || data.address || "";
+      await conn.insert(schema.userProfiles).values({
+        userId,
+        address,
+        ...data,
+      });
+    }
   }
 }
 

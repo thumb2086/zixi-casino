@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../db/schema.js";
 import { eq, lte } from "drizzle-orm";
+import { UpstashKV } from "./upstash-kv.js";
 
 const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 let db: any = null;
@@ -11,10 +12,26 @@ if (connectionString && !connectionString.includes("mock")) {
   db = drizzle(client, { schema });
 }
 
+export interface KVClient {
+  get<T>(key: string): Promise<T | null>;
+  set(key: string, value: any, options?: { ex?: number }): Promise<string>;
+  del(key: string): Promise<number>;
+  sadd(key: string, ...members: string[]): Promise<number>;
+  srem(key: string, ...members: string[]): Promise<number>;
+  smembers(key: string): Promise<string[]>;
+  lpush(key: string, ...values: any[]): Promise<number>;
+  lrange<T>(key: string, start: number, stop: number): Promise<T[]>;
+  ltrim(key: string, start: number, stop: number): Promise<string>;
+  claimSlot(key: string, ttlSeconds: number, value: string): Promise<boolean>;
+  expire?(key: string, seconds: number): Promise<number>;
+  ttl?(key: string): Promise<number>;
+  ping?(): Promise<boolean>;
+}
+
 /**
- * Postgres-backed KV Client to replace @vercel/kv
+ * Postgres-backed KV Client (fallback)
  */
-class PostgresKV {
+class PostgresKV implements KVClient {
   async get<T>(key: string): Promise<T | null> {
     if (!db) return null;
     try {
@@ -35,10 +52,7 @@ class PostgresKV {
     try {
         const expiresAt = options?.ex ? new Date(Date.now() + options.ex * 1000) : null;
         await db.insert(schema.kvStore).values({
-          key,
-          value,
-          expiresAt,
-          updatedAt: new Date()
+          key, value, expiresAt, updatedAt: new Date()
         }).onConflictDoUpdate({
           target: schema.kvStore.key,
           set: { value, expiresAt, updatedAt: new Date() }
@@ -49,17 +63,8 @@ class PostgresKV {
 
   async del(key: string) {
     if (!db) return 0;
-    try {
-        await db.delete(schema.kvStore).where(eq(schema.kvStore.key, key));
-    } catch(e) {}
+    try { await db.delete(schema.kvStore).where(eq(schema.kvStore.key, key)); } catch(e) {}
     return 1;
-  }
-
-  async gc() {
-    if (!db) return;
-    try {
-        await db.delete(schema.kvStore).where(lte(schema.kvStore.expiresAt, new Date()));
-    } catch(e) {}
   }
 
   async sadd(key: string, ...members: string[]) {
@@ -100,20 +105,18 @@ class PostgresKV {
   }
 }
 
-export interface KVClient {
-  get<T>(key: string): Promise<T | null>;
-  set(key: string, value: any, options?: { ex?: number }): Promise<string>;
-  del(key: string): Promise<number>;
-  sadd(key: string, ...members: string[]): Promise<number>;
-  srem(key: string, ...members: string[]): Promise<number>;
-  smembers(key: string): Promise<string[]>;
-  lpush(key: string, ...values: any[]): Promise<number>;
-  lrange<T>(key: string, start: number, stop: number): Promise<T[]>;
-  ltrim(key: string, start: number, stop: number): Promise<string>;
-  claimSlot(key: string, ttlSeconds: number, value: string): Promise<boolean>;
+function createKV(): KVClient {
+  const provider = process.env.KV_PROVIDER || "upstash";
+  if (provider === "upstash") {
+    const upstash = new UpstashKV();
+    console.log("✅ Using Upstash Redis KV provider");
+    return upstash;
+  }
+  console.log("✅ Using Postgres-backed KV provider");
+  return new PostgresKV();
 }
 
-export const kv: KVClient = new PostgresKV() as any;
+export const kv: KVClient = createKV();
 
 export const getSession = async (sessionId: string) => {
   return await kv.get(`session:${sessionId}`);

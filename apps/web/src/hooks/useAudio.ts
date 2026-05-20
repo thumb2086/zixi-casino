@@ -38,6 +38,7 @@ class AudioManager {
   private gestureBound = false;
   private clickBound = false;
   private userInteracted = false;
+  private bgmDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   private state: AudioPrefs = {
     masterVolume: 0.7,
@@ -103,6 +104,24 @@ class AudioManager {
     this.applyAllSoundStates();
   }
 
+  destroy() {
+    this.stopBGM();
+    if (this.bgmDebounceTimer) clearTimeout(this.bgmDebounceTimer);
+    if (this.clickBound && typeof document !== 'undefined') {
+      document.removeEventListener('click', this.handleGlobalClick);
+      this.clickBound = false;
+    }
+    Object.keys(this.sounds).forEach((key) => {
+      const s = this.sounds[key as SoundKey];
+      if (s) s.unload();
+      delete this.sounds[key as SoundKey];
+    });
+    this.initialized = false;
+    if (typeof window !== 'undefined') {
+      delete window.__deviceLinkerAudioManager;
+    }
+  }
+
   private preloadSfx() {
     (Object.keys(this.soundConfig) as Array<Exclude<SoundKey, `bgm_${string}`>>).forEach((key) => {
       this.ensureSound(key);
@@ -127,16 +146,37 @@ class AudioManager {
     window.addEventListener('keydown', unlock, { once: true, passive: true });
   }
 
+  private handleGlobalClick = (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    const interactive = target.closest('button, a, [role="button"], input[type="range"], select');
+    if (!interactive) return;
+    this.play('click', { volume: 0.6 });
+  };
+
   private bindGlobalClickSound() {
     if (this.clickBound || typeof document === 'undefined') return;
     this.clickBound = true;
+    document.addEventListener('click', this.handleGlobalClick);
+  }
 
-    document.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement | null;
-      if (!target) return;
-      const interactive = target.closest('button, a, [role="button"], input[type="range"], select');
-      if (!interactive) return;
-      this.play('click', { volume: 0.6 });
+  private retryPlay(sound: Howl, retries = 3, delay = 500): Promise<number | null> {
+    return new Promise((resolve) => {
+      const attempt = (remaining: number) => {
+        this.resumeAudioContext();
+        const id = sound.play();
+        if (id !== -1) {
+          resolve(id);
+          return;
+        }
+        if (remaining <= 0) {
+          console.warn(`[Audio] play failed after ${retries} retries`);
+          resolve(null);
+          return;
+        }
+        setTimeout(() => attempt(remaining - 1), delay);
+      };
+      attempt(retries);
     });
   }
 
@@ -153,17 +193,18 @@ class AudioManager {
       mute: this.isMuted(key),
       volume: this.getEffectiveVolume(key),
       onend: isBgm ? () => {
-        // HTML5 loop can be unreliable; manually re-seek + replay
-        if (this.currentBgmKey !== key) return; // was stopped
-        sound.seek(0);
-        const id = sound.play();
-        if (id !== -1) this.currentBgmId = id;
+        if (this.currentBgmKey !== key) return;
+        this.resumeAudioContext();
+        this.retryPlay(sound).then((id) => {
+          if (id !== null) this.currentBgmId = id;
+        });
       } : undefined,
       onloaderror: (_id, err) => {
         console.warn(`[Audio] load error for ${key}:`, err);
       },
       onplayerror: (_id, err) => {
         console.warn(`[Audio] play error for ${key}:`, err);
+        this.resumeAudioContext();
       },
     });
 
@@ -230,6 +271,14 @@ class AudioManager {
     if (!this.userInteracted) return null;
     if (this.isMuted(key)) return null;
 
+    // Debounce: if same key requested within 300ms, skip
+    if (this.bgmDebounceTimer) {
+      clearTimeout(this.bgmDebounceTimer);
+    }
+    this.bgmDebounceTimer = setTimeout(() => {
+      this.bgmDebounceTimer = null;
+    }, 300);
+
     this.resumeAudioContext();
 
     if (this.currentBgmKey === key && this.currentBgmId) {
@@ -237,8 +286,12 @@ class AudioManager {
       return this.currentBgmId;
     }
 
+    // Ensure the old BGM is fully stopped before starting new one
     if (this.currentBgmKey && this.currentBgmKey !== key) {
-      this.stop(this.currentBgmKey as SoundKey, this.currentBgmId);
+      const oldSound = this.sounds[this.currentBgmKey as SoundKey];
+      if (oldSound) {
+        oldSound.stop();
+      }
       this.currentBgmKey = '';
       this.currentBgmId = null;
     }
@@ -293,6 +346,7 @@ function getAudioManager(): AudioManager {
 
 const audioApi = {
   init: () => getAudioManager().init(),
+  destroy: () => getAudioManager().destroy(),
   play: (name: SoundKey, options?: { loop?: boolean; volume?: number }) => getAudioManager().play(name, options),
   playBGM: (trackName?: string) => getAudioManager().playBGM(trackName),
   stopBGM: () => getAudioManager().stopBGM(),

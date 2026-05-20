@@ -55,41 +55,58 @@ export const HorseRacingView: React.FC = () => {
 
       return unwrapGameEnvelope<HorseResult>(payload);
     },
-    onSuccess: (data) => {
-      setResult(data);
+    onMutate: () => {
+      // Start race animation immediately - don't wait for API
       setIsRacing(true);
       setStatusMsg('🏇 比賽開始！');
       setStatusColor('#ffd36a');
       setProgress(HORSES.reduce((acc, horse) => ({ ...acc, [horse.id]: 0 }), {}));
-
-      const winnerSpeed = 1.6;
-      const raceTimer = window.setInterval(() => {
-        setProgress((prev) => {
-          let allFinished = true;
-          const next: Record<number, number> = {};
-          for (const horse of HORSES) {
-            const speed = horse.id === data.winnerId ? winnerSpeed : 0.75 + Math.random() * 0.45;
-            const value = Math.min(100, (prev[horse.id] ?? 0) + speed);
-            next[horse.id] = value;
-            if (value < 100) allFinished = false;
-          }
-          if (allFinished) {
-            window.clearInterval(raceTimer);
-            setIsRacing(false);
-            setStatusMsg(`冠軍：${data.winnerName}（${data.multiplier}x）`);
-            setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
-          }
-          return next;
-        });
-      }, 90);
-
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onSuccess: (data) => {
+      setResult(data);
     },
     onError: (err: Error) => {
+      setIsRacing(false);
       setStatusMsg(`下注失敗：${err.message}`);
       setStatusColor('#ff4d4d');
     },
   });
+
+  const handleBet = () => {
+    if (isRacing || betMutation.isPending) return;
+    betMutation.mutate();
+  };
+
+  // Run race animation independently from API
+  React.useEffect(() => {
+    if (!isRacing) return;
+
+    const raceTimer = window.setInterval(() => {
+      setProgress((prev) => {
+        let allFinished = true;
+        const next: Record<number, number> = {};
+        for (const horse of HORSES) {
+          const value = Math.min(100, (prev[horse.id] ?? 0) + 0.75 + Math.random() * 0.5);
+          next[horse.id] = value;
+          if (value < 100) allFinished = false;
+        }
+        if (allFinished) {
+          window.clearInterval(raceTimer);
+          // If API hasn't returned yet, keep showing race ended state
+          if (result) {
+            setIsRacing(false);
+            setStatusMsg(`冠軍：${result.winnerName}（${result.multiplier}x）`);
+            setStatusColor(result.result === 'win' ? '#00ff88' : '#ff4d4d');
+          } else {
+            setStatusMsg('🏇 賽事結束，等待結果...');
+          }
+        }
+        return next;
+      });
+    }, 90);
+
+    return () => window.clearInterval(raceTimer);
+  }, [isRacing, result]);
 
   return (
     <div className="horse-racing-container">
@@ -128,7 +145,7 @@ export const HorseRacingView: React.FC = () => {
         ))}
         <div className="status-panel" style={{ color: statusColor }}>
           {statusMsg}
-          {result && (
+          {result && !isRacing && (
             <div className="mt-2 text-sm text-slate-300">
               你選了 #{result.selectedHorse}，冠軍 #{result.winnerId}，派彩 {result.payout}
             </div>
@@ -146,7 +163,7 @@ export const HorseRacingView: React.FC = () => {
         <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={betMutation.isPending || isRacing} />
         <button
           className="btn-bet"
-          onClick={() => betMutation.mutate()}
+          onClick={handleBet}
           disabled={betMutation.isPending || isRacing}
         >
           {betMutation.isPending ? '下注中…' : isRacing ? '賽事進行中…' : '立即下注'}
