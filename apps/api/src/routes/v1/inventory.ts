@@ -310,9 +310,12 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           });
         }
 
-        // Fire async on-chain transfer for ZXC credit
+        // Fire async on-chain transfers
         if (zxcIntent) {
           void transferOnChain(ctx.address, "zhixi", result.totalZxc.toString(), zxcIntent, walletAction, walletRepo);
+        }
+        if (yjcIntent) {
+          void transferOnChain(ctx.address, "yjc", result.totalYjc.toString(), yjcIntent, walletAction, walletRepo);
         }
 
         await opsRepo.logEvent({
