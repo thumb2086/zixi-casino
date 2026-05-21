@@ -160,6 +160,29 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         intent.address = ctx.address;
         intent.meta = { source: "inventory_use", itemId, quantity };
         await walletRepo.saveTxIntent(intent);
+
+        // Fire async on-chain transfer
+        void (async () => {
+          try {
+            const { SettlementServiceImpl, ViemRepository, getOnChainConfig } = await import("@repo/on-chain");
+            const runtime = new (await import("@repo/domain")).OnchainWalletManager().getRuntimeConfig();
+            if (!runtime.rpcUrl || !runtime.adminPrivateKey) return;
+            const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+            const svc = new SettlementServiceImpl(repo);
+            const treasury = getOnChainConfig().treasuryAddress;
+            const txResult = await svc.adminTransfer({
+              from: treasury,
+              to: ctx.address,
+              amount: totalCurrency.toString(),
+              tokenAddress: runtime.tokens.zhixi.contractAddress,
+            });
+            if (txResult.confirmed) {
+              await walletRepo.saveTxIntent(walletAction.processTxIntent(intent, "confirmed", txResult.txHash));
+            }
+          } catch (e) {
+            console.error("[inventory] on-chain transfer failed:", e);
+          }
+        })();
       }
 
       await opsRepo.logEvent({
@@ -216,22 +239,48 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         const walletAction = new WalletManager();
         const walletRepo = new WalletRepository();
 
+        let zxcIntent: any = null;
         if (result.totalZxc > 0) {
           const curBal = await gameSettlement.getBalance(ctx.address, "zhixi");
           await gameSettlement.setBalance(ctx.address, "zhixi", (Number(curBal) + result.totalZxc).toString());
-          const intent = walletAction.createTxIntent(ctx.userId, "ZXC", "admin_credit", result.totalZxc.toString());
-          intent.address = ctx.address;
-          intent.meta = { source: "inventory_use_all", token: "zhixi", totalZxc: result.totalZxc };
-          await walletRepo.saveTxIntent(intent);
+          zxcIntent = walletAction.createTxIntent(ctx.userId, "ZXC", "admin_credit", result.totalZxc.toString());
+          zxcIntent.address = ctx.address;
+          zxcIntent.meta = { source: "inventory_use_all", token: "zhixi", totalZxc: result.totalZxc };
+          await walletRepo.saveTxIntent(zxcIntent);
         }
+        let yjcIntent: any = null;
         if (result.totalYjc > 0) {
           const curBal = await gameSettlement.getBalance(ctx.address, "yjc");
           await gameSettlement.setBalance(ctx.address, "yjc", (Number(curBal) + result.totalYjc).toString());
-          const intent = walletAction.createTxIntent(ctx.userId, "YJC", "admin_credit", result.totalYjc.toString());
-          intent.address = ctx.address;
-          intent.meta = { source: "inventory_use_all", token: "yjc", totalYjc: result.totalYjc };
-          await walletRepo.saveTxIntent(intent);
+          yjcIntent = walletAction.createTxIntent(ctx.userId, "YJC", "admin_credit", result.totalYjc.toString());
+          yjcIntent.address = ctx.address;
+          yjcIntent.meta = { source: "inventory_use_all", token: "yjc", totalYjc: result.totalYjc };
+          await walletRepo.saveTxIntent(yjcIntent);
         }
+
+        // Fire async on-chain transfer for ZXC credit
+        void (async () => {
+          if (!zxcIntent) return;
+          try {
+            const { SettlementServiceImpl, ViemRepository, getOnChainConfig } = await import("@repo/on-chain");
+            const runtime = new (await import("@repo/domain")).OnchainWalletManager().getRuntimeConfig();
+            if (!runtime.rpcUrl || !runtime.adminPrivateKey) return;
+            const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+            const svc = new SettlementServiceImpl(repo);
+            const treasury = getOnChainConfig().treasuryAddress;
+            const txResult = await svc.adminTransfer({
+              from: treasury,
+              to: ctx.address,
+              amount: result.totalZxc.toString(),
+              tokenAddress: runtime.tokens.zhixi.contractAddress,
+            });
+            if (txResult.confirmed) {
+              await walletRepo.saveTxIntent(walletAction.processTxIntent(zxcIntent, "confirmed", txResult.txHash));
+            }
+          } catch (e) {
+            console.error("[inventory/use-all] on-chain transfer failed:", e);
+          }
+        })();
 
         await opsRepo.logEvent({
           channel: "rewards",
