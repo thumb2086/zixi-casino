@@ -6,13 +6,38 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, type ItemDefinition, type Rarity } from "@repo/shared";
 import { SessionRepository, OpsRepository, RewardCatalogRepository, WalletRepository, kv } from "@repo/infrastructure";
-import { WalletManager } from "@repo/domain";
+import { WalletManager, OnchainWalletManager } from "@repo/domain";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser, useAllTokenItems, rollbackUseAllTokens, type UseAllTokensResult } from "../../utils/inventory.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import * as schema from "@repo/infrastructure/db/schema.js";
 import { eq, sql } from "drizzle-orm";
+
+const onchainManager = new OnchainWalletManager();
+
+async function transferOnChain(address: string, tokenKey: "zhixi" | "yjc", amount: string, intent: any, walletAction: WalletManager, walletRepo: WalletRepository) {
+  try {
+    const { SettlementServiceImpl, ViemRepository, getOnChainConfig } = await import("@repo/on-chain");
+    const runtime = onchainManager.getRuntimeConfig();
+    const tokenCfg = runtime.tokens?.[tokenKey];
+    if (!runtime.rpcUrl || !runtime.adminPrivateKey || !tokenCfg?.contractAddress) return;
+    const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+    const svc = new SettlementServiceImpl(repo);
+    const treasury = getOnChainConfig().treasuryAddress;
+    const txResult = await svc.adminTransfer({
+      from: treasury,
+      to: address,
+      amount,
+      tokenAddress: tokenCfg.contractAddress,
+    });
+    if (txResult.confirmed) {
+      await walletRepo.saveTxIntent(walletAction.processTxIntent(intent, "confirmed", txResult.txHash));
+    }
+  } catch (e) {
+    console.error(`[inventory] on-chain transfer failed for ${tokenKey}:`, e);
+  }
+}
 
 function buildItemIndex(): Record<string, ItemDefinition & { rarity: Rarity }> {
   const out: Record<string, ItemDefinition & { rarity: Rarity }> = {};
@@ -162,27 +187,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         await walletRepo.saveTxIntent(intent);
 
         // Fire async on-chain transfer
-        void (async () => {
-          try {
-            const { SettlementServiceImpl, ViemRepository, getOnChainConfig } = await import("@repo/on-chain");
-            const runtime = new (await import("@repo/domain")).OnchainWalletManager().getRuntimeConfig();
-            if (!runtime.rpcUrl || !runtime.adminPrivateKey) return;
-            const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
-            const svc = new SettlementServiceImpl(repo);
-            const treasury = getOnChainConfig().treasuryAddress;
-            const txResult = await svc.adminTransfer({
-              from: treasury,
-              to: ctx.address,
-              amount: totalCurrency.toString(),
-              tokenAddress: runtime.tokens.zhixi.contractAddress,
-            });
-            if (txResult.confirmed) {
-              await walletRepo.saveTxIntent(walletAction.processTxIntent(intent, "confirmed", txResult.txHash));
-            }
-          } catch (e) {
-            console.error("[inventory] on-chain transfer failed:", e);
-          }
-        })();
+        void transferOnChain(ctx.address, creditToken === "yjc" ? "yjc" : "zhixi", totalCurrency.toString(), intent, walletAction, walletRepo);
       }
 
       await opsRepo.logEvent({
@@ -259,28 +264,9 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         }
 
         // Fire async on-chain transfer for ZXC credit
-        void (async () => {
-          if (!zxcIntent) return;
-          try {
-            const { SettlementServiceImpl, ViemRepository, getOnChainConfig } = await import("@repo/on-chain");
-            const runtime = new (await import("@repo/domain")).OnchainWalletManager().getRuntimeConfig();
-            if (!runtime.rpcUrl || !runtime.adminPrivateKey) return;
-            const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
-            const svc = new SettlementServiceImpl(repo);
-            const treasury = getOnChainConfig().treasuryAddress;
-            const txResult = await svc.adminTransfer({
-              from: treasury,
-              to: ctx.address,
-              amount: result.totalZxc.toString(),
-              tokenAddress: runtime.tokens.zhixi.contractAddress,
-            });
-            if (txResult.confirmed) {
-              await walletRepo.saveTxIntent(walletAction.processTxIntent(zxcIntent, "confirmed", txResult.txHash));
-            }
-          } catch (e) {
-            console.error("[inventory/use-all] on-chain transfer failed:", e);
-          }
-        })();
+        if (zxcIntent) {
+          void transferOnChain(ctx.address, "zhixi", result.totalZxc.toString(), zxcIntent, walletAction, walletRepo);
+        }
 
         await opsRepo.logEvent({
           channel: "rewards",
