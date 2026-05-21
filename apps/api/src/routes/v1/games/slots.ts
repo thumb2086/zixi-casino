@@ -104,6 +104,7 @@ export async function slotsRoutes(fastify: FastifyInstance) {
         payout,
         betAmount,
         multiplier: gameResult.multiplier,
+        winLines: gameResult.winLines,
         balance: finalBalance,
       }
     };
