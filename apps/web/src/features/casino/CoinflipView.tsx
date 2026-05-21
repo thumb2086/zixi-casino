@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
-import { useUserStore } from '../../store/useUserStore';
 import { ChipAnimation } from '../../components/ChipAnimation';
 import './Coinflip.css';
+
+const GAME_MAX_BET = 1_000_000;
 
 const COINFLIP_ROUND_MS = 6000;
 const COINFLIP_LOCK_MS = 4000;
@@ -12,7 +13,16 @@ const COINFLIP_LOCK_MS = 4000;
 export const CoinflipView: React.FC = () => {
   const queryClient = useQueryClient();
   const { session } = useAuth();
-  const { balance } = useUserStore();
+
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { maxBet?: number } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
   const [betAmount, setBetAmount] = useState('10');
   const [selection, setSelection] = useState<'heads' | 'tails'>('heads');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -167,10 +177,7 @@ export const CoinflipView: React.FC = () => {
   });
 
   const handleAllIn = () => {
-    const currentBalance = parseFloat(balance) || 0;
-    if (currentBalance > 0) {
-      setBetAmount(Math.floor(currentBalance).toString());
-    }
+    setBetAmount(String(maxBet));
   };
 
   return (

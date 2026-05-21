@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./Poker.css";
@@ -11,10 +12,19 @@ interface PokerResult {
   payout: number;
 }
 
-const MAX_BET = 1_000_000;
-
 export const PokerView: React.FC = () => {
   const { session } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { maxBet?: number } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const maxBet = Math.min(profile?.maxBet ?? 1_000_000, 1_000_000);
+
   const [betAmount, setBetAmount] = useState<string>("100");
   const [status, setStatus] = useState<"idle" | "playing" | "settled">("idle");
   const [result, setResult] = useState<PokerResult | null>(null);
@@ -75,7 +85,7 @@ export const PokerView: React.FC = () => {
         <input
           type="number"
           min={1}
-          max={MAX_BET}
+          max={maxBet}
           value={betAmount}
           onChange={(e) => setBetAmount(e.target.value)}
           disabled={status === "playing"}
@@ -84,7 +94,7 @@ export const PokerView: React.FC = () => {
           type="button"
           className="allin-btn"
           disabled={status === "playing"}
-          onClick={() => setBetAmount(String(MAX_BET))}
+          onClick={() => setBetAmount(String(maxBet))}
         >
           全下
         </button>
