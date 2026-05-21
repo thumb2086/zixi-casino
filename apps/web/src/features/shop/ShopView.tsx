@@ -172,7 +172,7 @@ export default function ShopView() {
 
   const [chests, setChests] = useState<any[]>([]);
   const [buyingChest, setBuyingChest] = useState<string | null>(null);
-  const [chestQty, setChestQty] = useState<Record<string, number>>({});
+  const [chestQty, setChestQty] = useState<Record<string, string>>({});
 
   const fetchChests = useCallback(async () => {
     try {
@@ -535,7 +535,7 @@ export default function ShopView() {
           <div className="grid grid-cols-2 gap-3">
             {chests.map((chest: any) => {
               const boughtHere = buyingChest === chest.id;
-              const qty = chestQty[chest.id] || 1;
+              const qty = parseInt(chestQty[chest.id] || '1', 10) || 1;
               const discount = qty >= 10 ? 0.10 : qty >= 5 ? 0.05 : 0;
               const unitPrice = Math.round(chest.price * (1 - discount));
               return (
@@ -543,27 +543,26 @@ export default function ShopView() {
                   <Gift className="w-8 h-8 mx-auto mb-2 text-[#fcc025]" />
                   <p className="text-sm font-bold text-white text-center truncate">{chest.name}</p>
                   <div className="flex items-center justify-center gap-2 mt-2">
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.max(1, (p[chest.id] || 1) - 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">−</button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String(Math.max(1, (parseInt(p[chest.id] || '1', 10) || 1) - 1)) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">−</button>
                     <input
-                      type="number"
-                      min={1}
-                      value={chestQty[chest.id] || 1}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        if (raw === '') { setChestQty(p => ({ ...p, [chest.id]: 0 })); return; }
-                        const v = parseInt(raw, 10);
-                        if (!isNaN(v)) setChestQty(p => ({ ...p, [chest.id]: Math.max(1, v) }));
+                      type="text"
+                      inputMode="numeric"
+                      value={chestQty[chest.id] ?? '1'}
+                      onChange={(e) => setChestQty(p => ({ ...p, [chest.id]: e.target.value }))}
+                      onBlur={(e) => {
+                        const v = parseInt(e.target.value, 10);
+                        if (!v || v < 1) setChestQty(p => ({ ...p, [chest.id]: '1' }));
                       }}
                       className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded text-center text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]"
                     />
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: (p[chest.id] || 1) + 1 }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String((parseInt(p[chest.id] || '1', 10) || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
                   </div>
                   <p className="text-center text-xs text-[#adaaaa] mt-2">
                     {(qty * unitPrice).toLocaleString()} ZXC
                     {discount > 0 && <span className="text-emerald-400 ml-1">-{discount * 100}%</span>}
                   </p>
                   <button
-                    onClick={() => handleBuyChest(chest.id, chestQty[chest.id] || 1)}
+                    onClick={() => handleBuyChest(chest.id, qty)}
                     disabled={boughtHere}
                     className="mt-2 w-full bg-[#fcc025] text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
                   >
