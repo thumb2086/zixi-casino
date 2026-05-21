@@ -45,7 +45,16 @@ export async function authRoutes(fastify: FastifyInstance) {
         await client.getBalance(address, tokenRuntime.contractAddress),
         decimals
       );
-      await walletRepo.updateBalance(address, onchainBalance, "zhixi");
+
+      // Don't overwrite DB balance if there are pending admin credits/debits
+      // that haven't been synced to chain yet (e.g. chest purchase, token use)
+      const pendingIntents = await walletRepo.listTxIntents({ address, limit: 5 });
+      const hasPendingAdmin = pendingIntents.some(
+        (i: any) => i.status === "pending" && (i.type === "admin_debit" || i.type === "admin_credit")
+      );
+      if (!hasPendingAdmin) {
+        await walletRepo.updateBalance(address, onchainBalance, "zhixi");
+      }
       return onchainBalance;
     } catch {
       return (await walletRepo.getBalance(address, "zhixi")) || "0";
