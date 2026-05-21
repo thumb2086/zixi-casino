@@ -7,8 +7,6 @@ import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 
-const GAME_MAX_BET = 1_000_000;
-
 const EUROPEAN_LAYOUT = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
 const REDS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
@@ -61,7 +59,7 @@ export function RouletteView() {
     },
     staleTime: 60000,
   });
-  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
+  const maxBet = profile?.maxBet ?? 1_000_000;
   const [betAmount, setBetAmount] = useState('10');
   const [bets, setBets] = useState<PlacedBet[]>([]);
   const [lastBets, setLastBets] = useState<PlacedBet[]>([]);
@@ -113,6 +111,7 @@ export function RouletteView() {
         animateWheel(data.winningNumber);
       }
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     },
     onError: (err: Error) => {
       setError(err.message);

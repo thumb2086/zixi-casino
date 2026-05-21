@@ -21,102 +21,127 @@ export async function giftRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         toAddress: z.string(),
         zxc: z.number().min(0).optional(),
+        yjc: z.number().min(0).optional(),
         itemId: z.string().optional(),
         quantity: z.number().int().min(1).max(9999).optional().default(1),
         note: z.string().max(240).optional(),
       }),
     },
   }, async (request) => {
-    const ctx = await getContext(request);
-    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
-
-    const body = request.body as any;
-    const toAddr = body.toAddress.toLowerCase().trim();
-    const fromAddr = ctx.address.toLowerCase();
-    const sender = await userRepo.getUserById(ctx.userId);
-    const senderName = sender?.displayName || fromAddr.slice(0, 6);
-
-    if (toAddr === fromAddr) {
-      return createApiEnvelope({ error: { message: "不能贈送給自己" } }, request.id);
-    }
-
-    const recipient = await userRepo.getUserByAddress(toAddr);
-    if (!recipient) {
-      return createApiEnvelope({ error: { message: "接收者不存在" } }, request.id);
-    }
-
-    const hasZxc = typeof body.zxc === "number" && body.zxc > 0;
-    const hasItem = body.itemId && String(body.itemId).trim();
-
-    if (!hasZxc && !hasItem) {
-      return createApiEnvelope({ error: { message: "請至少贈送 ZXC 或道具" } }, request.id);
-    }
-
-    const bundleSummary: string[] = [];
-
-    if (hasZxc) {
-      const senderBalance = await gameSettlement.getBalance(fromAddr, "zhixi");
-      if (Number(senderBalance) < body.zxc) {
-        return createApiEnvelope({ error: { message: `ZXC 餘額不足，目前 ${Number(senderBalance).toLocaleString()}` } }, request.id);
-      }
-      const newSender = (Number(senderBalance) - body.zxc).toFixed(4);
-      await gameSettlement.setBalance(fromAddr, "zhixi", newSender);
-
-      const recipientBalance = await gameSettlement.getBalance(toAddr, "zhixi");
-      const newRecipient = (Number(recipientBalance) + body.zxc).toFixed(4);
-      await gameSettlement.setBalance(toAddr, "zhixi", newRecipient);
-
-      bundleSummary.push(`${body.zxc.toLocaleString()} ZXC`);
-    }
-
-    if (hasItem) {
-      const itemId = String(body.itemId).trim();
-      const qty = Math.max(1, Math.floor(Number(body.quantity) || 1));
-      const def = ALL_ITEMS[itemId];
-
-      if (def?.type === "avatar" || def?.type === "title" || itemId.startsWith("token_yjc")) {
-        return createApiEnvelope({ error: { message: "頭像、稱號、YJC 無法贈送" } }, request.id);
-      }
-
-      const state = await loadInventoryState(ctx.userId);
-      const owned = state.inventory[itemId] || 0;
-      if (owned < qty) {
-        return createApiEnvelope({ error: { message: `道具 ${def?.name || itemId} 數量不足，持有 ${owned} 個` } }, request.id);
-      }
-
-      const nextState = { ...state, inventory: { ...state.inventory } };
-      nextState.inventory[itemId] = owned - qty;
-      if (nextState.inventory[itemId] <= 0) delete nextState.inventory[itemId];
-      await persistInventoryState(ctx.userId, nextState);
-
-      const defName = def?.name || itemId;
-      await grantBundleToUser(recipient.id, { items: [{ id: itemId, qty }] }, toAddr);
-
-      bundleSummary.push(`${defName} ×${qty}`);
-    }
-
-    const summary = bundleSummary.join(" + ");
-
     try {
-      const chatMsg = {
-        id: crypto.randomUUID(),
-        address: "",
-        displayName: "🎁 系統",
-        text: `🫵 ${senderName} 贈送 ${summary} 給 ${recipient.displayName || toAddr.slice(0, 6)}`,
-        createdAt: Date.now(),
-      };
-      await kv.lpush("chat:global:messages", chatMsg);
-      await kv.ltrim("chat:global:messages", 0, 49);
-    } catch {}
+      const ctx = await getContext(request);
+      if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
-    await opsRepo.logEvent({
-      channel: "rewards", severity: "info", source: "gift", kind: "user_gift",
-      userId: ctx.userId, address: fromAddr,
-      message: `Gift: ${summary} → ${toAddr}`,
-      meta: { toAddress: toAddr, bundle: summary, note: body.note || null },
-    });
+      const body = request.body as any;
+      const toAddr = body.toAddress.toLowerCase().trim();
+      const fromAddr = ctx.address.toLowerCase();
+      const sender = await userRepo.getUserById(ctx.userId);
+      const senderName = sender?.displayName || fromAddr.slice(0, 6);
 
-    return createApiEnvelope({ success: true, bundle: summary }, request.id);
+      if (toAddr === fromAddr) {
+        return createApiEnvelope({ error: { message: "不能贈送給自己" } }, request.id);
+      }
+
+      const recipient = await userRepo.getUserByAddress(toAddr);
+      if (!recipient) {
+        return createApiEnvelope({ error: { message: "接收者不存在" } }, request.id);
+      }
+
+      const hasZxc = typeof body.zxc === "number" && body.zxc > 0;
+      const hasYjc = typeof body.yjc === "number" && body.yjc > 0;
+      const hasItem = body.itemId && String(body.itemId).trim();
+
+      if (!hasZxc && !hasYjc && !hasItem) {
+        return createApiEnvelope({ error: { message: "請至少贈送 ZXC、YJC 或道具" } }, request.id);
+      }
+
+      const bundleSummary: string[] = [];
+
+      if (hasYjc) {
+        const senderYjc = await gameSettlement.getBalance(fromAddr, "yjc");
+        if (Number(senderYjc) < body.yjc) {
+          return createApiEnvelope({ error: { message: `YJC 餘額不足，目前 ${Number(senderYjc).toLocaleString()}` } }, request.id);
+        }
+        const newSenderYjc = (Number(senderYjc) - body.yjc).toFixed(4);
+        await gameSettlement.setBalance(fromAddr, "yjc", newSenderYjc);
+
+        const recipientYjc = await gameSettlement.getBalance(toAddr, "yjc");
+        const newRecipientYjc = (Number(recipientYjc) + body.yjc).toFixed(4);
+        await gameSettlement.setBalance(toAddr, "yjc", newRecipientYjc);
+
+        bundleSummary.push(`${body.yjc.toLocaleString()} YJC`);
+      }
+
+      if (hasZxc) {
+        const senderBalance = await gameSettlement.getBalance(fromAddr, "zhixi");
+        if (Number(senderBalance) < body.zxc) {
+          return createApiEnvelope({ error: { message: `ZXC 餘額不足，目前 ${Number(senderBalance).toLocaleString()}` } }, request.id);
+        }
+        const newSender = (Number(senderBalance) - body.zxc).toFixed(4);
+        await gameSettlement.setBalance(fromAddr, "zhixi", newSender);
+
+        const recipientBalance = await gameSettlement.getBalance(toAddr, "zhixi");
+        const newRecipient = (Number(recipientBalance) + body.zxc).toFixed(4);
+        await gameSettlement.setBalance(toAddr, "zhixi", newRecipient);
+
+        bundleSummary.push(`${body.zxc.toLocaleString()} ZXC`);
+      }
+
+      if (hasItem) {
+        const itemId = String(body.itemId).trim();
+        const qty = Math.max(1, Math.floor(Number(body.quantity) || 1));
+        const def = ALL_ITEMS[itemId];
+
+        if (def?.type === "avatar" || def?.type === "title" || itemId.startsWith("token_yjc")) {
+          return createApiEnvelope({ error: { message: "頭像、稱號、YJC 無法贈送" } }, request.id);
+        }
+
+        const state = await loadInventoryState(ctx.userId);
+        const owned = state.inventory[itemId] || 0;
+        if (owned < qty) {
+          return createApiEnvelope({ error: { message: `道具 ${def?.name || itemId} 數量不足，持有 ${owned} 個` } }, request.id);
+        }
+
+        const nextState = { ...state, inventory: { ...state.inventory } };
+        nextState.inventory[itemId] = owned - qty;
+        if (nextState.inventory[itemId] <= 0) delete nextState.inventory[itemId];
+        await persistInventoryState(ctx.userId, nextState);
+
+        const defName = def?.name || itemId;
+        await grantBundleToUser(recipient.id, { items: [{ id: itemId, qty }] }, toAddr);
+
+        bundleSummary.push(`${defName} ×${qty}`);
+      }
+
+      const summary = bundleSummary.join(" + ");
+
+      try {
+        const chatMsg = {
+          id: crypto.randomUUID(),
+          address: "",
+          displayName: "🎁 系統",
+          text: `🫵 ${senderName} 贈送 ${summary} 給 ${recipient.displayName || toAddr.slice(0, 6)}`,
+          createdAt: Date.now(),
+        };
+        await kv.lpush("chat:global:messages", chatMsg);
+        await kv.ltrim("chat:global:messages", 0, 49);
+      } catch {}
+
+      await opsRepo.logEvent({
+        channel: "rewards", severity: "info", source: "gift", kind: "user_gift",
+        userId: ctx.userId, address: fromAddr,
+        message: `Gift: ${summary} → ${toAddr}`,
+        meta: { toAddress: toAddr, bundle: summary, note: body.note || null },
+      });
+
+      return createApiEnvelope({ success: true, bundle: summary }, request.id);
+    } catch (error: any) {
+      console.error("[gift] send failed:", error);
+      return createApiEnvelope(
+        { error: { message: error?.message || "贈送失敗" } },
+        request.id
+      );
+    }
   });
 
   typedFastify.get("/recipients", async (request) => {

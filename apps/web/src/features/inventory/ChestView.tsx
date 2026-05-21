@@ -381,11 +381,12 @@ export default function ChestView() {
               <input
                 type="number"
                 min={1}
-                max={9999}
                 value={openQty}
                 onChange={(e) => {
-                  const v = parseInt(e.target.value) || 1;
-                  setOpenQty(Math.max(1, Math.min(9999, v)));
+                  const raw = e.target.value;
+                  if (raw === '') { setOpenQty(0); return; }
+                  const v = parseInt(raw, 10);
+                  if (!isNaN(v)) setOpenQty(Math.max(1, v));
                 }}
                 className="w-14 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center py-1 focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
@@ -476,9 +477,9 @@ export default function ChestView() {
                     <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
                     <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
-                      <input type="number" min="1" max={item.quantity}
+                      <input type="number" min="1"
                         value={useQty[item.id] || 1}
-                        onChange={(e) => { const v = parseInt(e.target.value) || 1; setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
+                        onChange={(e) => { const raw = e.target.value; if (raw === '') { setUseQty(p => ({ ...p, [item.id]: 0 })); return; } const v = parseInt(raw, 10); if (!isNaN(v)) setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
                         className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
                       />
                       <button onClick={() => setUseQty(p => ({ ...p, [item.id]: item.quantity }))}
@@ -512,9 +513,9 @@ export default function ChestView() {
                     <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
                     <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
-                      <input type="number" min="1" max={item.quantity}
+                      <input type="number" min="1"
                         value={useQty[item.id] || 1}
-                        onChange={(e) => { const v = parseInt(e.target.value) || 1; setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
+                        onChange={(e) => { const raw = e.target.value; if (raw === '') { setUseQty(p => ({ ...p, [item.id]: 0 })); return; } const v = parseInt(raw, 10); if (!isNaN(v)) setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
                         className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
                       />
                       <button onClick={() => useItem(item.id, useQty[item.id] || 1)}
@@ -736,11 +737,12 @@ export default function ChestView() {
                 <input
                   type="number"
                   min={1}
-                  max={giftDialog.maxQty}
                   value={giftQty}
                   onChange={(e) => {
-                    const v = parseInt(e.target.value) || 1;
-                    setGiftQty(Math.max(1, Math.min(giftDialog.maxQty, v)));
+                    const raw = e.target.value;
+                    if (raw === '') { setGiftQty(0); return; }
+                    const v = parseInt(raw, 10);
+                    if (!isNaN(v)) setGiftQty(Math.max(1, Math.min(giftDialog.maxQty, v)));
                   }}
                   className="w-16 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-lg text-center
                     focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"

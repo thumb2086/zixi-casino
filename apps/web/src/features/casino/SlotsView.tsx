@@ -7,22 +7,6 @@ import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 
-const GAME_MAX_BET = 1_000_000;
-const SYMBOLS = ['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣'];
-const REEL_DELAY_MS = 400;
-const REEL_STOP_INTERVAL = 500;
-
-function randomSymbol(): string {
-  return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-}
-
-// Which grid cells belong to each reel (3 vertical columns)
-const REEL_CELLS = [
-  [0, 3, 6], // reel 0 (left)
-  [1, 4, 7], // reel 1 (center)
-  [2, 5, 8], // reel 2 (right)
-];
-
 export const SlotsView: React.FC = () => {
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -38,7 +22,7 @@ export const SlotsView: React.FC = () => {
     },
     staleTime: 60000,
   });
-  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
+  const maxBet = profile?.maxBet ?? 1_000_000;
   const [grid, setGrid] = useState<string[]>(['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣', '🍒', '🍋']);
   const [status, setStatus] = useState('🎰 拉霸準備就緒，祝你好運！');
   const [winSymbols, setWinSymbols] = useState<number[]>([]);
@@ -115,6 +99,7 @@ export const SlotsView: React.FC = () => {
         }
         spinningRef.current = false;
         queryClient.invalidateQueries({ queryKey: ['user'] });
+        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
       }, stopDelay + REEL_STOP_INTERVAL * 3);
     }).catch((err: any) => {
       // Stop all reels on error

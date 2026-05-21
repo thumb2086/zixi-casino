@@ -7,8 +7,6 @@ import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 
-const GAME_MAX_BET = 1_000_000;
-
 export const BingoView: React.FC = () => {
   const queryClient = useQueryClient();
   const { session } = useAuth();
@@ -21,7 +19,7 @@ export const BingoView: React.FC = () => {
     },
     staleTime: 60000,
   });
-  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
+  const maxBet = profile?.maxBet ?? 1_000_000;
   const [betAmount, setBetAmount] = useState('10');
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [status, setStatus] = useState('📋 請從 1~75 中選 8 個號碼');
@@ -72,6 +70,7 @@ export const BingoView: React.FC = () => {
         setRoundNo((prev) => prev + 1);
         setIsRevealing(false);
         queryClient.invalidateQueries({ queryKey: ['user'] });
+        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
       }, 300);
     },
     onError: (err: Error) => {

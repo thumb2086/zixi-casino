@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./BluffDice.css";
@@ -14,6 +14,7 @@ interface GameResult {
 
 export const BluffDiceView: React.FC = () => {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -23,7 +24,7 @@ export const BluffDiceView: React.FC = () => {
     },
     staleTime: 60000,
   });
-  const maxBet = Math.min(profile?.maxBet ?? 1_000_000, 1_000_000);
+  const maxBet = profile?.maxBet ?? 1_000_000;
 
   const [betAmount, setBetAmount] = useState<string>("100");
   const [status, setStatus] = useState<"idle" | "rolling" | "settled">("idle");
@@ -50,6 +51,7 @@ export const BluffDiceView: React.FC = () => {
       }
       setResult(unwrapGameEnvelope<GameResult>(payload));
       setStatus("settled");
+      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     } catch (e: unknown) {
       setError(extractGameError(e));
       setStatus("idle");
@@ -113,7 +115,7 @@ export const BluffDiceView: React.FC = () => {
           onClick={() => setBetAmount(String(maxBet))}
           disabled={status === "rolling"}
         >
-          全下
+          {maxBet.toLocaleString()}
         </button>
         <button className="roll-btn" onClick={handleRoll} disabled={status === "rolling"}>
           {status === "rolling" ? "搖骰中…" : "搖骰開盅"}
