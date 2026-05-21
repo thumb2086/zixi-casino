@@ -6,7 +6,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, type ItemDefinition, type Rarity } from "@repo/shared";
-import { SessionRepository, OpsRepository, RewardCatalogRepository, WalletRepository, kv } from "@repo/infrastructure";
+import { SessionRepository, OpsRepository, RewardCatalogRepository, WalletRepository, ChainClient, kv } from "@repo/infrastructure";
 import { WalletManager, OnchainWalletManager } from "@repo/domain";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
@@ -25,7 +25,23 @@ async function transferOnChain(address: string, tokenKey: "zhixi" | "yjc", amoun
     if (!runtime.rpcUrl || !runtime.adminPrivateKey || !tokenCfg?.contractAddress) return;
     const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
     const svc = new SettlementServiceImpl(repo);
+    const chainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
     const treasury = getOnChainConfig().treasuryAddress;
+
+    // Auto-mint to treasury if it doesn't have enough on-chain balance
+    const decimals = await chainClient.getDecimals(tokenCfg.contractAddress, 18);
+    const treasuryWei = await chainClient.getBalance(treasury, tokenCfg.contractAddress);
+    const amountWei = chainClient.parseUnits(amount, decimals);
+    if (treasuryWei < amountWei) {
+      const deficitWei = amountWei - treasuryWei;
+      const mintTx = await chainClient.mint(treasury, deficitWei, tokenCfg.contractAddress);
+      const mintReceipt = await mintTx.wait();
+      if (!mintReceipt || mintReceipt.status !== 1) {
+        console.error(`[inventory] mint to treasury failed for ${tokenKey}`);
+        return;
+      }
+    }
+
     const txResult = await svc.adminTransfer({
       from: treasury,
       to: address,
@@ -207,7 +223,8 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           createdAt: new Date(),
         });
 
-        // On-chain transfer skipped — DB is the source of truth; background sync handles on-chain.
+        // Fire async on-chain transfer (auto-mints to treasury if needed)
+        void transferOnChain(ctx.address, creditToken === "yjc" ? "yjc" : "zhixi", totalCurrency.toString(), intent, walletAction, walletRepo);
       }
 
       await opsRepo.logEvent({
@@ -309,10 +326,13 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           });
         }
 
-        // DB is the source of truth for game operations.
-        // On-chain transfers are best-effort; skip them here to avoid
-        // failures when the treasury on-chain wallet has insufficient balance.
-        // Background sync handles on-chain eventually.
+        // Fire async on-chain transfers (auto-mints to treasury if needed)
+        if (zxcIntent) {
+          void transferOnChain(ctx.address, "zhixi", result.totalZxc.toString(), zxcIntent, walletAction, walletRepo);
+        }
+        if (yjcIntent) {
+          void transferOnChain(ctx.address, "yjc", result.totalYjc.toString(), yjcIntent, walletAction, walletRepo);
+        }
 
         await opsRepo.logEvent({
           channel: "rewards",
