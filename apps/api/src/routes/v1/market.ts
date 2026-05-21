@@ -172,46 +172,23 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
       else throw new Error("Unsupported market action payload");
 
-      // On-chain settlement (synchronous — wait for tx confirmation before DB update)
+      // On-chain settlement (update DB first, then fire async on-chain with logging)
       const walletAction = new WalletManager();
       const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow"].includes(type);
       const walletAmount = isReturnAction
         ? (result?.refund || result?.total || result?.amount || 0)
         : (result?.total || result?.margin || result?.amount || 0);
       const walletAbs = Math.abs(Number(walletAmount));
-      let txHash: string | undefined;
       if (walletAbs > 0) {
         const intentType = isCostAction ? "admin_debit" : "admin_credit";
         const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
         const newBalance = isCostAction ? Math.max(0, currentBalance - walletAbs) : currentBalance + walletAbs;
 
-        // Execute on-chain transfer first (before DB update)
-        const runtime = onchainManager.getRuntimeConfig();
-        if (runtime.rpcUrl && runtime.adminPrivateKey) {
-          const { SettlementServiceImpl, ViemRepository } = await import("@repo/on-chain");
-          const { getOnChainConfig } = await import("@repo/on-chain");
-          const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
-          const svc = new SettlementServiceImpl(repo);
-          const treasury = getOnChainConfig().treasuryAddress;
-          const fromAddr = intentType === "admin_credit" ? treasury : address;
-          const toAddr = intentType === "admin_credit" ? address : treasury;
-          const txResult = await svc.adminTransfer({
-            from: fromAddr,
-            to: toAddr,
-            amount: String(walletAbs),
-            tokenAddress: runtime.tokens.zhixi.contractAddress,
-          });
-          if (!txResult.confirmed) throw new Error("上鏈交易未確認");
-          txHash = txResult.txHash;
-        }
-
         await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
         const intent = walletAction.createTxIntent(userId, "ZXC", intentType, String(walletAbs));
         intent.address = address;
-        intent.meta = { source: "market", action: type, symbol: symbol || null, txHash };
-        await walletRepo.saveTxIntent(txHash
-          ? walletAction.processTxIntent(intent, "confirmed", txHash)
-          : intent);
+        intent.meta = { source: "market", action: type, symbol: symbol || null };
+        await walletRepo.saveTxIntent(intent);
         await walletRepo.saveLedgerEntry({
           id: randomUUID(),
           userId,
@@ -221,9 +198,33 @@ export async function marketRoutes(fastify: FastifyInstance) {
           amount: (isCostAction ? -walletAbs : walletAbs).toString(),
           balanceBefore: currentBalance.toString(),
           balanceAfter: newBalance.toString(),
-          meta: { symbol: symbol || null, result, txHash },
+          meta: { symbol: symbol || null, result },
           createdAt: new Date(),
         });
+
+        // Fire async on-chain transfer with proper error logging
+        const runtime = onchainManager.getRuntimeConfig();
+        if (runtime.rpcUrl && runtime.adminPrivateKey) {
+          const treasuryAddr = (await import("@repo/on-chain")).getOnChainConfig().treasuryAddress;
+          const fromAddr = intentType === "admin_credit" ? treasuryAddr : address;
+          const toAddr = intentType === "admin_credit" ? address : treasuryAddr;
+          const { SettlementServiceImpl, ViemRepository } = await import("@repo/on-chain");
+          const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+          const svc = new SettlementServiceImpl(repo);
+          void svc.adminTransfer({
+            from: fromAddr,
+            to: toAddr,
+            amount: String(walletAbs),
+            tokenAddress: runtime.tokens.zhixi.contractAddress,
+          }).then((txResult) => {
+            if (txResult.confirmed) {
+              walletRepo.saveTxIntent(walletAction.processTxIntent(intent, "confirmed", txResult.txHash)).catch(() => {});
+            }
+          }).catch((err) => {
+            console.error(`[Market] on-chain transfer failed for ${type}:`, err);
+            walletRepo.saveTxIntent(walletAction.processTxIntent(intent, "failed", undefined, err.message)).catch(() => {});
+          });
+        }
       }
 
       await marketRepo.saveAccount(address, userId, account);

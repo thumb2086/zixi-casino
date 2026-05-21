@@ -166,57 +166,62 @@ typedFastify.post("/buy", {
     body: z.object({
       sessionId: z.string().optional(),
       chestType: CHEST_TYPE_ENUM,
-      quantity: z.number().int().min(1).max(9999).optional().default(1),
+      quantity: z.coerce.number().int().min(1).max(9999).optional().default(1),
     }),
   },
 }, async (request: any) => {
-  const ctx = await getContext(request);
-  if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
+  try {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
 
-  const { chestType, quantity } = request.body as { chestType: ChestType; quantity: number };
-  const config = CHEST_CONFIGS[chestType];
-  const basePrice = config.price;
+    const { chestType, quantity } = request.body as { chestType: ChestType; quantity: number };
+    const config = CHEST_CONFIGS[chestType];
+    if (!config) return createApiEnvelope({ success: false }, request.id, false, `未知寶箱類型: ${chestType}`);
+    const basePrice = config.price;
 
-  const discountRate = quantity >= 10 ? 0.10 : quantity >= 5 ? 0.05 : 0;
-  const unitPrice = Math.round(basePrice * (1 - discountRate));
-  const totalPrice = unitPrice * quantity;
+    const discountRate = quantity >= 10 ? 0.10 : quantity >= 5 ? 0.05 : 0;
+    const unitPrice = Math.round(basePrice * (1 - discountRate));
+    const totalPrice = unitPrice * quantity;
 
-  const state = await loadInventoryState(ctx.userId);
-  const balanceBefore = await gameSettlement.getBalance(ctx.address, "zhixi");
-  const balanceBeforeNum = parseFloat(balanceBefore) || 0;
+    const state = await loadInventoryState(ctx.userId);
+    const balanceBefore = await gameSettlement.getBalance(ctx.address, "zhixi");
+    const balanceBeforeNum = parseFloat(balanceBefore) || 0;
 
-  if (balanceBeforeNum < totalPrice) {
-    return createApiEnvelope(
-      { success: false },
-      request.id,
-      false,
-      `餘額不足，購買 ${quantity} 個 ${config.name} 需 ${totalPrice.toLocaleString()} ZXC`,
-    );
+    if (balanceBeforeNum < totalPrice) {
+      return createApiEnvelope(
+        { success: false },
+        request.id,
+        false,
+        `餘額不足，購買 ${quantity} 個 ${config.name} 需 ${totalPrice.toLocaleString()} ZXC`,
+      );
+    }
+
+    await gameSettlement.setBalance(ctx.address, "zhixi", (balanceBeforeNum - totalPrice).toString());
+
+    // Create tx_intent for the purchase so the chain balance is synced
+    const buyIntent: any = walletManager.createTxIntent(ctx.userId, "ZXC", "admin_debit", totalPrice.toString());
+    buyIntent.address = ctx.address;
+    buyIntent.meta = { source: "chest_buy", chestType, quantity, unitPrice, keyId: `chest_key_${chestType}` };
+    await walletRepo.saveTxIntent(buyIntent);
+
+    const keyId = `chest_key_${chestType}`;
+    const nextState = { ...state, inventory: { ...state.inventory } };
+    nextState.inventory[keyId] = (nextState.inventory[keyId] || 0) + quantity;
+    await persistInventoryState(ctx.userId, nextState);
+
+    return createApiEnvelope({
+      success: true,
+      chestType,
+      quantity,
+      unitPrice,
+      discount: discountRate,
+      totalPrice,
+      balanceAfter: (balanceBeforeNum - totalPrice).toString(),
+      inventoryCount: Object.keys(nextState.inventory).length,
+    }, request.id);
+  } catch (error: any) {
+    return createApiEnvelope({ success: false }, request.id, false, error?.message || "購買寶箱失敗");
   }
-
-  await gameSettlement.setBalance(ctx.address, "zhixi", (balanceBeforeNum - totalPrice).toString());
-
-  // Create tx_intent for the purchase so the chain balance is synced
-  const buyIntent: any = walletManager.createTxIntent(ctx.userId, "ZXC", "admin_debit", totalPrice.toString());
-  buyIntent.address = ctx.address;
-  buyIntent.meta = { source: "chest_buy", chestType, quantity, unitPrice, keyId: `chest_key_${chestType}` };
-  await walletRepo.saveTxIntent(buyIntent);
-
-  const keyId = `chest_key_${chestType}`;
-  const nextState = { ...state, inventory: { ...state.inventory } };
-  nextState.inventory[keyId] = (nextState.inventory[keyId] || 0) + quantity;
-  await persistInventoryState(ctx.userId, nextState);
-
-  return createApiEnvelope({
-    success: true,
-    chestType,
-    quantity,
-    unitPrice,
-    discount: discountRate,
-    totalPrice,
-    balanceAfter: (balanceBeforeNum - totalPrice).toString(),
-    inventoryCount: Object.keys(nextState.inventory).length,
-  }, request.id);
 });
 
 // Open a chest. For the daily free chest the user must use action="claim_free".
