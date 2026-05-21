@@ -124,10 +124,10 @@ export default function ChestView() {
   const [useStatusMessage, setUseStatusMessage] = useState<string | null>(null);
   const [usingAllTokens, setUsingAllTokens] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [useQty, setUseQty] = useState<Record<string, number>>({});
+  const [useQty, setUseQty] = useState<Record<string, string>>({});
   const [giftDialog, setGiftDialog] = useState<{ itemId: string; name: string; maxQty: number } | null>(null);
   const [giftAddress, setGiftAddress] = useState('');
-  const [giftQty, setGiftQty] = useState(1);
+  const [giftQty, setGiftQty] = useState('1');
   const [giftSending, setGiftSending] = useState(false);
   const [recipients, setRecipients] = useState<Array<{ address: string; displayName: string }>>([]);
 
@@ -185,7 +185,7 @@ export default function ChestView() {
   }, [refreshStatus, refreshInventory, fetchRecipients]);
 
   const [opening, setOpening] = useState(false);
-  const [openQty, setOpenQty] = useState(1);
+  const [openQty, setOpenQty] = useState('1');
   const [showResult, setShowResult] = useState(false);
   const [openedItems, setOpenedItems] = useState<ChestItem[]>([]);
   const [openCompensation, setOpenCompensation] = useState(0);
@@ -370,23 +370,22 @@ export default function ChestView() {
               {[1, 5, 10, 100, 999].map((q) => (
                 <button
                   key={q}
-                  onClick={() => setOpenQty(q)}
+                  onClick={() => setOpenQty(String(q))}
                   className={`rounded-md px-2.5 py-1 text-[10px] font-black transition-all ${
-                    openQty === q ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'bg-[#1a1919] text-[#adaaaa] border border-[#494847]/30'
+                    parseInt(openQty || '1', 10) === q ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'bg-[#1a1919] text-[#adaaaa] border border-[#494847]/30'
                   }`}
                 >
                   x{q}
                 </button>
               ))}
               <input
-                type="number"
-                min={1}
+                type="text"
+                inputMode="numeric"
                 value={openQty}
-                onChange={(e) => {
-                  const raw = e.target.value;
-                  if (raw === '') { setOpenQty(0); return; }
-                  const v = parseInt(raw, 10);
-                  if (!isNaN(v)) setOpenQty(Math.max(1, v));
+                onChange={(e) => setOpenQty(e.target.value)}
+                onBlur={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (!v || v < 1) setOpenQty('1');
                 }}
                 className="w-14 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center py-1 focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
@@ -397,7 +396,8 @@ export default function ChestView() {
             {chests.map((chest) => {
               const keys = displayKeyCounts[chest.id] || 0;
               const currentPity = displayPity[chest.id] || 0;
-              const canOpen = keys >= openQty;
+              const openQtyNum = parseInt(openQty || '1', 10) || 1;
+              const canOpen = keys >= openQtyNum;
 
               return (
                 <div key={chest.id} className="group relative overflow-hidden rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-5 transition-all hover:border-[#fcc025]/30">
@@ -428,7 +428,7 @@ export default function ChestView() {
                   </div>
 
                   <button
-                    onClick={() => handleOpen(chest.id, openQty)}
+                    onClick={() => handleOpen(chest.id, openQtyNum)}
                     disabled={!canOpen || opening}
                     className={`w-full rounded-xl py-3 text-xs font-black uppercase tracking-widest transition-all ${
                       canOpen
@@ -436,7 +436,7 @@ export default function ChestView() {
                         : 'bg-[#494847]/20 text-[#494847] cursor-not-allowed border border-[#494847]/10'
                     }`}
                   >
-                    {opening ? '解鎖中...' : `開啟 ${openQty} 個`}
+                    {opening ? '解鎖中...' : `開啟 ${openQtyNum} 個`}
                   </button>
                 </div>
               );
@@ -477,14 +477,19 @@ export default function ChestView() {
                     <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
                     <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
-                      <input type="number" min="1"
-                        value={useQty[item.id] || 1}
-                        onChange={(e) => { const raw = e.target.value; if (raw === '') { setUseQty(p => ({ ...p, [item.id]: 0 })); return; } const v = parseInt(raw, 10); if (!isNaN(v)) setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
+                      <input type="text" inputMode="numeric"
+                        value={useQty[item.id] ?? '1'}
+                        onChange={(e) => setUseQty(p => ({ ...p, [item.id]: e.target.value }))}
+                        onBlur={(e) => {
+                          const v = parseInt(e.target.value, 10);
+                          if (!v || v < 1) setUseQty(p => ({ ...p, [item.id]: '1' }));
+                          else if (v > item.quantity) setUseQty(p => ({ ...p, [item.id]: String(item.quantity) }));
+                        }}
                         className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
                       />
-                      <button onClick={() => setUseQty(p => ({ ...p, [item.id]: item.quantity }))}
+                      <button onClick={() => setUseQty(p => ({ ...p, [item.id]: String(item.quantity) }))}
                         className="text-[10px] font-black bg-[#494847]/20 text-[#adaaaa] px-1.5 py-1 rounded-lg hover:bg-[#494847]/40">Max</button>
-                      <button onClick={() => useItem(item.id, useQty[item.id] || 1)}
+                      <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
                         className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
                         className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
@@ -513,12 +518,17 @@ export default function ChestView() {
                     <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
                     <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
-                      <input type="number" min="1"
-                        value={useQty[item.id] || 1}
-                        onChange={(e) => { const raw = e.target.value; if (raw === '') { setUseQty(p => ({ ...p, [item.id]: 0 })); return; } const v = parseInt(raw, 10); if (!isNaN(v)) setUseQty(p => ({ ...p, [item.id]: Math.max(1, Math.min(item.quantity, v)) })); }}
+                      <input type="text" inputMode="numeric"
+                        value={useQty[item.id] ?? '1'}
+                        onChange={(e) => setUseQty(p => ({ ...p, [item.id]: e.target.value }))}
+                        onBlur={(e) => {
+                          const v = parseInt(e.target.value, 10);
+                          if (!v || v < 1) setUseQty(p => ({ ...p, [item.id]: '1' }));
+                          else if (v > item.quantity) setUseQty(p => ({ ...p, [item.id]: String(item.quantity) }));
+                        }}
                         className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
                       />
-                      <button onClick={() => useItem(item.id, useQty[item.id] || 1)}
+                      <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
                         className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
                         className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
@@ -726,8 +736,8 @@ export default function ChestView() {
               <label className="block text-sm font-bold text-[#adaaaa] mb-1">數量</label>
               <div className="flex items-center gap-2 mb-4">
                 <button
-                  onClick={() => setGiftQty(Math.max(1, giftQty - 1))}
-                  disabled={giftQty <= 1}
+                  onClick={() => setGiftQty(String(Math.max(1, (parseInt(giftQty || '1', 10) || 1) - 1)))}
+                  disabled={(parseInt(giftQty || '1', 10) || 1) <= 1}
                   className="w-8 h-8 rounded-full bg-[#494847]/40 text-[#fcc025] font-bold text-lg
                     flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
                     hover:bg-[#494847]/60 transition-colors"
@@ -735,21 +745,21 @@ export default function ChestView() {
                   −
                 </button>
                 <input
-                  type="number"
-                  min={1}
+                  type="text"
+                  inputMode="numeric"
                   value={giftQty}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    if (raw === '') { setGiftQty(0); return; }
-                    const v = parseInt(raw, 10);
-                    if (!isNaN(v)) setGiftQty(Math.max(1, Math.min(giftDialog.maxQty, v)));
+                  onChange={(e) => setGiftQty(e.target.value)}
+                  onBlur={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!v || v < 1) setGiftQty('1');
+                    else if (v > giftDialog.maxQty) setGiftQty(String(giftDialog.maxQty));
                   }}
                   className="w-16 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-lg text-center
                     focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <button
-                  onClick={() => setGiftQty(Math.min(giftDialog.maxQty, giftQty + 1))}
-                  disabled={giftQty >= giftDialog.maxQty}
+                  onClick={() => setGiftQty(String(Math.min(giftDialog.maxQty, (parseInt(giftQty || '1', 10) || 1) + 1)))}
+                  disabled={(parseInt(giftQty || '1', 10) || 1) >= giftDialog.maxQty}
                   className="w-8 h-8 rounded-full bg-[#494847]/40 text-[#fcc025] font-bold text-lg
                     flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
                     hover:bg-[#494847]/60 transition-colors"
@@ -775,13 +785,13 @@ export default function ChestView() {
                       const res = await api.post('/api/v1/gift/send', {
                         toAddress: giftAddress.trim(),
                         itemId: giftDialog.itemId,
-                        quantity: giftQty,
+                        quantity: parseInt(giftQty || '1', 10) || 1,
                       });
                       if (res.data?.success) {
                         showToast('贈送成功！');
                         setGiftDialog(null);
                         setGiftAddress('');
-                        setGiftQty(1);
+                        setGiftQty('1');
                         await refreshInventory();
                       } else {
                         showToast(res.data?.error || '贈送失敗');
