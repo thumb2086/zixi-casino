@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './Slots.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
-import { useBetQueue } from './useBetQueue';
 
 const SYMBOLS = ['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣'];
 
@@ -15,7 +15,8 @@ function randomSymbols(): string[] {
 
 export const SlotsView: React.FC = () => {
   const { session } = useAuth();
-  const { enqueue, pending } = useBetQueue();
+  const queryClient = useQueryClient();
+  const spinningRef = useRef(false);
   const [betAmount, setBetAmount] = useState('10');
   const [grid, setGrid] = useState<string[]>(['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣', '🍒', '🍋']);
   const [status, setStatus] = useState('🎰 拉霸準備就緒，祝你好運！');
@@ -24,29 +25,24 @@ export const SlotsView: React.FC = () => {
   const handleSpin = () => {
     if (!session) return;
 
-    // Show mock result IMMEDIATELY (<1ms feedback)
-    const mockSymbols = randomSymbols();
-    setGrid(mockSymbols);
-    setStatus(`🎲 結果計算中...${pending > 0 ? ` (佇列 ${pending + 1})` : ''}`);
+    // Show mock result IMMEDIATELY
+    setGrid(randomSymbols());
+    setStatus('🎲 結果計算中...');
     setWinSymbols([]);
 
-    // Fire API in background
-    enqueue(async () => {
-      const res = await api.post('/api/v1/games/slots/play', {
-        sessionId: session.id,
-        betAmount: Number(betAmount),
-      });
+    // Fire API concurrently — no queue, each spin is independent
+    spinningRef.current = true;
+    api.post('/api/v1/games/slots/play', {
+      sessionId: session.id,
+      betAmount: Number(betAmount),
+    }).then((res) => {
       const payload = res.data;
-      if (!res.status || payload?.success === false) {
-        throw new Error(extractGameError(payload));
-      }
+      if (payload?.success === false) throw new Error(extractGameError(payload));
       const result = unwrapGameEnvelope<any>(payload);
 
-      // Replace mock with real result
-      const newGrid = [...grid];
-      for (let i = 0; i < 9; i++) newGrid[i] = result.symbols[i];
-      setGrid(newGrid);
-
+      // Update grid with real result (concurrent spins are fine — each is independent)
+      setGrid(result.symbols);
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       if (result.multiplier > 0) {
         setStatus(`🎉 中獎！倍率 ${result.multiplier}x`);
         setWinSymbols(result.winLine || [3, 4, 5]);
@@ -54,7 +50,10 @@ export const SlotsView: React.FC = () => {
         setStatus('😢 本局未中，下一把再衝！');
         setWinSymbols([]);
       }
-      return result;
+    }).catch((err: any) => {
+      setStatus(`❌ ${err?.message || '旋轉失敗'}`);
+    }).finally(() => {
+      spinningRef.current = false;
     });
   };
 
@@ -79,7 +78,7 @@ export const SlotsView: React.FC = () => {
         />
         <BetQuickActions amount={betAmount} onChange={setBetAmount} />
         <button className="btn-spin" onClick={handleSpin}>
-          {pending > 0 ? `旋轉中 (${pending})` : '開始旋轉'}
+          開始旋轉
         </button>
       </div>
 
