@@ -205,45 +205,19 @@ typedFastify.post("/buy", {
     buyIntent.meta = { source: "chest_buy", chestType, quantity, unitPrice, keyId: `chest_key_${chestType}` };
     await walletRepo.saveTxIntent(buyIntent);
 
-    // Record in wallet ledger for transaction history
+    // Record in wallet ledger for transaction history (debit = negative amount)
     await walletRepo.saveLedgerEntry({
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       userId: ctx.userId,
       address: ctx.address,
       token: "zhixi",
       type: "chest_buy",
-      amount: totalPrice.toString(),
+      amount: `-${totalPrice}`,
       balanceBefore: balanceBefore,
       balanceAfter: (balanceBeforeNum - totalPrice).toFixed(4),
       meta: { chestType, quantity, unitPrice, keyId: `chest_key_${chestType}` },
       createdAt: new Date(),
     });
-
-    // Synchronously sync the deduction to chain to prevent auth.ts from reverting it
-    try {
-      const { SettlementServiceImpl, ViemRepository, getOnChainConfig } = await import("@repo/on-chain");
-      const { OnchainWalletManager } = await import("@repo/domain");
-      const onchainManager = new OnchainWalletManager();
-      const runtime = onchainManager.getRuntimeConfig();
-      const tokenCfg = runtime.tokens?.zhixi;
-      if (runtime.rpcUrl && runtime.adminPrivateKey && tokenCfg?.contractAddress) {
-        const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
-        const svc = new SettlementServiceImpl(repo);
-        const treasury = getOnChainConfig().treasuryAddress;
-        const txResult = await svc.adminTransfer({
-          from: ctx.address,
-          to: treasury,
-          amount: totalPrice.toString(),
-          tokenAddress: tokenCfg.contractAddress,
-        });
-        if (txResult.confirmed) {
-          await walletRepo.saveTxIntent(walletManager.processTxIntent(buyIntent, "confirmed", txResult.txHash));
-        }
-      }
-    } catch (chainErr) {
-      console.error("[Chests] on-chain debit failed for chest buy:", chainErr);
-      // DB deduction already done; will be synced by worker later
-    }
 
     const keyId = `chest_key_${chestType}`;
     const nextState = { ...state, inventory: { ...state.inventory } };
