@@ -167,7 +167,7 @@ typedFastify.post("/buy", {
     body: z.object({
       sessionId: z.string().optional(),
       chestType: CHEST_TYPE_ENUM,
-      quantity: z.coerce.number().int().min(1).optional().default(1),
+      quantity: z.coerce.number().int().min(1).max(99).optional().default(1),
     }),
   },
 }, async (request: any) => {
@@ -446,7 +446,7 @@ typedFastify.post("/open-bulk", {
     body: z.object({
       sessionId: z.string().optional(),
       chestType: CHEST_TYPE_ENUM,
-      quantity: z.number().int().min(1),
+      quantity: z.number().int().min(1).max(99),
     }),
   },
 }, async (request: any) => {
