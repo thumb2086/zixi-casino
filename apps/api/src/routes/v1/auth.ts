@@ -52,9 +52,11 @@ export async function authRoutes(fastify: FastifyInstance) {
       const hasPendingAdmin = pendingIntents.some(
         (i: any) => i.status === "pending" && (i.type === "admin_debit" || i.type === "admin_credit")
       );
-      if (!hasPendingAdmin) {
-        await walletRepo.updateBalance(address, onchainBalance, "zhixi");
+      if (hasPendingAdmin) {
+        // Return DB balance (correctly reflects pending operations) instead of on-chain
+        return (await walletRepo.getBalance(address, "zhixi")) || "0";
       }
+      await walletRepo.updateBalance(address, onchainBalance, "zhixi");
       return onchainBalance;
     } catch {
       return (await walletRepo.getBalance(address, "zhixi")) || "0";
