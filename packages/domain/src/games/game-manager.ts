@@ -9,7 +9,7 @@ export interface GameDomain {
   resolveCoinflip(selection: string, seed: string, bias?: number): { winner: string; isWin: boolean; multiplier: number };
   resolveRoulette(bets: any[], seed: string, bias?: number): { winningNumber: number; color: string; totalPayoutMultiplier: number };
   resolveHorseRace(horseId: number, seed: string, bias?: number): { winnerId: number; winnerName: string; isWin: boolean; multiplier: number };
-  resolveSlots(betAmount: number, seed: string, bias?: number): { symbols: string[]; multiplier: number; payout: number };
+  resolveSlots(betAmount: number, seed: string, bias?: number): { symbols: string[]; multiplier: number; payout: number; winLines: number[][] };
   resolveSicbo(bets: any[], seed: string, bias?: number): { dice: number[]; total: number; isBig: boolean; totalPayoutMultiplier: number };
   resolveBingo(selectedNumbers: number[], seed: string, bias?: number): { winningNumbers: number[]; matches: number[]; multiplier: number };
   resolveDuel(p1Selection: string, p2Selection: string, seed: string): { winner: 1 | 2 | 0 };
@@ -165,37 +165,47 @@ export class GameManager implements GameDomain {
     };
   }
 
-  resolveSlots(betAmount: number, seed: string, bias: number = 0): { symbols: string[]; multiplier: number; payout: number } {
-    const symbols = ["🍒", "🍋", "🍊", "🍇", "🔔", "💎", "7️⃣"];
+  resolveSlots(betAmount: number, seed: string, bias: number = 0): { symbols: string[]; multiplier: number; payout: number; winLines: number[][] } {
+    const pool = ["🍒", "🍋", "🍊", "🍇", "🔔", "💎", "7️⃣"];
     let hash = this._fnv1a32(seed);
 
-    // Very simplified slots bias: force a win if bias hits
-    if (bias > 0 && (this._fnv1a32(seed + ':bias') % 100 < bias * 100)) {
-        const winSymbolIdx = hash % symbols.length;
-        return {
-            symbols: [symbols[winSymbolIdx], symbols[winSymbolIdx], symbols[winSymbolIdx]],
-            multiplier: symbols[winSymbolIdx] === "7️⃣" ? 50 : 10,
-            payout: betAmount * (symbols[winSymbolIdx] === "7️⃣" ? 50 : 10)
-        };
+    // Generate 3×3 grid (9 symbols): reels[0..2] each with 3 positions
+    const reels: string[][] = [[], [], []];
+    for (let r = 0; r < 3; r++) {
+      for (let p = 0; p < 3; p++) {
+        const idx = hash % pool.length;
+        reels[r].push(pool[idx]);
+        hash = this._fnv1a32(hash + ':' + r + ':' + p);
+      }
     }
+    const symbols = [...reels[0], ...reels[1], ...reels[2]]; // flat 9
 
-    const result = [
-      symbols[hash % symbols.length],
-      symbols[Math.floor(hash / symbols.length) % symbols.length],
-      symbols[Math.floor(hash / (symbols.length * symbols.length)) % symbols.length]
+    // Win lines: rows (0,1,2), columns (3,4,5), diagonals (6,7)
+    const lines: { indices: number[]; label: string }[] = [
+      { indices: [0, 3, 6], label: 'row0' },
+      { indices: [1, 4, 7], label: 'row1' },
+      { indices: [2, 5, 8], label: 'row2' },
+      { indices: [0, 4, 8], label: 'diag' },
+      { indices: [2, 4, 6], label: 'diag2' },
     ];
 
     let multiplier = 0;
-    if (result[0] === result[1] && result[1] === result[2]) {
-      multiplier = result[0] === "7️⃣" ? 50 : 10;
-    } else if (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]) {
-      multiplier = 2;
+    const winLines: number[][] = [];
+
+    for (const line of lines) {
+      const [a, b, c] = line.indices;
+      if (symbols[a] === symbols[b] && symbols[b] === symbols[c]) {
+        const baseMult = symbols[a] === "7️⃣" ? 50 : symbols[a] === "💎" ? 10 : 3;
+        multiplier = Math.max(multiplier, baseMult);
+        winLines.push(line.indices);
+      }
     }
 
     return {
-      symbols: result,
+      symbols,
       multiplier,
-      payout: betAmount * multiplier
+      payout: betAmount * multiplier,
+      winLines,
     };
   }
 

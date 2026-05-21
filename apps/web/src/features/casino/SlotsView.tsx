@@ -57,7 +57,7 @@ export const SlotsView: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
       if (result.multiplier > 0) {
         setStatus(`🎉 中獎！倍率 ${result.multiplier}x`);
-        setWinSymbols(result.winLine || [3, 4, 5]);
+        setWinSymbols(result.winLines?.flat() || []);
       } else {
         setStatus('😢 本局未中，下一把再衝！');
         setWinSymbols([]);
