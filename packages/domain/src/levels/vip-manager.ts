@@ -61,8 +61,8 @@ export class VipManager {
         return dbBalance;
       }
 
-      // Sync on-chain balance to DB if different
-      if (onchainBalance !== dbBalance) {
+      // Sync on-chain balance to DB only if on-chain has real tokens (ignore 0 when DB has value)
+      if (onchainBalance > 0 && onchainBalance !== dbBalance) {
         try {
           const userRow = await db
             .select({ id: schema.users.id })
@@ -85,11 +85,11 @@ export class VipManager {
               });
           }
         } catch {
-          // DB sync failure is non-fatal, return on-chain balance anyway
+          // DB sync failure is non-fatal
         }
       }
 
-      return onchainBalance;
+      return onchainBalance > 0 ? onchainBalance : dbBalance;
     } catch {
       return dbBalance;
     }
@@ -151,8 +151,8 @@ export class VipManager {
     const level = this.getVipTierByScore(score);
     const nextLevel = this.getNextLevel(level);
 
-    // 5. Determine YJC VIP tier (based on YJC balance + purchased buffs) - separate system!
-    const yjcVipTier = await this.getYjcVipTier(yjcBalance, addr);
+    // 5. Determine YJC VIP tier (based on purchased VIP pass buffs)
+    const yjcVipTier = await this.getYjcVipTier(addr);
 
     // 6. Calculate progress to next level
     let progressPct = 100;
@@ -180,41 +180,28 @@ export class VipManager {
     };
   }
 
-  // Get YJC VIP tier based on YJC balance + purchased VIP buffs
-  private async getYjcVipTier(yjcBalance: number, address?: string): Promise<YjcVipTier> {
-    // Check for permanent VIP buffs purchased from shop
-    if (address) {
-      try {
-        const db = await this.getDb();
-        const profile = await db
-          .select({ activeBuffs: schema.userProfiles.activeBuffs })
-          .from(schema.userProfiles)
-          .where(eq(schema.userProfiles.address, address.toLowerCase()))
-          .limit(1);
-        const buffs: any[] = (profile[0]?.activeBuffs as any[]) || [];
-        const hasVip2 = buffs.some((b: any) => b.id === 'vip_2_permanent');
-        const hasVip1 = buffs.some((b: any) => b.id === 'vip_1_permanent');
-        if (hasVip2) return YJC_VIP_TIERS[2];
-        if (hasVip1) return YJC_VIP_TIERS[1];
-      } catch {
-        // fall through to normal YJC balance check
-      }
-    }
-    for (let i = YJC_VIP_TIERS.length - 1; i >= 0; i--) {
-      if (yjcBalance >= YJC_VIP_TIERS[i].minBalance) {
-        return YJC_VIP_TIERS[i];
-      }
+  // Get YJC VIP tier based on purchased VIP pass buffs (no YJC balance fallback)
+  private async getYjcVipTier(address?: string): Promise<YjcVipTier> {
+    if (!address) return YJC_VIP_TIERS[0];
+    try {
+      const db = await this.getDb();
+      const profile = await db
+        .select({ activeBuffs: schema.userProfiles.activeBuffs })
+        .from(schema.userProfiles)
+        .where(eq(schema.userProfiles.address, address.toLowerCase()))
+        .limit(1);
+      const buffs: any[] = (profile[0]?.activeBuffs as any[]) || [];
+      if (buffs.some((b: any) => b.id === 'vip_2_permanent')) return YJC_VIP_TIERS[2];
+      if (buffs.some((b: any) => b.id === 'vip_1_permanent')) return YJC_VIP_TIERS[1];
+    } catch {
+      // ignore
     }
     return YJC_VIP_TIERS[0]; // "none" tier
   }
 
   // Get YJC VIP tier by address (for game fee calculation)
   async getYjcVipTierByAddress(address: string): Promise<YjcVipTier> {
-    const addr = address.toLowerCase();
-    const db = await this.getDb();
-
-    const yjcBalance = await this.resolveYjcBalance(db, addr);
-    return this.getYjcVipTier(yjcBalance, addr);
+    return this.getYjcVipTier(address.toLowerCase());
   }
 
   // Check if user has VIP2 (for zero game fees)

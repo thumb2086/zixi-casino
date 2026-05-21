@@ -7,7 +7,7 @@ import { sql } from "drizzle-orm";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { WalletManager } from "@repo/domain";
 import { rollEmployee, createDefaultCompany, processTicks, computeSummary, checkUnlocks,
-  upgradeLevelCost, upgradeFabCost, researchCost, STARTUP_FEE } from "@repo/domain/company/company-manager.js";
+  upgradeLevelCost, upgradeFabCost, researchCost, EQUIPMENT_COST, STARTUP_FEE } from "@repo/domain/company/company-manager.js";
 
 export async function companyRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -72,10 +72,14 @@ export async function companyRoutes(fastify: FastifyInstance) {
   typedFastify.get("/hire-preview", async (request) => {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
-    const rows = await pgQuery`SELECT company_type FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
-    return createApiEnvelope({ candidate: rollEmployee(row.company_type) }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const candidate = rollEmployee(row.company_type);
+    data.pendingHire = candidate;
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ candidate }, request.id);
   });
 
   typedFastify.post("/hire", {
@@ -88,11 +92,14 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const emp = data.employees?.find((e: any) => e.id === employeeId);
-    if (!emp) return createApiEnvelope({ error: { code: "NOT_FOUND", message: "employee not found" } }, request.id);
-    emp.hiredAt = Date.now();
+    const candidate = data.pendingHire;
+    if (!candidate || candidate.id !== employeeId) return createApiEnvelope({ error: { code: "NOT_FOUND", message: "employee not found or expired" } }, request.id);
+    candidate.hiredAt = Date.now();
+    data.employees = data.employees || [];
+    data.employees.push(candidate);
+    delete data.pendingHire;
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
-    return createApiEnvelope({ success: true, employee: emp }, request.id);
+    return createApiEnvelope({ success: true, employee: candidate }, request.id);
   });
 
   typedFastify.post("/fire", {
@@ -157,6 +164,27 @@ export async function companyRoutes(fastify: FastifyInstance) {
     if (data.research >= 100) { data.patents = (data.patents || 0) + 1; data.research = 0; checkUnlocks(data, row.company_type); }
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
     return createApiEnvelope({ success: true, research: data.research, patents: data.patents }, request.id);
+  });
+
+  typedFastify.post("/buy-equipment", {
+    schema: { body: z.object({ sessionId: z.string(), equipmentType: z.enum(["gpu", "supercomputer"]) }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { equipmentType } = request.body;
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const cost = EQUIPMENT_COST[equipmentType];
+    if (!cost) return createApiEnvelope({ error: { code: "INVALID_EQUIPMENT" } }, request.id);
+    if ((data.cash || 0) < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
+    data.equipment = data.equipment || { gpu: 0, supercomputer: 0 };
+    data.equipment[equipmentType] = (data.equipment[equipmentType] || 0) + 1;
+    data.cash -= cost;
+    appendHistory(data, "equipment", `購買 ${equipmentType === "gpu" ? "GPU" : "超級電腦"} x1（${cost.toLocaleString()} ZXC）`);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, equipment: data.equipment, cash: data.cash }, request.id);
   });
 
   typedFastify.post("/withdraw", {

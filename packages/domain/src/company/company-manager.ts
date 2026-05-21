@@ -40,6 +40,7 @@ export interface CompanyData {
   reputation: number;      // 0-100
   lastTickAt: number;      // epoch ms
   history: CompanyEvent[];
+  equipment: { gpu: number; supercomputer: number };
 }
 
 export interface CompanyEvent {
@@ -49,7 +50,7 @@ export interface CompanyEvent {
   detail?: Record<string, unknown>;
 }
 
-function appendHistory(data: CompanyData, type: string, summary: string, detail?: Record<string, unknown>) {
+export function appendHistory(data: CompanyData, type: string, summary: string, detail?: Record<string, unknown>) {
   data.history = data.history || [];
   data.history.unshift({ at: new Date().toISOString(), type, summary, detail });
   if (data.history.length > 80) data.history.length = 80;
@@ -80,6 +81,7 @@ export function createDefaultCompany(companyType: "ai" | "chip", companyName: st
     reputation: 50,
     lastTickAt: Date.now(),
     history: [],
+    equipment: { gpu: 0, supercomputer: 0 },
   };
 }
 
@@ -160,9 +162,11 @@ export function processTicks(data: CompanyData, companyType: "ai" | "chip"): { t
 
     data.cash += revenue;
 
-    // Research progress
+    // Research progress (equipment adds multiplicative bonus)
     const engCount = data.employees.filter(e => e.role === "engineer" || e.role === "chip_designer" || e.role === "materials_scientist").length;
-    data.research = Math.min(100, data.research + engCount * 0.1 * teamMult);
+    const equip = data.equipment || { gpu: 0, supercomputer: 0 };
+    const equipMult = 1 + equip.gpu * 0.5 + equip.supercomputer * 2;
+    data.research = Math.min(100, data.research + engCount * 0.1 * teamMult * equipMult);
 
     // Every 100 research → patent
     if (data.research >= 100) {
@@ -191,6 +195,7 @@ export function computeSummary(data: CompanyData, companyType: "ai" | "chip") {
     totalSalary: data.employees.reduce((s, e) => s + e.salary, 0),
     patents: data.patents,
     research: Math.round(data.research * 100) / 100,
+    equipment: data.equipment || { gpu: 0, supercomputer: 0 },
     reputation: Math.round(data.reputation),
     unlockedProducts: data.unlockedProducts.length,
     fabLevel: data.fabLevel,
@@ -232,5 +237,10 @@ export function upgradeFabCost(currentFabLevel: number): number {
 export function researchCost(): number {
   return 1000;
 }
+
+export const EQUIPMENT_COST: Record<string, number> = {
+  gpu: 5_000,
+  supercomputer: 50_000,
+};
 
 export { rollEmployee, STARTUP_FEE };

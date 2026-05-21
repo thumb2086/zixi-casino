@@ -122,7 +122,7 @@ export default function RoomLobbyView() {
           <img
             src="https://images.unsplash.com/photo-1543357480-c60d40007a3f?auto=format&fit=crop&q=80&w=2070"
             className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-105"
-            alt="Horse racing"
+            alt={t('lobby.horseRacingAlt')}
           />
           <div className="absolute bottom-0 left-0 z-20 space-y-4 p-10">
             <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export default function RoomLobbyView() {
               >
                 {game.vipOnly && (
                   <div className="absolute left-3 top-3 rounded-full border border-[#fcc025]/25 bg-[#fcc025]/10 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-[#fcc025]">
-                    VIP
+                    {t('lobby.vip')}
                   </div>
                 )}
                 {game.hot && (
