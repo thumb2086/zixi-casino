@@ -23,6 +23,23 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
   // Attach each leaderboard entry's equipped avatar + title (emoji + label)
   const enrichEntriesWithCosmetics = async (entries: Array<any>) => {
     if (!entries?.length) return;
+    const db = await requireDb();
+    const addresses = entries.map((e) => String(e?.address || "").toLowerCase()).filter(Boolean);
+
+    // Batch fetch all profiles at once
+    const profiles: Array<{ address: string; selectedAvatarId: string | null; selectedTitleId: string | null }> = [];
+    if (addresses.length > 0) {
+      try {
+        const rows = await db.select({
+          address: schema.userProfiles.address,
+          selectedAvatarId: schema.userProfiles.selectedAvatarId,
+          selectedTitleId: schema.userProfiles.selectedTitleId,
+        }).from(schema.userProfiles).where(sql`${schema.userProfiles.address} = ANY(${addresses})`);
+        profiles.push(...rows as any);
+      } catch {}
+    }
+    const profileMap = new Map(profiles.map((p) => [p.address.toLowerCase(), p]));
+
     const customItems = await rewardCatalogRepo.listItems({}).catch(() => [] as any[]);
     const avatarMap = new Map<string, { id: string; icon?: string; label?: string }>();
     const titleMap = new Map<string, { id: string; label?: string }>();
@@ -33,48 +50,31 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
     }
     for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TABLES)[]) {
       for (const item of ITEM_DROP_TABLES[rarity]) {
-        if (item.type === "avatar" && !avatarMap.has(item.id)) {
-          avatarMap.set(item.id, { id: item.id, icon: item.icon, label: item.name });
-        }
-        if (item.type === "title" && !titleMap.has(item.id)) {
-          titleMap.set(item.id, { id: item.id, label: item.name });
-        }
+        if (item.type === "avatar" && !avatarMap.has(item.id)) avatarMap.set(item.id, { id: item.id, icon: item.icon, label: item.name });
+        if (item.type === "title" && !titleMap.has(item.id)) titleMap.set(item.id, { id: item.id, label: item.name });
       }
     }
 
-    await Promise.all(entries.map(async (entry) => {
+    for (const entry of entries) {
       const addr = String(entry?.address || "").toLowerCase();
-      if (!addr) return;
-      let avId = "classic_chip";
-      let tiId = "title_newbie";
-      try {
-        const db2 = await requireDb();
-        const profile = await db2.query.userProfiles.findFirst({
-          where: (p: any, { eq }: any) => eq(p.address, addr),
-        });
-        if (profile) {
-          if (profile.selectedAvatarId) avId = profile.selectedAvatarId;
-          if (profile.selectedTitleId) tiId = profile.selectedTitleId;
-        }
-      } catch {}
-      const av = avatarMap.get(avId || "classic_chip") || avatarMap.get("classic_chip");
-      const ti = titleMap.get(tiId || "newbie") || titleMap.get("newbie");
+      if (!addr) continue;
+      const profile = profileMap.get(addr);
+      const avId = profile?.selectedAvatarId || "classic_chip";
+      const tiId = profile?.selectedTitleId || "title_newbie";
+      const av = avatarMap.get(avId) || avatarMap.get("classic_chip");
+      const ti = titleMap.get(tiId) || titleMap.get("title_newbie") || titleMap.get("newbie");
       entry.activeAvatarId = av?.id ?? null;
       entry.activeAvatarIcon = av?.icon ?? null;
       entry.activeTitleId = ti?.id ?? null;
       entry.activeTitleLabel = ti?.label ?? null;
 
-      // Compute VIP level from amount (total bet)
       const betAmount = Number(entry?.amount || 0);
       let vipLevel = LEVEL_TIERS[0]?.label || "普通會員";
       for (let i = LEVEL_TIERS.length - 1; i >= 0; i--) {
-        if (betAmount >= LEVEL_TIERS[i].threshold) {
-          vipLevel = LEVEL_TIERS[i].label;
-          break;
-        }
+        if (betAmount >= LEVEL_TIERS[i].threshold) { vipLevel = LEVEL_TIERS[i].label; break; }
       }
       entry.vipLevel = vipLevel;
-    }));
+    }
   };
 
   // Helper to get context and address
@@ -121,7 +121,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         if (syncEnabled && sync !== "off") {
           const now = Date.now();
           const lastSyncAt = Number(await kv.get<number>(ASSET_LB_SYNC_KEY) || 0);
-          const syncEveryRead = String(process.env.ASSET_LEADERBOARD_SYNC_EVERY_READ ?? "true").toLowerCase() !== "false";
+          const syncEveryRead = String(process.env.ASSET_LEADERBOARD_SYNC_EVERY_READ ?? "false").toLowerCase() !== "false";
           const shouldSync = sync === "force"
             || syncEveryRead
             || (!syncEveryRead && (now - lastSyncAt >= ASSET_LB_SYNC_INTERVAL_MS));
@@ -159,16 +159,19 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
                   ...walletAddresses.map((r) => r.address),
                 ]));
 
-                for (const addr of addresses) {
-                  const normalizedAddr = addr.toLowerCase();
-                  await Promise.all(tokenMeta.map(async (token) => {
-                    try {
-                      const raw = await client.getBalance(normalizedAddr, token.contractAddress);
-                      const balance = client.formatUnits(raw, token.decimals);
-                      await walletRepo.updateBalance(normalizedAddr, balance, token.key);
-                    } catch {
-                      // keep best effort sync; ignore per-user/per-token failures
-                    }
+                // Batch sync with concurrency limit to avoid RPC flood
+                const BATCH_SIZE = 10;
+                const normalizedAddrs = addresses.map((a) => a.toLowerCase());
+                for (let i = 0; i < normalizedAddrs.length; i += BATCH_SIZE) {
+                  const batch = normalizedAddrs.slice(i, i + BATCH_SIZE);
+                  await Promise.all(batch.map(async (addr) => {
+                    await Promise.all(tokenMeta.map(async (token) => {
+                      try {
+                        const raw = await client.getBalance(addr, token.contractAddress);
+                        const balance = client.formatUnits(raw, token.decimals);
+                        await walletRepo.updateBalance(addr, balance, token.key);
+                      } catch {}
+                    }));
                   }));
                 }
                 await kv.set(ASSET_LB_SYNC_KEY, now);
