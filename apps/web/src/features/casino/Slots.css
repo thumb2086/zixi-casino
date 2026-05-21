@@ -17,7 +17,7 @@
 .slots-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .slot-cell {
@@ -29,15 +29,23 @@
   justify-content: center;
   font-size: 2.5rem;
   overflow: hidden;
+  transition: border 0.15s, background 0.15s;
 }
 
 .slot-cell.spinning {
-  animation: slot-blur 0.1s infinite linear;
+  animation: slot-blur 0.08s infinite linear;
+}
+
+.slot-cell.win {
+  background: rgba(234, 179, 8, 0.2);
+  border: 2px solid #eab308;
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.3);
 }
 
 @keyframes slot-blur {
-  0% { transform: translateY(-5px); filter: blur(2px); }
-  100% { transform: translateY(5px); filter: blur(2px); }
+  0% { filter: blur(3px); transform: translateY(-4px); }
+  50% { filter: blur(1px); }
+  100% { filter: blur(3px); transform: translateY(4px); }
 }
 
 .slot-controls {
@@ -76,17 +84,6 @@
   font-size: 1rem;
   min-height: 1.5em;
 }
-
-.win-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 10;
-}
-
 
 @media (max-width: 640px) {
   .slots-container { max-width: 100%; padding: 12px; }
