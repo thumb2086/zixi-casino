@@ -1,6 +1,7 @@
 // apps/api/src/routes/v1/inventory.ts
 // Read the user's persisted inventory and activate items.
 
+import { randomUUID } from "crypto";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -171,10 +172,12 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       // Credit total amount
       const creditToken = lastOutcome.currencyType || "zhixi";
       if (totalCurrency > 0) {
+        let balanceBefore = "0";
+        let balanceAfter = "0";
         try {
-          const curBalance = await gameSettlement.getBalance(ctx.address, creditToken);
-          const newBal = (Number(curBalance) + totalCurrency).toFixed(4);
-          await gameSettlement.setBalance(ctx.address, creditToken, newBal);
+          balanceBefore = await gameSettlement.getBalance(ctx.address, creditToken);
+          balanceAfter = (Number(balanceBefore) + totalCurrency).toFixed(4);
+          await gameSettlement.setBalance(ctx.address, creditToken, balanceAfter);
         } catch (err: any) {
           return createApiEnvelope({ success: false }, request.id, false, "CREDIT_FAILED");
         }
@@ -185,6 +188,19 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         intent.address = ctx.address;
         intent.meta = { source: "inventory_use", itemId, quantity };
         await walletRepo.saveTxIntent(intent);
+
+        await walletRepo.saveLedgerEntry({
+          id: randomUUID(),
+          userId: ctx.userId,
+          address: ctx.address,
+          token: creditToken,
+          type: "inventory_use",
+          amount: totalCurrency.toString(),
+          balanceBefore,
+          balanceAfter,
+          meta: { itemId, quantity, source: "inventory_use" },
+          createdAt: new Date(),
+        });
 
         // Fire async on-chain transfer
         void transferOnChain(ctx.address, creditToken === "yjc" ? "yjc" : "zhixi", totalCurrency.toString(), intent, walletAction, walletRepo);
@@ -246,21 +262,47 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
 
         let zxcIntent: any = null;
         if (result.totalZxc > 0) {
-          const curBal = await gameSettlement.getBalance(ctx.address, "zhixi");
-          await gameSettlement.setBalance(ctx.address, "zhixi", (Number(curBal) + result.totalZxc).toString());
+          const balBefore = await gameSettlement.getBalance(ctx.address, "zhixi");
+          const balAfter = (Number(balBefore) + result.totalZxc).toString();
+          await gameSettlement.setBalance(ctx.address, "zhixi", balAfter);
           zxcIntent = walletAction.createTxIntent(ctx.userId, "ZXC", "admin_credit", result.totalZxc.toString());
           zxcIntent.address = ctx.address;
           zxcIntent.meta = { source: "inventory_use_all", token: "zhixi", totalZxc: result.totalZxc };
           await walletRepo.saveTxIntent(zxcIntent);
+          await walletRepo.saveLedgerEntry({
+            id: randomUUID(),
+            userId: ctx.userId,
+            address: ctx.address,
+            token: "zhixi",
+            type: "inventory_use_all",
+            amount: result.totalZxc.toString(),
+            balanceBefore: balBefore,
+            balanceAfter: balAfter,
+            meta: { source: "inventory_use_all", token: "zhixi", totalZxc: result.totalZxc },
+            createdAt: new Date(),
+          });
         }
         let yjcIntent: any = null;
         if (result.totalYjc > 0) {
-          const curBal = await gameSettlement.getBalance(ctx.address, "yjc");
-          await gameSettlement.setBalance(ctx.address, "yjc", (Number(curBal) + result.totalYjc).toString());
+          const balBefore = await gameSettlement.getBalance(ctx.address, "yjc");
+          const balAfter = (Number(balBefore) + result.totalYjc).toString();
+          await gameSettlement.setBalance(ctx.address, "yjc", balAfter);
           yjcIntent = walletAction.createTxIntent(ctx.userId, "YJC", "admin_credit", result.totalYjc.toString());
           yjcIntent.address = ctx.address;
           yjcIntent.meta = { source: "inventory_use_all", token: "yjc", totalYjc: result.totalYjc };
           await walletRepo.saveTxIntent(yjcIntent);
+          await walletRepo.saveLedgerEntry({
+            id: randomUUID(),
+            userId: ctx.userId,
+            address: ctx.address,
+            token: "yjc",
+            type: "inventory_use_all",
+            amount: result.totalYjc.toString(),
+            balanceBefore: balBefore,
+            balanceAfter: balAfter,
+            meta: { source: "inventory_use_all", token: "yjc", totalYjc: result.totalYjc },
+            createdAt: new Date(),
+          });
         }
 
         // Fire async on-chain transfer for ZXC credit
