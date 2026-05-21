@@ -1,20 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Crown, ChevronLeft, ChevronRight, Gift, Percent, MessageCircle, TrendingUp } from 'lucide-react';
-import { LEVEL_TIERS } from '@repo/shared';
+import { formatNumber, LEVEL_TIERS } from '@repo/shared';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
 export default function VIPLevelsView() {
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
-
-  const formatNumber = (num: number) => {
-    if (num >= 1_000_000_000_000) return `${(num / 1_000_000_000_000).toFixed(1)}兆`;
-    if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(1)}億`;
-    if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}百萬`;
-    if (num >= 1_000) return `${(num / 1_000).toFixed(0)}K`;
-    return num.toString();
-  };
-
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
 
   const feeDiscountPct = (tier: typeof LEVEL_TIERS[number]) => Math.round((tier.marketFeeDiscount || 0) * 100);
 
@@ -145,7 +139,7 @@ export default function VIPLevelsView() {
                   <div className="text-left">
                     <h3 className="font-bold text-white">{tier.label}</h3>
                     <p className="text-xs font-bold text-[#adaaaa]">
-                      門檻: {formatNumber(tier.threshold)}
+                      門檻: {nf(tier.threshold)}
                     </p>
                   </div>
                 </div>
@@ -161,7 +155,7 @@ export default function VIPLevelsView() {
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
                       <p className="text-xs font-bold text-[#adaaaa]">單注上限</p>
-                      <p className="text-sm font-black text-white">{formatNumber(tier.maxBet)}</p>
+                      <p className="text-sm font-black text-white">{nf(tier.maxBet)}</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
                       <p className="text-xs font-bold text-[#adaaaa]">手續費折扣</p>

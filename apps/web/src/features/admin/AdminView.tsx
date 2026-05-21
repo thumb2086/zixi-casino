@@ -28,7 +28,9 @@ import {
 } from 'lucide-react';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
+import { formatNumber } from '@repo/shared';
 import { useAuthStore } from '../../store/useAuthStore';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 
 interface OpsEvent {
   id?: string;
@@ -103,6 +105,8 @@ const TYPE_LABEL: Record<string, string> = {
 
 export default function AdminView() {
   const { sessionId, isAuthorized } = useAuthStore();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
 
   const [authErr, setAuthErr] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
@@ -979,9 +983,9 @@ export default function AdminView() {
                   {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">顯示名稱：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
                   {userInspect.balances && (
                     <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
-                      <div><p className="text-xs text-[#494847]">ZXC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">YJC 餘額</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">累積下注</p><p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">ZXC 餘額</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">YJC 餘額</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">累積下注</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p></div>
                     </div>
                   )}
                   <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">目前勝率偏置：</span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : '未設定（採系統預設）'}</span></div>
@@ -1174,15 +1178,15 @@ export default function AdminView() {
                   <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
                     <div>
                       <p className="text-xs text-[#494847]">ZXC 餘額</p>
-                      <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.zxc) || 0)}</p>
+                      <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-[#494847]">YJC 餘額</p>
-                      <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.yjc) || 0)}</p>
+                      <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-[#494847]">累積下注</p>
-                      <p className="mt-1 font-mono text-xs text-white">{formatNumber(Number(userInspect.balances.totalBet) || 0)}</p>
+                      <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p>
                     </div>
                   </div>
                 )}

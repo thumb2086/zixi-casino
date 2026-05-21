@@ -3,6 +3,7 @@ import { Crown, Loader2, Target, Timer, Trophy, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import { useLeaderboard, type LeaderboardType } from '../../hooks/useLeaderboard';
 import AppBottomNav from '../../components/AppBottomNav';
 
@@ -57,6 +58,8 @@ const getTimeRemaining = (type: LeaderboardType): string => {
 
 export default function LeaderboardView() {
   const { t } = useTranslation();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { address } = useUserStore();
   const [category, setCategory] = useState<LeaderboardCategory>('betting');
   const [filter, setFilter] = useState<FilterLabel>('ALL-TIME');
@@ -205,7 +208,7 @@ export default function LeaderboardView() {
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-[#fcc025]">{orderedTopThree[0].titleLabel}</p>
                     )}
                     <p className="mt-1 text-xs font-black text-slate-400">
-                      {formatNumber(orderedTopThree[0].amount, 'short')} {unit}
+                      {nf(orderedTopThree[0].amount)} {unit}
                     </p>
                   </div>
                 </div>
@@ -233,7 +236,7 @@ export default function LeaderboardView() {
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-[#fcc025]">{orderedTopThree[1].titleLabel}</p>
                     )}
                     <p className="mt-1 text-sm font-black text-[#fcc025]">
-                      {formatNumber(orderedTopThree[1].amount, 'short')} {unit}
+                      {nf(orderedTopThree[1].amount)} {unit}
                     </p>
                   </div>
                 </div>
@@ -258,7 +261,7 @@ export default function LeaderboardView() {
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-amber-500">{orderedTopThree[2].titleLabel}</p>
                     )}
                     <p className="mt-1 text-xs font-black text-amber-500">
-                      {formatNumber(orderedTopThree[2].amount, 'short')} {unit}
+                      {nf(orderedTopThree[2].amount)} {unit}
                     </p>
                   </div>
                 </div>
@@ -324,7 +327,7 @@ export default function LeaderboardView() {
                   </div>
                   <div className="text-right">
                     <p className={`text-sm font-black italic tracking-tighter ${player.isSelf ? 'text-[#fcc025]' : 'text-white'}`}>
-                      {formatNumber(player.amount, 'short')} {unit}
+                      {nf(player.amount)} {unit}
                     </p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-widest text-[#494847]">{metricLabel}</p>
                   </div>
@@ -351,7 +354,7 @@ export default function LeaderboardView() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-black italic tracking-tighter text-[#fcc025]">
-                      {formatNumber(selfEntry.amount, 'short')} {unit}
+                      {nf(selfEntry.amount)} {unit}
                     </p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-widest text-[#494847]">{metricLabel}</p>
                   </div>
