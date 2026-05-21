@@ -185,7 +185,7 @@ export default function ChestView() {
   }, [refreshStatus, refreshInventory, fetchRecipients]);
 
   const [opening, setOpening] = useState(false);
-  const [openQty, setOpenQty] = useState('1');
+  const [openQtys, setOpenQtys] = useState<Record<string, string>>({});
   const [showResult, setShowResult] = useState(false);
   const [openedItems, setOpenedItems] = useState<ChestItem[]>([]);
   const [openCompensation, setOpenCompensation] = useState(0);
@@ -364,39 +364,14 @@ export default function ChestView() {
         {/* Tab: Chests */}
         {invTab === 'chests' && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">可開啟寶箱</h2>
-            <div className="flex items-center gap-2">
-              {[1, 5, 10, 100, 999].map((q) => (
-                <button
-                  key={q}
-                  onClick={() => setOpenQty(String(q))}
-                  className={`rounded-md px-2.5 py-1 text-[10px] font-black transition-all ${
-                    parseInt(openQty || '1', 10) === q ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20' : 'bg-[#1a1919] text-[#adaaaa] border border-[#494847]/30'
-                  }`}
-                >
-                  x{q}
-                </button>
-              ))}
-              <input
-                type="text"
-                inputMode="numeric"
-                value={openQty}
-                onChange={(e) => setOpenQty(e.target.value)}
-                onBlur={(e) => {
-                  const v = parseInt(e.target.value, 10);
-                  if (!v || v < 1) setOpenQty('1');
-                }}
-                className="w-14 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center py-1 focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-            </div>
-          </div>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa] mb-4">可開啟寶箱</h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {chests.map((chest) => {
               const keys = displayKeyCounts[chest.id] || 0;
               const currentPity = displayPity[chest.id] || 0;
-              const openQtyNum = parseInt(openQty || '1', 10) || 1;
+              const chestOpenQty = openQtys[chest.id] ?? '1';
+              const openQtyNum = parseInt(chestOpenQty, 10) || 1;
               const canOpen = keys >= openQtyNum;
 
               return (
@@ -413,7 +388,7 @@ export default function ChestView() {
                     <div className="text-4xl">📦</div>
                   </div>
 
-                  <div className="mb-6 space-y-2">
+                  <div className="mb-4 space-y-2">
                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">
                       <span>保底進度</span>
                       <span className="text-[#fcc025]">{currentPity} / {chest.pityThreshold}</span>
@@ -425,6 +400,17 @@ export default function ChestView() {
                         className="h-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]"
                       />
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    {[1, 5, 10, 100].map((q) => (
+                      <button key={q} onClick={() => setOpenQtys(p => ({ ...p, [chest.id]: String(q) }))}
+                        className={`rounded-md px-2 py-1 text-[10px] font-black transition-all ${parseInt(chestOpenQty, 10) === q ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/20 text-[#adaaaa]'}`}>x{q}</button>
+                    ))}
+                    <input type="text" inputMode="numeric" value={chestOpenQty}
+                      onChange={(e) => setOpenQtys(p => ({ ...p, [chest.id]: e.target.value }))}
+                      onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v < 1) setOpenQtys(p => ({ ...p, [chest.id]: '1' })); }}
+                      className="w-14 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center py-1 focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                   </div>
 
                   <button
