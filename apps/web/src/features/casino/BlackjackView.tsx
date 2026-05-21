@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./Blackjack.css";
 import "./CasinoCommon.css";
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
 import { BetQuickActions } from "./BetQuickActions";
+
+const GAME_MAX_BET = 1_000_000;
 
 interface Card {
   rank: string;
@@ -37,6 +40,16 @@ const INITIAL_STATE: GameState = {
 
 export const BlackjackView: React.FC = () => {
   const { session } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { maxBet?: number } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
   const [betAmount, setBetAmount] = useState<string>("100");
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
   const [error, setError] = useState<string>("");
@@ -140,7 +153,7 @@ export const BlackjackView: React.FC = () => {
         {gameState.status === "idle" || gameState.status === "settled" ? (
           <>
             <input type="number" value={betAmount} onChange={(e) => setBetAmount(e.target.value)} disabled={isAnimating} />
-            <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={isAnimating} />
+            <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={isAnimating} maxBet={maxBet} />
             <button className="start-btn" onClick={() => handleAction("start")} disabled={isAnimating}>發牌</button>
           </>
         ) : (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './Bingo.css';
@@ -7,9 +7,21 @@ import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 
+const GAME_MAX_BET = 1_000_000;
+
 export const BingoView: React.FC = () => {
   const queryClient = useQueryClient();
   const { session } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { maxBet?: number } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
   const [betAmount, setBetAmount] = useState('10');
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
   const [status, setStatus] = useState('📋 請從 1~75 中選 8 個號碼');
@@ -114,7 +126,7 @@ export const BingoView: React.FC = () => {
           className="flex-1 bg-slate-800 border border-slate-700 p-2 rounded text-white font-mono"
           disabled={isRevealing || betMutation.isPending}
         />
-        <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={betMutation.isPending || isRevealing} />
+        <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={betMutation.isPending || isRevealing} maxBet={maxBet} />
         <button
           className="bg-yellow-500 text-black font-bold px-8 rounded hover:bg-yellow-400 disabled:opacity-50"
           onClick={() => betMutation.mutate()}

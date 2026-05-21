@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './HorseRacing.css';
 import './CasinoCommon.css';
-import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
-import { useBetQueue } from './useBetQueue';
+
+const GAME_MAX_BET = 1_000_000;
 
 const HORSES = [
   { id: 1, name: '赤焰', multiplier: 3.6 },
@@ -43,7 +44,15 @@ function pickWinner(roundId: number): typeof HORSES[0] {
 
 export const HorseRacingView: React.FC = () => {
   const { session } = useAuth();
-  const { enqueue, pending } = useBetQueue();
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { maxBet?: number } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
   const [selectedHorseId, setSelectedHorseId] = useState(1);
   const [betAmount, setBetAmount] = useState('10');
   const [statusMsg, setStatusMsg] = useState('請選擇馬匹並下注。');
@@ -56,7 +65,6 @@ export const HorseRacingView: React.FC = () => {
 
   // Sync round info from server
   const [roundId, setRoundId] = useState<number | null>(null);
-  const [clockOffset, setClockOffset] = useState(0);
 
   const fetchRound = useCallback(async () => {
     try {
@@ -64,7 +72,6 @@ export const HorseRacingView: React.FC = () => {
       const data = res.data?.data?.data ?? res.data?.data;
       if (data?.roundId !== undefined) {
         setRoundId(data.roundId);
-        setClockOffset(data.serverNow - Date.now());
       }
     } catch {}
   }, []);
@@ -91,18 +98,13 @@ export const HorseRacingView: React.FC = () => {
     // Start race animation
     setProgress(HORSES.reduce((acc, horse) => ({ ...acc, [horse.id]: 0 }), {}));
 
-    // Fire settlement API in background
-    enqueue(async () => {
-      const res = await api.post('/api/v1/games/horse/play', {
-        sessionId: session.id,
-        betAmount: Number(betAmount),
-        horseId: selectedHorseId,
-      });
-      const payload = res.data;
-      if (!res.status || payload?.success === false) {
-        throw new Error(extractGameError(payload));
-      }
-      return unwrapGameEnvelope(payload);
+    // Fire settlement API in background (no queue)
+    api.post('/api/v1/games/horse/play', {
+      sessionId: session.id,
+      betAmount: Number(betAmount),
+      horseId: selectedHorseId,
+    }).catch((err: any) => {
+      console.error('[horse] bet failed:', err);
     });
   };
 
@@ -166,7 +168,7 @@ export const HorseRacingView: React.FC = () => {
         ))}
         <div className="status-panel" style={{ color: statusColor }}>
           {statusMsg}
-          {pending > 0 && <p className="text-xs text-[#adaaaa] mt-1">結算中 ({pending})</p>}
+          
         </div>
       </div>
 
@@ -176,9 +178,9 @@ export const HorseRacingView: React.FC = () => {
           value={betAmount}
           onChange={(e) => setBetAmount(e.target.value)}
         />
-        <BetQuickActions amount={betAmount} onChange={setBetAmount} />
+        <BetQuickActions amount={betAmount} onChange={setBetAmount} maxBet={maxBet} />
         <button className="btn-bet" onClick={handleBet} disabled={roundId === null}>
-          {pending > 0 ? `下注中 (${pending})` : '立即下注'}
+          立即下注
         </button>
       </div>
     </div>

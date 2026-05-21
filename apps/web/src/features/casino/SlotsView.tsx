@@ -1,11 +1,13 @@
 import React, { useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './Slots.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
+
+const GAME_MAX_BET = 1_000_000;
 
 const SYMBOLS = ['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣'];
 
@@ -18,6 +20,16 @@ export const SlotsView: React.FC = () => {
   const queryClient = useQueryClient();
   const spinningRef = useRef(false);
   const [betAmount, setBetAmount] = useState('10');
+
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { maxBet?: number } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
   const [grid, setGrid] = useState<string[]>(['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣', '🍒', '🍋']);
   const [status, setStatus] = useState('🎰 拉霸準備就緒，祝你好運！');
   const [winSymbols, setWinSymbols] = useState<number[]>([]);
@@ -76,7 +88,7 @@ export const SlotsView: React.FC = () => {
           onChange={(e) => setBetAmount(e.target.value)}
           className="flex-1 bg-slate-800 border border-slate-700 p-4 rounded-lg text-white"
         />
-        <BetQuickActions amount={betAmount} onChange={setBetAmount} />
+        <BetQuickActions amount={betAmount} onChange={setBetAmount} maxBet={maxBet} />
         <button className="btn-spin" onClick={handleSpin}>
           開始旋轉
         </button>

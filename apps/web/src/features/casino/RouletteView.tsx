@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './Roulette.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
+
+const GAME_MAX_BET = 1_000_000;
 
 const EUROPEAN_LAYOUT = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
@@ -50,6 +52,16 @@ const TABLE_ROWS = [
 export function RouletteView() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
+
+  const { data: profile } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile as { maxBet?: number } | undefined;
+    },
+    staleTime: 60000,
+  });
+  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
   const [betAmount, setBetAmount] = useState('10');
   const [bets, setBets] = useState<PlacedBet[]>([]);
   const [lastBets, setLastBets] = useState<PlacedBet[]>([]);
@@ -215,7 +227,7 @@ export function RouletteView() {
             <input type="number" className="min-w-0 flex-1 rounded border border-slate-600 bg-slate-800 p-2 text-white"
               value={betAmount} onChange={(e) => setBetAmount(e.target.value)}
               disabled={betMutation.isPending || isSpinning} />
-            <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={betMutation.isPending || isSpinning} />
+            <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={betMutation.isPending || isSpinning} maxBet={maxBet} />
             <button className="bg-gold rounded px-8 py-2 font-bold text-black hover:opacity-90 disabled:opacity-50"
               onClick={() => betMutation.mutate()} disabled={betMutation.isPending || isSpinning || bets.length === 0}>
               {betMutation.isPending ? '處理中...' : '旋轉開獎'}
