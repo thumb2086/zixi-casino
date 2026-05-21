@@ -165,14 +165,19 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         meta: { itemId, quantity, totalCurrency, buffsActivated: totalBuffs.length },
       });
 
+      const finalBalance = totalCurrency > 0
+        ? await gameSettlement.getBalance(ctx.address, creditToken).catch(() => null)
+        : null;
+
       return createApiEnvelope(
         {
           success: true,
           item: lastOutcome.item,
           effectSummary: lastOutcome.effectSummary,
           currencyGranted: totalCurrency,
+          currencyToken: creditToken,
           buffActivated: totalBuffs[0] || null,
-          balance: totalCurrency > 0 ? await gameSettlement.getBalance(ctx.address, "zhixi").catch(() => null) : null,
+          balance: finalBalance,
           activeBuffs: lastOutcome.state.activeBuffs,
           activeAvatar: lastOutcome.state.activeAvatar,
           activeTitle: lastOutcome.state.activeTitle,

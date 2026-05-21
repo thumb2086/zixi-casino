@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronRight, X, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -109,7 +110,7 @@ function formatExpires(expiresAt?: string | null): string {
 }
 
 export default function ChestView() {
-
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [chests, setChests] = useState<ChestConfig[]>([]);
   const [status, setStatus] = useState<ChestStatus | null>(null);
@@ -240,6 +241,7 @@ export default function ChestView() {
         if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
         showToast(`成功使用 ${d.itemCount} 個物品，獲得 ${parts.join(' + ')}`);
         await refreshInventory();
+        queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
         showToast(res.data?.error || '兌換失敗');
       }
@@ -256,9 +258,16 @@ export default function ChestView() {
     try {
       const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
-        showToast(`成功使用 ${quantity} 個物品`);
-        if (res.data.data.message) showToast(res.data.data.message);
+        const d = res.data.data;
+        if (d.currencyGranted > 0) {
+          showToast(`獲得 ${d.currencyGranted.toLocaleString()} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
+        } else if (d.effectSummary) {
+          showToast(d.effectSummary);
+        } else {
+          showToast(`成功使用 ${quantity} 個物品`);
+        }
         await refreshInventory();
+        queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
         showToast(res.data?.error || '使用失敗');
       }
