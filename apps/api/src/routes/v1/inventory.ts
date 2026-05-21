@@ -226,8 +226,12 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           createdAt: new Date(),
         });
 
-        // Fire async on-chain transfer (auto-mints to treasury if needed)
-        void transferOnChain(ctx.address, creditToken === "yjc" ? "yjc" : "zhixi", totalCurrency.toString(), intent, walletAction, walletRepo);
+        // Sync on-chain transfer so chain balance matches DB
+        await transferOnChain(ctx.address, creditToken === "yjc" ? "yjc" : "zhixi", totalCurrency.toString(), intent, walletAction, walletRepo).catch(async (err) => {
+          console.error("[Inventory] transferOnChain failed, reverting DB credit:", err?.message);
+          await gameSettlement.setBalance(ctx.address, creditToken, balanceBefore);
+          await walletRepo.updateBalance(ctx.address, balanceBefore, creditToken);
+        });
       }
 
       await opsRepo.logEvent({
