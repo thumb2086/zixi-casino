@@ -63,7 +63,7 @@ export async function slotsRoutes(fastify: FastifyInstance) {
 
     const roundId = `slots_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
-    // 1. Validate and deduct balance
+    // 1. Validate and deduct balance (synchronous, required)
     const validation = await gameSettlement.validateAndDeductBalance(
       address,
       token,
@@ -80,113 +80,96 @@ export async function slotsRoutes(fastify: FastifyInstance) {
       );
     }
 
-    try {
-      // 2. Resolve game
-      const gameResult = gameManager.resolveSlots(betAmount, roundId);
-      const isWin = gameResult.multiplier > 0;
-      const payout = isWin ? betAmount * gameResult.multiplier : 0;
-      const payoutStr = payout.toString();
+    // 2. Resolve game (in-memory, fast)
+    const gameResult = gameManager.resolveSlots(betAmount, roundId);
+    const isWin = gameResult.multiplier > 0;
+    const payout = isWin ? betAmount * gameResult.multiplier : 0;
 
-      // 3. Execute on-chain settlement
-      const settlement = await gameSettlement.executeSettlement({
-        userId,
-        address,
-        game: "slots",
-        token: token === "yjc" ? "YJC" : "ZXC",
-        betAmount: amountStr,
-        payoutAmount: payoutStr,
-        roundId,
-        requestId: request.id,
-      });
+    // 3. Credit payout to balance (synchronous, required)
+    const finalBalance = await gameSettlement.creditPayout(
+      address,
+      token,
+      validation.balanceAfter,
+      payout,
+      'slots',
+      userId
+    );
 
-      if (!settlement.success) {
-        // Rollback balance on settlement error
-        await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
-        return createApiEnvelope(
-          { success: false },
-          request.id,
-          false,
-          settlement.error?.message || "Settlement failed"
-        );
-      }
-
-      // 4. Credit payout to balance
-      const finalBalance = await gameSettlement.creditPayout(
-        address,
-        token,
-        validation.balanceAfter,
-        settlement.finalPayout,
-        'slots',
-        userId
-      );
-
-      // 5. Update total bet
-      await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
-
-      // 6. Record game session
-      const db = await requireDb();
-      const sessionManager = new GameSessionManager(db);
-      const session = await sessionManager.recordGame({
-        userId,
-        address,
-        game: "slots",
+    // Respond immediately — remaining work fires in background
+    const responsePayload = {
+      success: true,
+      data: {
+        symbols: gameResult.symbols,
+        result: isWin ? "win" : "lose",
+        payout,
         betAmount,
-        gameResult: {
-          result: settlement.isWin ? "win" : "lose",
-          payout: settlement.finalPayout,
-          meta: { 
-            symbols: gameResult.symbols, 
-            multiplier: gameResult.multiplier,
-            betTxHash: settlement.betTxHash,
-            payoutTxHash: settlement.payoutTxHash,
-            fee: settlement.feeAmount,
-          },
-        },
-      });
-
-      // 7. Log event
-      await gameSettlement.logGameEvent({
-        game: "slots",
-        userId,
-        address,
-        amount: amountStr,
-        payout: settlement.finalPayout.toString(),
-        fee: settlement.feeAmount.toString(),
-        isWin: settlement.isWin,
         multiplier: gameResult.multiplier,
-        betTxHash: settlement.betTxHash,
-        payoutTxHash: settlement.payoutTxHash,
-        roundId,
-      });
+        balance: finalBalance,
+      }
+    };
 
-      // 8. Save round
-      await gameSettlement.saveRound("slots", roundId, gameResult);
+    // 4-8. Background: executeSettlement, updateTotalBet, recordGame, logEvent, saveRound
+    void (async () => {
+      try {
+        const settlement = await gameSettlement.executeSettlement({
+          userId,
+          address,
+          game: "slots",
+          token: token === "yjc" ? "YJC" : "ZXC",
+          betAmount: amountStr,
+          payoutAmount: payout.toString(),
+          roundId,
+          requestId: request.id,
+        });
 
-      return createApiEnvelope({
-        success: true,
-        data: {
-          sessionId: session.id,
-          symbols: gameResult.symbols,
-          result: settlement.isWin ? "win" : "lose",
-          payout: settlement.finalPayout,
+        if (!settlement.success) {
+          console.error(`[slots] settlement failed for round ${roundId}:`, settlement.error);
+          return;
+        }
+
+        await gameSettlement.updateTotalBet(address, betAmount, payout, userId);
+
+        const db = await requireDb();
+        const sessionManager = new GameSessionManager(db);
+        await sessionManager.recordGame({
+          userId,
+          address,
+          game: "slots",
           betAmount,
+          gameResult: {
+            result: settlement.isWin ? "win" : "lose",
+            payout: settlement.finalPayout,
+            meta: { 
+              symbols: gameResult.symbols, 
+              multiplier: gameResult.multiplier,
+              betTxHash: settlement.betTxHash,
+              payoutTxHash: settlement.payoutTxHash,
+              fee: settlement.feeAmount,
+            },
+          },
+        });
+
+        await gameSettlement.logGameEvent({
+          game: "slots",
+          userId,
+          address,
+          amount: amountStr,
+          payout: settlement.finalPayout.toString(),
+          fee: settlement.feeAmount.toString(),
+          isWin: settlement.isWin,
           multiplier: gameResult.multiplier,
-          fee: settlement.feeAmount,
-          balance: finalBalance,
           betTxHash: settlement.betTxHash,
           payoutTxHash: settlement.payoutTxHash,
-        }
-      }, request.id);
+          roundId,
+        });
 
-    } catch (err: any) {
-      await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
-      return createApiEnvelope(
-        { success: false },
-        request.id,
-        false,
-        err?.message || "Unexpected error"
-      );
-    }
+        await gameSettlement.saveRound("slots", roundId, gameResult);
+      } catch (bgErr) {
+        console.error(`[slots] background processing failed for round ${roundId}:`, bgErr);
+      }
+    })();
+
+    return createApiEnvelope(responsePayload, request.id);
   });
 
   typedFastify.get("/history", {

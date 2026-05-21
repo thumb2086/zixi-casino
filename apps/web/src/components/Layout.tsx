@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
-import { MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../store/api';
@@ -38,41 +38,52 @@ export default function Layout() {
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="flex w-full flex-col gap-10 lg:flex-row lg:items-start"
           >
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 transition-all duration-300">
               <Outlet />
             </div>
 
-            <aside className="sticky top-32 hidden h-fit w-96 flex-col gap-3 lg:flex">
+            {/* Desktop chat: slide in/out from right */}
+            <div className="hidden lg:flex items-stretch gap-0">
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  chatOpen ? 'max-w-96' : 'max-w-0'
+                }`}
+              >
+                <div className="w-96 shrink-0 flex flex-col gap-3">
+                  <button
+                    onClick={() => setChatOpen(!chatOpen)}
+                    className="flex items-center gap-2 rounded-xl border border-[#494847]/20 bg-[#1a1919] px-4 py-2.5 text-left hover:bg-[#1a1919]/80 transition-colors"
+                  >
+                    <MessageCircle size={16} className="text-blue-400 shrink-0" />
+                    <span className="text-xs font-black uppercase tracking-widest text-blue-400">🌍 全域聊天</span>
+                  </button>
+                  <ChatRoom />
+                  <footer className="py-4 text-center">
+                    <p className="text-xs font-black uppercase tracking-[0.5em] text-[#494847]">
+                      &copy; 2026 子熙模擬器 - Aureum Edition
+                    </p>
+                  </footer>
+                </div>
+              </div>
               <button
                 onClick={() => setChatOpen(!chatOpen)}
-                className="flex items-center justify-between rounded-xl border border-[#494847]/20 bg-[#1a1919] px-4 py-2.5 text-left hover:bg-[#1a1919]/80 transition-colors"
+                className="self-start mt-2 flex items-center justify-center w-6 h-12 rounded-r-xl border border-l-0 border-[#494847]/20 bg-[#1a1919] text-[#adaaaa] hover:text-white hover:bg-[#1a1919]/80 transition-colors"
               >
-                <div className="flex items-center gap-2">
-                  <MessageCircle size={16} className="text-blue-400 shrink-0" />
-                  <span className="text-xs font-black uppercase tracking-widest text-blue-400">🌍 全域聊天</span>
-                </div>
-                {chatOpen ? <ChevronDown size={16} className="text-[#adaaaa]" /> : <ChevronUp size={16} className="text-[#adaaaa]" />}
+                {chatOpen ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
               </button>
-              {chatOpen && <ChatRoom />}
-
-              <footer className="py-4 text-center">
-                <p className="text-xs font-black uppercase tracking-[0.5em] text-[#494847]">
-                  &copy; 2026 子熙模擬器 - Aureum Edition
-                </p>
-              </footer>
-            </aside>
+            </div>
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {/* Global chat bar (mobile only - desktop uses sidebar) */}
+      {/* Global chat bar (mobile only) */}
       <div className="fixed bottom-20 inset-x-0 z-40 lg:hidden">
         {chatOpen ? (
-          <div className="mx-2 mb-2 lg:mb-4 lg:mr-4">
+          <div className="mx-2 mb-2">
             <div className="flex items-center justify-between bg-[#1a1919] rounded-t-xl border border-[#494847]/20 px-4 py-2">
               <span className="text-xs font-black uppercase tracking-widest text-blue-400">🌍 全域聊天</span>
               <button onClick={() => setChatOpen(false)} className="text-[#adaaaa] hover:text-white">
-                <ChevronDown size={18} />
+                <ChevronRight size={18} />
               </button>
             </div>
             <ChatRoom />
@@ -80,7 +91,7 @@ export default function Layout() {
         ) : (
           <button
             onClick={() => setChatOpen(true)}
-            className="mx-2 mb-2 w-[calc(100%-1rem)] flex items-center gap-3 bg-[#1a1919]/90 backdrop-blur-xl border border-[#494847]/20 rounded-xl px-4 py-2.5 text-left hover:bg-[#1a1919] transition-colors lg:mb-4 lg:mr-4 lg:w-auto"
+            className="mx-2 mb-2 w-[calc(100%-1rem)] flex items-center gap-3 bg-[#1a1919]/90 backdrop-blur-xl border border-[#494847]/20 rounded-xl px-4 py-2.5 text-left hover:bg-[#1a1919] transition-colors"
           >
             <MessageCircle size={16} className="text-blue-400 shrink-0" />
             <div className="flex-1 min-w-0">
@@ -92,7 +103,7 @@ export default function Layout() {
                 </p>
               )}
             </div>
-            <ChevronUp size={16} className="text-[#adaaaa] shrink-0" />
+            <ChevronLeft size={16} className="text-[#adaaaa] shrink-0" />
           </button>
         )}
       </div>

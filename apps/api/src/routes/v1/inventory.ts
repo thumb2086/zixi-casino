@@ -231,6 +231,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           request.id,
         );
       } catch (error: any) {
+        console.error("[use-all-tokens]", error);
         return createApiEnvelope({ success: false }, request.id, false, error?.message || "USE_ALL_TOKENS_FAILED");
       }
     },
