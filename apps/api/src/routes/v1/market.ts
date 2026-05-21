@@ -88,10 +88,8 @@ export async function marketRoutes(fastify: FastifyInstance) {
     }
 
     const normalized = marketManager.normalizeAccount(storedAccount, nowTs);
-    // Sync cash from wallet (source of truth — synced from on-chain)
-    // Subtract locked margin from open futures positions so cash reflects truly available balance
-    const lockedMargin = normalized.futuresPositions.reduce((sum, p) => sum + p.margin, 0);
-    normalized.cash = Math.max(0, Number(liveWalletBalance || 0) - lockedMargin);
+    // Sync cash from wallet (source of truth — margin was already deducted at position open)
+    normalized.cash = Number(liveWalletBalance || 0);
     normalized.updatedAt = new Date(nowTs).toISOString();
     return normalized;
   };
