@@ -30,7 +30,7 @@ type Quote = {
 type MarketActionParams =
   | { type: 'stock_buy' | 'stock_sell'; symbol: string; quantity: string }
   | { type: 'bank_deposit' | 'bank_withdraw'; amount: string }
-  | { type: 'futures_open'; symbol: string; side: string; amount: string; leverage: string }
+  | { type: 'futures_open'; symbol: string; side: string; amount: string; leverage: string; takeProfitPrice?: number; stopLossPrice?: number }
   | { type: 'futures_close'; positionId: string };
 
 export default function MarketView() {
@@ -52,6 +52,8 @@ export default function MarketView() {
   const [futuresSide, setFuturesSide] = useState<'long' | 'short'>('long');
   const [futuresLeverage, setFuturesLeverage] = useState(5);
   const [futuresMargin, setFuturesMargin] = useState('1000');
+  const [futuresTakeProfit, setFuturesTakeProfit] = useState('');
+  const [futuresStopLoss, setFuturesStopLoss] = useState('');
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -139,6 +141,12 @@ export default function MarketView() {
           </div>
           <input type="number" min={10} value={futuresMargin} onChange={(e) => setFuturesMargin(e.target.value)}
             placeholder={t('market.margin')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          <div className="grid grid-cols-2 gap-2">
+            <input type="number" min={0} step={0.01} value={futuresTakeProfit} onChange={(e) => setFuturesTakeProfit(e.target.value)}
+              placeholder={t('market.take_profit')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+            <input type="number" min={0} step={0.01} value={futuresStopLoss} onChange={(e) => setFuturesStopLoss(e.target.value)}
+              placeholder={t('market.stop_loss')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          </div>
           <div className="text-[10px] text-[#adaaaa] space-y-1">
             <p>{t('market.notional_value', { value: formatNumber(Number(futuresMargin || 0) * futuresLeverage) })}</p>
             <p>{t('market.liquidation_price', { value: futuresSide === 'long'
@@ -149,8 +157,10 @@ export default function MarketView() {
           <button type="button" disabled={execute.isPending || !futuresMargin || Number(futuresMargin) < 10}
             onClick={() => runAction({
               type: 'futures_open', symbol: selectedSymbol, side: futuresSide,
-              amount: futuresMargin, leverage: String(futuresLeverage)
-            }, t('market.futures_open_success', { side: futuresSide }))}
+              amount: futuresMargin, leverage: String(futuresLeverage),
+              ...(futuresTakeProfit ? { takeProfitPrice: Number(futuresTakeProfit) } : {}),
+              ...(futuresStopLoss ? { stopLossPrice: Number(futuresStopLoss) } : {}),
+            }, t('market.futures_open_success', { side: futuresSide }))} 
             className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-white disabled:opacity-50 hover:brightness-110">
             {t('market.open_position', { side: futuresSide, symbol: selectedSymbol })}
           </button>
@@ -379,6 +389,12 @@ export default function MarketView() {
                         <p className="text-[10px] text-[#adaaaa] mt-1">
                           {t('market.position_detail', { entry: formatNumber(pos.entryPrice), mark: formatNumber(pos.markPrice ?? 0), liquidation: formatNumber(pos.liquidationPrice) })}
                         </p>
+                        {(pos.takeProfitPrice || pos.stopLossPrice) && (
+                          <div className="flex gap-3 mt-1 text-[10px]">
+                            {pos.takeProfitPrice ? <span className="text-emerald-400">{t('market.take_profit')} {formatNumber(pos.takeProfitPrice)}</span> : null}
+                            {pos.stopLossPrice ? <span className="text-red-400">{t('market.stop_loss')} {formatNumber(pos.stopLossPrice)}</span> : null}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

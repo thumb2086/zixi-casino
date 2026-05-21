@@ -64,6 +64,8 @@ export interface FuturesPosition {
   notional: number;
   openedAt: number;
   liquidationPrice: number;
+  takeProfitPrice?: number;
+  stopLossPrice?: number;
 }
 
 export interface MarketAccount {
@@ -377,6 +379,32 @@ export class MarketManager {
       const quote = market.symbols[pos.symbol];
       if (!quote) { survivors.push(pos); continue; }
       const pnl = positionPnl(pos, quote.price);
+
+      // Check take-profit
+      if (pos.takeProfitPrice !== undefined) {
+        const hitTp = pos.side === "long" ? quote.price >= pos.takeProfitPrice : quote.price <= pos.takeProfitPrice;
+        if (hitTp) {
+          const closedPnl = positionPnl(pos, pos.takeProfitPrice);
+          account.cash = round(account.cash + pos.margin + closedPnl, 6);
+          events.push({ type: "take_profit", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.takeProfitPrice });
+          appendHistory(account, { type: "futures_tp", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 6), closePrice: pos.takeProfitPrice, pnl: closedPnl });
+          continue;
+        }
+      }
+
+      // Check stop-loss
+      if (pos.stopLossPrice !== undefined) {
+        const hitSl = pos.side === "long" ? quote.price <= pos.stopLossPrice : quote.price >= pos.stopLossPrice;
+        if (hitSl) {
+          const closedPnl = positionPnl(pos, pos.stopLossPrice);
+          account.cash = round(account.cash + pos.margin + closedPnl, 6);
+          events.push({ type: "stop_loss", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.stopLossPrice });
+          appendHistory(account, { type: "futures_sl", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 6), closePrice: pos.stopLossPrice, pnl: closedPnl });
+          continue;
+        }
+      }
+
+      // Check liquidation
       if (pnl <= -(pos.margin * 0.99)) {
         events.push({ type: "liquidated", positionId: pos.id, symbol: pos.symbol, side: pos.side, marginLost: round(pos.margin, 6), markPrice: quote.price, estimatedPnl: pnl });
         appendHistory(account, { type: "futures_liquidated", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 6), markPrice: quote.price, pnl });
@@ -424,7 +452,7 @@ export class MarketManager {
     return { symbol, quantity, price: quote.price, fee, net };
   }
 
-  openFutures(account: MarketAccount, market: MarketSnapshot, payload: { symbol: unknown; side?: string; margin: unknown; leverage: unknown; maxMargin?: number }) {
+  openFutures(account: MarketAccount, market: MarketSnapshot, payload: { symbol: unknown; side?: string; margin: unknown; leverage: unknown; maxMargin?: number; takeProfitPrice?: number; stopLossPrice?: number }) {
     const symbol = requireSymbol(payload.symbol, TRADEABLE_FUTURES);
     const side = payload.side === "short" ? "short" : "long";
     const margin = requireAmount(payload.margin, "margin");
@@ -441,7 +469,13 @@ export class MarketManager {
     account.cash = round(account.cash - margin - fee, 6);
     const openedAt = Date.now();
     const id = `fut_${openedAt}_${hashInt(`${symbol}:${openedAt}:${Math.random()}`).toString().slice(-6)}`;
-    const pos: FuturesPosition = { id, symbol, side, leverage, margin, quantity, notional, entryPrice: quote.price, liquidationPrice: liquidationPrice({ side, entryPrice: quote.price, leverage }), openedAt };
+    const tp = payload.takeProfitPrice ? round(payload.takeProfitPrice, 4) : undefined;
+    const sl = payload.stopLossPrice ? round(payload.stopLossPrice, 4) : undefined;
+    if (tp && side === "long" && tp <= quote.price) throw new Error("止盈價必須高於當前價格");
+    if (tp && side === "short" && tp >= quote.price) throw new Error("止盈價必須低於當前價格");
+    if (sl && side === "long" && sl >= quote.price) throw new Error("止損價必須低於當前價格");
+    if (sl && side === "short" && sl <= quote.price) throw new Error("止損價必須高於當前價格");
+    const pos: FuturesPosition = { id, symbol, side, leverage, margin, quantity, notional, entryPrice: quote.price, liquidationPrice: liquidationPrice({ side, entryPrice: quote.price, leverage }), openedAt, takeProfitPrice: tp, stopLossPrice: sl };
     account.futuresPositions.push(pos);
     appendHistory(account, { type: "futures_open", id, symbol, side, leverage, margin, price: quote.price, fee });
     return { id, symbol, side, leverage, margin, entryPrice: quote.price, liquidationPrice: pos.liquidationPrice, fee };
