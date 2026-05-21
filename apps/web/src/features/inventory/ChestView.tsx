@@ -664,9 +664,8 @@ export default function ChestView() {
               <div className="text-center">
                 <button
                   onClick={() => {
-                    setOpenQty(1);
+                    setOpenQtys({});
                     setShowResult(false);
-                    navigate('/app/inventory');
                   }}
                   className="bg-[#494847] hover:bg-[#5a5858] text-white font-bold px-8 py-3
                     rounded-xl transition-colors inline-flex items-center gap-2"
