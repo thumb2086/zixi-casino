@@ -42,8 +42,18 @@ export default function Layout() {
               <Outlet />
             </div>
 
-            <aside className="sticky top-32 hidden h-fit w-96 flex-col gap-8 lg:flex">
-              <ChatRoom />
+            <aside className="sticky top-32 hidden h-fit w-96 flex-col gap-3 lg:flex">
+              <button
+                onClick={() => setChatOpen(!chatOpen)}
+                className="flex items-center justify-between rounded-xl border border-[#494847]/20 bg-[#1a1919] px-4 py-2.5 text-left hover:bg-[#1a1919]/80 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageCircle size={16} className="text-blue-400 shrink-0" />
+                  <span className="text-xs font-black uppercase tracking-widest text-blue-400">🌍 全域聊天</span>
+                </div>
+                {chatOpen ? <ChevronDown size={16} className="text-[#adaaaa]" /> : <ChevronUp size={16} className="text-[#adaaaa]" />}
+              </button>
+              {chatOpen && <ChatRoom />}
 
               <footer className="py-4 text-center">
                 <p className="text-xs font-black uppercase tracking-[0.5em] text-[#494847]">

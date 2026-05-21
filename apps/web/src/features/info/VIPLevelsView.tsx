@@ -16,13 +16,7 @@ export default function VIPLevelsView() {
   };
 
 
-  const gameFeeDiscountByThreshold = (threshold: number) => {
-    if (threshold >= 100_000_000_000) return 100;
-    if (threshold >= 50_000_000) return 50;
-    if (threshold >= 1_000_000) return 20;
-    if (threshold >= 100_000) return 10;
-    return 0;
-  };
+  const feeDiscountPct = (tier: typeof LEVEL_TIERS[number]) => Math.round((tier.marketFeeDiscount || 0) * 100);
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
@@ -50,20 +44,20 @@ export default function VIPLevelsView() {
             共 {LEVEL_TIERS.length} 個等級，從普通會員到神諭十二階。等級依據您的總投注額計算，等級越高享有越多特權。
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
-              <div className="flex items-center gap-2">
-                <Percent className="h-4 w-4 text-emerald-400" />
-                <span className="text-xs font-bold text-[#adaaaa]">最高折扣</span>
+              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+                <div className="flex items-center gap-2">
+                  <Percent className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-bold text-[#adaaaa]">最高折扣</span>
+                </div>
+                <p className="mt-1 text-lg font-black text-emerald-400">{Math.round(Math.max(...LEVEL_TIERS.map(t => t.marketFeeDiscount || 0)) * 100)}%</p>
               </div>
-              <p className="mt-1 text-lg font-black text-emerald-400">100%</p>
-            </div>
-            <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
-              <div className="flex items-center gap-2">
-                <Gift className="h-4 w-4 text-[#fcc025]" />
-                <span className="text-xs font-bold text-[#adaaaa]">最高倍率</span>
+              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+                <div className="flex items-center gap-2">
+                  <Gift className="h-4 w-4 text-[#fcc025]" />
+                  <span className="text-xs font-bold text-[#adaaaa]">最高倍率</span>
+                </div>
+                <p className="mt-1 text-lg font-black text-[#fcc025]">{Math.max(...LEVEL_TIERS.map(t => t.dailyBonusMultiplier || 1)).toFixed(1)}x</p>
               </div>
-              <p className="mt-1 text-lg font-black text-[#fcc025]">8.0x</p>
-            </div>
           </div>
         </section>
 
@@ -171,9 +165,7 @@ export default function VIPLevelsView() {
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
                       <p className="text-xs font-bold text-[#adaaaa]">手續費折扣</p>
-                      <p className="text-sm font-black text-emerald-400">
-                        {gameFeeDiscountByThreshold(tier.threshold)}%
-                      </p>
+                      <p className="text-sm font-black text-emerald-400">{feeDiscountPct(tier)}%</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
                       <p className="text-xs font-bold text-[#adaaaa]">紅利倍率</p>
