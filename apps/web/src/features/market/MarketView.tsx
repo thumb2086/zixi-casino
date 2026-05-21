@@ -377,7 +377,7 @@ export default function MarketView() {
                           </div>
                         </div>
                         <p className="text-[10px] text-[#adaaaa] mt-1">
-                          入場 {formatNumber(pos.entryPrice)} · 標記 {formatNumber(pos.price || 0)} · 強平 {formatNumber(pos.liquidationPrice)}
+                          入場 {formatNumber(pos.entryPrice)} · 標記 {formatNumber(pos.markPrice ?? 0)} · 強平 {formatNumber(pos.liquidationPrice)}
                         </p>
                       </div>
                     ))}
