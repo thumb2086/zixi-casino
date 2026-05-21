@@ -86,6 +86,7 @@ export default function ShopView() {
   const [balance, setBalance] = useState('0');
   const [ownedAvatars, setOwnedAvatars] = useState<string[]>([]);
   const [ownedTitles, setOwnedTitles] = useState<string[]>([]);
+  const [purchasedBundles, setPurchasedBundles] = useState<string[]>([]);
 
   // ── Pawn state ───────────────────────────────────────────────────────────
   const [invItems, setInvItems] = useState<any[]>([]);
@@ -112,6 +113,7 @@ export default function ShopView() {
   const [yjcBalance, setYjcBalance] = useState('0');
   const [convertZxc, setConvertZxc] = useState('');
   const [convertYjc, setConvertYjc] = useState('');
+  const [convertYjcTarget, setConvertYjcTarget] = useState('');
   const [converting, setConverting] = useState(false);
   const CONVERSION_RATE = 100_000_000; // 1 YJC = 100M ZXC
 
@@ -130,6 +132,7 @@ export default function ShopView() {
       if (invRes?.data?.data) {
         setOwnedAvatars(invRes.data.data.ownedAvatars || []);
         setOwnedTitles(invRes.data.data.ownedTitles || []);
+        setPurchasedBundles(invRes.data.data.purchasedBundles || []);
       }
       if (pawnInvRes?.data?.data?.items) {
         setInvItems(pawnInvRes.data.data.items.filter((i: any) => i.type !== 'avatar' && i.type !== 'title'));
@@ -221,6 +224,40 @@ export default function ShopView() {
       const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(amount) });
       if (res.data?.success) {
         setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || (amount / CONVERSION_RATE)} YJC`);
+        setConvertZxc('');
+        fetchItems();
+      } else {
+        setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
+      }
+    } catch (err: any) {
+      setMsg(`❌ ${err?.response?.data?.error?.message || err?.message || '兌換失敗'}`);
+    } finally {
+      setConverting(false);
+      setTimeout(() => setMsg(null), 5000);
+    }
+  }
+
+  async function handleConvertByYjcTarget() {
+    if (!sessionId || converting) return;
+    const yjcTarget = parseFloat(convertYjcTarget);
+    if (!yjcTarget || yjcTarget <= 0) {
+      setMsg('❌ 請輸入大於 0 的 YJC 目標數量');
+      setTimeout(() => setMsg(null), 3000);
+      return;
+    }
+    const zxcNeeded = yjcTarget * CONVERSION_RATE;
+    if (zxcNeeded < CONVERSION_RATE) {
+      setMsg(`❌ 最低兌換 ${CONVERSION_RATE.toLocaleString()} ZXC（${1} YJC）`);
+      setTimeout(() => setMsg(null), 3000);
+      return;
+    }
+    setConverting(true);
+    setMsg(null);
+    try {
+      const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(zxcNeeded) });
+      if (res.data?.success) {
+        setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || yjcTarget} YJC`);
+        setConvertYjcTarget('');
         setConvertZxc('');
         fetchItems();
       } else {
@@ -405,7 +442,7 @@ export default function ShopView() {
     const meta = item.meta as Record<string, any> | undefined;
     const bundle = meta?.bundle as Array<{ id: string; qty?: number }> | undefined;
     if (bundle) {
-      if (invItems.some((i) => i.id === item.itemId)) return false;
+      if (purchasedBundles.includes(item.itemId)) return false;
       const ownedAvatarOrTitles = bundle.filter(
         (s) => ownedAvatars.includes(s.id) || ownedTitles.includes(s.id),
       );
@@ -473,6 +510,13 @@ export default function ShopView() {
               {converting ? <Loader2 size={12} className="animate-spin" /> : '兌換'}
             </button>
           </div>
+          <div className="flex items-center gap-2 mt-2">
+            <input type="number" min={0.0001} step={0.0001} placeholder="目標 YJC" value={convertYjcTarget} onChange={e => setConvertYjcTarget(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <span className="text-xs text-[#adaaaa] shrink-0">= {(parseFloat(convertYjcTarget || '0') * CONVERSION_RATE).toLocaleString()} ZXC</span>
+            <button onClick={handleConvertByYjcTarget} disabled={converting || !convertYjcTarget || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
+              {converting ? <Loader2 size={12} className="animate-spin" /> : '換YJC'}
+            </button>
+          </div>
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#494847]/20">
             <input type="number" min="0.0001" step="0.0001" placeholder="YJC 數量" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertZxcFromYjc} disabled={converting || !convertYjc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#fcc025] text-black px-4 py-2 rounded-lg disabled:opacity-50">
@@ -503,15 +547,16 @@ export default function ShopView() {
                     <input
                       type="number"
                       min={1}
-                      max={999}
                       value={chestQty[chest.id] || 1}
                       onChange={(e) => {
-                        const v = parseInt(e.target.value) || 1;
-                        setChestQty(p => ({ ...p, [chest.id]: Math.max(1, Math.min(999, v)) }));
+                        const raw = e.target.value;
+                        if (raw === '') { setChestQty(p => ({ ...p, [chest.id]: 0 })); return; }
+                        const v = parseInt(raw, 10);
+                        if (!isNaN(v)) setChestQty(p => ({ ...p, [chest.id]: Math.max(1, v) }));
                       }}
                       className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded text-center text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]"
                     />
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: Math.min(999, (p[chest.id] || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: (p[chest.id] || 1) + 1 }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
                   </div>
                   <p className="text-center text-xs text-[#adaaaa] mt-2">
                     {(qty * unitPrice).toLocaleString()} ZXC
@@ -810,8 +855,13 @@ export default function ShopView() {
 
           {showSellForm && (
             <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20 mb-4 space-y-3">
-              <input placeholder="道具 ID (ex: token_1000)" value={sellItemId} onChange={e => setSellItemId(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]" />
+              <select value={sellItemId} onChange={e => setSellItemId(e.target.value)}
+                className="w-full bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]">
+                <option value="">選擇道具</option>
+                {invItems.map((item: any) => (
+                  <option key={item.id} value={item.id}>{item.name} (x{item.quantity})</option>
+                ))}
+              </select>
               <div className="flex gap-2">
                 <input type="number" min={1} placeholder="數量" value={sellQty} onChange={e => setSellQty(parseInt(e.target.value) || 1)}
                   className="w-20 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]" />

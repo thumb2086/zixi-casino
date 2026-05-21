@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./Blackjack.css";
 import "./CasinoCommon.css";
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
 import { BetQuickActions } from "./BetQuickActions";
-
-const GAME_MAX_BET = 1_000_000;
 
 interface Card {
   rank: string;
@@ -40,6 +38,7 @@ const INITIAL_STATE: GameState = {
 
 export const BlackjackView: React.FC = () => {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -49,7 +48,7 @@ export const BlackjackView: React.FC = () => {
     },
     staleTime: 60000,
   });
-  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
+  const maxBet = profile?.maxBet ?? 1_000_000;
   const [betAmount, setBetAmount] = useState<string>("100");
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE);
   const [error, setError] = useState<string>("");
@@ -107,6 +106,7 @@ export const BlackjackView: React.FC = () => {
           reason: payload.reason,
         }));
         setIsAnimating(false);
+        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
         return;
       }
 
@@ -121,6 +121,7 @@ export const BlackjackView: React.FC = () => {
         multiplier: payload.multiplier || 0,
         reason: payload.reason,
       });
+      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     } catch (e: any) {
       setError(extractGameError(e?.response?.data || e));
     }

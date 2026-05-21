@@ -152,7 +152,7 @@ export default function SwapView() {
 
   const s = summary.data;
   const zxcBalance = String(s?.balances?.zhixi?.balance ?? s?.summary?.balances?.ZXC ?? '0');
-  const yjcBalance = String(s?.balances?.yjc?.balance ?? '0');
+  const yjcBalance = String(s?.onchain?.yjc?.balance ?? s?.summary?.balances?.YJC ?? '0');
 
   const inputNumeric = Number(inputAmount) || 0;
 

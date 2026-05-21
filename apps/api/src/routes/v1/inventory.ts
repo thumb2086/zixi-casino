@@ -112,9 +112,14 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       }
     }
 
+    const purchasedBundles = Object.entries(state.inventory)
+      .filter(([itemId, qty]) => qty > 0 && itemId.startsWith('combo_'))
+      .map(([itemId]) => itemId);
+
     return createApiEnvelope(
       {
         items,
+        purchasedBundles,
         ownedAvatars: state.ownedAvatars,
         ownedTitles: state.ownedTitles,
         activeAvatar: state.activeAvatar,

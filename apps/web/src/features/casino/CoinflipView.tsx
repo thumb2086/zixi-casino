@@ -5,8 +5,6 @@ import { api } from '../../store/api';
 import { ChipAnimation } from '../../components/ChipAnimation';
 import './Coinflip.css';
 
-const GAME_MAX_BET = 1_000_000;
-
 const COINFLIP_ROUND_MS = 6000;
 const COINFLIP_LOCK_MS = 4000;
 
@@ -22,7 +20,7 @@ export const CoinflipView: React.FC = () => {
     },
     staleTime: 60000,
   });
-  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
+  const maxBet = profile?.maxBet ?? 1_000_000;
   const [betAmount, setBetAmount] = useState('10');
   const [selection, setSelection] = useState<'heads' | 'tails'>('heads');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -164,6 +162,7 @@ export const CoinflipView: React.FC = () => {
         setStatus('✅ 下注成功，等待開獎...');
         setStatusColor('#00ff88');
         queryClient.invalidateQueries({ queryKey: ['user'] });
+        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
       } else {
         console.log('Full response data:', responseData);
         setStatus('❌ 錯誤: roundId 未返回');
@@ -228,9 +227,9 @@ export const CoinflipView: React.FC = () => {
             className="min-h-[56px] rounded-lg bg-purple-600 px-4 font-bold text-white hover:bg-purple-700 disabled:opacity-50 sm:min-w-[96px]"
             onClick={handleAllIn}
             disabled={isDrawing || !isBettingOpen}
-            title="全部下注"
+            title="最高下注"
           >
-            全下
+            {maxBet.toLocaleString()}
           </button>
           <button
             ref={buttonRef}

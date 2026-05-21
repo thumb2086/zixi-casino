@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import './HorseRacing.css';
 import './CasinoCommon.css';
 import { BetQuickActions } from './BetQuickActions';
-
-const GAME_MAX_BET = 1_000_000;
 
 const HORSES = [
   { id: 1, name: '赤焰', multiplier: 3.6 },
@@ -44,6 +42,7 @@ function pickWinner(roundId: number): typeof HORSES[0] {
 
 export const HorseRacingView: React.FC = () => {
   const { session } = useAuth();
+  const queryClient = useQueryClient();
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
     queryFn: async () => {
@@ -52,7 +51,7 @@ export const HorseRacingView: React.FC = () => {
     },
     staleTime: 60000,
   });
-  const maxBet = Math.min(profile?.maxBet ?? GAME_MAX_BET, GAME_MAX_BET);
+  const maxBet = profile?.maxBet ?? 1_000_000;
   const [selectedHorseId, setSelectedHorseId] = useState(1);
   const [betAmount, setBetAmount] = useState('10');
   const [statusMsg, setStatusMsg] = useState('請選擇馬匹並下注。');
@@ -103,6 +102,8 @@ export const HorseRacingView: React.FC = () => {
       sessionId: session.id,
       betAmount: Number(betAmount),
       horseId: selectedHorseId,
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     }).catch((err: any) => {
       console.error('[horse] bet failed:', err);
     });
