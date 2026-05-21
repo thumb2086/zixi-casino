@@ -195,13 +195,11 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       },
     },
     async (request: any) => {
-      const ctx = await getContext(request);
-      if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
-
-      let result: UseAllTokensResult | null = null;
-
       try {
-        result = await useAllTokenItems(ctx.userId);
+        const ctx = await getContext(request);
+        if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
+
+        const result = await useAllTokenItems(ctx.userId);
 
         if (result.totalZxc > 0) {
           const curBal = await gameSettlement.getBalance(ctx.address, "zhixi");
@@ -233,9 +231,6 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           request.id,
         );
       } catch (error: any) {
-        if (result?.preState) {
-          rollbackUseAllTokens(ctx.userId, result.preState).catch(() => {});
-        }
         return createApiEnvelope({ success: false }, request.id, false, error?.message || "USE_ALL_TOKENS_FAILED");
       }
     },
