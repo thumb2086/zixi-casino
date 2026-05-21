@@ -681,20 +681,15 @@ export class UserRepository implements IUserRepository {
       updatedAt: new Date(),
     };
 
-    const result = await conn
-      .update(schema.userProfiles)
-      .set(payload)
-      .where(eq(schema.userProfiles.userId, userId));
-
-    if (result?.length === 0 || result?.rowCount === 0) {
-      const user = await this.getUserById(userId);
-      const address = user?.address || data.address || "";
-      await conn.insert(schema.userProfiles).values({
-        userId,
-        address,
-        ...data,
-      });
-    }
+    const user = await this.getUserById(userId);
+    await conn.insert(schema.userProfiles).values({
+      userId,
+      address: user?.address || data.address || "",
+      ...data,
+    }).onConflictDoUpdate({
+      target: schema.userProfiles.userId,
+      set: payload,
+    });
   }
 }
 
