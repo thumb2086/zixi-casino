@@ -215,7 +215,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const amount = parseInt(convertZxc, 10);
     if (!amount || amount < CONVERSION_RATE) {
-      setMsg(`❌ 最低兌換 ${CONVERSION_RATE.toLocaleString()} ZXC`);
+      setMsg(`❌ 最低兌換 ${formatNumber(CONVERSION_RATE, numberMode)} ZXC`);
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -248,7 +248,7 @@ export default function ShopView() {
     }
     const zxcNeeded = yjcTarget * CONVERSION_RATE;
     if (zxcNeeded < CONVERSION_RATE) {
-      setMsg(`❌ 最低兌換 ${CONVERSION_RATE.toLocaleString()} ZXC（${1} YJC）`);
+      setMsg(`❌ 最低兌換 ${formatNumber(CONVERSION_RATE, numberMode)} ZXC（${1} YJC）`);
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -285,7 +285,7 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', { sessionId, yjcAmount: String(yjcNum) });
       if (res.data?.success) {
-        setMsg(`✅ 成功兌換 ${res.data.data?.zxcAmount || (yjcNum * CONVERSION_RATE).toLocaleString()} ZXC`);
+        setMsg(`✅ 成功兌換 ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
         setConvertYjc('');
         fetchItems();
       } else {
@@ -504,16 +504,16 @@ export default function ShopView() {
             <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">佑戩幣 YJC</span>
             <span className="text-sm font-black italic text-[#4fc3f7] ml-auto">{formatBalance(yjcBalance, numberMode)}</span>
           </div>
-          <div className="text-sm text-[#adaaaa] mb-2">1 YJC = {CONVERSION_RATE.toLocaleString()} ZXC</div>
+          <div className="text-sm text-[#adaaaa] mb-2">1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXC</div>
           <div className="flex items-center gap-2">
-            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`最少 ${CONVERSION_RATE.toLocaleString()}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
+            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`最少 ${formatNumber(CONVERSION_RATE, numberMode)}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
             <button onClick={handleConvertYjc} disabled={converting || !convertZxc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
               {converting ? <Loader2 size={12} className="animate-spin" /> : '兌換'}
             </button>
           </div>
           <div className="flex items-center gap-2 mt-2">
             <input type="number" min={0.0001} step={0.0001} placeholder="目標 YJC" value={convertYjcTarget} onChange={e => setConvertYjcTarget(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
-            <span className="text-xs text-[#adaaaa] shrink-0">= {(parseFloat(convertYjcTarget || '0') * CONVERSION_RATE).toLocaleString()} ZXC</span>
+            <span className="text-xs text-[#adaaaa] shrink-0">= {formatNumber(parseFloat(convertYjcTarget || '0') * CONVERSION_RATE, numberMode)} ZXC</span>
             <button onClick={handleConvertByYjcTarget} disabled={converting || !convertYjcTarget || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
               {converting ? <Loader2 size={12} className="animate-spin" /> : '換YJC'}
             </button>
@@ -559,7 +559,7 @@ export default function ShopView() {
                     <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String((parseInt(p[chest.id] || '1', 10) || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
                   </div>
                   <p className="text-center text-xs text-[#adaaaa] mt-2">
-                    {(qty * unitPrice).toLocaleString()} ZXC
+                    {formatNumber(qty * unitPrice, numberMode)} ZXC
                     {discount > 0 && <span className="text-emerald-400 ml-1">-{discount * 100}%</span>}
                   </p>
                   <button
@@ -625,9 +625,9 @@ export default function ShopView() {
                                 <span className="shrink-0">{info?.icon || '•'}</span>
                                 <span className="text-white font-medium">{info?.name || sub.id}</span>
                                 {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
-                                {subValue ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{subValue.toLocaleString()} ZXC</span>
+                                {subValue ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{formatNumber(subValue, numberMode)} ZXC</span>
                                   : hasDiscount && totalValue > 0 && bundle.length > 1 && (
-                                    <span className="text-sm text-[#adaaaa] ml-auto">~{Math.round(totalValue / bundle.length).toLocaleString()} ZXC</span>
+                                    <span className="text-sm text-[#adaaaa] ml-auto">~{formatNumber(Math.round(totalValue / bundle.length), numberMode)} ZXC</span>
                                   )}
                               </div>
                             );
@@ -636,8 +636,8 @@ export default function ShopView() {
                     )}
                     {hasDiscount && (
                       <div className="mt-2 flex items-center gap-2">
-                        <span className="text-sm text-[#adaaaa] line-through">{totalValue.toLocaleString()} ZXC</span>
-                        <span className="text-sm font-black text-emerald-400">{price.toLocaleString()} ZXC</span>
+                        <span className="text-sm text-[#adaaaa] line-through">{formatNumber(totalValue, numberMode)} ZXC</span>
+                        <span className="text-sm font-black text-emerald-400">{formatNumber(price, numberMode)} ZXC</span>
                         <span className="text-sm font-black bg-emerald-400/20 text-emerald-400 px-1.5 py-0.5 rounded">
                           -{Math.round((1 - price / totalValue) * 100)}%
                         </span>
@@ -646,7 +646,7 @@ export default function ShopView() {
                   </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="text-sm font-black text-[#fcc025]">
-                      {price.toLocaleString()} {item.meta?.token === 'yjc' ? 'YJC' : 'ZXC'}
+                      {formatNumber(price, numberMode)} {item.meta?.token === 'yjc' ? 'YJC' : 'ZXC'}
                     </span>
                     <button
                       onClick={() => handleBuy(item.itemId)}
@@ -747,21 +747,21 @@ export default function ShopView() {
                     <>
                       <div>
                         <span className="text-[#adaaaa]">市值</span>
-                        <p className="font-black text-white">{totalValue.toLocaleString()} ZXC</p>
+                        <p className="font-black text-white">{formatNumber(totalValue, numberMode)} ZXC</p>
                       </div>
                       <div>
                         <span className="text-[#adaaaa]">即時變現</span>
-                        <p className="font-black text-emerald-400">{totalPayout.toLocaleString()} ZXC</p>
+                        <p className="font-black text-emerald-400">{formatNumber(totalPayout, numberMode)} ZXC</p>
                       </div>
                       <div>
                         <span className="text-[#adaaaa]">損益</span>
                         <p className={`font-black ${totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {totalPnl >= 0 ? '+' : ''}{totalPnl.toLocaleString()} ZXC
+                          {totalPnl >= 0 ? '+' : ''}{formatNumber(totalPnl, numberMode)} ZXC
                         </p>
                       </div>
                       <div>
                         <span className="text-[#adaaaa]">成本</span>
-                        <p className="font-black text-[#adaaaa]">{totalCost.toLocaleString()} ZXC</p>
+                        <p className="font-black text-[#adaaaa]">{formatNumber(totalCost, numberMode)} ZXC</p>
                       </div>
                     </>
                   );
@@ -791,7 +791,7 @@ export default function ShopView() {
                           )}
                         </div>
                         <div className="flex items-center gap-3 mt-1">
-                          <span className="text-sm font-black text-white">{marketPrice.toLocaleString()} ZXC</span>
+                          <span className="text-sm font-black text-white">{formatNumber(marketPrice, numberMode)} ZXC</span>
                           <span className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
                             {isUp ? '▲' : '▼'} {Math.abs(dayChange).toFixed(2)}%
                           </span>
@@ -799,13 +799,13 @@ export default function ShopView() {
                         </div>
                         <div className="flex items-center gap-3 mt-0.5">
                           <span className={`text-xs font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {pnl >= 0 ? '+' : ''}{pnl.toLocaleString()} ZXC ({pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%)
+                            {pnl >= 0 ? '+' : ''}{formatNumber(pnl, numberMode)} ZXC ({pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%)
                           </span>
-                          <span className="text-xs text-[#adaaaa]">均價 {Number(stock.avgPrice || 0).toLocaleString()}</span>
+                          <span className="text-xs text-[#adaaaa]">均價 {formatNumber(Number(stock.avgPrice || 0), numberMode)}</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
-                        <span className="text-sm font-black text-emerald-400">+{totalPayout.toLocaleString()} ZXC</span>
+                        <span className="text-sm font-black text-emerald-400">+{formatNumber(totalPayout, numberMode)} ZXC</span>
                         <span className="text-[10px] text-[#adaaaa]">(70% 變現)</span>
                         <button
                           onClick={() => handleStockSell(stock.symbol, stock.qty)}
@@ -888,7 +888,7 @@ export default function ShopView() {
                     <p className="text-xs text-[#adaaaa]">{l.quantity} 個 · {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-sm font-black text-[#fcc025]">{Number(l.price).toLocaleString()} ZXC</span>
+                    <span className="text-sm font-black text-[#fcc025]">{formatNumber(Number(l.price), numberMode)} ZXC</span>
                     <button onClick={() => handleBuyListing(l.id)} disabled={buyingListing === l.id}
                       className="text-xs font-black uppercase tracking-widest bg-[#fcc025] text-black px-3 py-1.5 rounded-lg disabled:opacity-50">
                       {buyingListing === l.id ? <Loader2 size={10} className="animate-spin" /> : '購買'}
@@ -913,7 +913,7 @@ export default function ShopView() {
                   <span className="text-2xl shrink-0">📦</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white">{l.itemId}</p>
-                    <p className="text-xs text-[#adaaaa]">{l.quantity} 個 · {Number(l.price).toLocaleString()} ZXC</p>
+                    <p className="text-xs text-[#adaaaa]">{l.quantity} 個 · {formatNumber(Number(l.price), numberMode)} ZXC</p>
                     <span className={`text-[10px] font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-[#adaaaa]'}`}>{l.status}</span>
                   </div>
                   {l.status === 'active' && (
