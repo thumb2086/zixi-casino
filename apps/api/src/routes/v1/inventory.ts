@@ -28,17 +28,20 @@ async function transferOnChain(address: string, tokenKey: "zhixi" | "yjc", amoun
     const chainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
     const treasury = getOnChainConfig().treasuryAddress;
 
-    // Auto-mint to treasury if it doesn't have enough on-chain balance
+    // Auto-mint to treasury (100京 = 10^18 units) if balance is low
     const decimals = await chainClient.getDecimals(tokenCfg.contractAddress, 18);
     const treasuryWei = await chainClient.getBalance(treasury, tokenCfg.contractAddress);
     const amountWei = chainClient.parseUnits(amount, decimals);
-    if (treasuryWei < amountWei) {
-      const deficitWei = amountWei - treasuryWei;
-      const mintTx = await chainClient.mint(treasury, deficitWei, tokenCfg.contractAddress);
-      const mintReceipt = await mintTx.wait();
-      if (!mintReceipt || mintReceipt.status !== 1) {
-        console.error(`[inventory] mint to treasury failed for ${tokenKey}`);
-        return;
+    const targetWei = chainClient.parseUnits("1000000000000000000", decimals); // 100京
+    if (treasuryWei < amountWei || treasuryWei < targetWei) {
+      const mintWei = targetWei - treasuryWei;
+      if (mintWei > 0n) {
+        const mintTx = await chainClient.mint(treasury, mintWei, tokenCfg.contractAddress);
+        const mintReceipt = await mintTx.wait();
+        if (!mintReceipt || mintReceipt.status !== 1) {
+          console.error(`[inventory] mint to treasury failed for ${tokenKey}`);
+          return;
+        }
       }
     }
 
