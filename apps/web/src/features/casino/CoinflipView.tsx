@@ -184,8 +184,8 @@ export const CoinflipView: React.FC = () => {
 
       <div className="coin-wrapper" ref={coinRef}>
         <div className="coin" style={{ transform: `rotateY(${rotation}deg)` }}>
-          <div className="coin-face coin-front">🪙</div>
-          <div className="coin-face coin-back">📀</div>
+          <div className="coin-face coin-front">ZC</div>
+          <div className="coin-face coin-back">子</div>
         </div>
       </div>
 

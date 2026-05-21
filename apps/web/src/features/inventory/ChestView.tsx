@@ -645,7 +645,7 @@ export default function ChestView() {
                 <div className="text-center mb-4">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-br from-[#fcc025]/20 to-[#e6ad03]/10 border border-[#fcc025]/40 rounded-2xl px-6 py-4 shadow-lg shadow-[#fcc025]/5">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fcc025] to-[#e6ad03] flex items-center justify-center shadow-lg">
-                      <span className="text-lg">🪙</span>
+                       <span className="text-lg">💰</span>
                     </div>
                     <div className="text-left">
                       <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>

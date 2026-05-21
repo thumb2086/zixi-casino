@@ -27,7 +27,7 @@ export default function RoomLobbyView() {
   const { session } = useAuth();
 
   const games: GameCard[] = [
-    { id: 'coinflip', name: 'Coinflip', nameZh: '猜硬幣', icon: '🪙' },
+    { id: 'coinflip', name: 'Coinflip', nameZh: '猜硬幣', icon: '🟡' },
     { id: 'slots', name: 'Slots', nameZh: '老虎機', icon: '🎰' },
     { id: 'roulette', name: 'Roulette', nameZh: '輪盤', icon: '🎡' },
     { id: 'blackjack', name: 'Blackjack', nameZh: '21 點', icon: '🃏' },
