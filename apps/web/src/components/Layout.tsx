@@ -55,12 +55,12 @@ export default function Layout() {
                     className="flex items-center gap-2 rounded-xl border border-[#494847]/20 bg-[#1a1919] px-4 py-2.5 text-left hover:bg-[#1a1919]/80 transition-colors"
                   >
                     <MessageCircle size={16} className="text-blue-400 shrink-0" />
-                    <span className="text-xs font-black uppercase tracking-widest text-blue-400">🌍 全域聊天</span>
+                    <span className="text-xs font-black uppercase tracking-widest text-blue-400">{t('layout.global_chat')}</span>
                   </button>
                   <ChatRoom />
                   <footer className="py-4 text-center">
                     <p className="text-xs font-black uppercase tracking-[0.5em] text-[#494847]">
-                      &copy; 2026 子熙模擬器 - Aureum Edition
+                      {t('layout.footer')}
                     </p>
                   </footer>
                 </div>
@@ -81,7 +81,7 @@ export default function Layout() {
         {chatOpen ? (
           <div className="mx-2 mb-2">
             <div className="flex items-center justify-between bg-[#1a1919] rounded-t-xl border border-[#494847]/20 px-4 py-2">
-              <span className="text-xs font-black uppercase tracking-widest text-blue-400">🌍 全域聊天</span>
+              <span className="text-xs font-black uppercase tracking-widest text-blue-400">{t('layout.global_chat')}</span>
               <button onClick={() => setChatOpen(false)} className="text-[#adaaaa] hover:text-white">
                 <ChevronRight size={18} />
               </button>
@@ -95,10 +95,10 @@ export default function Layout() {
           >
             <MessageCircle size={16} className="text-blue-400 shrink-0" />
             <div className="flex-1 min-w-0">
-              <span className="text-xs font-bold text-blue-400">🌍 全域聊天</span>
+              <span className="text-xs font-bold text-blue-400">{t('layout.global_chat')}</span>
               {lastMessage && (
                 <p className="text-[10px] text-[#adaaaa] truncate mt-0.5">
-                  <span className="font-bold text-[#fcc025]">{lastMessage.displayName || '匿名'}: </span>
+                  <span className="font-bold text-[#fcc025]">{lastMessage.displayName || t('lobby.anonymous')}: </span>
                   {lastMessage.text}
                 </p>
               )}

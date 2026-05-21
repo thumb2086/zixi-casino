@@ -198,7 +198,7 @@ export default function LobbyView() {
                 </span>
                 <span className="flex items-center gap-1">
                   <TrendingUp size={12} className="text-emerald-400" />
-                  股票: {formatNumber(stockValue)}
+                   {t('lobby.stocks')}: {formatNumber(stockValue)}
                 </span>
               </div>
             </div>
@@ -209,31 +209,31 @@ export default function LobbyView() {
             <GlassCard
               to="/app/company"
               icon={Building2}
-              title={isZh ? '我的公司' : 'My Company'}
-              subtitle={isZh ? 'AI / 晶片模擬' : 'AI / Chip Simulation'}>
+              title={t('lobby.my_company')}
+              subtitle={t('lobby.ai_chip_simulation')}>
               <div className="absolute top-2 right-2 bg-[#fcc025] text-[#0e0e0e] text-[8px] font-black px-2 py-0.5 rounded-full">BETA</div>
               <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
-                {isZh ? '創辦公司、雇用員工、研發產品' : 'Start, hire, research, and profit.'}
+                {t('lobby.company_description')}
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <TrendingUp className="h-3 w-3 text-emerald-400" />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-                  {isZh ? '模擬經營' : 'Simulation'}
+                  {t('lobby.simulation_label')}
                 </span>
               </div>
             </GlassCard>
             <GlassCard
               to="/app/admin"
               icon={SettingsIcon}
-              title={isZh ? '管理中心' : 'Admin Override'}
-              subtitle={isZh ? '權限限定' : 'Authorized Only'}>
+              title={t('lobby.admin_override')}
+              subtitle={t('lobby.authorized_only')}>
               <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
-                {isZh ? '系統設定與管理工具' : 'System configuration and operator tools.'}
+                {t('lobby.admin_tools_description')}
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#fcc025]" />
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#fcc025]">
-                  {isZh ? '連線安全' : 'Secure'}
+                  {t('lobby.secure_label')}
                 </span>
               </div>
             </GlassCard>
@@ -241,8 +241,8 @@ export default function LobbyView() {
           <GlassCard
             to="/app/events"
             icon={CalendarClock}
-            title="活動"
-            subtitle="進行中活動與獎勵"
+            title={t('lobby.events')}
+            subtitle={t('lobby.events_subtitle')}
           >
           </GlassCard>
 
@@ -362,11 +362,11 @@ export default function LobbyView() {
           <GlassCard
             to="/app/collection"
             icon={Archive}
-            title="收藏櫃"
-            subtitle="頭像、稱號與珍藏品"
+            title={t('lobby.collection')}
+            subtitle={t('lobby.collection_subtitle')}
           >
             <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
-              檢視已獲得的頭像、稱號與收藏品
+              {t('lobby.collection_description')}
             </p>
           </GlassCard>
           {isAdmin && (

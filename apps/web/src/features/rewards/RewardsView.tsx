@@ -76,7 +76,7 @@ export default function RewardsView() {
             <Star size={64} fill="#fcc025" className="text-[#fcc025]" />
           </div>
           <div className="mt-4 rounded-full bg-[#fcc025] px-4 py-1 text-xs font-black uppercase tracking-widest text-black shadow-xl">
-            Platinum IV
+            {t('rewards.tier_platinum4')}
           </div>
           <p className="mt-8 text-xs font-bold uppercase tracking-[0.3em] text-[#adaaaa]">
             {t('rewards.vip_progress')}
@@ -85,8 +85,8 @@ export default function RewardsView() {
             <div className="h-full w-[65%] bg-[#fcc025] shadow-[0_0_10px_#fcc025]" />
           </div>
           <div className="mt-2 flex w-full justify-between text-xs font-black uppercase text-[#494847]">
-            <span>Gold</span>
-            <span>Platinum</span>
+            <span>{t('rewards.progress_gold')}</span>
+            <span>{t('rewards.progress_platinum')}</span>
           </div>
         </section>
 
@@ -109,7 +109,7 @@ export default function RewardsView() {
                       : 'border-[#494847]/10 bg-[#1a1919]'
                 }`}
               >
-                <span className="text-[8px] font-black uppercase text-[#adaaaa]">Day {reward.day}</span>
+                <span className="text-[8px] font-black uppercase text-[#adaaaa]">{t('rewards.day', { number: reward.day })}</span>
                 <div className="text-xs font-black italic">{reward.amount}</div>
                 {reward.status === 'CLAIMED' && <CheckCircle2 size={12} className="text-emerald-500" />}
                 {reward.status === 'AVAILABLE' && (

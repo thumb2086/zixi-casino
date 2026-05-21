@@ -21,12 +21,12 @@ interface ChatMessage {
   createdAt?: string;
 }
 
-const CATEGORIES = [
-  { value: 'bug', label: '回報錯誤' },
-  { value: 'account', label: '帳號問題' },
-  { value: 'payment', label: '金流問題' },
-  { value: 'gameplay', label: '遊戲玩法' },
-  { value: 'other', label: '其他' },
+const CATEGORIES = (t: (key: string) => string) => [
+  { value: 'bug', label: t('support.cat_bug') },
+  { value: 'account', label: t('support.cat_account') },
+  { value: 'payment', label: t('support.cat_payment') },
+  { value: 'gameplay', label: t('support.cat_gameplay') },
+  { value: 'other', label: t('support.cat_other') },
 ];
 
 export default function SupportView() {
@@ -89,11 +89,11 @@ export default function SupportView() {
   async function handleSubmitTicket(e: FormEvent) {
     e.preventDefault();
     if (!sessionId) {
-      setTicketResult('請先登入再提交工單');
+      setTicketResult(t('support.login_first'));
       return;
     }
     if (!title.trim() || !message.trim()) {
-      setTicketResult('請填寫標題與內容');
+      setTicketResult(t('support.fill_required'));
       return;
     }
     setSubmitting(true);
@@ -109,15 +109,15 @@ export default function SupportView() {
       });
       const data = res.data?.data;
       if (data?.success) {
-        setTicketResult(`已建立工單：${data.reportId}`);
+        setTicketResult(t('support.ticket_created', { id: data.reportId }));
         setTitle('');
         setMessage('');
         setContact('');
       } else {
-        setTicketResult(res.data?.data?.error?.message || '建立工單失敗');
+        setTicketResult(res.data?.data?.error?.message || t('support.ticket_failed'));
       }
     } catch (err: any) {
-      setTicketResult(err?.response?.data?.data?.error?.message || err?.message || '建立工單失敗');
+      setTicketResult(err?.response?.data?.data?.error?.message || err?.message || t('support.ticket_failed'));
     } finally {
       setSubmitting(false);
     }
@@ -157,18 +157,18 @@ export default function SupportView() {
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-4">
             <Megaphone size={18} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">最新公告</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('support.announcements_title')}</h2>
           </div>
           {announcementsLoading ? (
-            <div className="flex items-center gap-2 text-[#adaaaa] text-sm"><Loader2 size={14} className="animate-spin" /> 載入中...</div>
+            <div className="flex items-center gap-2 text-[#adaaaa] text-sm"><Loader2 size={14} className="animate-spin" /> {t('support.loading')}</div>
           ) : announcements.length === 0 ? (
-            <p className="text-sm text-[#adaaaa]">目前沒有公告</p>
+            <p className="text-sm text-[#adaaaa]">{t('support.no_announcements')}</p>
           ) : (
             <ul className="space-y-3">
               {announcements.slice(0, 5).map((a) => (
                 <li key={a.id} className="border-l-2 border-[#fcc025]/50 pl-3">
                   <div className="flex items-center gap-2">
-                    {a.isPinned && <span className="text-xs font-black uppercase text-[#fcc025]">釘選</span>}
+                    {a.isPinned && <span className="text-xs font-black uppercase text-[#fcc025]">{t('support.pinned')}</span>}
                     <h3 className="text-sm font-bold text-white">{a.title}</h3>
                   </div>
                   <p className="text-xs text-[#adaaaa] mt-1 whitespace-pre-wrap">{a.content}</p>
@@ -181,53 +181,53 @@ export default function SupportView() {
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-4">
             <Send size={18} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">提交工單</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('support.submit_ticket_title')}</h2>
           </div>
           {!isAuthorized ? (
-            <p className="text-sm text-[#adaaaa]">請先登入後再提交工單。</p>
+            <p className="text-sm text-[#adaaaa]">{t('support.login_first')}</p>
           ) : (
             <form onSubmit={handleSubmitTicket} className="space-y-3">
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">標題</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.title_label')}</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
-                  placeholder="簡短描述問題"
+                  placeholder={t('support.title_placeholder')}
                   maxLength={100}
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">分類</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.category_label')}</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
                 >
-                  {CATEGORIES.map((c) => (
+                  {CATEGORIES(t).map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">內容</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.content_label')}</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none min-h-24"
-                  placeholder="詳細描述、重現步驟、預期行為"
+                  placeholder={t('support.content_placeholder')}
                   maxLength={2000}
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">聯絡方式（選填）</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.contact_label')}</label>
                 <input
                   type="text"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
-                  placeholder="Email / Discord / Telegram"
+                  placeholder={t('support.contact_placeholder')}
                   maxLength={200}
                 />
               </div>
@@ -237,7 +237,7 @@ export default function SupportView() {
                 className="w-full bg-[#fcc025] text-[#0e0e0e] font-black uppercase tracking-widest text-xs py-3 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                提交工單
+                {t('support.submit_btn')}
               </button>
               {ticketResult && (
                 <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
@@ -251,17 +251,17 @@ export default function SupportView() {
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-4">
             <MessageCircle size={18} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">全站聊天室</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('support.chat_title')}</h2>
           </div>
           <div className="bg-[#0e0e0e] border border-[#494847]/20 rounded-lg p-3 h-60 overflow-y-auto flex flex-col gap-2 mb-3">
             {chatLoading && chatMessages.length === 0 ? (
-              <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> 載入中...</div>
+              <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> {t('support.loading')}</div>
             ) : chatMessages.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">目前沒有訊息，來打聲招呼吧。</p>
+              <p className="text-xs text-[#adaaaa]">{t('support.no_messages')}</p>
             ) : (
               chatMessages.slice(-50).map((msg) => (
                 <div key={msg.id} className="text-xs">
-                  <span className="font-bold text-[#fcc025] mr-2">{msg.displayName || msg.address?.slice(0, 6) || '匿名玩家'}</span>
+                  <span className="font-bold text-[#fcc025] mr-2">{msg.displayName || msg.address?.slice(0, 6) || t('support.anonymous_player')}</span>
                   <span className="text-white whitespace-pre-wrap">{msg.text}</span>
                 </div>
               ))
@@ -274,7 +274,7 @@ export default function SupportView() {
                 value={chatText}
                 onChange={(e) => setChatText(e.target.value)}
                 className="flex-1 bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
-                placeholder="輸入訊息..."
+                placeholder={t('support.chat_placeholder')}
                 maxLength={500}
               />
               <button
@@ -282,11 +282,11 @@ export default function SupportView() {
                 disabled={chatSending || !chatText.trim()}
                 className="bg-[#fcc025] text-[#0e0e0e] font-black uppercase tracking-widest text-xs px-4 rounded-lg disabled:opacity-50"
               >
-                {chatSending ? <Loader2 size={14} className="animate-spin" /> : '送出'}
+                {chatSending ? <Loader2 size={14} className="animate-spin" /> : t('support.send')}
               </button>
             </form>
           ) : (
-            <p className="text-xs text-[#adaaaa]">登入後才能發言</p>
+            <p className="text-xs text-[#adaaaa]">{t('support.login_to_chat')}</p>
           )}
         </section>
       </main>

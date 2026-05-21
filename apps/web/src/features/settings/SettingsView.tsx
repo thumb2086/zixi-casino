@@ -315,7 +315,7 @@ export default function SettingsView() {
                       amountDisplay === 'full' ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
                     }`}
                   >
-                    1,000,000
+                    {t('settings.full')}
                   </button>
                 </div>
               </div>
@@ -352,8 +352,8 @@ export default function SettingsView() {
           <div className="flex items-center gap-3">
             <Type className="text-[#fcc025]" size={18} />
             <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
-              字體大小
-            </h3>
+               {t('settings.font_size')}
+             </h3>
           </div>
           <div className="mt-4 flex gap-2">
             {(['small', 'medium', 'large'] as const).map((level) => (
@@ -365,7 +365,7 @@ export default function SettingsView() {
                   fontSize === level ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
                 }`}
               >
-                {level === 'small' ? '小' : level === 'medium' ? '中' : '大'}
+                {level === 'small' ? t('settings.size_small') : level === 'medium' ? t('settings.size_medium') : t('settings.size_large')}
               </button>
             ))}
           </div>

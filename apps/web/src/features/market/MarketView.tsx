@@ -69,7 +69,7 @@ export default function MarketView() {
         const pnl = data.result.realizedPnl;
         const sign = pnl >= 0 ? '+' : '';
         const label = pnl >= 0 ? 'success' : 'error';
-        setActionNotice({ type: label, message: `倉位已平倉 · 實現損益 ${sign}${formatNumber(pnl, numberMode)} ZXC` });
+        setActionNotice({ type: label, message: t('market.futures_closed', { pnl: `${sign}${formatNumber(pnl, numberMode)}` }) });
       } else {
         setActionNotice({ type: 'success', message: successMsg });
       }
@@ -85,9 +85,9 @@ export default function MarketView() {
     <div className="h-full flex flex-col gap-4">
       {/* Tabs: Spot / Futures / Bank */}
       <div className="flex gap-1 rounded-xl bg-[#0e0e0e] p-1 border border-[#494847]/20">
-        <button onClick={() => setPanelTab('spot')} className={tabCls('spot')}>現貨</button>
-        <button onClick={() => setPanelTab('futures')} className={tabCls('futures')}>合約</button>
-        <button onClick={() => setPanelTab('bank')} className={tabCls('bank')}>銀行</button>
+        <button onClick={() => setPanelTab('spot')} className={tabCls('spot')}>{t('market.spot')}</button>
+        <button onClick={() => setPanelTab('futures')} className={tabCls('futures')}>{t('market.futures')}</button>
+        <button onClick={() => setPanelTab('bank')} className={tabCls('bank')}>{t('market.bank')}</button>
       </div>
 
       {panelTab !== 'bank' && (
@@ -109,12 +109,12 @@ export default function MarketView() {
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'stock_buy', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.buy_success'))}
               className="rounded-2xl bg-[#fcc025] px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:opacity-50">
-              買入 {selectedQuote?.symbol || selectedSymbol}
+              {t('market.buy', { symbol: selectedQuote?.symbol || selectedSymbol })}
             </button>
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'stock_sell', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.sell_success'))}
               className="rounded-2xl bg-[#ff7351] px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-white disabled:opacity-50">
-              賣出 {selectedQuote?.symbol || selectedSymbol}
+              {t('market.sell', { symbol: selectedQuote?.symbol || selectedSymbol })}
             </button>
           </div>
         </div>
@@ -125,34 +125,34 @@ export default function MarketView() {
         <div className="space-y-3">
           <div className="flex gap-2">
             <button onClick={() => setFuturesSide('long')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${futuresSide === 'long' ? 'bg-emerald-500 text-white shadow' : 'bg-[#0e0e0e] text-[#adaaaa] border border-[#494847]/20'}`}>做多</button>
+              className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${futuresSide === 'long' ? 'bg-emerald-500 text-white shadow' : 'bg-[#0e0e0e] text-[#adaaaa] border border-[#494847]/20'}`}>{t('market.go_long')}</button>
             <button onClick={() => setFuturesSide('short')}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${futuresSide === 'short' ? 'bg-red-500 text-white shadow' : 'bg-[#0e0e0e] text-[#adaaaa] border border-[#494847]/20'}`}>做空</button>
+              className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${futuresSide === 'short' ? 'bg-red-500 text-white shadow' : 'bg-[#0e0e0e] text-[#adaaaa] border border-[#494847]/20'}`}>{t('market.go_short')}</button>
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-[#adaaaa]">槓桿</span>
+              <span className="text-[10px] font-bold text-[#adaaaa]">{t('market.leverage')}</span>
               <span className="text-xs font-black text-[#fcc025]">{futuresLeverage}x</span>
             </div>
             <input type="range" min={1} max={20} value={futuresLeverage} onChange={(e) => setFuturesLeverage(Number(e.target.value))}
               className="w-full accent-[#fcc025]" />
           </div>
           <input type="number" min={10} value={futuresMargin} onChange={(e) => setFuturesMargin(e.target.value)}
-            placeholder="保證金" className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+            placeholder={t('market.margin')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
           <div className="text-[10px] text-[#adaaaa] space-y-1">
-            <p>名義價值：{formatNumber(Number(futuresMargin || 0) * futuresLeverage)} ZXC</p>
-            <p>強平價格：{futuresSide === 'long'
+            <p>{t('market.notional_value', { value: formatNumber(Number(futuresMargin || 0) * futuresLeverage) })}</p>
+            <p>{t('market.liquidation_price', { value: futuresSide === 'long'
               ? formatNumber(Math.round(Number(selectedQuote?.price || 0) * (1 - 0.96 / futuresLeverage)))
               : formatNumber(Math.round(Number(selectedQuote?.price || 0) * (1 + 0.96 / futuresLeverage)))
-            } ZXC</p>
+            })}</p>
           </div>
           <button type="button" disabled={execute.isPending || !futuresMargin || Number(futuresMargin) < 10}
             onClick={() => runAction({
               type: 'futures_open', symbol: selectedSymbol, side: futuresSide,
               amount: futuresMargin, leverage: String(futuresLeverage)
-            }, `${futuresSide === 'long' ? '多' : '空'}倉開倉成功`)}
+            }, t('market.futures_open_success', { side: futuresSide }))}
             className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 text-xs font-black uppercase tracking-[0.15em] text-white disabled:opacity-50 hover:brightness-110">
-            開倉 {futuresSide === 'long' ? '做多' : '做空'} {selectedSymbol}
+            {t('market.open_position', { side: futuresSide, symbol: selectedSymbol })}
           </button>
         </div>
       )}
@@ -161,14 +161,14 @@ export default function MarketView() {
       {panelTab === 'bank' && (
         <div className="space-y-3">
           <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
-            placeholder="金額" className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+            placeholder={t('market.amount')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
           <div className="grid grid-cols-2 gap-2">
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
-              className="rounded-xl bg-emerald-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-emerald-500">存入</button>
+              className="rounded-xl bg-emerald-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-emerald-500">{t('market.bank_deposit')}</button>
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
-              className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">提款</button>
+              className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
         </div>
       )}
@@ -221,7 +221,7 @@ export default function MarketView() {
           <div className="flex items-center gap-4">
             {/* Mobile: trade drawer toggle */}
             <button onClick={() => setMobileDrawerOpen(o => !o)} className="lg:hidden text-xs font-black uppercase tracking-[0.18em] text-[#fcc025]">
-              {mobileDrawerOpen ? '關閉下單' : '下單'}
+              {mobileDrawerOpen ? t('market.close_order') : t('market.place_order')}
             </button>
             <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
               {t('market.public_feed')}
@@ -236,7 +236,7 @@ export default function MarketView() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileDrawerOpen(false)} />
           <div className="absolute left-0 top-16 bottom-24 w-80 max-w-[85vw] bg-[#1a1919] border-r border-[#494847]/10 p-5 overflow-y-auto shadow-2xl">
             <div className="flex justify-end mb-3">
-              <button onClick={() => setMobileDrawerOpen(false)} className="text-xs text-[#adaaaa]">✕ 關閉</button>
+              <button onClick={() => setMobileDrawerOpen(false)} className="text-xs text-[#adaaaa]">✕ {t('market.close')}</button>
             </div>
             {executionPanel}
           </div>
@@ -324,13 +324,13 @@ export default function MarketView() {
           {/* Portfolio summary - above everything */}
           {(summary?.futuresPositions?.length > 0 || summary?.stockPositions?.length > 0) && (
             <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa] mb-4">我的持倉</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa] mb-4">{t('market.portfolio')}</h2>
               {summary?.futuresPositions?.length > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold text-[#adaaaa]">合約</span>
+                    <span className="text-[10px] font-bold text-[#adaaaa]">{t('market.futures')}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-[#adaaaa]">保證金：{formatNumber(summary.usedFuturesMargin || 0)}</span>
+                      <span className="text-xs font-black text-[#adaaaa]">{t('market.margin_label', { value: formatNumber(summary.usedFuturesMargin || 0) })}</span>
                       {summary.futuresPositions.length > 1 && (
                         <button onClick={async () => {
                           let lastErr: any = null;
@@ -341,17 +341,17 @@ export default function MarketView() {
                           }
                           const sign = totalPnl >= 0 ? '+' : '';
                           const label = totalPnl >= 0 ? 'success' : 'error';
-                          setActionNotice({ type: lastErr ? 'error' : label, message: lastErr?.message || `${summary.futuresPositions.length} 倉位已全平 · 總實現損益 ${sign}${formatNumber(totalPnl, numberMode)} ZXC` });
+                          setActionNotice({ type: lastErr ? 'error' : label, message: lastErr?.message || t('market.bulk_close_result', { count: summary.futuresPositions.length, pnl: `${sign}${formatNumber(totalPnl, numberMode)}` }) });
                         }} disabled={execute.isPending}
                           className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
-                          全平
-                        </button>
+                          {t('market.close_all')}
+                         </button>
                       )}
                     </div>
                   </div>
                   {summary.futuresUnrealizedPnl !== undefined && (
                     <div className={`text-xs font-bold mb-2 ${(summary.futuresUnrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      未實現損益：{(summary.futuresUnrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(summary.futuresUnrealizedPnl || 0, numberMode)} ZXC
+                      {t('market.unrealized_pnl', { value: `${(summary.futuresUnrealizedPnl || 0) >= 0 ? '+' : ''}${formatNumber(summary.futuresUnrealizedPnl || 0, numberMode)}` })}
                     </div>
                   )}
                   <div className="space-y-2">
@@ -360,7 +360,7 @@ export default function MarketView() {
                         <div className="flex items-center justify-between">
                           <div className="min-w-0 flex items-center gap-2">
                             <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                              {pos.side === 'long' ? '多' : '空'}
+                              {pos.side === 'long' ? t('market.long_badge') : t('market.short_badge')}
                             </span>
                             <p className="text-xs font-black text-white">{pos.symbol}</p>
                             <span className="text-[10px] text-[#adaaaa]">{pos.leverage}x</span>
@@ -369,15 +369,15 @@ export default function MarketView() {
                             <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(pos.unrealizedPnl || 0, numberMode)}
                             </p>
-                            <button onClick={() => runAction({ type: 'futures_close', positionId: pos.id }, '倉位已平倉')}
+                            <button onClick={() => runAction({ type: 'futures_close', positionId: pos.id }, t('market.position_closed'))}
                               disabled={execute.isPending}
-                              className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
-                              平倉
-                            </button>
+                               className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
+                               {t('market.close_position')}
+                             </button>
                           </div>
                         </div>
                         <p className="text-[10px] text-[#adaaaa] mt-1">
-                          入場 {formatNumber(pos.entryPrice)} · 標記 {formatNumber(pos.markPrice ?? 0)} · 強平 {formatNumber(pos.liquidationPrice)}
+                          {t('market.position_detail', { entry: formatNumber(pos.entryPrice), mark: formatNumber(pos.markPrice ?? 0), liquidation: formatNumber(pos.liquidationPrice) })}
                         </p>
                       </div>
                     ))}
@@ -386,7 +386,7 @@ export default function MarketView() {
               )}
               {summary?.stockPositions?.length > 0 && (
                 <div>
-                  <span className="text-[10px] font-bold text-[#adaaaa] block mb-2">股票</span>
+                  <span className="text-[10px] font-bold text-[#adaaaa] block mb-2">{t('market.stocks')}</span>
                   <div className="space-y-2">
                     {summary.stockPositions.map((pos: any) => (
                       <div key={pos.symbol} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
@@ -396,7 +396,7 @@ export default function MarketView() {
                             {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(pos.unrealizedPnl || 0, numberMode)}
                           </p>
                         </div>
-                        <p className="text-[10px] text-[#adaaaa] mt-0.5">市值 {formatNumber(pos.marketValue, numberMode)}</p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{t('market.market_value', { value: formatNumber(pos.marketValue, numberMode) })}</p>
                       </div>
                     ))}
                   </div>
@@ -415,7 +415,7 @@ export default function MarketView() {
                   {selectedQuote && (
                     <button onClick={() => setChartOpen(!chartOpen)}
                       className="ml-auto text-[10px] font-bold text-[#fcc025] bg-[#fcc025]/10 px-2.5 py-1 rounded-lg hover:bg-[#fcc025]/20 transition-colors">
-                      詳圖 {chartOpen ? '▲' : '▼'}
+                      {t('market.chart_detail')} {chartOpen ? '▲' : '▼'}
                     </button>
                   )}
                 </div>

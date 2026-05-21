@@ -197,6 +197,7 @@ export default function ShopView() {
         const discountText = d.discount > 0 ? ` (省 ${(d.discount * 100).toFixed(0)}%)` : '';
         setMsg(`✅ ${quantity} x ${label}寶箱 已放入背包！${discountText}`);
         if (d.balanceAfter) setBalance(d.balanceAfter);
+        fetchItems();
         setTimeout(() => setMsg(null), 3000);
       } else {
         setMsg(`❌ ${res.data?.error || '購買失敗'}`);

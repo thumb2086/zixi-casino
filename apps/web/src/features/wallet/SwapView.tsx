@@ -1,4 +1,4 @@
-import { useState, FormEvent, useCallback, useEffect } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { ArrowDownUp, Loader2, Coins } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AppBottomNav from '../../components/AppBottomNav';
@@ -25,9 +25,7 @@ function SwapPanel({
   zxcBalance,
   yjcBalance,
   isAuthorized,
-  setDirection,
   setInputAmount,
-  setResult,
   handleSwap,
   toggle,
 }: {
@@ -37,14 +35,12 @@ function SwapPanel({
   result: string | null;
   zxcBalance: string;
   yjcBalance: string;
-  loadingBalances: boolean;
   isAuthorized: boolean;
-  setDirection: (d: Direction) => void;
   setInputAmount: (v: string) => void;
-  setResult: (v: string | null) => void;
   handleSwap: (e: FormEvent) => Promise<void>;
   toggle: () => void;
 }) {
+  const { t } = useTranslation();
   const inputNumeric = Number(inputAmount) || 0;
   const previewAmount =
     direction === 'zxc_to_yjc'
@@ -58,21 +54,21 @@ function SwapPanel({
   return (
     <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-black uppercase tracking-widest text-white">兌換</h2>
+        <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('swap.title')}</h2>
         <p className="text-xs font-black uppercase tracking-widest text-[#fcc025]">
-          固定匯率：1 YJC = {ZXC_PER_YJC.toLocaleString()} ZXC
+          {t('swap.fixed_rate', { rate: ZXC_PER_YJC.toLocaleString() })}
         </p>
       </div>
 
       {!isAuthorized && (
-        <p className="text-sm text-[#adaaaa] mb-4">請先登入後再兌換。</p>
+        <p className="text-sm text-[#adaaaa] mb-4">{t('swap.login_first')}</p>
       )}
 
       <form onSubmit={handleSwap} className="space-y-4">
         <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">支付</span>
-            <span className="text-xs text-[#adaaaa]">餘額 {formatBalance(fromBalance)} {fromSymbol}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.pay')}</span>
+            <span className="text-xs text-[#adaaaa]">{t('swap.balance', { amount: formatBalance(fromBalance), symbol: fromSymbol })}</span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -92,7 +88,7 @@ function SwapPanel({
             type="button"
             onClick={toggle}
             className="w-10 h-10 rounded-full bg-[#fcc025] text-[#0e0e0e] flex items-center justify-center"
-            aria-label="切換方向"
+            aria-label={t('swap.toggle_direction')}
           >
             <ArrowDownUp size={16} />
           </button>
@@ -100,8 +96,8 @@ function SwapPanel({
 
         <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">收到</span>
-            <span className="text-xs text-[#adaaaa]">餘額 {formatBalance(toBalance)} {toSymbol}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.receive')}</span>
+            <span className="text-xs text-[#adaaaa]">{t('swap.balance', { amount: formatBalance(toBalance), symbol: toSymbol })}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="flex-1 text-2xl font-black italic text-[#fcc025]">
@@ -117,7 +113,7 @@ function SwapPanel({
           className="w-full bg-[#fcc025] text-[#0e0e0e] font-black uppercase tracking-widest text-xs py-3 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
-          確認兌換
+          {t('swap.confirm')}
         </button>
 
         {result && (
@@ -128,10 +124,10 @@ function SwapPanel({
       </form>
 
       <div className="mt-4 text-xs text-[#adaaaa] space-y-1">
-        <p>• 匯率固定為 1 YJC = {ZXC_PER_YJC.toLocaleString()} ZXC（1 億子熙幣）</p>
-        <p>• 手續費：0</p>
-        <p>• 雙向兌換，兌換以整數為單位，小數部分自動捨去</p>
-        <p>• 兌換直接上鏈，最終金額以鏈上交易為準</p>
+        <p>{t('swap.bullet_fixed_rate', { rate: ZXC_PER_YJC.toLocaleString() })}</p>
+        <p>{t('swap.bullet_zero_fee')}</p>
+        <p>{t('swap.bullet_bidirectional')}</p>
+        <p>{t('swap.bullet_onchain')}</p>
       </div>
     </section>
   );
@@ -165,19 +161,19 @@ export default function SwapView() {
   async function handleSwap(e: FormEvent) {
     e.preventDefault();
     if (!sessionId) {
-      setResult('請先登入');
+      setResult(t('swap.error_login'));
       return;
     }
     if (inputNumeric <= 0) {
-      setResult('請輸入金額');
+      setResult(t('swap.error_amount'));
       return;
     }
     if (direction === 'zxc_to_yjc' && inputNumeric < ZXC_PER_YJC) {
-      setResult(`最少 ${ZXC_PER_YJC.toLocaleString()} ZXC 才能兌換 1 YJC`);
+      setResult(t('swap.error_min_zxc', { rate: ZXC_PER_YJC.toLocaleString() }));
       return;
     }
     if (direction === 'yjc_to_zxc' && inputNumeric < 1) {
-      setResult('最少 1 YJC 才能兌換');
+      setResult(t('swap.error_min_yjc'));
       return;
     }
 
@@ -186,7 +182,7 @@ export default function SwapView() {
     try {
       if (direction === 'zxc_to_yjc') {
         const data = await convert.mutateAsync({ zxcAmount: String(Math.floor(inputNumeric)) });
-        setResult(`兌換成功：${data.requiredZxc} ZXC → ${data.yjcAmount} YJC`);
+        setResult(t('swap.success_zxc_to_yjc', { zxc: data.requiredZxc, yjc: data.yjcAmount }));
         setInputAmount('');
       } else {
         const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', {
@@ -195,14 +191,14 @@ export default function SwapView() {
         });
         const data = res.data?.data;
         if (data?.success) {
-          setResult(`兌換成功：${data.yjcAmount} YJC → ${Number(data.zxcAmount).toLocaleString()} ZXC`);
+          setResult(t('swap.success_yjc_to_zxc', { yjc: data.yjcAmount, zxc: Number(data.zxcAmount).toLocaleString() }));
           setInputAmount('');
         } else {
-          setResult(data?.error?.message || '兌換失敗');
+          setResult(data?.error?.message || t('swap.failed'));
         }
       }
     } catch (err: any) {
-      setResult(err?.response?.data?.data?.error?.message || err?.message || '兌換失敗');
+      setResult(err?.response?.data?.data?.error?.message || err?.message || t('swap.failed'));
     } finally {
       setSubmitting(false);
     }
@@ -214,7 +210,7 @@ export default function SwapView() {
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-4">
             <ArrowDownUp className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">兌換</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">{t('swap.heading')}</h1>
           </div>
         </div>
       </header>
@@ -223,15 +219,15 @@ export default function SwapView() {
         <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 mt-16">
           <div className="flex items-center gap-2 mb-4">
             <Coins size={18} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">目前餘額</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('swap.balance_title')}</h2>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">ZXC 子熙幣</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.zxc_label')}</p>
               <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(zxcBalance)}</p>
             </div>
             <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">YJC 佑戩幣</p>
+              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.yjc_label')}</p>
               <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(yjcBalance)}</p>
             </div>
           </div>
@@ -245,9 +241,7 @@ export default function SwapView() {
           zxcBalance={zxcBalance}
           yjcBalance={yjcBalance}
           isAuthorized={isAuthorized}
-          setDirection={setDirection}
           setInputAmount={setInputAmount}
-          setResult={setResult}
           handleSwap={handleSwap}
           toggle={toggle}
         />

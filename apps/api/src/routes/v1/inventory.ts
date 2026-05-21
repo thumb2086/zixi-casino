@@ -443,7 +443,9 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
             UPDATE user_profiles
             SET active_buffs = COALESCE(active_buffs, '[]'::jsonb) || ${JSON.stringify([{
               id: tier,
+              type: "vip_tier",
               label: itemId === 'vip2_pass' ? 'VIP 2 永久' : 'VIP 1 永久',
+              value: itemId === 'vip2_pass' ? 2 : 1,
               source: 'shop',
               acquiredAt: new Date().toISOString(),
             }])}::jsonb,

@@ -127,7 +127,7 @@ export default function WalletView() {
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <AssetCard label={t('vault.zxc_label')} value={formatNumber(zxcBalance, numberMode)} token="ZXC" />
-            <AssetCard label={t('vault.yjc_label')} value={formatNumber(yjcBalance, numberMode)} token={`YJC (≈ ${formatNumber(yjcNum * ZXC_PER_YJC, numberMode)} ZXC)`} />
+            <AssetCard label={t('vault.yjc_label')} value={formatNumber(yjcBalance, numberMode)} token={t('wallet.yjc_with_zxc', { amount: formatNumber(yjcNum * ZXC_PER_YJC, numberMode) })} />
           </div>
         </section>
 
