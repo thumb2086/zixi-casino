@@ -180,24 +180,28 @@ export class GameManager implements GameDomain {
     }
     const symbols = [...reels[0], ...reels[1], ...reels[2]]; // flat 9
 
-    // Win lines: rows (0,1,2), columns (3,4,5), diagonals (6,7)
-    const lines: { indices: number[]; label: string }[] = [
-      { indices: [0, 3, 6], label: 'row0' },
-      { indices: [1, 4, 7], label: 'row1' },
-      { indices: [2, 5, 8], label: 'row2' },
-      { indices: [0, 4, 8], label: 'diag' },
-      { indices: [2, 4, 6], label: 'diag2' },
+    // 8 win lines: 3 rows + 3 columns + 2 diagonals
+    const lines: number[][] = [
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // rows
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // columns
+      [0, 4, 8], [2, 4, 6],            // diagonals
     ];
 
     let multiplier = 0;
     const winLines: number[][] = [];
 
-    for (const line of lines) {
-      const [a, b, c] = line.indices;
+    for (const [a, b, c] of lines) {
       if (symbols[a] === symbols[b] && symbols[b] === symbols[c]) {
+        // Triple: high payout
         const baseMult = symbols[a] === "7️⃣" ? 50 : symbols[a] === "💎" ? 10 : 3;
         multiplier = Math.max(multiplier, baseMult);
-        winLines.push(line.indices);
+        winLines.push([a, b, c]);
+      } else if (symbols[a] === symbols[b] || symbols[b] === symbols[c] || symbols[a] === symbols[c]) {
+        // Pair: small payout
+        const paired = symbols[a] === symbols[b] ? symbols[a] : symbols[c];
+        const pairMult = paired === "7️⃣" ? 5 : paired === "💎" ? 3 : 1.5;
+        multiplier = Math.max(multiplier, pairMult);
+        winLines.push([a, b, c]);
       }
     }
 
