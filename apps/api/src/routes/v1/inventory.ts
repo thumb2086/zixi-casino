@@ -5,7 +5,8 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, type ItemDefinition, type Rarity } from "@repo/shared";
-import { SessionRepository, OpsRepository, RewardCatalogRepository, kv } from "@repo/infrastructure";
+import { SessionRepository, OpsRepository, RewardCatalogRepository, WalletRepository, kv } from "@repo/infrastructure";
+import { WalletManager } from "@repo/domain";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser, useAllTokenItems, rollbackUseAllTokens, type UseAllTokensResult } from "../../utils/inventory.js";
@@ -152,6 +153,13 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         } catch (err: any) {
           return createApiEnvelope({ success: false }, request.id, false, "CREDIT_FAILED");
         }
+
+        const walletAction = new WalletManager();
+        const walletRepo = new WalletRepository();
+        const intent = walletAction.createTxIntent(ctx.userId, creditToken === "yjc" ? "YJC" : "ZXC", "admin_credit", totalCurrency.toString());
+        intent.address = ctx.address;
+        intent.meta = { source: "inventory_use", itemId, quantity };
+        await walletRepo.saveTxIntent(intent);
       }
 
       await opsRepo.logEvent({
@@ -205,14 +213,24 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
         if (!ctx) return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED");
 
         const result = await useAllTokenItems(ctx.userId);
+        const walletAction = new WalletManager();
+        const walletRepo = new WalletRepository();
 
         if (result.totalZxc > 0) {
           const curBal = await gameSettlement.getBalance(ctx.address, "zhixi");
           await gameSettlement.setBalance(ctx.address, "zhixi", (Number(curBal) + result.totalZxc).toString());
+          const intent = walletAction.createTxIntent(ctx.userId, "ZXC", "admin_credit", result.totalZxc.toString());
+          intent.address = ctx.address;
+          intent.meta = { source: "inventory_use_all", token: "zhixi", totalZxc: result.totalZxc };
+          await walletRepo.saveTxIntent(intent);
         }
         if (result.totalYjc > 0) {
           const curBal = await gameSettlement.getBalance(ctx.address, "yjc");
           await gameSettlement.setBalance(ctx.address, "yjc", (Number(curBal) + result.totalYjc).toString());
+          const intent = walletAction.createTxIntent(ctx.userId, "YJC", "admin_credit", result.totalYjc.toString());
+          intent.address = ctx.address;
+          intent.meta = { source: "inventory_use_all", token: "yjc", totalYjc: result.totalYjc };
+          await walletRepo.saveTxIntent(intent);
         }
 
         await opsRepo.logEvent({
