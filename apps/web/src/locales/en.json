@@ -327,7 +327,7 @@
     "language": "Language",
     "switch_label": "Switch",
     "github_repo": "GitHub Repository",
-    "footer": "© 2026 ZiXi Simulator v1.0.5 — Aureum Edition"
+    "footer": "© 2026 ZiXi Simulator v{{version}} — Aureum Edition"
   },
   "inventory": {
     "title": "Inventory",
@@ -684,7 +684,7 @@
     "simulation_status": "Simulation Status",
     "operator_connected": "Operator Connected",
     "global_chat": "🌍 Global Chat",
-    "footer": "© 2026 ZiXi Simulator - Aureum Edition"
+    "footer": "© 2026 ZiXi Simulator v{{version}} — Aureum Edition"
   },
   "game": {
     "slots": "Slots",

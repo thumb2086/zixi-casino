@@ -433,7 +433,7 @@ export default function SettingsView() {
       </main>
 
           <AppBottomNav current="settings" />
-        <p className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer')}</p>
+            <p className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer', { version: APP_VERSION })}</p>
         </div>
   );
 }

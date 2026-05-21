@@ -327,7 +327,7 @@
     "language": "語言",
     "switch_label": "切換",
     "github_repo": "GitHub 儲存庫",
-    "footer": "© 2026 子熙模擬器 v1.0.5 — Aureum Edition"
+    "footer": "© 2026 子熙模擬器 v{{version}} — Aureum Edition"
   },
   "inventory": {
     "title": "背包",
@@ -684,7 +684,7 @@
     "simulation_status": "模擬狀態",
     "operator_connected": "操作員已連線",
     "global_chat": "🌍 全域聊天",
-    "footer": "© 2026 子熙模擬器 - Aureum Edition"
+    "footer": "© 2026 子熙模擬器 v{{version}} — Aureum Edition"
   },
   "game": {
     "slots": "老虎機",

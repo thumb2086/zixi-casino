@@ -4,6 +4,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { APP_VERSION } from '@repo/shared';
 import { api } from '../store/api';
 import ChatRoom from './ChatRoom';
 
@@ -60,7 +61,7 @@ export default function Layout() {
                   <ChatRoom />
                   <footer className="py-4 text-center">
                     <p className="text-xs font-black uppercase tracking-[0.5em] text-[#494847]">
-                      {t('layout.footer')}
+                      {t('layout.footer', { version: APP_VERSION })}
                     </p>
                   </footer>
                 </div>
