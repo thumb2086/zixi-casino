@@ -37,7 +37,7 @@ export default function MarketView() {
   const { t } = useTranslation();
   const { snapshot, account, execute } = useMarket();
   const { amountDisplay } = usePreferencesStore();
-  const numberMode = amountDisplay === 'full' ? 'full' : 'short' as const;
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const marketSnapshot = snapshot.data;
   const summary = account.data;
   const stockSymbols: Quote[] = Object.values(marketSnapshot?.symbols || {});
@@ -71,7 +71,7 @@ export default function MarketView() {
         const pnl = data.result.realizedPnl;
         const sign = pnl >= 0 ? '+' : '';
         const label = pnl >= 0 ? 'success' : 'error';
-        setActionNotice({ type: label, message: t('market.futures_closed', { pnl: `${sign}${formatNumber(pnl, numberMode)}` }) });
+        setActionNotice({ type: label, message: t('market.futures_closed', { pnl: `${sign}${nf(pnl)}` }) });
       } else {
         setActionNotice({ type: 'success', message: successMsg });
       }
@@ -148,10 +148,10 @@ export default function MarketView() {
               placeholder={t('market.stop_loss')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
           </div>
           <div className="text-[10px] text-[#adaaaa] space-y-1">
-            <p>{t('market.notional_value', { value: formatNumber(Number(futuresMargin || 0) * futuresLeverage) })}</p>
+            <p>{t('market.notional_value', { value: nf(Number(futuresMargin || 0) * futuresLeverage) })}</p>
             <p>{t('market.liquidation_price', { value: futuresSide === 'long'
-              ? formatNumber(Math.round(Number(selectedQuote?.price || 0) * (1 - 0.96 / futuresLeverage)))
-              : formatNumber(Math.round(Number(selectedQuote?.price || 0) * (1 + 0.96 / futuresLeverage)))
+              ? nf(Math.round(Number(selectedQuote?.price || 0) * (1 - 0.96 / futuresLeverage)))
+              : nf(Math.round(Number(selectedQuote?.price || 0) * (1 + 0.96 / futuresLeverage)))
             })}</p>
           </div>
           <button type="button" disabled={execute.isPending || !futuresMargin || Number(futuresMargin) < 10}
@@ -203,7 +203,7 @@ export default function MarketView() {
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol} — {selectedQuote.name}</span>
               <div className="text-right">
-                <p className="text-sm font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(selectedQuote.price || 0))}</p>
+                <p className="text-sm font-black italic tracking-tight text-[#fcc025]">{nf(Number(selectedQuote.price || 0))}</p>
                 <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
                   {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
                 </p>
@@ -293,7 +293,7 @@ export default function MarketView() {
               <div className="mt-5 grid gap-4 md:grid-cols-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.market_index')}</p>
-                  <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">{formatNumber(marketSnapshot?.marketIndex || 0, numberMode)}</p>
+                  <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">{nf(marketSnapshot?.marketIndex || 0)}</p>
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.trend')}</p>
@@ -315,16 +315,16 @@ export default function MarketView() {
               <div className="mt-4 space-y-3">
                 <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.net_worth')}</p>
-                  <p className="mt-1 text-2xl font-black italic tracking-tight text-[#fcc025]">{formatNumber(summary?.netWorth || 0, numberMode)}</p>
+                  <p className="mt-1 text-2xl font-black italic tracking-tight text-[#fcc025]">{nf(summary?.netWorth || 0)}</p>
                 </div>
                 <div className="grid gap-3 grid-cols-2">
                   <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.cash')}</p>
-                    <p className="mt-1 text-lg font-black text-white">{formatNumber(summary?.cash || 0, numberMode)}</p>
+                    <p className="mt-1 text-lg font-black text-white">{nf(summary?.cash || 0)}</p>
                   </div>
                   <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.bank')}</p>
-                    <p className="mt-1 text-lg font-black text-white">{formatNumber(summary?.bankBalance || 0, numberMode)}</p>
+                    <p className="mt-1 text-lg font-black text-white">{nf(summary?.bankBalance || 0)}</p>
                   </div>
                 </div>
               </div>
@@ -340,7 +340,7 @@ export default function MarketView() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold text-[#adaaaa]">{t('market.futures')}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-[#adaaaa]">{t('market.margin_label', { value: formatNumber(summary.usedFuturesMargin || 0) })}</span>
+                      <span className="text-xs font-black text-[#adaaaa]">{t('market.margin_label', { value: nf(summary.usedFuturesMargin || 0) })}</span>
                       {summary.futuresPositions.length > 1 && (
                         <button onClick={async () => {
                           let lastErr: any = null;
@@ -351,7 +351,7 @@ export default function MarketView() {
                           }
                           const sign = totalPnl >= 0 ? '+' : '';
                           const label = totalPnl >= 0 ? 'success' : 'error';
-                          setActionNotice({ type: lastErr ? 'error' : label, message: lastErr?.message || t('market.bulk_close_result', { count: summary.futuresPositions.length, pnl: `${sign}${formatNumber(totalPnl, numberMode)}` }) });
+                          setActionNotice({ type: lastErr ? 'error' : label, message: lastErr?.message || t('market.bulk_close_result', { count: summary.futuresPositions.length, pnl: `${sign}${nf(totalPnl)}` }) });
                         }} disabled={execute.isPending}
                           className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
                           {t('market.close_all')}
@@ -361,7 +361,7 @@ export default function MarketView() {
                   </div>
                   {summary.futuresUnrealizedPnl !== undefined && (
                     <div className={`text-xs font-bold mb-2 ${(summary.futuresUnrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {t('market.unrealized_pnl', { value: `${(summary.futuresUnrealizedPnl || 0) >= 0 ? '+' : ''}${formatNumber(summary.futuresUnrealizedPnl || 0, numberMode)}` })}
+                      {t('market.unrealized_pnl', { value: `${(summary.futuresUnrealizedPnl || 0) >= 0 ? '+' : ''}${nf(summary.futuresUnrealizedPnl || 0)}` })}
                     </div>
                   )}
                   <div className="space-y-2">
@@ -377,7 +377,7 @@ export default function MarketView() {
                           </div>
                           <div className="text-right shrink-0 ml-2 flex items-center gap-2">
                             <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(pos.unrealizedPnl || 0, numberMode)}
+                              {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{nf(pos.unrealizedPnl || 0)}
                             </p>
                             <button onClick={() => runAction({ type: 'futures_close', positionId: pos.id }, t('market.position_closed'))}
                               disabled={execute.isPending}
@@ -387,12 +387,12 @@ export default function MarketView() {
                           </div>
                         </div>
                         <p className="text-[10px] text-[#adaaaa] mt-1">
-                          {t('market.position_detail', { entry: formatNumber(pos.entryPrice), mark: formatNumber(pos.markPrice ?? 0), liquidation: formatNumber(pos.liquidationPrice) })}
+                          {t('market.position_detail', { entry: nf(pos.entryPrice), mark: nf(pos.markPrice ?? 0), liquidation: nf(pos.liquidationPrice) })}
                         </p>
                         {(pos.takeProfitPrice || pos.stopLossPrice) && (
                           <div className="flex gap-3 mt-1 text-[10px]">
-                            {pos.takeProfitPrice ? <span className="text-emerald-400">{t('market.take_profit')} {formatNumber(pos.takeProfitPrice)}</span> : null}
-                            {pos.stopLossPrice ? <span className="text-red-400">{t('market.stop_loss')} {formatNumber(pos.stopLossPrice)}</span> : null}
+                            {pos.takeProfitPrice ? <span className="text-emerald-400">{t('market.take_profit')} {nf(pos.takeProfitPrice)}</span> : null}
+                            {pos.stopLossPrice ? <span className="text-red-400">{t('market.stop_loss')} {nf(pos.stopLossPrice)}</span> : null}
                           </div>
                         )}
                       </div>
@@ -407,12 +407,12 @@ export default function MarketView() {
                     {summary.stockPositions.map((pos: any) => (
                       <div key={pos.symbol} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-black text-white">{pos.symbol} <span className="text-[10px] font-bold text-[#adaaaa]">×{formatNumber(pos.quantity)}</span></p>
+                          <p className="text-xs font-black text-white">{pos.symbol} <span className="text-[10px] font-bold text-[#adaaaa]">×{nf(pos.quantity)}</span></p>
                           <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{formatNumber(pos.unrealizedPnl || 0, numberMode)}
+                            {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{nf(pos.unrealizedPnl || 0)}
                           </p>
                         </div>
-                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{t('market.market_value', { value: formatNumber(pos.marketValue, numberMode) })}</p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{t('market.market_value', { value: nf(pos.marketValue) })}</p>
                       </div>
                     ))}
                   </div>
@@ -452,7 +452,7 @@ export default function MarketView() {
                         </div>
                         {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
                       </div>
-                      <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{formatNumber(Number(quote.price || 0), numberMode)}</p>
+                      <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{nf(Number(quote.price || 0))}</p>
                     </button>
                   ))}
                 </div>

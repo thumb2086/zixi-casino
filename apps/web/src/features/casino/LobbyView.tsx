@@ -24,6 +24,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import { api } from '../../store/api';
 import AppBottomNav from '../../components/AppBottomNav';
 import { useWallet } from '../wallet/useWallet';
@@ -71,6 +72,8 @@ export default function LobbyView() {
   const { t, i18n } = useTranslation();
   const isZh = i18n.language.startsWith('zh');
   const { username, address, balance } = useUserStore();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { summary } = useWallet();
   const { data: leaderboardData } = useLeaderboard('all', 50);
   const selfRank = leaderboardData?.selfRank?.rank;
@@ -189,16 +192,16 @@ export default function LobbyView() {
                 {t('vault.total_assets')}
               </p>
               <div className="text-5xl font-black uppercase italic tracking-tighter text-[#fcc025]">
-                {formatNumber(liveBalance || 0)} <span className="text-lg not-italic text-white">ZXC</span>
+                {nf(liveBalance || 0)} <span className="text-lg not-italic text-white">ZXC</span>
               </div>
               <div className="mt-2 flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
                 <span className="flex items-center gap-1">
                   <Landmark size={12} className="text-[#fcc025]" />
-                  {t('market.bank')}: {formatNumber(bankBalance)}
+                  {t('market.bank')}: {nf(bankBalance)}
                 </span>
                 <span className="flex items-center gap-1">
                   <TrendingUp size={12} className="text-emerald-400" />
-                   {t('lobby.stocks')}: {formatNumber(stockValue)}
+                   {t('lobby.stocks')}: {nf(stockValue)}
                 </span>
               </div>
             </div>
@@ -270,7 +273,7 @@ export default function LobbyView() {
               ) : recentTxs.map((tx, i) => (
                 <div key={i} className="flex gap-2 truncate">
                   <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="truncate">{tx.type} · {formatNumber(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
+                  <span className="truncate">{tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
                 </div>
               ))}
             </div>

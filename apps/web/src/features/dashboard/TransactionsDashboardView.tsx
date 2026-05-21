@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../store/api';
 import { Link } from 'react-router-dom';
 import { formatNumber } from '@repo/shared';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
 type TxRow = {
@@ -31,6 +32,8 @@ function toExplorerUrl(txHash: string) {
 }
 
 export default function TransactionsDashboardView() {
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const [status, setStatus] = useState<string>('');
   const [address, setAddress] = useState('');
   const [gameType, setGameType] = useState('');
@@ -106,7 +109,7 @@ export default function TransactionsDashboardView() {
         </section>
 
         <section className="grid gap-3 md:grid-cols-4">
-          <div className="rounded-xl border border-[#494847]/20 bg-gradient-to-br from-[#1e1d1d] to-[#151414] p-3 text-sm">Total: <b>{formatNumber(summary?.total ?? 0)}</b></div>
+          <div className="rounded-xl border border-[#494847]/20 bg-gradient-to-br from-[#1e1d1d] to-[#151414] p-3 text-sm">Total: <b>{nf(summary?.total ?? 0)}</b></div>
           <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/20 to-[#151414] p-3 text-sm">Confirmed: <b>{summary?.confirmed ?? 0}</b></div>
           <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-900/20 to-[#151414] p-3 text-sm">Pending: <b>{summary?.pending ?? 0}</b></div>
           <div className="rounded-xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 to-[#151414] p-3 text-sm">Success: <b>{((summary?.successRate ?? 0) * 100).toFixed(2)}%</b></div>
@@ -143,7 +146,7 @@ export default function TransactionsDashboardView() {
                   <td className="p-3">{String(row.roundId)}</td>
                   <td className="p-3">{row.userAddress}</td>
                   <td className="p-3 uppercase">{row.type}</td>
-                  <td className="p-3">{formatNumber(Number(row.amount))} {row.tokenSymbol || ''}</td>
+                  <td className="p-3">{nf(Number(row.amount))} {row.tokenSymbol || ''}</td>
                   <td className="p-3">
                     <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${statusColors[row.status] || 'bg-white/10 text-white border-white/20'}`}>
                       {row.status}

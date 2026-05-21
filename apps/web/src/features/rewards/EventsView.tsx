@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatNumber } from '@repo/shared';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 
 interface Campaign {
   campaignId: string;
@@ -91,6 +92,8 @@ function formatRewardSummary(r: any): string {
 
 export default function EventsView() {
   const navigate = useNavigate();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { sessionId } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -224,8 +227,8 @@ export default function EventsView() {
               </button>
             </div>
             <div className="mt-4 space-y-2 text-sm text-white">
-              {successBundle.zxc > 0 && <p>+ {formatNumber(Number(successBundle.zxc))} ZXC</p>}
-              {successBundle.yjc > 0 && <p>+ {formatNumber(Number(successBundle.yjc))} YJC</p>}
+              {successBundle.zxc > 0 && <p>+ {nf(Number(successBundle.zxc))} ZXC</p>}
+              {successBundle.yjc > 0 && <p>+ {nf(Number(successBundle.yjc))} YJC</p>}
               {Array.isArray(successBundle.items) && successBundle.items.map((it: any, i: number) => (
                 <p key={i}>道具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `×${it.qty}` : ''}</p>
               ))}

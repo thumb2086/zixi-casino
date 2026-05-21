@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { formatNumber } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
 type LedgerEntry = {
@@ -34,6 +35,8 @@ type DashboardTx = {
 
 export default function PublicTransactionsView() {
   const { t } = useTranslation();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { address, username, balance } = useUserStore();
   const { address: authAddress } = useAuthStore();
   const displayAddress = address || authAddress || '';
@@ -137,14 +140,14 @@ export default function PublicTransactionsView() {
               <Coins size={14} className="text-[#fcc025]" />
               <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">總交易</span>
             </div>
-            <p className="text-xl font-black italic text-[#fcc025]">{formatNumber(summary?.total ?? 0)}</p>
+            <p className="text-xl font-black italic text-[#fcc025]">{nf(summary?.total ?? 0)}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-emerald-400" />
               <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功</span>
             </div>
-            <p className="text-xl font-black italic text-emerald-400">{formatNumber(summary?.confirmed ?? 0)}</p>
+            <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
           </div>
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">
@@ -171,7 +174,7 @@ export default function PublicTransactionsView() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-black uppercase tracking-[0.14em] text-white">
-                      {`${item.type?.toUpperCase?.() || 'TX'} • ${formatNumber(Number(item.amount))} ${item.tokenSymbol || ''}`}
+                      {`${item.type?.toUpperCase?.() || 'TX'} • ${nf(Number(item.amount))} ${item.tokenSymbol || ''}`}
                     </p>
                     <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
                       {item.userAddress?.slice(0, 10)}... / round {String(item.roundId)}
@@ -215,7 +218,7 @@ export default function PublicTransactionsView() {
               <div key={entry.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-white">{entry.type}</span>
-                  <span className="text-xs font-bold text-[#fcc025]">{entry.token} {formatNumber(Number(entry.amount))}</span>
+                  <span className="text-xs font-bold text-[#fcc025]">{entry.token} {nf(Number(entry.amount))}</span>
                 </div>
                 <p className="text-[10px] text-[#adaaaa] mt-1">{entry.address?.slice(0, 10)}... · {new Date(entry.createdAt).toLocaleString('zh-TW')}</p>
               </div>
