@@ -330,6 +330,18 @@ typedFastify.post(
           compIntent.address = ctx.address;
           compIntent.meta = { source: "chest_compensation", chestType };
           await walletRepo.saveTxIntent(compIntent);
+          await walletRepo.saveLedgerEntry({
+            id: randomUUID(),
+            userId: ctx.userId,
+            address: ctx.address,
+            token: "zhixi",
+            type: "chest_compensation",
+            amount: outcome.compensationZXC.toString(),
+            balanceBefore: bal,
+            balanceAfter: (Number(bal) + outcome.compensationZXC).toFixed(4),
+            meta: { chestType, source: "chest_compensation" },
+            createdAt: new Date(),
+          });
         }
       } catch (error: any) {
         if (keyId) {
@@ -536,6 +548,18 @@ typedFastify.post("/open-bulk", {
     compIntent.address = ctx.address;
     compIntent.meta = { source: "chest_compensation_bulk", chestType, quantity };
     await walletRepo.saveTxIntent(compIntent);
+    await walletRepo.saveLedgerEntry({
+      id: randomUUID(),
+      userId: ctx.userId,
+      address: ctx.address,
+      token: "zhixi",
+      type: "chest_compensation",
+      amount: totalComp.toString(),
+      balanceBefore: bal,
+      balanceAfter: (Number(bal) + totalComp).toFixed(4),
+      meta: { chestType, quantity, source: "chest_compensation_bulk" },
+      createdAt: new Date(),
+    });
   }
 
   const newKeyCounts: Record<string, number> = {};
