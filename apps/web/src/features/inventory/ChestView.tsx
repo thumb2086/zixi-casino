@@ -3,6 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronRight, X, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { formatNumber } from '@repo/shared';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 
@@ -112,6 +114,8 @@ function formatExpires(expiresAt?: string | null): string {
 export default function ChestView() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const [chests, setChests] = useState<ChestConfig[]>([]);
   const [status, setStatus] = useState<ChestStatus | null>(null);
   const [inventory, setInventory] = useState<InventoryState>({
@@ -260,7 +264,7 @@ export default function ChestView() {
       if (res.data?.success) {
         const d = res.data.data;
         if (d.currencyGranted > 0) {
-          showToast(`獲得 ${d.currencyGranted.toLocaleString()} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
+          showToast(`獲得 ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
         } else if (d.effectSummary) {
           showToast(d.effectSummary);
         } else {

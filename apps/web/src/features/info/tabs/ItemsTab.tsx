@@ -242,7 +242,7 @@ export default function ItemsTab() {
                   <p className="mt-1 line-clamp-2 text-xs font-bold text-[#adaaaa]">{item.description || '暫無說明'}</p>
                   {item.effect?.type === 'currency' && (
                     <p className="mt-1 text-xs font-bold text-[#fcc025]">
-                      {item.effect.currency === 'yjc' ? `💎 ${item.effect.value} YJC` : `💰 ${Number(item.effect.value).toLocaleString()} ZXC`}
+                      {item.effect.currency === 'yjc' ? `💎 ${item.effect.value} YJC` : `💰 ${nf(Number(item.effect.value))} ZXC`}
                     </p>
                   )}
                   {item.effect?.type === 'xp_boost' && (
