@@ -182,7 +182,6 @@ export async function companyRoutes(fastify: FastifyInstance) {
     data.equipment = data.equipment || { gpu: 0, supercomputer: 0 };
     data.equipment[equipmentType] = (data.equipment[equipmentType] || 0) + 1;
     data.cash -= cost;
-    appendHistory(data, "equipment", `購買 ${equipmentType === "gpu" ? "GPU" : "超級電腦"} x1（${cost.toLocaleString()} ZXC）`);
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
     return createApiEnvelope({ success: true, equipment: data.equipment, cash: data.cash }, request.id);
   });

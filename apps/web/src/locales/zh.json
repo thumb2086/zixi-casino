@@ -162,7 +162,9 @@
     "position_detail": "入場 {{entry}} · 標記 {{mark}} · 強平 {{liquidation}}",
     "market_value": "市值 {{value}}",
     "open_position": "開倉 {{side}} {{symbol}}",
-    "futures_open_success": "{{side}}倉開倉成功"
+    "futures_open_success": "{{side}}倉開倉成功",
+    "take_profit": "止盈價",
+    "stop_loss": "止損價"
   },
   "casino": {
     "title": "娛樂大廳",

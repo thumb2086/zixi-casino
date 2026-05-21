@@ -131,6 +131,8 @@ export async function marketRoutes(fastify: FastifyInstance) {
         side: z.enum(["long", "short"]).optional(),
         leverage: z.string().optional(),
         positionId: z.string().optional(),
+        takeProfitPrice: z.number().optional(),
+        stopLossPrice: z.number().optional(),
       }),
     },
   }, async (request) => {

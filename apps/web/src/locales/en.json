@@ -162,7 +162,9 @@
     "position_detail": "Entry {{entry}} · Mark {{mark}} · Liq {{liquidation}}",
     "market_value": "Market Value {{value}}",
     "open_position": "Open {{side}} {{symbol}}",
-    "futures_open_success": "{{side}} position opened successfully"
+    "futures_open_success": "{{side}} position opened successfully",
+    "take_profit": "TP (price)",
+    "stop_loss": "SL (price)"
   },
   "casino": {
     "title": "Casino Floor",
