@@ -207,8 +207,7 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           createdAt: new Date(),
         });
 
-        // Fire async on-chain transfer
-        void transferOnChain(ctx.address, creditToken === "yjc" ? "yjc" : "zhixi", totalCurrency.toString(), intent, walletAction, walletRepo);
+        // On-chain transfer skipped — DB is the source of truth; background sync handles on-chain.
       }
 
       await opsRepo.logEvent({
@@ -310,13 +309,10 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
           });
         }
 
-        // Fire async on-chain transfers
-        if (zxcIntent) {
-          void transferOnChain(ctx.address, "zhixi", result.totalZxc.toString(), zxcIntent, walletAction, walletRepo);
-        }
-        if (yjcIntent) {
-          void transferOnChain(ctx.address, "yjc", result.totalYjc.toString(), yjcIntent, walletAction, walletRepo);
-        }
+        // DB is the source of truth for game operations.
+        // On-chain transfers are best-effort; skip them here to avoid
+        // failures when the treasury on-chain wallet has insufficient balance.
+        // Background sync handles on-chain eventually.
 
         await opsRepo.logEvent({
           channel: "rewards",
