@@ -21,6 +21,9 @@ const routeCacheConfig: Record<string, CacheConfig> = {
   "GET:/api/v1/company/investable": { ttl: 60 },
   "GET:/api/v1/company/hire-preview": { ttl: 300 },
   "GET:/api/v1/gift/recipients": { ttl: 30 },
+  "GET:/api/v1/rewards/catalog": { ttl: 120 },
+  "GET:/api/v1/rewards/campaigns": { ttl: 60 },
+  "GET:/api/v1/rewards/submissions/me": { ttl: 30 },
 };
 
 function getConfig(method: string, url: string): CacheConfig | undefined {

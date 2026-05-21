@@ -274,10 +274,17 @@ export async function rewardRoutes(fastify: FastifyInstance) {
       });
 
       let claimedSet = new Set<string>();
-      if (ctx?.user?.id) {
-        for (const c of campaigns) {
-          const n = await campaignRepo.countClaims(c.campaignId, ctx.user.id);
-          if (n >= ((c as any).maxClaimsPerUser ?? 1)) claimedSet.add(c.campaignId);
+      if (ctx?.user?.id && campaigns.length > 0) {
+        // Batch all countClaims queries in parallel to avoid N+1
+        const claims = await Promise.all(
+          campaigns.map((c: any) =>
+            campaignRepo.countClaims(c.campaignId, ctx.user.id)
+              .then((n: number) => ({ campaignId: c.campaignId, count: n }))
+          )
+        );
+        for (const { campaignId, count } of claims) {
+          const c = campaigns.find((x: any) => x.campaignId === campaignId);
+          if (count >= ((c as any)?.maxClaimsPerUser ?? 1)) claimedSet.add(campaignId);
         }
       }
       const enriched = campaigns.map((c: any) => ({
