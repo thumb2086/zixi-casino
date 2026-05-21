@@ -232,7 +232,7 @@ export default function ChestView() {
     setUsingAllTokens(true);
     setUseStatusMessage('正在兌換全部代幣...');
     try {
-      const res = await api.post('/api/v1/inventory/use-all-tokens');
+      const res = await api.post('/api/v1/inventory/use-all-tokens', {});
       if (res.data?.success) {
         const d = res.data.data;
         const parts: string[] = [];
