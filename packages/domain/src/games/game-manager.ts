@@ -113,7 +113,7 @@ export class GameManager implements GameDomain {
 
     let totalPayoutMultiplier = 0;
     for (const bet of bets) {
-      if (bet.type === "number" && Number(bet.value) === winningNumber) totalPayoutMultiplier += 35;
+      if (bet.type === "number" && Number(bet.value) === winningNumber) totalPayoutMultiplier += 36;
       if (bet.type === "color" && bet.value === color) totalPayoutMultiplier += 2;
       if (bet.type === "parity") {
          const isOdd = winningNumber % 2 !== 0;

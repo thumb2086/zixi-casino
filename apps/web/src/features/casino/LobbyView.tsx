@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
   ChevronRight,
@@ -74,6 +74,7 @@ export default function LobbyView() {
   const { username, address, balance } = useUserStore();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
+  const queryClient = useQueryClient();
   const { summary } = useWallet();
   const { data: leaderboardData } = useLeaderboard('all', 50);
   const selfRank = leaderboardData?.selfRank?.rank;
@@ -88,6 +89,26 @@ export default function LobbyView() {
   });
   const isAdmin = Boolean(profileData?.isAdmin);
   const vipLevel = profileData?.vipLevel || '普通會員';
+
+  const { data: missionsData } = useQuery({
+    queryKey: ['missions'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/missions');
+      return res.data?.data?.missions || [];
+    },
+    staleTime: 30000,
+  });
+  const missions = missionsData || [];
+  const claimMission = useCallback(async (missionId: string) => {
+    try {
+      const { sessionId } = await import('../../store/useAuthStore').then(m => m.useAuthStore.getState());
+      const res = await api.post('/api/v1/missions/claim', { sessionId, missionId });
+      if (res.data?.data?.success) {
+        queryClient.invalidateQueries({ queryKey: ['missions'] });
+        queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
+      }
+    } catch {}
+  }, [queryClient]);
   const ZXC_PER_YJC = 100_000_000;
   const liveZxc = resolvePreferredBalance({
     onchainBalance: summary.data?.onchain?.zxc?.balance,
@@ -374,6 +395,44 @@ export default function LobbyView() {
               </div>
             </GlassCard>
           )}
+
+          {/* Bullseye Missions */}
+          <div className="rounded-2xl border border-[#fcc025]/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-[0_0_30px_rgba(252,192,37,0.05)]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🎯</span>
+                <h2 className="text-sm font-black uppercase tracking-widest text-[#fcc025]">靶心任務</h2>
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {missions.map((m: any) => {
+                const pct = m.target > 0 ? Math.min(100, (m.progress / m.target) * 100) : 0;
+                const done = m.progress >= m.target;
+                return (
+                  <div key={m.id} className={`rounded-xl border ${done && !m.claimed ? 'border-[#fcc025]/40' : 'border-[#494847]/20'} bg-[#0e0e0e] p-4`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-xs font-bold text-white">{m.name}</p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{m.desc}</p>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#fcc025]">{m.reward.toLocaleString()} ZXC</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-[#1a1919] mb-2">
+                      <div className="h-full rounded-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]" style={{ width: `${pct}%` }} />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-[#adaaaa]">{m.progress}/{m.target}</span>
+                      {m.claimed ? (
+                        <span className="text-[10px] font-bold text-emerald-400">✅ 已領取</span>
+                      ) : done ? (
+                        <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-[#fcc025] px-2 py-1 rounded-lg hover:brightness-110">領取</button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </section>
       </main>
 
