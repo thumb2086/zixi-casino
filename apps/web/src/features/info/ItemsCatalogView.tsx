@@ -18,10 +18,8 @@ interface CatalogItem {
 const RARITY_COLORS = {
   common: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', label: '普通' },
   rare: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', label: '稀有' },
-  epic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: '史詩' },
   legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', label: '傳說' },
   mythic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: '神話' },
-  oracle: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', label: '神諭' },
   vip: { bg: 'bg-[#fcc025]/20', text: 'text-[#fcc025]', border: 'border-[#fcc025]/30', label: 'VIP' },
 };
 

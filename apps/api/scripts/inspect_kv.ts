@@ -14,7 +14,7 @@ let count = 0;
 for (const p of profiles) {
   const existing = await kv.get<any>(`chest_meta:${p.user_id}`);
   if (!existing) {
-    const defaults: Record<ChestType, number> = { common: 0, rare: 0, epic: 0, legendary: 0, mythic: 0, oracle: 0 };
+    const defaults: Record<ChestType, number> = { common: 0, rare: 0, epic: 0, legendary: 0 };
     await kv.set(`chest_meta:${p.user_id}`, { chestPity: defaults, lastFreeChestAt: null });
     console.log(`Created chest_meta for user ${p.user_id} (${p.address})`);
     count++;
