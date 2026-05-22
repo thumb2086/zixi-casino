@@ -4,6 +4,7 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   Check,
+  ChevronRight,
   Copy,
   Gift,
   History,
@@ -232,43 +233,13 @@ export default function WalletView() {
 
           </div>
 
-          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+          <Link to="/app/transactions" className="flex items-center justify-between rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl hover:bg-white/5 transition-colors">
             <div className="flex items-center gap-2">
               <History size={16} className="text-[#adaaaa]" />
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('vault.transactions')}</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">交易紀錄</h2>
             </div>
-            <div className="mt-4 space-y-3">
-              {summary.isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
-              {!summary.isLoading && walletSummary?.recentTransactions?.length === 0 && (
-                <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
-                  {t('vault.no_transactions')}
-                </div>
-              )}
-              {walletSummary?.recentTransactions?.map((tx: any) => {
-                const amountNum = Number(tx.amount);
-                const positive = amountNum >= 0;
-                return (
-                  <div key={tx.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-black uppercase tracking-[0.15em] text-white">{tx.type.replaceAll('_', ' ')}</p>
-                        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
-                          {new Date(tx.createdAt).toLocaleString('zh-TW')}
-                        </p>
-                        {tx.counterparty && <p className="mt-1 text-xs font-bold text-[#adaaaa]">{tx.counterparty}</p>}
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-lg font-black italic tracking-tight ${positive ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                          {positive ? '+' : '-'}{formatNumber(Math.abs(amountNum), numberMode)} {tx.token}
-                        </p>
-                        <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">{tx.status}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+            <ChevronRight size={16} className="text-[#adaaaa]" />
+          </Link>
         </section>
       </main>
 
