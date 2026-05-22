@@ -6,21 +6,18 @@ import { createApiEnvelope } from "@repo/shared";
 import { GameSessionManager } from "@repo/domain/games/game-session-manager.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import { GameManager } from "@repo/domain/games/game-manager.js";
-import { getRoundInfo } from "@repo/domain/games/auto-round.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
 
 export async function coinflipRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const gameManager = new GameManager();
 
-  // GET /api/v1/games/coinflip/round - Get current round info (no auth needed for clock sync)
+  // GET /api/v1/games/coinflip/round - Server time sync
   typedFastify.get("/round", async (request) => {
-    const roundInfo = getRoundInfo("coinflip");
     return createApiEnvelope({
       success: true,
       data: {
         serverNow: Date.now(),
-        ...roundInfo,
       },
     }, request.id);
   });
@@ -70,23 +67,8 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统一分局)
-    const roundInfo = getRoundInfo('coinflip');
-    if (!roundInfo.isBettingOpen) {
-      return createApiEnvelope(
-        { 
-          success: false, 
-          roundId: roundInfo.roundId,
-          closesAt: roundInfo.closesAt,
-          bettingClosesAt: roundInfo.bettingClosesAt,
-        },
-        request.id,
-        false,
-        "本局开奖中，请等待下一局"
-      );
-    }
-
-    const roundId = String(roundInfo.roundId);
+    // Turn-based: unique round per bet (no auto-round window)
+    const roundId = `coinflip_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const amountStr = betAmount.toString();
 
     // 1. Validate and deduct balance
@@ -99,7 +81,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
 
     if (!validation.success) {
       return createApiEnvelope(
-        { success: false, error: validation.error, roundId: roundInfo.roundId },
+        { success: false, error: validation.error },
         request.id,
         false,
         validation.error?.message || "Validation failed"
@@ -108,7 +90,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game using GameManager (deterministic FNV hash)
-      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundInfo.roundId}`);
+      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundId}`);
       const isWin = result.isWin;
       const payout = isWin ? betAmount * result.multiplier : 0;
       const payoutStr = payout.toString();
@@ -129,7 +111,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
         // Rollback balance on settlement error
         await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
         return createApiEnvelope(
-          { success: false, roundId: roundInfo.roundId },
+          { success: false },
           request.id,
           false,
           settlement.error?.message || "Settlement failed"
@@ -166,8 +148,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
                 betTxHash: settlement.betTxHash,
                 payoutTxHash: settlement.payoutTxHash,
                 fee: settlement.feeAmount,
-                roundId: roundInfo.roundId,
-                closesAt: roundInfo.closesAt,
+                roundId,
               },
             },
           });
@@ -188,7 +169,6 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
             winner: result.winner,
             selection,
             isWin,
-            roundInfo,
           });
         } catch {}
       })();
@@ -197,7 +177,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
         success: true,
         data: {
           sessionId: roundId,
-          roundId: roundInfo.roundId,
+          roundId,
           selection,
           winner: result.winner,
           result: settlement.isWin ? "win" : "lose",
@@ -208,8 +188,6 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
           balance: finalBalance,
           betTxHash: settlement.betTxHash,
           payoutTxHash: settlement.payoutTxHash,
-          closesAt: roundInfo.closesAt,
-          bettingClosesAt: roundInfo.bettingClosesAt,
         }
       }, request.id);
 
