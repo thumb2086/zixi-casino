@@ -146,59 +146,57 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
         userId
       );
 
-      // 5. Update total bet
-      await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
-
-      // 6. Record game session
-      const db = await requireDb();
-      const sessionManager = new GameSessionManager(db);
-      const session = await sessionManager.recordGame({
-        userId,
-        address,
-        game: "coinflip",
-        betAmount,
-        gameResult: {
-          result: settlement.isWin ? "win" : "lose",
-          payout: settlement.finalPayout,
-          meta: { 
-            winner: result.winner, 
-            selection,
+      // 5-8. Background: updateTotalBet (XP/titles), game session, log event, save round
+      void (async () => {
+        try {
+          await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
+          const db = await requireDb();
+          const sessionManager = new GameSessionManager(db);
+          await sessionManager.recordGame({
+            userId,
+            address,
+            game: "coinflip",
+            betAmount,
+            gameResult: {
+              result: settlement.isWin ? "win" : "lose",
+              payout: settlement.finalPayout,
+              meta: { 
+                winner: result.winner, 
+                selection,
+                betTxHash: settlement.betTxHash,
+                payoutTxHash: settlement.payoutTxHash,
+                fee: settlement.feeAmount,
+                roundId: roundInfo.roundId,
+                closesAt: roundInfo.closesAt,
+              },
+            },
+          });
+          await gameSettlement.logGameEvent({
+            game: "coinflip",
+            userId,
+            address,
+            amount: amountStr,
+            payout: settlement.finalPayout.toString(),
+            fee: settlement.feeAmount.toString(),
+            isWin: settlement.isWin,
+            multiplier: result.multiplier,
             betTxHash: settlement.betTxHash,
             payoutTxHash: settlement.payoutTxHash,
-            fee: settlement.feeAmount,
-            roundId: roundInfo.roundId,
-            closesAt: roundInfo.closesAt,
-          },
-        },
-      });
-
-      // 7. Log event
-      await gameSettlement.logGameEvent({
-        game: "coinflip",
-        userId,
-        address,
-        amount: amountStr,
-        payout: settlement.finalPayout.toString(),
-        fee: settlement.feeAmount.toString(),
-        isWin: settlement.isWin,
-        multiplier: result.multiplier,
-        betTxHash: settlement.betTxHash,
-        payoutTxHash: settlement.payoutTxHash,
-        roundId,
-      });
-
-      // 8. Save round
-      await gameSettlement.saveRound("coinflip", roundId, {
-        winner: result.winner,
-        selection,
-        isWin,
-        roundInfo,
-      });
+            roundId,
+          });
+          await gameSettlement.saveRound("coinflip", roundId, {
+            winner: result.winner,
+            selection,
+            isWin,
+            roundInfo,
+          });
+        } catch {}
+      })();
 
       return createApiEnvelope({
         success: true,
         data: {
-          sessionId: session.id,
+          sessionId: roundId,
           roundId: roundInfo.roundId,
           selection,
           winner: result.winner,
