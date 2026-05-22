@@ -12,7 +12,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | 版本 | 範圍 | 內容 | 狀態 |
 |------|------|------|------|
 | **v1.0.6** | 寶箱 + XP | 8 層寶箱平衡、物品/當舖值調整、保底修正、經驗加成系統 | ✅ 開發完成 |
-| **v1.0.7** | Coinflip | Route 與 Domain 賠率不一致，統一使用 GameManager | ⏳ |
+| **v1.0.7** | Coinflip + Slots | Coinflip 統一 GameManager；Slots 補齊遺失前端常數 | ✅ |
 | **v1.0.8** | Roulette | Domain 數字賠 35x 應為 36x | ⏳ |
 | **v1.0.9** | Horse Racing | RTP_SCALE=2.0 導致 -5.5% 玩家優勢，重新設計 | ⏳ |
 | **v1.0.10** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
@@ -30,10 +30,10 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 
 ## 遊戲修正細節
 
-### v1.0.7 — Coinflip
-- **問題**: Route 自行計算結果（`hashInt` + 2.0x），從未呼叫 GameManager
-- **修正**: Route 改呼叫 `gameManager.resolveCoinflip()`，賠率 1.96x（2% HE）
-- **檔案**: `apps/api/src/routes/v1/games/coinflip.ts`
+### v1.0.7 — Coinflip + Slots 修復
+- **Coinflip**: Route 自行計算結果（`hashInt` + 2.0x）→ 改呼叫 `gameManager.resolveCoinflip()`，賠率 1.96x（2% HE）
+- **Slots**: 補上遺失的前端常數 `REEL_CELLS`、`randomSymbol`、`REEL_DELAY_MS`、`REEL_STOP_INTERVAL`
+- **檔案**: `apps/api/src/routes/v1/games/coinflip.ts`, `apps/web/src/features/casino/SlotsView.tsx`
 
 ### v1.0.8 — Roulette
 - **問題**: Domain `resolveRoulette` 中數字賠 35x，正確應為 36x
