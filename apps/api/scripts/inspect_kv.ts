@@ -2,7 +2,7 @@ import postgres from 'postgres';
 import { kv } from '@repo/infrastructure';
 import { CHEST_CONFIGS, type ChestType } from '@repo/shared';
 
-const url = process.env.DATABASE_URL || 'postgresql://neondb_owner:REDACTED@ep-quiet-tooth-amze0a44-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require';
+const url = process.env.DATABASE_URL;
 const sql = postgres(url, { ssl: 'require', max: 1 });
 
 // 1. Cleanup test entry
