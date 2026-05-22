@@ -52,6 +52,7 @@ const TX_TYPE_LABEL: Record<string, string> = {
   futures_liquidated: '合約爆倉',
   bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
   loan_borrow: '貸款', loan_repay: '還款',
+  item_use: '代幣使用',
 };
 const TX_STATUS_LABEL: Record<string, string> = {
   pending: '等待中', broadcasted: '廣播中', confirmed: '已確認', failed: '失敗',
@@ -212,7 +213,7 @@ export default function WalletView() {
               {!summary.isLoading && (!walletSummary?.recentTransactions || walletSummary.recentTransactions.length === 0) && <div className="text-xs text-[#adaaaa]">暫無交易</div>}
               {(walletSummary?.recentTransactions || []).slice(0, 10).map((tx: any) => {
                 const amt = Number(tx.amount);
-                const isCredit = tx.type === 'payout' || tx.type === 'deposit' || tx.type === 'airdrop' || tx.type === 'admin_credit' || tx.type === 'chest_compensation';
+                const isCredit = tx.type === 'payout' || tx.type === 'deposit' || tx.type === 'airdrop' || tx.type === 'admin_credit' || tx.type === 'chest_compensation' || tx.type === 'item_use';
                 return (
                   <div key={tx.id} className="flex items-center justify-between rounded-xl border border-[#494847]/10 bg-[#0e0e0e] px-4 py-3">
                     <div className="min-w-0">
