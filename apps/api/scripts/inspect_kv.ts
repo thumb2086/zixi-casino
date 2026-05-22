@@ -2,7 +2,7 @@ import postgres from 'postgres';
 import { kv } from '@repo/infrastructure';
 import { CHEST_CONFIGS, type ChestType } from '@repo/shared';
 
-const url = process.env.DATABASE_URL || '***REMOVED-BY-SECURITY-FIX***';
+const url = process.env.DATABASE_URL;
 const sql = postgres(url, { ssl: 'require', max: 1 });
 
 // 1. Cleanup test entry
