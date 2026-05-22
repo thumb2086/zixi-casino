@@ -446,7 +446,7 @@ typedFastify.post("/open-bulk", {
     body: z.object({
       sessionId: z.string().optional(),
       chestType: CHEST_TYPE_ENUM,
-      quantity: z.number().int().min(1).max(99),
+      quantity: z.number().int().min(1),
     }),
   },
 }, async (request: any) => {
