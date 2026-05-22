@@ -11,7 +11,6 @@ import { useUserStore } from './store/useUserStore';
 import MarketView from './features/market/MarketView';
 import RewardsView from './features/rewards/RewardsView';
 import SubmitRewardView from './features/rewards/SubmitRewardView';
-import EventsView from './features/rewards/EventsView';
 import AdminView from './features/admin/AdminView';
 import ChestView from './features/inventory/ChestView';
 import LeaderboardView from './features/stats/LeaderboardView';
@@ -151,7 +150,7 @@ function AppContent() {
             <Route path="market" element={<MarketView />} />
             <Route path="rewards" element={<RewardsView />} />
             <Route path="rewards/submit" element={<SubmitRewardView />} />
-            <Route path="events" element={<EventsView />} />
+            <Route path="events" element={<AnnouncementCenter />} />
             <Route path="leaderboard" element={<LeaderboardView />} />
             <Route path="announcement" element={<AnnouncementCenter />} />
             <Route path="support" element={<SupportView />} />
