@@ -119,7 +119,7 @@ export async function rewardRoutes(fastify: FastifyInstance) {
         name: z.string().min(1).max(32),
         icon: z.string().max(16).optional(), // emoji for avatars
         description: z.string().max(240).optional(),
-        rarity: z.enum(["common", "rare", "epic", "legendary", "mythic"]).optional(),
+        rarity: z.enum(["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"]).optional(),
       }),
     },
   }, async (request) => {

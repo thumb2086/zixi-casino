@@ -33,6 +33,9 @@ const RARITY_COLORS: Record<string, string> = {
   epic: '#ba68c8',
   legendary: '#ffd54f',
   mythic: '#ff6f00',
+  chaos: '#aa00ff',
+  abyss: '#00bcd4',
+  oracle: '#ff0044',
 };
 
 const ALL_ITEMS_LOOKUP: Record<string, any> = {};
@@ -112,7 +115,7 @@ export default function ShopView() {
   const [yjcBalance, setYjcBalance] = useState('0');
   const [convertZxc, setConvertZxc] = useState('');
   const [convertYjc, setConvertYjc] = useState('');
-  const [convertYjcTarget, setConvertYjcTarget] = useState('');
+
   const [converting, setConverting] = useState(false);
   const CONVERSION_RATE = 100_000_000; // 1 YJC = 100M ZXC
 
@@ -186,7 +189,7 @@ export default function ShopView() {
 
   async function handleBuyChest(chestType: string, quantity: number = 1) {
     if (!sessionId) return;
-    const label = chestType === 'common' ? '普通' : chestType === 'rare' ? '稀有' : chestType === 'epic' ? '史詩' : '傳奇';
+    const label = ({ common:'普通', rare:'稀有', epic:'史詩', legendary:'傳奇', mythic:'神話', chaos:'混沌', abyss:'深淵', oracle:'神諭' } as Record<string,string>)[chestType] || chestType;
     setBuyingChest(chestType);
     setMsg(null);
     try {
@@ -212,18 +215,19 @@ export default function ShopView() {
 
   async function handleConvertYjc() {
     if (!sessionId || converting) return;
-    const amount = parseInt(convertZxc, 10);
-    if (!amount || amount < CONVERSION_RATE) {
-      setMsg(`❌ 最低兌換 ${formatNumber(CONVERSION_RATE, numberMode)} ZXC`);
+    const yjcInput = parseFloat(convertZxc);
+    if (!yjcInput || yjcInput <= 0) {
+      setMsg('❌ 請輸入大於 0 的 YJC 數量');
       setTimeout(() => setMsg(null), 3000);
       return;
     }
+    const zxcNeeded = yjcInput * CONVERSION_RATE;
     setConverting(true);
     setMsg(null);
     try {
-      const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(amount) });
+      const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(zxcNeeded) });
       if (res.data?.success) {
-        setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || (amount / CONVERSION_RATE)} YJC`);
+        setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || yjcInput} YJC`);
         setConvertZxc('');
         fetchItems();
       } else {
@@ -237,39 +241,6 @@ export default function ShopView() {
     }
   }
 
-  async function handleConvertByYjcTarget() {
-    if (!sessionId || converting) return;
-    const yjcTarget = parseFloat(convertYjcTarget);
-    if (!yjcTarget || yjcTarget <= 0) {
-      setMsg('❌ 請輸入大於 0 的 YJC 目標數量');
-      setTimeout(() => setMsg(null), 3000);
-      return;
-    }
-    const zxcNeeded = yjcTarget * CONVERSION_RATE;
-    if (zxcNeeded < CONVERSION_RATE) {
-      setMsg(`❌ 最低兌換 ${formatNumber(CONVERSION_RATE, numberMode)} ZXC（${1} YJC）`);
-      setTimeout(() => setMsg(null), 3000);
-      return;
-    }
-    setConverting(true);
-    setMsg(null);
-    try {
-      const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(zxcNeeded) });
-      if (res.data?.success) {
-        setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || yjcTarget} YJC`);
-        setConvertYjcTarget('');
-        setConvertZxc('');
-        fetchItems();
-      } else {
-        setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
-      }
-    } catch (err: any) {
-      setMsg(`❌ ${err?.response?.data?.error?.message || err?.message || '兌換失敗'}`);
-    } finally {
-      setConverting(false);
-      setTimeout(() => setMsg(null), 5000);
-    }
-  }
 
   async function handleConvertZxcFromYjc() {
     if (!sessionId || converting) return;
@@ -497,30 +468,75 @@ export default function ShopView() {
             <span className="text-lg font-black italic text-[#fcc025]">{formatBalance(balance, numberMode)}</span>
         </section>
 
-        <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
-          <div className="flex items-center gap-2 mb-2">
+        {/* YJC Exchange */}
+        <section className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+          <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">💎</span>
             <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">佑戩幣 YJC</span>
-            <span className="text-sm font-black italic text-[#4fc3f7] ml-auto">{formatBalance(yjcBalance, numberMode)}</span>
           </div>
-          <div className="text-sm text-[#adaaaa] mb-2">1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXC</div>
-          <div className="flex items-center gap-2">
-            <input type="number" min={CONVERSION_RATE} step={CONVERSION_RATE} placeholder={`最少 ${formatNumber(CONVERSION_RATE, numberMode)}`} value={convertZxc} onChange={e => setConvertZxc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
-            <button onClick={handleConvertYjc} disabled={converting || !convertZxc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
-              {converting ? <Loader2 size={12} className="animate-spin" /> : '兌換'}
+          <div className="bg-[#0e0e0e] rounded-xl p-4 mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-bold text-[#adaaaa]">可用 YJC</span>
+              <span className="text-sm font-black text-[#4fc3f7]">{formatBalance(yjcBalance, numberMode)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#adaaaa]">可用 ZXC</span>
+              <span className="text-sm font-black text-[#fcc025]">{formatBalance(balance, numberMode)}</span>
+            </div>
+          </div>
+          <div className="text-center text-[10px] font-bold text-[#adaaaa] mb-4 tracking-wider">
+            1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXC（固定匯率）
+          </div>
+
+          {/* ZXC → YJC */}
+          <div className="rounded-xl bg-[#0e0e0e] p-4 mb-3">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-black uppercase tracking-widest text-white">用 ZXC 購買 YJC</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number" min="0.0001" step="0.0001"
+                placeholder="輸入 YJC 數量"
+                value={convertZxc}
+                onChange={e => setConvertZxc(e.target.value)}
+                className="flex-1 bg-[#1a1919] text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-[#494847]/30 outline-none focus:border-[#4fc3f7] placeholder:text-[#494847] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="shrink-0 text-xs font-bold text-[#4fc3f7] whitespace-nowrap">
+                ≈ {formatNumber(parseFloat(convertZxc || '0') * CONVERSION_RATE, numberMode)} ZXC
+              </span>
+            </div>
+            <button
+              onClick={handleConvertYjc}
+              disabled={converting || !convertZxc || !sessionId}
+              className="mt-2 w-full rounded-xl bg-[#4fc3f7] py-2.5 text-xs font-black uppercase tracking-widest text-[#0e0e0e] transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
+            >
+              {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : '購買 YJC'}
             </button>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <input type="number" min={0.0001} step={0.0001} placeholder="目標 YJC" value={convertYjcTarget} onChange={e => setConvertYjcTarget(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
-            <span className="text-xs text-[#adaaaa] shrink-0">= {formatNumber(parseFloat(convertYjcTarget || '0') * CONVERSION_RATE, numberMode)} ZXC</span>
-            <button onClick={handleConvertByYjcTarget} disabled={converting || !convertYjcTarget || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#4fc3f7] text-[#0e0e0e] px-4 py-2 rounded-lg disabled:opacity-50">
-              {converting ? <Loader2 size={12} className="animate-spin" /> : '換YJC'}
-            </button>
-          </div>
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#494847]/20">
-            <input type="number" min="0.0001" step="0.0001" placeholder="YJC 數量" value={convertYjc} onChange={e => setConvertYjc(e.target.value)} className="flex-1 bg-[#0e0e0e] text-white text-xs font-bold rounded-lg px-3 py-2 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847]" />
-            <button onClick={handleConvertZxcFromYjc} disabled={converting || !convertYjc || !sessionId} className="shrink-0 text-sm font-black uppercase tracking-widest bg-[#fcc025] text-black px-4 py-2 rounded-lg disabled:opacity-50">
-              {converting ? <Loader2 size={12} className="animate-spin" /> : '反向兌換'}
+
+          {/* YJC → ZXC */}
+          <div className="rounded-xl bg-[#0e0e0e] p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-black uppercase tracking-widest text-white">用 YJC 換回 ZXC</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number" min="0.0001" step="0.0001"
+                placeholder="YJC 數量"
+                value={convertYjc}
+                onChange={e => setConvertYjc(e.target.value)}
+                className="flex-1 bg-[#1a1919] text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="shrink-0 text-xs font-bold text-[#fcc025] whitespace-nowrap">
+                ≈ {formatNumber(parseFloat(convertYjc || '0') * CONVERSION_RATE, numberMode)} ZXC
+              </span>
+            </div>
+            <button
+              onClick={handleConvertZxcFromYjc}
+              disabled={converting || !convertYjc || !sessionId}
+              className="mt-2 w-full rounded-xl bg-[#fcc025] py-2.5 text-xs font-black uppercase tracking-widest text-black transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
+            >
+              {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : '確認換回 ZXC'}
             </button>
           </div>
         </section>
