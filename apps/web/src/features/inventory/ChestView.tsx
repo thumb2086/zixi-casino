@@ -156,7 +156,6 @@ export default function ChestView() {
       if (res.data?.success) setChests(res.data.data);
       return res.data;
     },
-    staleTime: 60000,
   });
 
   useQuery({
@@ -166,7 +165,6 @@ export default function ChestView() {
       if (res.data?.success) setStatus(res.data.data);
       return res.data;
     },
-    staleTime: 30000,
   });
 
   useQuery({
@@ -176,7 +174,6 @@ export default function ChestView() {
       if (res.data?.success) setInventory(res.data.data);
       return res.data;
     },
-    staleTime: 30000,
   });
 
   useQuery({
@@ -186,7 +183,6 @@ export default function ChestView() {
       if (res.data?.success) setRecipients(res.data.data.users);
       return res.data;
     },
-    staleTime: 30000,
   });
 
   const [opening, setOpening] = useState(false);
