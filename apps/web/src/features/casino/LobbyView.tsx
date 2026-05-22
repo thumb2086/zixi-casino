@@ -94,10 +94,13 @@ export default function LobbyView() {
   const { data: missionsData } = useQuery({
     queryKey: ['missions'],
     queryFn: async () => {
-      const res = await api.get('/api/v1/missions');
-      return res.data?.data?.missions || [];
+      try {
+        const res = await api.get('/api/v1/missions');
+        return res.data?.data?.missions || [];
+      } catch { return []; }
     },
     staleTime: 30000,
+    retry: 1,
   });
   const missions = missionsData || [];
   const claimMission = useCallback(async (missionId: string) => {

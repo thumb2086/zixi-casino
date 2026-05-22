@@ -213,7 +213,7 @@ export default function WalletView() {
               {!summary.isLoading && (!walletSummary?.recentTransactions || walletSummary.recentTransactions.length === 0) && <div className="text-xs text-[#adaaaa]">暫無交易</div>}
               {(walletSummary?.recentTransactions || []).slice(0, 10).map((tx: any) => {
                 const amt = Number(tx.amount);
-                const isCredit = tx.type === 'payout' || tx.type === 'deposit' || tx.type === 'airdrop' || tx.type === 'admin_credit' || tx.type === 'chest_compensation' || tx.type === 'item_use';
+                const isCredit = amt >= 0;
                 return (
                   <div key={tx.id} className="flex items-center justify-between rounded-xl border border-[#494847]/10 bg-[#0e0e0e] px-4 py-3">
                     <div className="min-w-0">
