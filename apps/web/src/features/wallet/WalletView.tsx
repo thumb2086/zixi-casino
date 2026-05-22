@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   ArrowDownCircle,
   ArrowUpCircle,
@@ -41,6 +42,21 @@ function AssetCard({
   );
 }
 
+const TX_TYPE_LABEL: Record<string, string> = {
+  bet: '下注', payout: '派彩', deposit: '存入',
+  withdrawal: '提領', transfer: '轉帳',
+  chest_buy: '購買寶箱', chest_compensation: '寶箱補償',
+  airdrop: '空投', admin_credit: '系統發放', admin_debit: '系統扣回',
+  convert: 'YJC兌換', stock_buy: '買入股票', stock_sell: '賣出股票',
+  futures_open: '開合約', futures_close: '平合約',
+  futures_liquidated: '合約爆倉',
+  bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
+  loan_borrow: '貸款', loan_repay: '還款',
+};
+const TX_STATUS_LABEL: Record<string, string> = {
+  pending: '等待中', broadcasted: '廣播中', confirmed: '已確認', failed: '失敗',
+};
+
 export default function WalletView() {
   const { t } = useTranslation();
   const { amountDisplay } = usePreferencesStore();
@@ -66,6 +82,20 @@ export default function WalletView() {
   };
 
   const numberMode = amountDisplay === 'full' ? 'full' : 'short';
+
+  const { data: myTxData } = useQuery({
+    queryKey: ['wallet-my-tx', myAddress],
+    enabled: !!myAddress,
+    queryFn: async () => {
+      const res = await api.get('/api/v1/dashboard/transactions', { params: { address: myAddress, limit: 20, page: 1 } });
+      return (res.data.data?.items || []) as {
+        id: string; type: string; amount: string; tokenSymbol?: string;
+        status: string; gameType?: string; roundId: string | number;
+        createdAt: string;
+      }[];
+    },
+    refetchInterval: 15000,
+  });
   const walletSummary = summary.data?.summary;
   const assets = summary.data?.assets;
   const onchain = summary.data?.onchain;
@@ -155,16 +185,37 @@ export default function WalletView() {
             )}
           </div>
 
-          <Link to="/app/transactions" className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl hover:bg-white/5 transition-colors group">
-            <div className="flex items-center gap-3 mb-3">
-              <History size={18} className="text-[#fcc025]" />
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">交易紀錄</h2>
+          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl md:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <History size={18} className="text-[#fcc025]" />
+                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">交易紀錄</h2>
+              </div>
+              <Link to="/app/transactions" className="text-[10px] font-bold text-[#fcc025] hover:underline">查看全部</Link>
             </div>
-            <p className="text-sm font-bold text-[#adaaaa]">檢視所有交易與錢包動態</p>
-            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-[#fcc025] group-hover:gap-2 transition-all">
-              前往查看 <ChevronRight size={14} />
+            <div className="space-y-2">
+              {!myTxData && <div className="text-xs text-[#adaaaa]">載入中...</div>}
+              {myTxData?.length === 0 && <div className="text-xs text-[#adaaaa]">暫無交易</div>}
+              {(myTxData || []).slice(0, 10).map((tx) => {
+                const amt = Number(tx.amount);
+                const isCredit = tx.type === 'payout' || tx.type === 'deposit' || tx.type === 'airdrop' || tx.type === 'admin_credit' || tx.type === 'chest_compensation';
+                return (
+                  <div key={tx.id} className="flex items-center justify-between rounded-xl border border-[#494847]/10 bg-[#0e0e0e] px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-white truncate">{TX_TYPE_LABEL[tx.type] || tx.type}</p>
+                      <p className="text-[10px] text-[#adaaaa] mt-0.5">{new Date(tx.createdAt).toLocaleString('zh-TW')}</p>
+                    </div>
+                    <div className="text-right shrink-0 ml-3">
+                      <p className={`text-xs font-black ${isCredit ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                        {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {tx.tokenSymbol || 'ZXC'}
+                      </p>
+                      <p className="text-[10px] text-[#adaaaa]">{TX_STATUS_LABEL[tx.status] || tx.status}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </Link>
+          </div>
 
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-3">
