@@ -133,6 +133,7 @@ export default function AdminView() {
   const [announcementContent, setAnnouncementContent] = useState('');
   const [announcementPinned, setAnnouncementPinned] = useState(false);
   const [announcementType, setAnnouncementType] = useState<'info' | 'warning' | 'urgent'>('info');
+  const [editingAnnouncement, setEditingAnnouncement] = useState<any | null>(null);
 
   const [catalogItemId, setCatalogItemId] = useState('');
   const [catalogType, setCatalogType] = useState<'avatar' | 'title' | 'buff' | 'chest' | 'key' | 'collectible'>('avatar');
@@ -401,22 +402,34 @@ export default function AdminView() {
     e.preventDefault();
     if (!announcementTitle.trim() || !announcementContent.trim()) return;
     try {
-      await api.post('/api/v1/admin/announcements', {
-        sessionId,
-        title: announcementTitle.trim(),
-        content: announcementContent.trim(),
-        isPinned: announcementPinned || announcementType === 'urgent',
-        isActive: true,
-        type: announcementType,
-      });
-      show(`公告已發布：${announcementTitle} [${announcementType}]`);
+      if (editingAnnouncement) {
+        const aid = editingAnnouncement.announcementId || editingAnnouncement.id;
+        await api.patch(`/api/v1/admin/announcements/${aid}`, {
+          sessionId,
+          title: announcementTitle,
+          content: announcementContent,
+          type: announcementType,
+        });
+        show(`公告已更新：${announcementTitle}`);
+      } else {
+        const res = await api.post('/api/v1/admin/announcements', {
+          sessionId,
+          title: announcementTitle,
+          content: announcementContent,
+          type: announcementType,
+          isPinned: announcementPinned,
+        });
+        if (!res.data?.success) throw new Error(res.data?.error || '發布失敗');
+        show(`公告已發布：${announcementTitle} [${announcementType}]`);
+      }
+      setEditingAnnouncement(null);
       setAnnouncementTitle('');
       setAnnouncementContent('');
       setAnnouncementPinned(false);
       setAnnouncementType('info');
       refresh();
     } catch (err: any) {
-      show(errMsg(err));
+      show(err?.response?.data?.message || err?.message || '操作失敗');
     }
   }
 
@@ -928,7 +941,7 @@ export default function AdminView() {
               </form>
             </div>
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">發佈新公告</h3></div>
+              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{editingAnnouncement ? '編輯公告' : '發佈新公告'}</h3></div>
               <form onSubmit={handleAnnouncementCreate} className="space-y-3">
                 <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="標題" maxLength={100} />
                 <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder="內容" maxLength={2000} />
@@ -939,7 +952,12 @@ export default function AdminView() {
                   ))}
                 </div>
                 <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />發佈時即釘選於最上方</label>
-                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">發佈公告</button>
+                <div className="flex gap-2">
+                  <button type="submit" className="flex-1 py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">{editingAnnouncement ? '更新公告' : '發佈公告'}</button>
+                  {editingAnnouncement && (
+                    <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementTitle(''); setAnnouncementContent(''); setAnnouncementType('info'); setAnnouncementPinned(false); }} className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg text-xs font-black">取消</button>
+                  )}
+                </div>
               </form>
             </div>
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
@@ -955,6 +973,7 @@ export default function AdminView() {
                         <p className="text-xs text-[#494847] mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
+                        <button onClick={() => { const a = ann as any; setEditingAnnouncement(ann); setAnnouncementTitle(a.title); setAnnouncementContent(a.content); setAnnouncementType(a.type || 'info'); setAnnouncementPinned(!!a.isPinned); }} className="p-1.5 rounded border border-[#fcc025]/30 hover:bg-[#fcc025]/10" title="編輯"><Edit2 size={14} className="text-[#fcc025]" /></button>
                         <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? '取消釘選' : '置頂'}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
                         <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isActive ? '隱藏' : '顯示'}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}</button>
                         <button onClick={() => handleAnnouncementDelete(ann)} className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10" title="刪除"><Trash2 size={14} className="text-red-400" /></button>
