@@ -225,26 +225,10 @@ export default function LobbyView() {
                 </span>
               </div>
             </GlassCard>
-            <GlassCard
-              to="/app/admin"
-              icon={SettingsIcon}
-              title={t('lobby.admin_override')}
-              subtitle={t('lobby.authorized_only')}>
-              <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
-                {t('lobby.admin_tools_description')}
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#fcc025]" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#fcc025]">
-                  {t('lobby.secure_label')}
-                </span>
-              </div>
-            </GlassCard>
-
           <GlassCard
-            to="/app/events"
+            to="/app/announcement"
             icon={CalendarClock}
-            title={t('lobby.events')}
+            title="公告與活動"
             subtitle={t('lobby.events_subtitle')}
           >
           </GlassCard>
