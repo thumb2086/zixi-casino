@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Archive } from 'lucide-react';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
-import { ITEM_DROP_TABLES, RARITY_NAMES } from '@repo/shared';
 
 const RARITY_COLORS: Record<string, string> = {
   common: '#b0b0b0',
@@ -14,33 +14,22 @@ const RARITY_COLORS: Record<string, string> = {
 };
 
 const RARITY_ORDER: Record<string, number> = {
-  common: 0,
-  rare: 1,
-  epic: 2,
-  legendary: 3,
-  mythic: 4,
+  common: 0, rare: 1, epic: 2, legendary: 3, mythic: 4,
 };
 
 export default function CollectionView() {
-  const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: items, isLoading } = useQuery({
+    queryKey: ['collection'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/inventory');
+      const raw = res.data?.data?.items || res.data?.success?.items || [];
+      return (raw.filter((i: any) => i.type === 'collectible') as any[])
+        .sort((a: any, b: any) => (RARITY_ORDER[b.rarity] || 0) - (RARITY_ORDER[a.rarity] || 0));
+    },
+    staleTime: 30000,
+  });
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.get('/api/v1/inventory');
-        if (res.data?.success?.items) {
-          const collectibles = res.data.success.items.filter((i: any) => i.type === 'collectible');
-          setItems(collectibles.sort((a: any, b: any) => (RARITY_ORDER[b.rarity] || 0) - (RARITY_ORDER[a.rarity] || 0)));
-        } else if (res.data?.data?.items) {
-          const collectibles = res.data.data.items.filter((i: any) => i.type === 'collectible');
-          setItems(collectibles.sort((a: any, b: any) => (RARITY_ORDER[b.rarity] || 0) - (RARITY_ORDER[a.rarity] || 0)));
-        }
-      } catch {} finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const isEmpty = !isLoading && (!items || items.length === 0);
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
@@ -55,11 +44,11 @@ export default function CollectionView() {
       </header>
 
       <main className="pt-20 px-6 max-w-2xl mx-auto">
-        {loading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-[#fcc025] border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : items.length === 0 ? (
+        ) : isEmpty ? (
           <div className="rounded-xl border border-[#494847]/20 bg-[#1a1919] p-12 text-center mt-8">
             <Archive className="w-12 h-12 mx-auto text-[#494847] mb-4" />
             <p className="text-sm text-[#adaaaa]">尚未收藏任何物品</p>
@@ -67,7 +56,7 @@ export default function CollectionView() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-            {items.map((item: any) => (
+            {items!.map((item: any) => (
               <div
                 key={item.id}
                 className="rounded-2xl border-2 bg-[#1a1919] p-6 text-center transition-transform hover:scale-[1.02]"
