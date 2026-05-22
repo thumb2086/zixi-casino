@@ -29,7 +29,7 @@ const DUPLICATE_COMPENSATION: Record<string, number> = {
 const chestManager = new ChestManager();
 const walletManager = new WalletManager();
 
-const CHEST_TYPE_ENUM = z.enum(["common", "rare", "epic", "legendary", "mythic"]);
+  const CHEST_TYPE_ENUM = z.enum(["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"]);
 
 let _catalogRepo: RewardCatalogRepository;
 function getCatalogRepo() {
@@ -50,7 +50,7 @@ async function buildCustomDropTables(): Promise<Record<string, ItemDefinition[]>
   const tables: Record<string, ItemDefinition[]> = {};
   for (const item of userItems) {
     const r = item.rarity as string;
-    if (!["common", "rare", "epic", "legendary", "mythic"].includes(r)) continue;
+        if (!["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"].includes(r)) continue;
     if (!tables[r]) tables[r] = [];
     tables[r].push({
       id: item.itemId,
@@ -392,7 +392,7 @@ typedFastify.post(
       // Broadcast chest drops to global chat
       try {
         const rareDrops = outcome.result.items.filter(
-          (d: any) => d.item.rarity === "legendary" || d.item.rarity === "mythic" || d.item.rarity === "oracle"
+          (d: any) => d.item.rarity === "legendary" || d.item.rarity === "mythic" || d.item.rarity === "chaos" || d.item.rarity === "abyss" || d.item.rarity === "oracle"
         );
         if (rareDrops.length > 0) {
           const { UserRepository } = await import("@repo/infrastructure");

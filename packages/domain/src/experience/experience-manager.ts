@@ -14,6 +14,9 @@ const LEVEL_SCALE = 1.5;
 export interface XpGrantResult {
   xpGained: number;
   multiplier: number;
+  itemBonus: number;
+  vipBonus: number;
+  eventBonus: number;
   totalXp: number;
   newLevel: number;
   leveledUp: boolean;
@@ -34,9 +37,9 @@ export function xpForLevel(level: number): number {
 
 /**
  * Calculate the effective XP multiplier from active xp_boost buffs.
- * Returns the highest active multiplier (e.g. 2 for 2x).
+ * Returns the extra multiplier beyond base (e.g. 2x buff → returns 1).
  */
-export function getActiveXpMultiplier(activeBuffs: ActiveBuff[]): number {
+function getItemXpBonus(activeBuffs: ActiveBuff[]): number {
   const now = Date.now();
   let maxMult = 1;
   for (const buff of activeBuffs) {
@@ -44,21 +47,33 @@ export function getActiveXpMultiplier(activeBuffs: ActiveBuff[]): number {
     if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
     maxMult = Math.max(maxMult, buff.value);
   }
-  return maxMult;
+  return maxMult - 1; // extra beyond base 1×
 }
 
 /**
- * Grant XP based on bet amount, applying active buff multipliers.
- * Returns the full result including any level-up.
+ * Calculate VIP XP bonus from dailyBonusMultiplier.
+ * Returns extra multiplier (e.g. 1.5x dailyBonus → returns 0.5).
+ */
+export function getVipXpBonus(dailyBonusMultiplier: number): number {
+  return dailyBonusMultiplier - 1;
+}
+
+/**
+ * Grant XP based on bet amount, applying all bonus sources.
+ * Bonuses stack additively: total_mult = 1 + itemBonus + vipBonus + eventBonus
  */
 export function grantXp(
   currentXp: number,
   currentLevel: number,
   betAmount: number,
   activeBuffs: ActiveBuff[],
+  vipDailyBonusMult: number = 1,
+  eventBonus: number = 0,
 ): XpGrantResult {
   const baseXp = Math.floor(betAmount * XP_PER_ZXC);
-  const multiplier = getActiveXpMultiplier(activeBuffs);
+  const itemBonus = getItemXpBonus(activeBuffs);
+  const vipBonus = getVipXpBonus(vipDailyBonusMult);
+  const multiplier = 1 + itemBonus + vipBonus + eventBonus;
   const xpGained = Math.floor(baseXp * multiplier);
 
   let totalXp = currentXp + xpGained;
@@ -70,5 +85,5 @@ export function grantXp(
     leveledUp = true;
   }
 
-  return { xpGained, multiplier, totalXp, newLevel, leveledUp };
+  return { xpGained, multiplier, itemBonus, vipBonus, eventBonus, totalXp, newLevel, leveledUp };
 }

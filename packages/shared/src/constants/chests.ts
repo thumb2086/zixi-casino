@@ -1,8 +1,8 @@
 // Chest and Item System Constants (Brawl Stars Style)
 
-export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic";
+export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic" | "chaos" | "abyss" | "oracle";
 export type ItemType = "avatar" | "title" | "token" | "buff" | "collectible";
-export type ChestType = "common" | "rare" | "epic" | "legendary" | "mythic";
+export type ChestType = "common" | "rare" | "epic" | "legendary" | "mythic" | "chaos" | "abyss" | "oracle";
 
 export interface ChestConfig {
   id: ChestType;
@@ -44,11 +44,14 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     pityThreshold: 10,
     dropCount: { min: 2, max: 4 },
     weights: {
-      common: 700,
-      rare: 250,
-      epic: 45,
-      legendary: 5,
+      common: 500,
+      rare: 300,
+      epic: 150,
+      legendary: 50,
       mythic: 0,
+      chaos: 0,
+      abyss: 0,
+      oracle: 0,
     },
   },
   rare: {
@@ -60,11 +63,14 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     pityThreshold: 10,
     dropCount: { min: 3, max: 5 },
     weights: {
-      common: 400,
-      rare: 450,
-      epic: 130,
-      legendary: 19,
-      mythic: 1,
+      common: 150,
+      rare: 250,
+      epic: 300,
+      legendary: 300,
+      mythic: 0,
+      chaos: 0,
+      abyss: 0,
+      oracle: 0,
     },
   },
   epic: {
@@ -76,11 +82,14 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     pityThreshold: 10,
     dropCount: { min: 4, max: 6 },
     weights: {
-      common: 200,
-      rare: 400,
-      epic: 320,
-      legendary: 75,
-      mythic: 5,
+      common: 0,
+      rare: 0,
+      epic: 100,
+      legendary: 898,
+      mythic: 2,
+      chaos: 0,
+      abyss: 0,
+      oracle: 0,
     },
   },
   legendary: {
@@ -93,10 +102,13 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     dropCount: { min: 5, max: 8 },
     weights: {
       common: 0,
-      rare: 100,
-      epic: 400,
-      legendary: 450,
-      mythic: 50,
+      rare: 0,
+      epic: 0,
+      legendary: 750,
+      mythic: 250,
+      chaos: 0,
+      abyss: 0,
+      oracle: 0,
     },
   },
   mythic: {
@@ -111,8 +123,68 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       common: 0,
       rare: 0,
       epic: 0,
-      legendary: 300,
-      mythic: 700,
+      legendary: 100,
+      mythic: 880,
+      chaos: 20,
+      abyss: 0,
+      oracle: 0,
+    },
+  },
+  chaos: {
+    id: "chaos",
+    name: "混沌寶箱",
+    nameEn: "Chaos Chest",
+    price: 1_000_000,
+    guaranteedRarity: "chaos",
+    pityThreshold: 1,
+    dropCount: { min: 8, max: 12 },
+    weights: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 689,
+      mythic: 0,
+      chaos: 311,
+      abyss: 0,
+      oracle: 0,
+    },
+  },
+  abyss: {
+    id: "abyss",
+    name: "深淵寶箱",
+    nameEn: "Abyss Chest",
+    price: 10_000_000,
+    guaranteedRarity: "abyss",
+    pityThreshold: 1,
+    dropCount: { min: 8, max: 12 },
+    weights: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 0,
+      mythic: 0,
+      chaos: 850,
+      abyss: 150,
+      oracle: 0,
+    },
+  },
+  oracle: {
+    id: "oracle",
+    name: "神諭寶箱",
+    nameEn: "Oracle Chest",
+    price: 100_000_000,
+    guaranteedRarity: "oracle",
+    pityThreshold: 1,
+    dropCount: { min: 8, max: 12 },
+    weights: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 0,
+      mythic: 0,
+      chaos: 700,
+      abyss: 200,
+      oracle: 100,
     },
   },
 };
@@ -121,9 +193,9 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
 export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
   common: [
     { id: "token_1", name: "1 ZXC", nameEn: "1 ZXC", type: "token", rarity: "common", description: "1 子熙幣", icon: "🪙", tradable: false, consumable: true, effect: { type: "currency", value: 1 } },
+    { id: "token_3", name: "3 ZXC", nameEn: "3 ZXC", type: "token", rarity: "common", description: "3 子熙幣", icon: "🪙", tradable: false, consumable: true, effect: { type: "currency", value: 3 } },
     { id: "token_5", name: "5 ZXC", nameEn: "5 ZXC", type: "token", rarity: "common", description: "5 子熙幣", icon: "🪙", tradable: false, consumable: true, effect: { type: "currency", value: 5 } },
     { id: "token_10", name: "10 ZXC", nameEn: "10 ZXC", type: "token", rarity: "common", description: "10 子熙幣", icon: "🪙", tradable: false, consumable: true, effect: { type: "currency", value: 10 } },
-    { id: "token_25", name: "25 ZXC", nameEn: "25 ZXC", type: "token", rarity: "common", description: "25 子熙幣", icon: "🪙", tradable: false, consumable: true, effect: { type: "currency", value: 25 } },
     { id: "buff_xp_30m", name: "經驗加倍 (30分鐘)", nameEn: "XP Boost (30m)", type: "buff", rarity: "common", description: "30分鐘內獲得經驗值翻倍", icon: "⚡", tradable: false, consumable: true, effect: { type: "xp_boost", value: 2, duration: 0.5 } },
     { id: "buff_xp_1h", name: "經驗加倍 (1小時)", nameEn: "XP Boost (1h)", type: "buff", rarity: "common", description: "1小時內獲得經驗值翻倍", icon: "⚡", tradable: false, consumable: true, effect: { type: "xp_boost", value: 2, duration: 1 } },
     { id: "buff_xp_2h", name: "經驗加倍 (2小時)", nameEn: "XP Boost (2h)", type: "buff", rarity: "common", description: "2小時內獲得經驗值翻倍", icon: "⚡", tradable: false, consumable: true, effect: { type: "xp_boost", value: 2, duration: 2 } },
@@ -148,6 +220,7 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "title_member_2", name: "青銅會員", nameEn: "Bronze Member", type: "title", rarity: "common", description: "累積押注達 10,000 子熙幣", icon: "🥉", tradable: false, consumable: false },
   ],
   rare: [
+    { id: "token_25", name: "25 ZXC", nameEn: "25 ZXC", type: "token", rarity: "rare", description: "25 子熙幣", icon: "💰", tradable: false, consumable: true, effect: { type: "currency", value: 25 } },
     { id: "token_50", name: "50 ZXC", nameEn: "50 ZXC", type: "token", rarity: "rare", description: "50 子熙幣", icon: "💰", tradable: false, consumable: true, effect: { type: "currency", value: 50 } },
     { id: "token_100", name: "100 ZXC", nameEn: "100 ZXC", type: "token", rarity: "rare", description: "100 子熙幣", icon: "💰", tradable: false, consumable: true, effect: { type: "currency", value: 100 } },
     { id: "buff_xp_4h", name: "經驗加倍 (4小時)", nameEn: "XP Boost (4h)", type: "buff", rarity: "rare", description: "4小時內獲得經驗值翻倍", icon: "⚡", tradable: false, consumable: true, effect: { type: "xp_boost", value: 2, duration: 4 } },
@@ -204,15 +277,14 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "title_member_6", name: "鑽石等級", nameEn: "Diamond Member", type: "title", rarity: "epic", description: "累積押注達 50,000,000 子熙幣", icon: "💠", tradable: false, consumable: false },
   ],
   legendary: [
+    { id: "token_500", name: "500 ZXC", nameEn: "500 ZXC", type: "token", rarity: "legendary", description: "500 子熙幣", icon: "🏆", tradable: false, consumable: true, effect: { type: "currency", value: 500 } },
     { id: "token_1000", name: "1000 ZXC", nameEn: "1000 ZXC", type: "token", rarity: "legendary", description: "1000 子熙幣", icon: "🏆", tradable: false, consumable: true, effect: { type: "currency", value: 1000 } },
-    { id: "token_5000", name: "5000 ZXC", nameEn: "5000 ZXC", type: "token", rarity: "legendary", description: "5000 子熙幣", icon: "🏆", tradable: false, consumable: true, effect: { type: "currency", value: 5000 } },
-    { id: "token_25000", name: "25,000 ZXC", nameEn: "25000 ZXC", type: "token", rarity: "legendary", description: "25000 子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 25000 } },
-    { id: "token_50000", name: "50,000 ZXC", nameEn: "50000 ZXC", type: "token", rarity: "legendary", description: "50000 子熙幣", icon: "💵", tradable: false, consumable: true, effect: { type: "currency", value: 50000 } },
+    { id: "token_2500", name: "2,500 ZXC", nameEn: "2500 ZXC", type: "token", rarity: "legendary", description: "2500 子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 2500 } },
     { id: "buff_xp_24h", name: "經驗加倍 (24小時)", nameEn: "XP Boost (24h)", type: "buff", rarity: "legendary", description: "24小時內獲得經驗值翻倍", icon: "⚡", tradable: false, consumable: true, effect: { type: "xp_boost", value: 2, duration: 24 } },
     { id: "buff_luck_1h_s", name: "超級運氣 (1小時)", nameEn: "Super Luck (1h)", type: "buff", rarity: "legendary", description: "1小時內大幅提升遊戲勝率", icon: "✨", tradable: false, consumable: true, effect: { type: "luck_boost", value: 0.20, duration: 1 } },
     { id: "buff_permanent", name: "永久幸運", nameEn: "Permanent Luck", type: "buff", rarity: "legendary", description: "永久小幅提升遊戲勝率", icon: "✨", tradable: false, consumable: true, effect: { type: "luck_boost", value: 0.02 } },
     { id: "buff_prevent_loss_10", name: "免輸護符 (10 次)", nameEn: "Loss Shield (10 uses)", type: "buff", rarity: "legendary", description: "使用後下 10 次輸的下注將全額退回", icon: "🛡️", tradable: false, consumable: true, effect: { type: "prevent_loss", value: 10 } },
-    { id: "token_yjc_shard", name: "YJC 碎片", nameEn: "YJC Shard", type: "token", rarity: "legendary", description: "0.0001 YJC，可在兌換商店使用", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.0001, currency: "yjc" } },
+    { id: "yjc_shard_2", name: "YJC 碎片 (小)", nameEn: "YJC Shard", type: "token", rarity: "legendary", description: "0.00002 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.00002, currency: "yjc" } },
     { id: "avatar_legend", name: "傳奇", nameEn: "Legend", type: "avatar", rarity: "legendary", description: "傳奇玩家的專屬頭像", icon: "🌟", tradable: true, consumable: false },
     { id: "avatar_skull", name: "骷髏王", nameEn: "Skull King", type: "avatar", rarity: "legendary", description: "令人畏懼的骷髏王", icon: "💀", tradable: false, consumable: false },
     { id: "avatar_reaper", name: "死神", nameEn: "Reaper", type: "avatar", rarity: "legendary", description: "收割靈魂的死神", icon: "🗡️", tradable: false, consumable: false },
@@ -243,13 +315,10 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "title_member_16", name: "創世等級", nameEn: "Genesis", type: "title", rarity: "legendary", description: "累積押注達 100,000,000,000 子熙幣", icon: "✨", tradable: false, consumable: false },
   ],
   mythic: [
-    { id: "token_10000", name: "10000 ZXC", nameEn: "10000 ZXC", type: "token", rarity: "mythic", description: "10000 子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 10000 } },
-    { id: "token_100000", name: "100,000 ZXC", nameEn: "100000 ZXC", type: "token", rarity: "mythic", description: "100000 子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 100000 } },
-    { id: "token_500000", name: "500,000 ZXC", nameEn: "500000 ZXC", type: "token", rarity: "mythic", description: "500000 子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 500000 } },
-    { id: "token_1000000", name: "1,000,000 ZXC", nameEn: "1M ZXC", type: "token", rarity: "mythic", description: "一百萬子熙幣", icon: "🏆", tradable: false, consumable: true, effect: { type: "currency", value: 1000000 } },
-    { id: "token_10000000", name: "10,000,000 ZXC", nameEn: "10M ZXC", type: "token", rarity: "mythic", description: "一千萬子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 10000000 } },
-    { id: "token_yjc", name: "YJC 幣", nameEn: "YJC Coin", type: "token", rarity: "mythic", description: "0.001 YJC，稀有加密資產", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 0.001, currency: "yjc" } },
-    { id: "token_yjc_01", name: "0.01 YJC", nameEn: "0.01 YJC", type: "token", rarity: "mythic", description: "0.01 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.01, currency: "yjc" } },
+    { id: "token_5000", name: "5,000 ZXC", nameEn: "5000 ZXC", type: "token", rarity: "mythic", description: "5000 子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 5000 } },
+    { id: "token_10000", name: "10,000 ZXC", nameEn: "10000 ZXC", type: "token", rarity: "mythic", description: "10000 子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 10000 } },
+    { id: "token_25000", name: "25,000 ZXC", nameEn: "25000 ZXC", type: "token", rarity: "mythic", description: "25000 子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 25000 } },
+    { id: "token_50000", name: "50,000 ZXC", nameEn: "50000 ZXC", type: "token", rarity: "mythic", description: "50000 子熙幣", icon: "💵", tradable: false, consumable: true, effect: { type: "currency", value: 50000 } },
     { id: "avatar_mythic", name: "神話", nameEn: "Mythic", type: "avatar", rarity: "mythic", description: "超越傳奇的神話頭像", icon: "🔱", tradable: true, consumable: false },
     { id: "avatar_phoenix", name: "鳳凰", nameEn: "Phoenix", type: "avatar", rarity: "mythic", description: "浴火重生的鳳凰", icon: "🔥", tradable: false, consumable: false },
     { id: "avatar_demon", name: "惡魔", nameEn: "Demon", type: "avatar", rarity: "mythic", description: "來自深淵的惡魔", icon: "😈", tradable: false, consumable: false },
@@ -267,6 +336,37 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "collectible_heart", name: "龍之心", nameEn: "Dragon Heart", type: "collectible", rarity: "mythic", description: "遠古巨龍跳動的心臟", icon: "❤️‍🔥", tradable: false, consumable: false },
     { id: "collectible_egg", name: "鳳凰蛋", nameEn: "Phoenix Egg", type: "collectible", rarity: "mythic", description: "蘊含重生之火的鳳凰蛋", icon: "🥚", tradable: false, consumable: false },
     { id: "collectible_anchor", name: "深海之錨", nameEn: "Abyss Anchor", type: "collectible", rarity: "mythic", description: "來自深海遺跡的遠古船錨", icon: "⚓", tradable: false, consumable: false },
+  ],
+  chaos: [
+    { id: "token_100000", name: "100,000 ZXC", nameEn: "100K ZXC", type: "token", rarity: "chaos", description: "十萬子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 100000 } },
+    { id: "token_250000", name: "250,000 ZXC", nameEn: "250K ZXC", type: "token", rarity: "chaos", description: "二十五萬子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 250000 } },
+    { id: "token_500000", name: "500,000 ZXC", nameEn: "500K ZXC", type: "token", rarity: "chaos", description: "五十萬子熙幣", icon: "🏆", tradable: false, consumable: true, effect: { type: "currency", value: 500000 } },
+    { id: "token_1000000", name: "1,000,000 ZXC", nameEn: "1M ZXC", type: "token", rarity: "chaos", description: "一百萬子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 1000000 } },
+    { id: "yjc_small", name: "YJC 小量", nameEn: "YJC Small", type: "token", rarity: "chaos", description: "0.001 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.001, currency: "yjc" } },
+    { id: "yjc_medium", name: "YJC 中量", nameEn: "YJC Medium", type: "token", rarity: "chaos", description: "0.005 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.005, currency: "yjc" } },
+    { id: "avatar_oracle", name: "神諭", nameEn: "Oracle", type: "avatar", rarity: "chaos", description: "洞悉萬物的神諭頭像", icon: "🔮", tradable: true, consumable: false },
+    { id: "avatar_cosmos", name: "宇宙", nameEn: "Cosmos", type: "avatar", rarity: "chaos", description: "蘊含宇宙奧秘的頭像", icon: "🌌", tradable: true, consumable: false },
+    { id: "title_oracle", name: "神諭者", nameEn: "Oracle Seer", type: "title", rarity: "chaos", description: "預知未來的傳說之人", icon: "🔮", tradable: false, consumable: false },
+    { id: "title_cosmic", name: "宇宙主宰", nameEn: "Cosmic Ruler", type: "title", rarity: "chaos", description: "掌控宇宙的至高存在", icon: "👑", tradable: false, consumable: false },
+    { id: "collectible_blackhole", name: "黑洞", nameEn: "Black Hole", type: "collectible", rarity: "chaos", description: "吞噬一切的神秘黑洞", icon: "🕳️", tradable: false, consumable: false },
+  ],
+  abyss: [
+    { id: "token_1000000", name: "1,000,000 ZXC", nameEn: "1M ZXC", type: "token", rarity: "abyss", description: "一百萬子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 1000000 } },
+    { id: "token_2500000", name: "2,500,000 ZXC", nameEn: "2.5M ZXC", type: "token", rarity: "abyss", description: "兩百五十萬子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 2500000 } },
+    { id: "token_5000000", name: "5,000,000 ZXC", nameEn: "5M ZXC", type: "token", rarity: "abyss", description: "五百萬子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 5000000 } },
+    { id: "token_10000000", name: "10,000,000 ZXC", nameEn: "10M ZXC", type: "token", rarity: "abyss", description: "一千萬子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 10000000 } },
+    { id: "yjc_large", name: "YJC 大量", nameEn: "YJC Large", type: "token", rarity: "abyss", description: "0.01 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.01, currency: "yjc" } },
+    { id: "yjc_huge", name: "YJC 巨大", nameEn: "YJC Huge", type: "token", rarity: "abyss", description: "0.05 YJC", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 0.05, currency: "yjc" } },
+    { id: "collectible_galaxy", name: "銀河", nameEn: "Galaxy", type: "collectible", rarity: "abyss", description: "旋轉的璀璨銀河", icon: "🌌", tradable: false, consumable: false },
+    { id: "collectible_singularity", name: "奇點", nameEn: "Singularity", type: "collectible", rarity: "abyss", description: "宇宙初始的奇異點", icon: "✨", tradable: false, consumable: false },
+  ],
+  oracle: [
+    { id: "token_10000000", name: "10,000,000 ZXC", nameEn: "10M ZXC", type: "token", rarity: "oracle", description: "一千萬子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 10000000 } },
+    { id: "token_25000000", name: "25,000,000 ZXC", nameEn: "25M ZXC", type: "token", rarity: "oracle", description: "兩千五百萬子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 25000000 } },
+    { id: "token_50000000", name: "50,000,000 ZXC", nameEn: "50M ZXC", type: "token", rarity: "oracle", description: "五千萬子熙幣", icon: "🔱", tradable: false, consumable: true, effect: { type: "currency", value: 50000000 } },
+    { id: "token_100000000", name: "100,000,000 ZXC", nameEn: "100M ZXC", type: "token", rarity: "oracle", description: "一億子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 100000000 } },
+    { id: "yjc_massive", name: "YJC 巨量", nameEn: "YJC Massive", type: "token", rarity: "oracle", description: "0.1 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.1, currency: "yjc" } },
+    { id: "yjc_giant", name: "YJC 無敵", nameEn: "YJC Giant", type: "token", rarity: "oracle", description: "0.5 YJC", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 0.5, currency: "yjc" } },
   ],
 };
 
@@ -304,19 +404,24 @@ export const PAWN_DISCOUNT_RATE = 0.7;
 // Token face value for collectibles by rarity (minimum token of that tier)
 export const COLLECTIBLE_VALUE_BY_RARITY: Record<Rarity, number> = {
   common: 1,
-  rare: 50,
-  epic: 250,
-  legendary: 1000,
-  mythic: 10000,
+  rare: 25,
+  epic: 100,
+  legendary: 500,
+  mythic: 2500,
+  chaos: 10000,
+  abyss: 50000,
+  oracle: 250000,
 };
 
-// Base price for buffs / non-token items
 export const BUFF_PAWN_PRICES: Record<Rarity, number> = {
-  common: 3,
-  rare: 5,
-  epic: 10,
-  legendary: 25,
+  common: 1,
+  rare: 3,
+  epic: 8,
+  legendary: 20,
   mythic: 50,
+  chaos: 100,
+  abyss: 200,
+  oracle: 500,
 };
 
 export function getItemPawnValue(item: ItemDefinition): number {
@@ -336,6 +441,9 @@ export const RARITY_NAMES: Record<Rarity, { name: string; nameEn: string; color:
   epic: { name: "史詩", nameEn: "Epic", color: "#ba68c8" },
   legendary: { name: "傳奇", nameEn: "Legendary", color: "#ffd54f" },
   mythic: { name: "神話", nameEn: "Mythic", color: "#ff6f00" },
+  chaos: { name: "混沌", nameEn: "Chaos", color: "#aa00ff" },
+  abyss: { name: "深淵", nameEn: "Abyss", color: "#00bcd4" },
+  oracle: { name: "神諭", nameEn: "Oracle", color: "#ff0044" },
 };
 
 // Chest Animation Duration (ms)
