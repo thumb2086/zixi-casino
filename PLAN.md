@@ -12,50 +12,54 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | 版本 | 範圍 | 內容 | 狀態 |
 |------|------|------|------|
 | **v1.0.6** | 寶箱 + XP | 8 層寶箱平衡、物品/當舖值調整、保底修正、經驗加成系統 | ✅ 開發完成 |
-| **v1.0.7** | Coinflip + Slots | Coinflip 統一 GameManager；Slots 補齊遺失前端常數 | ✅ |
+| **v1.0.7** | Coinflip | Route 統一使用 GameManager 賠率 | ✅ |
+| **v1.0.8** | Slots（前端） | 補齊遺失常數 REEL_CELLS/SYMBOLS/reelDelay 等 | ✅ |
 | **v1.0.8** | Roulette | Domain 數字賠 35x 應為 36x | ⏳ |
-| **v1.0.9** | Horse Racing | RTP_SCALE=2.0 導致 -5.5% 玩家優勢，重新設計 | ⏳ |
-| **v1.0.10** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
-| **v1.0.11** | Dragon Tiger | `Math.random()`→FNV、賠率 redesign、HE 過高 | ⏳ |
-| **v1.0.12** | BluffDice | 固定預測 18 導致 -39% 玩家優勢 | ⏳ |
-| **v1.0.13** | 其餘遊戲 | Slots/Sicbo/Duel/Crash/Poker/Blackjack 微調 | ⏳ |
-| **v1.0.14** | 股市調整 + 交易效能 | 背景 tick、admin 端點、清算修正、前端極速反饋 | ⏳ |
-| **v1.0.15** | 上鏈系統 | 上鏈排隊佇列、上鏈公開頁面 | ⏳ |
-| **v1.0.16** | 交易紀錄 + 動態重構 | 交易紀錄系統完善、公開動態保留市場與錢包、移除重複錢包動態 | ⏳ |
-| **v1.0.17** | 全站快取 + 監控 | 管理頁面載入優化、伺服器運行時間、重新登入時間反饋圖表 | ⏳ |
-| **v1.0.18** | 公司系統 | `/upgrade-fab`、`/deposit`、招聘押金、export、測試 | ⏳ |
+| **v1.0.10** | Horse Racing | RTP_SCALE=2.0 導致 -5.5% 玩家優勢，重新設計 | ⏳ |
+| **v1.0.11** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
+| **v1.0.12** | Dragon Tiger | `Math.random()`→FNV、賠率 redesign、HE 過高 | ⏳ |
+| **v1.0.13** | BluffDice | 固定預測 18 導致 -39% 玩家優勢 | ⏳ |
+| **v1.0.14** | 其餘遊戲 | Sicbo/Duel/Crash/Poker/Blackjack 微調 | ⏳ |
+| **v1.0.15** | 股市調整 + 交易效能 | 背景 tick、admin 端點、清算修正、前端極速反饋 | ⏳ |
+| **v1.0.16** | 上鏈系統 | 上鏈排隊佇列、上鏈公開頁面 | ⏳ |
+| **v1.0.17** | 交易紀錄 + 動態重構 | 交易紀錄系統完善、公開動態保留市場與錢包、移除重複錢包動態 | ⏳ |
+| **v1.0.18** | 全站快取 + 監控 | 管理頁面載入優化、伺服器運行時間、重新登入時間反饋圖表 | ⏳ |
+| **v1.0.19** | 公司系統 | `/upgrade-fab`、`/deposit`、招聘押金、export、測試 | ⏳ |
 | **v1.1.0** | 正式版 | 全部合併至 master，穩定化 | 🎯 |
 
 ---
 
 ## 遊戲修正細節
 
-### v1.0.7 — Coinflip + Slots 修復
-- **Coinflip**: Route 自行計算結果（`hashInt` + 2.0x）→ 改呼叫 `gameManager.resolveCoinflip()`，賠率 1.96x（2% HE）
-- **Slots**: 補上遺失的前端常數 `REEL_CELLS`、`randomSymbol`、`REEL_DELAY_MS`、`REEL_STOP_INTERVAL`
-- **檔案**: `apps/api/src/routes/v1/games/coinflip.ts`, `apps/web/src/features/casino/SlotsView.tsx`
+### v1.0.7 — Coinflip
+- Route 自行計算結果（`hashInt` + 2.0x）→ 改呼叫 `gameManager.resolveCoinflip()`，賠率 1.96x（2% HE）
+- **檔案**: `apps/api/src/routes/v1/games/coinflip.ts`
 
-### v1.0.8 — Roulette
+### v1.0.8 — Slots（前端修復）
+- 補上遺失的前端常數：`REEL_CELLS`、`randomSymbol`、`REEL_DELAY_MS`、`REEL_STOP_INTERVAL`
+- **檔案**: `apps/web/src/features/casino/SlotsView.tsx`
+
+### v1.0.9 — Roulette
 - **問題**: Domain `resolveRoulette` 中數字賠 35x，正確應為 36x
 - **修正**: Domain 中 `totalPayoutMultiplier += 35` → `+= 36`
 - **檔案**: `packages/domain/src/games/game-manager.ts`
 
-### v1.0.9 — Horse Racing
+### v1.0.10 — Horse Racing
 - **問題**: Route 自訂 HORSES 陣列 + RTP_SCALE=2.0 使 EV=1.055（玩家優勢）
 - **修正**: Route 改用 GameManager 的統一邏輯，設定合理 HE 3~5%
 - **檔案**: `apps/api/src/routes/v1/games/horse.ts`, `packages/domain/src/games/game-manager.ts`
 
-### v1.0.10 — Bingo
+### v1.0.11 — Bingo
 - **問題**: 5/75 匹配率極低，RTP 僅 0.74%
 - **修正**: 提高基礎命中率（擴大可選數字範圍或增加中獎組合），調整 payout 倍率
 - **檔案**: `packages/domain/src/games/game-manager.ts`
 
-### v1.0.11 — Dragon Tiger
+### v1.0.12 — Dragon Tiger
 - **問題**: ① `Math.random()` 不可驗證 ② flat 2x 賠率 ③ HE 40%
 - **修正**: ① 改用 FNV 哈希 ② 採用 domain 的 `12/range` 變動賠率 ③ 重新計算平衡賠率
 - **檔案**: `apps/api/src/routes/v1/games/shoot-dragon-gate*.ts`, `packages/domain/src/games/game-manager.ts`
 
-### v1.0.12 — BluffDice
+### v1.0.13 — BluffDice
 - **問題**: Route 硬編碼 `predictedTotal=18`（接近 5d6 期望值 17.5），導致 EV≈1.39
 - **修正**: 讓玩家自選預測總和，調整賠率表使 HE 落在合理範圍
 - **檔案**: `apps/api/src/routes/v1/games/bluffdice.ts`, `packages/domain/src/games/game-manager.ts`
