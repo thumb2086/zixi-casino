@@ -6,21 +6,18 @@ import { createApiEnvelope } from "@repo/shared";
 import { GameSessionManager } from "@repo/domain/games/game-session-manager.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import { GameManager } from "@repo/domain/games/game-manager.js";
-import { getRoundInfo, hashInt } from "@repo/domain/games/auto-round.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
 
 export async function coinflipRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const gameManager = new GameManager();
 
-  // GET /api/v1/games/coinflip/round - Get current round info (no auth needed for clock sync)
+  // GET /api/v1/games/coinflip/round - Server time sync
   typedFastify.get("/round", async (request) => {
-    const roundInfo = getRoundInfo("coinflip");
     return createApiEnvelope({
       success: true,
       data: {
         serverNow: Date.now(),
-        ...roundInfo,
       },
     }, request.id);
   });
@@ -70,23 +67,8 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统一分局)
-    const roundInfo = getRoundInfo('coinflip');
-    if (!roundInfo.isBettingOpen) {
-      return createApiEnvelope(
-        { 
-          success: false, 
-          roundId: roundInfo.roundId,
-          closesAt: roundInfo.closesAt,
-          bettingClosesAt: roundInfo.bettingClosesAt,
-        },
-        request.id,
-        false,
-        "本局开奖中，请等待下一局"
-      );
-    }
-
-    const roundId = String(roundInfo.roundId);
+    // Turn-based: unique round per bet (no auto-round window)
+    const roundId = `coinflip_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const amountStr = betAmount.toString();
 
     // 1. Validate and deduct balance
@@ -99,7 +81,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
 
     if (!validation.success) {
       return createApiEnvelope(
-        { success: false, error: validation.error, roundId: roundInfo.roundId },
+        { success: false, error: validation.error },
         request.id,
         false,
         validation.error?.message || "Validation failed"
@@ -107,10 +89,10 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // 2. Resolve game using deterministic hash based on roundId
-      const resultSide = (hashInt(`coinflip:${roundInfo.roundId}`) % 2 === 0) ? 'heads' : 'tails';
-      const isWin = (selection === resultSide);
-      const payout = isWin ? betAmount * 2 : 0;
+      // 2. Resolve game using GameManager (deterministic FNV hash)
+      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundId}`);
+      const isWin = result.isWin;
+      const payout = isWin ? betAmount * result.multiplier : 0;
       const payoutStr = payout.toString();
 
       // 3. Execute on-chain settlement
@@ -129,7 +111,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
         // Rollback balance on settlement error
         await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
         return createApiEnvelope(
-          { success: false, roundId: roundInfo.roundId },
+          { success: false },
           request.id,
           false,
           settlement.error?.message || "Settlement failed"
@@ -146,72 +128,66 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
         userId
       );
 
-      // 5. Update total bet
-      await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
-
-      // 6. Record game session
-      const db = await requireDb();
-      const sessionManager = new GameSessionManager(db);
-      const session = await sessionManager.recordGame({
-        userId,
-        address,
-        game: "coinflip",
-        betAmount,
-        gameResult: {
-          result: settlement.isWin ? "win" : "lose",
-          payout: settlement.finalPayout,
-          meta: { 
-            winner: resultSide, 
-            selection,
+      // 5-8. Background: updateTotalBet (XP/titles), game session, log event, save round
+      void (async () => {
+        try {
+          await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
+          const db = await requireDb();
+          const sessionManager = new GameSessionManager(db);
+          await sessionManager.recordGame({
+            userId,
+            address,
+            game: "coinflip",
+            betAmount,
+            gameResult: {
+              result: settlement.isWin ? "win" : "lose",
+              payout: settlement.finalPayout,
+              meta: { 
+                winner: result.winner, 
+                selection,
+                betTxHash: settlement.betTxHash,
+                payoutTxHash: settlement.payoutTxHash,
+                fee: settlement.feeAmount,
+                roundId,
+              },
+            },
+          });
+          await gameSettlement.logGameEvent({
+            game: "coinflip",
+            userId,
+            address,
+            amount: amountStr,
+            payout: settlement.finalPayout.toString(),
+            fee: settlement.feeAmount.toString(),
+            isWin: settlement.isWin,
+            multiplier: result.multiplier,
             betTxHash: settlement.betTxHash,
             payoutTxHash: settlement.payoutTxHash,
-            fee: settlement.feeAmount,
-            roundId: roundInfo.roundId,
-            closesAt: roundInfo.closesAt,
-          },
-        },
-      });
-
-      // 7. Log event
-      await gameSettlement.logGameEvent({
-        game: "coinflip",
-        userId,
-        address,
-        amount: amountStr,
-        payout: settlement.finalPayout.toString(),
-        fee: settlement.feeAmount.toString(),
-        isWin: settlement.isWin,
-        multiplier: 2,
-        betTxHash: settlement.betTxHash,
-        payoutTxHash: settlement.payoutTxHash,
-        roundId,
-      });
-
-      // 8. Save round
-      await gameSettlement.saveRound("coinflip", roundId, {
-        winner: resultSide,
-        selection,
-        isWin,
-        roundInfo,
-      });
+            roundId,
+          });
+          await gameSettlement.saveRound("coinflip", roundId, {
+            winner: result.winner,
+            selection,
+            isWin,
+          });
+        } catch {}
+      })();
 
       return createApiEnvelope({
         success: true,
         data: {
-          sessionId: session.id,
-          roundId: roundInfo.roundId,
+          sessionId: roundId,
+          roundId,
           selection,
-          winner: resultSide,
+          winner: result.winner,
           result: settlement.isWin ? "win" : "lose",
           payout: settlement.finalPayout,
           betAmount,
-          multiplier: 2,
+          multiplier: result.multiplier,
           fee: settlement.feeAmount,
           balance: finalBalance,
           betTxHash: settlement.betTxHash,
           payoutTxHash: settlement.payoutTxHash,
-          closesAt: roundInfo.closesAt,
-          bettingClosesAt: roundInfo.bettingClosesAt,
         }
       }, request.id);
 

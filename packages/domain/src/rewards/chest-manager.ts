@@ -48,18 +48,28 @@ export class ChestManager {
     forceGuaranteed: boolean
   ): Rarity {
     const config = CHEST_CONFIGS[chestType];
+    const weights: Record<Rarity, number> = config.weights;
+    const ALL_RARITIES: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"];
     
-    // If pity threshold reached or forced, return guaranteed rarity
+    // If pity threshold reached: re-roll among guaranteedRarity and above (weighted)
     if (forceGuaranteed && config.guaranteedRarity) {
-      return config.guaranteedRarity;
+      const minIdx = ALL_RARITIES.indexOf(config.guaranteedRarity);
+      const eligible = ALL_RARITIES.slice(minIdx).filter(r => weights[r] > 0);
+      const eligibleTotal = eligible.reduce((s, r) => s + weights[r], 0);
+      const hash = this.fnv1a32(seed + ":pity");
+      let roll = hash % eligibleTotal;
+      for (const rarity of eligible) {
+        roll -= weights[rarity];
+        if (roll < 0) return rarity;
+      }
+      return eligible[eligible.length - 1];
     }
 
     const hash = this.fnv1a32(seed);
-    const weights: Record<Rarity, number> = config.weights;
     const totalWeight = Object.values(weights).reduce((a, b) => (a as number) + (b as number), 0) as number;
     
     let random = hash % totalWeight;
-    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic"];
+    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"];
     
     for (const rarity of rarities) {
       random -= weights[rarity];
@@ -215,7 +225,7 @@ export class ChestManager {
     const config = CHEST_CONFIGS[chestType];
     const totalWeight = Object.values(config.weights).reduce((a, b) => (a as number) + (b as number), 0) as number;
     
-    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic"];
+    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"];
     
     return rarities
       .filter(r => config.weights[r] > 0)
