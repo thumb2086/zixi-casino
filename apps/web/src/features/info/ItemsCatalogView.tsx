@@ -8,18 +8,22 @@ interface CatalogItem {
   id: string;
   name: string;
   type: 'avatar' | 'title' | 'item' | 'buff';
-  rarity: 'common' | 'rare' | 'legendary' | 'mythic' | 'vip';
+  rarity: string;
   description: string;
   icon: string;
   source: string;
   howToGet: string;
 }
 
-const RARITY_COLORS = {
+const RARITY_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> = {
   common: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', label: '普通' },
   rare: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', label: '稀有' },
+  epic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: '史詩' },
   legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', label: '傳說' },
   mythic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: '神話' },
+  chaos: { bg: 'bg-fuchsia-500/20', text: 'text-fuchsia-400', border: 'border-fuchsia-500/30', label: '混沌' },
+  abyss: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30', label: '深淵' },
+  oracle: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', label: '神諭' },
   vip: { bg: 'bg-[#fcc025]/20', text: 'text-[#fcc025]', border: 'border-[#fcc025]/30', label: 'VIP' },
 };
 

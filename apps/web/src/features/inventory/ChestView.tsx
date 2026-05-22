@@ -88,6 +88,9 @@ const RARITY_COLORS: Record<string, string> = {
   epic: '#ba68c8',
   legendary: '#ffd54f',
   mythic: '#ff6f00',
+  chaos: '#aa00ff',
+  abyss: '#00bcd4',
+  oracle: '#ff0044',
 };
 
 const BUFF_TYPE_LABEL: Record<string, string> = {
@@ -609,7 +612,7 @@ export default function ChestView() {
                 <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-2 mb-6">
                   {[...openedItems]
                     .sort((a, b) => {
-                      const order = ['common', 'rare', 'epic', 'legendary', 'mythic'];
+                      const order = ['common', 'rare', 'epic', 'legendary', 'mythic', 'oracle'];
                       return order.indexOf(b.item.rarity) - order.indexOf(a.item.rarity);
                     })
                     .map((item, index) => (

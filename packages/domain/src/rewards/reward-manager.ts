@@ -7,7 +7,7 @@ export interface RewardTitle {
   label: string;
   description: string;
   requirement: string;
-  rarity: "common" | "rare" | "epic" | "legendary" | "mythic";
+    rarity: "common" | "rare" | "epic" | "legendary" | "mythic" | "chaos" | "abyss" | "oracle";
 }
 
 const MEMBER_RARITY: Record<number, string> = {

@@ -664,11 +664,11 @@ export class GameSettlementWrapper {
     if (userId) {
       await this.checkAndUnlockTitles(userId, address);
       // Grant XP based on bet amount
-      await this.grantGameXp(userId, betAmount).catch(() => {});
+      await this.grantGameXp(userId, betAmount, address).catch(() => {});
     }
   }
 
-  private async grantGameXp(userId: string, betAmount: number): Promise<void> {
+  private async grantGameXp(userId: string, betAmount: number, address?: string): Promise<void> {
     const { requireDb } = await import("@repo/infrastructure/db/index.js");
     const db = await requireDb();
     const { grantXp } = await import("@repo/domain");
@@ -681,7 +681,16 @@ export class GameSettlementWrapper {
     const currentXp = Number(profile?.xp || 0);
     const currentLevel = Number(profile?.level || 1);
 
-    const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs);
+    // Get VIP daily bonus multiplier
+    let vipDailyBonusMult = 1;
+    if (address) {
+      try {
+        const vipLevelTier = await this.vipManager.getVipLevel(address);
+        vipDailyBonusMult = vipLevelTier.dailyBonusMultiplier ?? 1;
+      } catch {}
+    }
+
+    const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs, vipDailyBonusMult);
 
     await db.execute(sql`
       UPDATE user_profiles SET xp = ${result.totalXp}, level = ${result.newLevel}, updated_at = NOW() WHERE user_id = ${userId}

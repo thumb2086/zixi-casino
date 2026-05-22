@@ -431,7 +431,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         itemId: z.string().min(1),
         type: z.enum(["avatar", "title", "buff", "chest", "key", "collectible"]),
         name: z.string().min(1),
-        rarity: z.enum(["common", "rare", "epic", "legendary", "mythic", "vip"]),
+        rarity: z.enum(["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "vip", "oracle"]),
         source: z.string().optional(),
         description: z.string().optional(),
         icon: z.string().optional(),
