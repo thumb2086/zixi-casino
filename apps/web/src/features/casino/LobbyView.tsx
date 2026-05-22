@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../../store/useAuthStore';
 import {
   Bell,
   ChevronRight,
@@ -101,7 +102,7 @@ export default function LobbyView() {
   const missions = missionsData || [];
   const claimMission = useCallback(async (missionId: string) => {
     try {
-      const { sessionId } = await import('../../store/useAuthStore').then(m => m.useAuthStore.getState());
+      const { sessionId } = useAuthStore.getState();
       const res = await api.post('/api/v1/missions/claim', { sessionId, missionId });
       if (res.data?.data?.success) {
         queryClient.invalidateQueries({ queryKey: ['missions'] });
