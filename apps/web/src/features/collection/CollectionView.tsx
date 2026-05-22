@@ -1,5 +1,4 @@
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Archive } from 'lucide-react';
 import AppBottomNav from '../../components/AppBottomNav';
@@ -18,18 +17,18 @@ const RARITY_ORDER: Record<string, number> = {
 };
 
 export default function CollectionView() {
-  const { data: items, isLoading } = useQuery({
-    queryKey: ['collection'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/inventory');
-      const raw = res.data?.data?.items || res.data?.success?.items || [];
-      return (raw.filter((i: any) => i.type === 'collectible') as any[])
-        .sort((a: any, b: any) => (RARITY_ORDER[b.rarity] || 0) - (RARITY_ORDER[a.rarity] || 0));
-    },
-    staleTime: 30000,
-  });
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const isEmpty = !isLoading && (!items || items.length === 0);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api.get('/api/v1/inventory');
+        const raw = res.data?.data?.items || res.data?.success?.items || [];
+        setItems(raw.filter((i: any) => i.type === 'collectible').sort((a: any, b: any) => (RARITY_ORDER[b.rarity] || 0) - (RARITY_ORDER[a.rarity] || 0)));
+      } catch {} finally { setLoading(false); }
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">

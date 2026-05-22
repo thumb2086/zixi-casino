@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, RefreshCw, Coins, ShoppingBag, ChevronLeft, Gift, Zap, Shield, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
@@ -85,12 +84,6 @@ export default function ShopView() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState<string | null>(null);
-  const queryClient = useQueryClient();
-  const refreshAll = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['shop-catalog'] });
-    queryClient.invalidateQueries({ queryKey: ['shop-inventory'] });
-    queryClient.invalidateQueries({ queryKey: ['shop-wallet'] });
-  }, [queryClient]);
   const [msg, setMsg] = useState<string | null>(null);
   const [balance, setBalance] = useState('0');
   const [ownedAvatars, setOwnedAvatars] = useState<string[]>([]);
@@ -126,44 +119,31 @@ export default function ShopView() {
   const [converting, setConverting] = useState(false);
   const CONVERSION_RATE = 100_000_000; // 1 YJC = 100M ZXC
 
-  useQuery({
-    queryKey: ['shop-catalog', sessionId],
-    enabled: !!sessionId,
-    queryFn: async () => {
-      const res = await api.get('/api/v1/rewards/catalog');
-      const catalog = res.data?.data?.customItems || [];
+  const fetchItems = useCallback(async () => {
+    try {
+      const [catalogRes, summaryRes, invRes] = await Promise.all([
+        api.get('/api/v1/rewards/catalog'),
+        api.get('/api/v1/wallet/summary', { params: { sessionId } }).catch(() => null),
+        api.get('/api/v1/inventory', { params: { sessionId } }).catch(() => null),
+      ]);
+      const catalog = catalogRes.data?.data?.customItems || [];
       setItems(catalog.filter((i: any) => i.source === 'shop' && Number(i.price) > 0));
-      return catalog;
-    },
-  });
-
-  useQuery({
-    queryKey: ['shop-inventory', sessionId],
-    enabled: !!sessionId,
-    queryFn: async () => {
-      const res = await api.get('/api/v1/inventory', { params: { sessionId } });
-      if (res.data?.data) {
-        setOwnedAvatars(res.data.data.ownedAvatars || []);
-        setOwnedTitles(res.data.data.ownedTitles || []);
-        setPurchasedBundles(res.data.data.purchasedBundles || []);
-        if (res.data.data.items) setInvItems(res.data.data.items.filter((i: any) => i.type !== 'avatar' && i.type !== 'title'));
+      if (invRes?.data?.data) {
+        setOwnedAvatars(invRes.data.data.ownedAvatars || []);
+        setOwnedTitles(invRes.data.data.ownedTitles || []);
+        setPurchasedBundles(invRes.data.data.purchasedBundles || []);
+        if (invRes.data.data.items) setInvItems(invRes.data.data.items.filter((i: any) => i.type !== 'avatar' && i.type !== 'title'));
       }
-      return res.data;
-    },
-  });
+      if (summaryRes?.data?.data) {
+        const s = summaryRes.data.data;
+        const bal = s?.summary?.balances?.ZXC || s?.balances?.zhixi?.balance || '0';
+        setBalance(String(bal));
+        setYjcBalance(s?.summary?.balances?.YJC || s?.balances?.yjc?.balance || '0');
+      }
+    } catch { setItems([]); }
+  }, [sessionId]);
 
-  useQuery({
-    queryKey: ['shop-wallet', sessionId],
-    enabled: !!sessionId,
-    queryFn: async () => {
-      const res = await api.get('/api/v1/wallet/summary', { params: { sessionId } });
-      const s = res.data?.data;
-      const bal = s?.summary?.balances?.ZXC || s?.balances?.zhixi?.balance || '0';
-      setBalance(String(bal));
-      setYjcBalance(s?.summary?.balances?.YJC || s?.balances?.yjc?.balance || '0');
-      return res.data;
-    },
-  });
+  useEffect(() => { fetchItems(); }, [fetchItems]);
 
   const [chests, setChests] = useState<any[]>([]);
   const [buyingChest, setBuyingChest] = useState<string | null>(null);
@@ -192,7 +172,7 @@ export default function ShopView() {
         const discountText = d.discount > 0 ? ` (省 ${(d.discount * 100).toFixed(0)}%)` : '';
         setMsg(`✅ ${quantity} x ${label}寶箱 已放入背包！${discountText}`);
         if (d.balanceAfter) setBalance(d.balanceAfter);
-        refreshAll();
+        fetchItems();
         setTimeout(() => setMsg(null), 3000);
       } else {
         setMsg(`❌ ${res.data?.error || '購買失敗'}`);
@@ -222,7 +202,7 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`✅ 成功兌換 ${res.data.data?.yjcAmount || yjcInput} YJC`);
         setConvertZxc('');
-        refreshAll();
+        fetchItems();
       } else {
         setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
       }
@@ -250,7 +230,7 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`✅ 成功兌換 ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
         setConvertYjc('');
-        refreshAll();
+        fetchItems();
       } else {
         setMsg(`❌ ${res.data?.error?.message || res.data?.error || '兌換失敗'}`);
       }
@@ -272,7 +252,7 @@ export default function ShopView() {
         setMsg(`${res.data.data?.name || itemId} 購買成功！`);
         const newBal = res.data.data?.balanceAfter;
         if (newBal) setBalance(newBal);
-        refreshAll();
+        fetchItems();
       } else {
         setMsg(res.data?.error || '購買失敗');
       }
@@ -292,7 +272,7 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`典當成功！獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
-        await refreshAll();
+        await fetchItems();
       } else {
         setMsg(res.data?.error || '典當失敗');
       }
@@ -354,7 +334,7 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`✅ 購買成功！`);
         fetchListings();
-        refreshAll();
+        fetchItems();
       } else {
         setMsg(`❌ ${res.data?.error || '購買失敗'}`);
       }
@@ -390,7 +370,7 @@ export default function ShopView() {
       if (res.data?.success) {
         setMsg(`✅ 成功出售 ${qty} 股 ${symbol}，獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
-        await refreshAll();
+        await fetchItems();
       } else {
         setMsg(`❌ ${res.data?.error || '出售失敗'}`);
       }

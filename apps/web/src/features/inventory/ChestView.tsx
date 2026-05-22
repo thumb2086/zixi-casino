@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronRight, X, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -149,41 +149,46 @@ export default function ChestView() {
   const displayPity = localPity || pity;
   const displayKeyCounts = localKeyCounts || keyCounts;
 
-  useQuery({
-    queryKey: ['chest-configs'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/chests');
-      if (res.data?.success) setChests(res.data.data);
-      return res.data;
-    },
-  });
-
-  useQuery({
-    queryKey: ['chest-status'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/chests/status');
-      if (res.data?.success) setStatus(res.data.data);
-      return res.data;
-    },
-  });
-
-  useQuery({
-    queryKey: ['chest-inventory'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/inventory');
-      if (res.data?.success) setInventory(res.data.data);
-      return res.data;
-    },
-  });
-
-  useQuery({
-    queryKey: ['chest-recipients'],
-    queryFn: async () => {
+  const fetchRecipients = useCallback(async () => {
+    try {
       const res = await api.get("/api/v1/gift/recipients");
       if (res.data?.success) setRecipients(res.data.data.users);
-      return res.data;
-    },
-  });
+    } catch (err) {
+      console.error("Failed to fetch recipients:", err);
+    }
+  }, []);
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const res = await api.get('/api/v1/chests/status');
+      if (res.data?.success) setStatus(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch chest status:', err);
+    }
+  }, []);
+
+  const refreshInventory = useCallback(async () => {
+    try {
+      const res = await api.get('/api/v1/inventory');
+      if (res.data?.success) setInventory(res.data.data);
+    } catch (err) {
+      console.error('Failed to fetch inventory:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRecipients();
+    (async () => {
+      try {
+        const res = await api.get('/api/v1/chests');
+        if (res.data?.success) setChests(res.data.data);
+      } catch (err) {
+        console.error('Failed to fetch chests:', err);
+      }
+    })();
+    refreshStatus();
+    refreshInventory();
+  }, [refreshStatus, refreshInventory, fetchRecipients]);
 
   const [opening, setOpening] = useState(false);
   const [openQtys, setOpenQtys] = useState<Record<string, string>>({});
@@ -218,8 +223,8 @@ export default function ChestView() {
           }
         }
         setShowResult(true);
-        await queryClient.invalidateQueries({ queryKey: ['chest-inventory'] });
-        await queryClient.invalidateQueries({ queryKey: ['chest-status'] });
+        await refreshInventory();
+        await refreshStatus();
       } else {
         showToast(res.data?.error || '開啟失敗');
       }
@@ -241,7 +246,7 @@ export default function ChestView() {
         if (d.totalZxc > 0) parts.push(`${d.totalZxc.toLocaleString()} ZXC`);
         if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
         showToast(`成功使用 ${d.itemCount} 個物品，獲得 ${parts.join(' + ')}`);
-        await queryClient.invalidateQueries({ queryKey: ['chest-inventory'] });
+        await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
         showToast(res.data?.error || '兌換失敗');
@@ -267,7 +272,7 @@ export default function ChestView() {
         } else {
           showToast(`成功使用 ${quantity} 個物品`);
         }
-        await queryClient.invalidateQueries({ queryKey: ['chest-inventory'] });
+        await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
         showToast(res.data?.error || '使用失敗');
@@ -778,7 +783,7 @@ export default function ChestView() {
                         setGiftDialog(null);
                         setGiftAddress('');
                         setGiftQty('1');
-                        await queryClient.invalidateQueries({ queryKey: ['chest-inventory'] });
+                        await refreshInventory();
                       } else {
                         showToast(res.data?.error || '贈送失敗');
                       }
