@@ -32,7 +32,7 @@ export default function SubmitRewardView() {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('');
   const [description, setDescription] = useState('');
-  const [rarity, setRarity] = useState<'common' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'oracle'>('common');
+  const [rarity, setRarity] = useState<'common' | 'rare' | 'epic' | 'legendary' | 'mythic'>('common');
   const [submitting, setSubmitting] = useState(false);
   const [resultMsg, setResultMsg] = useState<string | null>(null);
 

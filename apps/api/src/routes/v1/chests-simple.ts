@@ -29,7 +29,7 @@ const DUPLICATE_COMPENSATION: Record<string, number> = {
 const chestManager = new ChestManager();
 const walletManager = new WalletManager();
 
-  const CHEST_TYPE_ENUM = z.enum(["common", "rare", "epic", "legendary", "mythic", "oracle"]);
+const CHEST_TYPE_ENUM = z.enum(["common", "rare", "epic", "legendary", "mythic"]);
 
 let _catalogRepo: RewardCatalogRepository;
 function getCatalogRepo() {
@@ -50,7 +50,7 @@ async function buildCustomDropTables(): Promise<Record<string, ItemDefinition[]>
   const tables: Record<string, ItemDefinition[]> = {};
   for (const item of userItems) {
     const r = item.rarity as string;
-        if (!["common", "rare", "epic", "legendary", "mythic", "oracle"].includes(r)) continue;
+    if (!["common", "rare", "epic", "legendary", "mythic"].includes(r)) continue;
     if (!tables[r]) tables[r] = [];
     tables[r].push({
       id: item.itemId,

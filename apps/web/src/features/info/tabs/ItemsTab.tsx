@@ -10,7 +10,7 @@ interface CatalogItem {
   name?: string;
   label?: string;
   type: 'avatar' | 'title' | 'item' | 'buff';
-  rarity?: 'common' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'oracle' | 'vip';
+  rarity?: 'common' | 'rare' | 'legendary' | 'mythic' | 'vip' | 'epic';
   description?: string;
   icon?: string;
   source?: string;
@@ -26,12 +26,11 @@ const RARITY_STYLES = {
   epic: { bg: 'bg-purple-500/20', text: 'text-purple-300', border: 'border-purple-500/30', label: '史詩' },
   legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-500/30', label: '傳說' },
   mythic: { bg: 'bg-pink-500/20', text: 'text-pink-300', border: 'border-pink-500/30', label: '神話' },
-  oracle: { bg: 'bg-red-500/20', text: 'text-red-300', border: 'border-red-500/30', label: '神諭' },
   vip: { bg: 'bg-[#fcc025]/20', text: 'text-[#fcc025]', border: 'border-[#fcc025]/30', label: 'VIP' },
 };
 
 const RARITY_RANK: Record<string, number> = {
-  oracle: 0, mythic: 1, legendary: 2, epic: 3, rare: 4, common: 5, vip: 6,
+  mythic: 0, legendary: 1, epic: 2, rare: 3, common: 4, vip: 5,
 };
 
 const TYPE_ICONS = {

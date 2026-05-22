@@ -138,7 +138,7 @@ export default function AdminView() {
   const [catalogItemId, setCatalogItemId] = useState('');
   const [catalogType, setCatalogType] = useState<'avatar' | 'title' | 'buff' | 'chest' | 'key' | 'collectible'>('avatar');
   const [catalogName, setCatalogName] = useState('');
-  const [catalogRarity, setCatalogRarity] = useState<'common' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'oracle' | 'vip'>('common');
+  const [catalogRarity, setCatalogRarity] = useState<'common' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'vip'>('common');
   const [catalogIcon, setCatalogIcon] = useState('');
   const [catalogDescription, setCatalogDescription] = useState('');
 
