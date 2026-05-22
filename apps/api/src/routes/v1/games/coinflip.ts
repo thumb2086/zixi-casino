@@ -6,7 +6,7 @@ import { createApiEnvelope } from "@repo/shared";
 import { GameSessionManager } from "@repo/domain/games/game-session-manager.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import { GameManager } from "@repo/domain/games/game-manager.js";
-import { getRoundInfo, hashInt } from "@repo/domain/games/auto-round.js";
+import { getRoundInfo } from "@repo/domain/games/auto-round.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
 
 export async function coinflipRoutes(fastify: FastifyInstance) {
@@ -107,10 +107,10 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // 2. Resolve game using deterministic hash based on roundId
-      const resultSide = (hashInt(`coinflip:${roundInfo.roundId}`) % 2 === 0) ? 'heads' : 'tails';
-      const isWin = (selection === resultSide);
-      const payout = isWin ? betAmount * 2 : 0;
+      // 2. Resolve game using GameManager (deterministic FNV hash)
+      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundInfo.roundId}`);
+      const isWin = result.isWin;
+      const payout = isWin ? betAmount * result.multiplier : 0;
       const payoutStr = payout.toString();
 
       // 3. Execute on-chain settlement
@@ -161,7 +161,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
           result: settlement.isWin ? "win" : "lose",
           payout: settlement.finalPayout,
           meta: { 
-            winner: resultSide, 
+            winner: result.winner, 
             selection,
             betTxHash: settlement.betTxHash,
             payoutTxHash: settlement.payoutTxHash,
@@ -181,7 +181,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
         payout: settlement.finalPayout.toString(),
         fee: settlement.feeAmount.toString(),
         isWin: settlement.isWin,
-        multiplier: 2,
+        multiplier: result.multiplier,
         betTxHash: settlement.betTxHash,
         payoutTxHash: settlement.payoutTxHash,
         roundId,
@@ -189,7 +189,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
 
       // 8. Save round
       await gameSettlement.saveRound("coinflip", roundId, {
-        winner: resultSide,
+        winner: result.winner,
         selection,
         isWin,
         roundInfo,
@@ -201,11 +201,11 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
           sessionId: session.id,
           roundId: roundInfo.roundId,
           selection,
-          winner: resultSide,
+          winner: result.winner,
           result: settlement.isWin ? "win" : "lose",
           payout: settlement.finalPayout,
           betAmount,
-          multiplier: 2,
+          multiplier: result.multiplier,
           fee: settlement.feeAmount,
           balance: finalBalance,
           betTxHash: settlement.betTxHash,
