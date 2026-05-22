@@ -22,12 +22,38 @@ type DashboardTx = {
   createdAt: string;
 };
 
+type LedgerEntry = {
+  id: string;
+  type: string;
+  amount: string;
+  token: string;
+  address: string;
+  balanceBefore: string;
+  balanceAfter: string;
+  createdAt: string;
+};
+
 const TX_TYPE_LABEL: Record<string, string> = {
   bet: '下注',
   payout: '派彩',
   deposit: '存入',
   withdrawal: '提領',
   transfer: '轉帳',
+  chest_buy: '購買寶箱',
+  chest_compensation: '寶箱補償',
+  airdrop: '空投',
+  admin_credit: '系統發放',
+  admin_debit: '系統扣回',
+  convert: 'YJC兌換',
+  stock_buy: '買入股票',
+  stock_sell: '賣出股票',
+  futures_open: '開合約',
+  futures_close: '平合約',
+  futures_liquidated: '合約爆倉',
+  bank_deposit: '銀行存入',
+  bank_withdraw: '銀行提領',
+  loan_borrow: '貸款',
+  loan_repay: '還款',
 };
 
 const TX_STATUS_LABEL: Record<string, string> = {
@@ -66,6 +92,15 @@ export default function PublicTransactionsView() {
     refetchInterval: 15000,
   });
 
+  const { data: recentTxData } = useQuery({
+    queryKey: ['recent-txs-inline'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/stats/recent-txs');
+      return res.data.data as { events: LedgerEntry[] };
+    },
+    refetchInterval: 10000,
+  });
+
   const { data: healthData } = useQuery({
     queryKey: ['health-stats-inline'],
     queryFn: async () => {
@@ -84,7 +119,24 @@ export default function PublicTransactionsView() {
     refetchInterval: 30000,
   });
 
-  const items = txData?.items || [];
+  const txItems = txData?.items || [];
+  const ledgerEvents = recentTxData?.events || [];
+  // Merge dashboard TXs with wallet ledger events, sorted newest first
+  const mergedItems: DashboardTx[] = [
+    ...txItems,
+    ...ledgerEvents.map((e: LedgerEntry) => ({
+      id: e.id,
+      roundId: '',
+      userAddress: e.address,
+      type: e.type,
+      amount: e.amount,
+      tokenSymbol: e.token,
+      status: 'confirmed' as const,
+      createdAt: e.createdAt,
+    })),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+   .slice(0, 50);
+  const items = mergedItems;
   const summary = txData?.summary;
   const serviceStats = healthData?.stats;
 
