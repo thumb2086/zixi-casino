@@ -132,115 +132,117 @@ export default function WalletView() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-6">
-            <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-              <div className="flex items-center gap-3">
-                <Gift className="text-[#fcc025]" size={18} />
-                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
-              </div>
-              <p className="mt-3 text-sm font-bold text-[#adaaaa]">
-                {t('vault.next_available')}{nextAirdropLabel}
-              </p>
-              <button
-                type="button"
-                disabled={!canClaimAirdrop || airdrop.isPending}
-                onClick={() => airdrop.mutate()}
-                className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <ArrowDownCircle size={16} />
-                {airdrop.isPending ? t('vault.claiming') : t('vault.claim_airdrop')}
-              </button>
-              {airdrop.error?.message && (
-                <p className="mt-2 text-xs font-bold text-[#ff7351]">{airdrop.error.message}</p>
-              )}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <Gift className="text-[#fcc025]" size={18} />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
             </div>
-
-            <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-              <div className="flex items-center gap-3">
-                <Repeat2 className="text-[#fcc025]" size={18} />
-                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.transfer')}</h2>
-              </div>
-              <div className="mt-4 grid gap-3">
-                <input
-                  value={transferTo}
-                  onChange={(event) => setTransferTo(event.target.value)}
-                  placeholder={t('vault.recipient_placeholder')}
-                  className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
-                />
-                <div className="grid gap-3 md:grid-cols-[1fr_140px]">
-                  <input
-                    value={transferAmount}
-                    onChange={(event) => setTransferAmount(event.target.value)}
-                    placeholder={t('market.amount')}
-                    className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
-                  />
-                  <select
-                    value={transferToken}
-                    onChange={(event) => setTransferToken(event.target.value as 'zhixi' | 'yjc')}
-                    className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none"
-                  >
-                    <option value="zhixi">ZXC</option>
-                    <option value="yjc">YJC</option>
-                  </select>
-                </div>
-                <button
-                  type="button"
-                  disabled={!transferTo || !transferAmount || transfer.isPending}
-                  onClick={() => transfer.mutate({ to: transferTo, amount: transferAmount, token: transferToken })}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <ArrowUpCircle size={16} />
-                  {transfer.isPending ? t('vault.sending') : t('vault.send_transfer')}
-                </button>
-              </div>
-            </div>
-
-            {myAddress && (
-              <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-                <div className="flex items-center gap-3">
-                  <QrCode className="text-[#fcc025]" size={18} />
-                  <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">
-                    {t('vault.receive_funds')}
-                  </h2>
-                </div>
-                <div className="mt-4 flex flex-col items-stretch gap-4 md:flex-row md:items-center">
-                  <div className="rounded-xl bg-white p-3 self-start">
-                    <QRCodeSVG value={myAddress} size={160} level="M" includeMargin={false} />
-                  </div>
-                  <div className="flex flex-1 flex-col gap-3">
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
-                      {t('vault.receive_address')}
-                    </p>
-                    <p className="break-all rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold text-white">
-                      {myAddress}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleCopyAddress}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black"
-                    >
-                      {copied ? <Check size={16} /> : <Copy size={16} />}
-                      {copied ? t('common.copied') : t('vault.copy_address')}
-                    </button>
-                    <p className="text-xs text-[#adaaaa]">
-                      {t('vault.receive_instruction')}
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <p className="mt-3 text-sm font-bold text-[#adaaaa]">
+              {t('vault.next_available')}{nextAirdropLabel}
+            </p>
+            <button
+              type="button"
+              disabled={!canClaimAirdrop || airdrop.isPending}
+              onClick={() => airdrop.mutate()}
+              className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ArrowDownCircle size={16} />
+              {airdrop.isPending ? t('vault.claiming') : t('vault.claim_airdrop')}
+            </button>
+            {airdrop.error?.message && (
+              <p className="mt-2 text-xs font-bold text-[#ff7351]">{airdrop.error.message}</p>
             )}
-
           </div>
 
-          <Link to="/app/transactions" className="flex items-center justify-between rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl hover:bg-white/5 transition-colors">
-            <div className="flex items-center gap-2">
-              <History size={16} className="text-[#adaaaa]" />
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">交易紀錄</h2>
+          <Link to="/app/transactions" className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl hover:bg-white/5 transition-colors group">
+            <div className="flex items-center gap-3 mb-3">
+              <History size={18} className="text-[#fcc025]" />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">交易紀錄</h2>
             </div>
-            <ChevronRight size={16} className="text-[#adaaaa]" />
+            <p className="text-sm font-bold text-[#adaaaa]">檢視所有交易與錢包動態</p>
+            <div className="mt-4 flex items-center gap-1 text-xs font-bold text-[#fcc025] group-hover:gap-2 transition-all">
+              前往查看 <ChevronRight size={14} />
+            </div>
           </Link>
-        </section>
+
+          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-3">
+              <Repeat2 className="text-[#fcc025]" size={18} />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.transfer')}</h2>
+            </div>
+            <div className="grid gap-3">
+              <input
+                value={transferTo}
+                onChange={(event) => setTransferTo(event.target.value)}
+                placeholder={t('vault.recipient_placeholder')}
+                className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
+              />
+              <div className="grid grid-cols-[1fr_100px] gap-2">
+                <input
+                  value={transferAmount}
+                  onChange={(event) => setTransferAmount(event.target.value)}
+                  placeholder={t('market.amount')}
+                  className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
+                />
+                <select
+                  value={transferToken}
+                  onChange={(event) => setTransferToken(event.target.value as 'zhixi' | 'yjc')}
+                  className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none"
+                >
+                  <option value="zhixi">ZXC</option>
+                  <option value="yjc">YJC</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                disabled={!transferTo || !transferAmount || transfer.isPending}
+                onClick={() => transfer.mutate({ to: transferTo, amount: transferAmount, token: transferToken })}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ArrowUpCircle size={16} />
+                {transfer.isPending ? t('vault.sending') : t('vault.send_transfer')}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {myAddress && (
+          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <QrCode className="text-[#fcc025]" size={18} />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">
+                {t('vault.receive_funds')}
+              </h2>
+            </div>
+            <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-center">
+              <div className="rounded-xl bg-white p-3 self-start">
+                <QRCodeSVG value={myAddress} size={140} level="M" includeMargin={false} />
+              </div>
+              <div className="flex flex-1 flex-col gap-3">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+                  {t('vault.receive_address')}
+                </p>
+                <p className="break-all rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold text-white">
+                  {myAddress}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCopyAddress}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black"
+                  >
+                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                    {copied ? t('common.copied') : t('vault.copy_address')}
+                  </button>
+                </div>
+                <p className="text-xs text-[#adaaaa]">
+                  {t('vault.receive_instruction')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <AppBottomNav current="wallet" />
