@@ -180,6 +180,33 @@ export default function PublicTransactionsView() {
           </span>
         </div>
 
+        {/* Uptime Chart */}
+        {serviceStats?.last24h?.success && (
+          <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/10 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-bold text-[#adaaaa] uppercase tracking-wider">24h 服務狀態</span>
+              <span className="text-[10px] font-bold text-[#adaaaa]">{serviceStats.uptime || ''}</span>
+            </div>
+            <div className="flex items-end gap-[2px] h-16">
+              {serviceStats.last24h.success.map((s: number, i: number) => {
+                const f = (serviceStats.last24h?.failure || [])[i] || 0;
+                const total = s + f;
+                const h = total > 0 ? Math.max(4, (s / Math.max(total, 1)) * 60) : 4;
+                const barH = total > 0 ? Math.max(4, (total / 30) * 60) : 4;
+                return (
+                  <div key={i} className="flex-1 flex flex-col justify-end items-center gap-[1px]" title={`${s} OK / ${f} FAIL`}>
+                    <div className="w-full rounded-t-sm" style={{ height: `${Math.min(h, 60)}px`, background: f > 0 ? `linear-gradient(to top, #ff7351 ${(f/total)*100}%, #10b981 ${(s/total)*100}%)` : '#10b981', opacity: total > 0 ? 0.8 : 0.2 }} />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-between mt-1 text-[8px] text-[#494847]">
+              <span>-24h</span>
+              <span>現在</span>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-2">

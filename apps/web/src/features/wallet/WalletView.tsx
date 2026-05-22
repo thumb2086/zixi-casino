@@ -101,6 +101,8 @@ export default function WalletView() {
   const onchain = summary.data?.onchain;
   const canClaimAirdrop = summary.data?.canClaimAirdrop ?? true;
   const nextAirdropAt = summary.data?.nextAirdropAt;
+  const checkinStreak = summary.data?.checkinStreak ?? 0;
+  const checkinHistory: string[] = summary.data?.checkinHistory || [];
   const zxcBalance = resolvePreferredBalance({
     onchainBalance: onchain?.zxc?.balance,
     onchainAvailable: onchain?.zxc?.available,
@@ -164,18 +166,43 @@ export default function WalletView() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-3">
               <Gift className="text-[#fcc025]" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
             </div>
-            <p className="mt-3 text-sm font-bold text-[#adaaaa]">
-              {t('vault.next_available')}{nextAirdropLabel}
-            </p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex flex-col items-center bg-[#0e0e0e] rounded-xl px-4 py-2">
+                <span className="text-2xl font-black italic text-[#fcc025]">{checkinStreak}</span>
+                <span className="text-[10px] font-bold text-[#adaaaa]">連續天數</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-[#adaaaa]">{t('vault.next_available')}{nextAirdropLabel}</p>
+                <p className="text-xs font-bold text-[#fcc025] mt-1">獎勵倍率 ×{(1 + checkinStreak * 0.05).toFixed(2)}</p>
+              </div>
+            </div>
+            {/* Calendar grid: last 30 days */}
+            <div className="grid grid-cols-7 gap-1 mb-3">
+              {Array.from({ length: 30 }, (_, i) => {
+                const d = new Date(Date.now() - (29 - i) * 86400000);
+                const dateStr = d.toISOString().slice(0, 10);
+                const checked = checkinHistory.includes(dateStr);
+                const isToday = i === 29;
+                return (
+                  <div key={i} className={`aspect-square rounded flex items-center justify-center text-[9px] font-bold ${
+                    isToday ? 'ring-1 ring-[#fcc025]' : ''
+                  } ${
+                    checked ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#494847]'
+                  }`}>
+                    {d.getDate()}
+                  </div>
+                );
+              })}
+            </div>
             <button
               type="button"
               disabled={!canClaimAirdrop || airdrop.isPending}
               onClick={() => airdrop.mutate()}
-              className="mt-4 inline-flex items-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ArrowDownCircle size={16} />
               {airdrop.isPending ? t('vault.claiming') : t('vault.claim_airdrop')}

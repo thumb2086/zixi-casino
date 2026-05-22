@@ -159,11 +159,13 @@ export async function walletRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED", message: "Invalid session" } }, request.id);
 
     const address = ctx.session.address;
-    const [zxcBal, yjcBal, ledger, lastAirdrop] = await Promise.all([
+    const [zxcBal, yjcBal, ledger, lastAirdrop, checkinStreak, checkinHistory] = await Promise.all([
       walletRepo.getBalance(address, "zhixi"),
       walletRepo.getBalance(address, "yjc"),
       walletRepo.listLedgerEntries({ address, limit: 25 }),
       kv.get<number>(`last_airdrop:${address}`),
+      kv.get<number>(`checkin_streak:${address}`),
+      kv.get<string[]>(`checkin_history:${address}`),
     ]);
 
     let balances = { ZXC: zxcBal || "0", YJC: yjcBal || "0" };
@@ -303,6 +305,8 @@ export async function walletRoutes(fastify: FastifyInstance) {
       onchain,
       canClaimAirdrop: !nextAirdropAt || Date.now() >= nextAirdropAt,
       nextAirdropAt,
+      checkinStreak: checkinStreak || 0,
+      checkinHistory: (checkinHistory || []).slice(-30),
     }, request.id);
   });
 
@@ -317,9 +321,11 @@ export async function walletRoutes(fastify: FastifyInstance) {
     try {
       const address = ctx.session.address;
       const now = Date.now();
-      const [lastAirdropRaw, distributedTotalRaw] = await Promise.all([
+      const [lastAirdropRaw, distributedTotalRaw, streakRaw, historyRaw] = await Promise.all([
         kv.get<number>(`last_airdrop:${address}`),
         kv.get<string | number>(AIRDROP_DISTRIBUTED_TOTAL_KEY),
+        kv.get<number>(`checkin_streak:${address}`),
+        kv.get<string[]>(`checkin_history:${address}`),
       ]);
       const lastAirdrop = lastAirdropRaw || 0;
 
@@ -328,13 +334,30 @@ export async function walletRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ error: { code: "COOLDOWN", message: `Please wait ${waitMinutes} more minutes` } }, request.id);
       }
 
+      // Calculate streak
+      const todayDate = new Date().toISOString().slice(0, 10);
+      const yesterdayDate = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      const lastCheckinDate = lastAirdrop > 0 ? new Date(lastAirdrop).toISOString().slice(0, 10) : null;
+      let streak = streakRaw || 0;
+      const history = (historyRaw || []).slice(-30);
+      if (lastCheckinDate === yesterdayDate) {
+        streak += 1;
+      } else if (lastCheckinDate !== todayDate) {
+        streak = 1;
+      }
+      if (streak > 99) streak = 99;
+      const streakMultiplier = 1 + streak * 0.05;
       const token: WalletTokenKey = "zhixi";
+
+      // Apply streak to fallback amount too
+      const baseFallback = 100000;
+      const streakFallback = Math.floor(baseFallback * streakMultiplier);
 
       let onChainRuntime: { client: any; tokenRuntime: any; decimals: number } | null = null;
       try {
         onChainRuntime = await getTokenRuntime(token);
       } catch {
-        const fallbackAmount = "100000";
+        const fallbackAmount = String(streakFallback);
         const address = ctx.session.address;
         const prevBalance = await gameSettlement.getBalance(address, token);
         const newBalance = (parseFloat(prevBalance || "0") + parseFloat(fallbackAmount)).toString();
@@ -360,7 +383,11 @@ export async function walletRoutes(fastify: FastifyInstance) {
           meta: { source: "daily_airdrop", mode: "direct_credit", intentId: airdropIntent.id },
           createdAt: new Date(),
         });
-        await kv.set(`last_airdrop:${address}`, now);
+        await Promise.all([
+          kv.set(`last_airdrop:${address}`, now),
+          kv.set(`checkin_streak:${address}`, streak),
+          kv.set(`checkin_history:${address}`, [...history, todayDate].slice(-30)),
+        ]);
         await opsRepo.logEvent({
           channel: "wallet",
           severity: "info",
@@ -467,6 +494,8 @@ export async function walletRoutes(fastify: FastifyInstance) {
         await Promise.all([
           kv.set(`last_airdrop:${address}`, now),
           kv.set(AIRDROP_DISTRIBUTED_TOTAL_KEY, (distributedWei + amountWei).toString()),
+          kv.set(`checkin_streak:${address}`, streak),
+          kv.set(`checkin_history:${address}`, [...history, todayDate].slice(-30)),
         ]);
 
         await opsRepo.logEvent({
