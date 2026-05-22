@@ -135,7 +135,6 @@ export default function ShopView() {
       setItems(catalog.filter((i: any) => i.source === 'shop' && Number(i.price) > 0));
       return catalog;
     },
-    staleTime: 30000,
   });
 
   useQuery({
@@ -151,7 +150,6 @@ export default function ShopView() {
       }
       return res.data;
     },
-    staleTime: 30000,
   });
 
   useQuery({
@@ -165,7 +163,6 @@ export default function ShopView() {
       setYjcBalance(s?.summary?.balances?.YJC || s?.balances?.yjc?.balance || '0');
       return res.data;
     },
-    staleTime: 30000,
   });
 
   const [chests, setChests] = useState<any[]>([]);
