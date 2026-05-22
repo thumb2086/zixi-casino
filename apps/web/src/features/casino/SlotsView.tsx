@@ -7,6 +7,12 @@ import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 
+const REEL_CELLS = [[0, 3, 6], [1, 4, 7], [2, 5, 8]];
+const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣'];
+const randomSymbol = () => SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+const REEL_DELAY_MS = 200;
+const REEL_STOP_INTERVAL = 400;
+
 export const SlotsView: React.FC = () => {
   const { session } = useAuth();
   const queryClient = useQueryClient();
