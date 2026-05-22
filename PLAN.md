@@ -14,7 +14,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.6** | 寶箱 + XP | 8 層寶箱平衡、物品/當舖值調整、保底修正、經驗加成系統 | ✅ 開發完成 |
 | **v1.0.7** | Coinflip | Route 統一使用 GameManager 賠率 | ✅ |
 | **v1.0.8** | Slots（前端） | 補齊遺失常數 REEL_CELLS/SYMBOLS/reelDelay 等 | ✅ |
-| **v1.0.8** | Roulette | Domain 數字賠 35x 應為 36x | ⏳ |
+| **v1.0.9** | Roulette + 靶心任務 | Roulette 數字賠 35x 應為 36x；新增靶心任務系統 | ⏳ |
 | **v1.0.10** | Horse Racing | RTP_SCALE=2.0 導致 -5.5% 玩家優勢，重新設計 | ⏳ |
 | **v1.0.11** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
 | **v1.0.12** | Dragon Tiger | `Math.random()`→FNV、賠率 redesign、HE 過高 | ⏳ |
@@ -39,10 +39,11 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 - 補上遺失的前端常數：`REEL_CELLS`、`randomSymbol`、`REEL_DELAY_MS`、`REEL_STOP_INTERVAL`
 - **檔案**: `apps/web/src/features/casino/SlotsView.tsx`
 
-### v1.0.9 — Roulette
-- **問題**: Domain `resolveRoulette` 中數字賠 35x，正確應為 36x
-- **修正**: Domain 中 `totalPayoutMultiplier += 35` → `+= 36`
+### v1.0.9 — Roulette + 靶心任務
+- **Roulette**: Domain `resolveRoulette` 中數字賠 35x → 36x
 - **檔案**: `packages/domain/src/games/game-manager.ts`
+- **靶心任務**: 新增每日/每週靶心任務系統，玩家達成指定目標（累計押注、勝場數、連勝等）可領取獎勵
+- **檔案**: `packages/domain/src/missions/`、`apps/api/src/routes/v1/missions.ts`、`apps/web/src/features/missions/`
 
 ### v1.0.10 — Horse Racing
 - **問題**: Route 自訂 HORSES 陣列 + RTP_SCALE=2.0 使 EV=1.055（玩家優勢）
@@ -77,6 +78,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | 背景市場 tick | **高** | 定時器統一推進價格，避免每 request 各自算 |
 | Admin 干預端點 | **高** | 調整 symbol 價格/波動率、注入 shock、改利率 |
 | futures_close tick | **中** | API 補上 tick 參數傳遞 |
+| futures_open 遺漏 TP/SL 參數 | **高** | API `apps/api/src/routes/v1/market.ts:141,171` 未將 `takeProfitPrice`/`stopLossPrice` 從 request body 傳入 domain `openFutures()`，導致開倉永遠沒有停利停損價 |
 | 清算檢查一致性 | **中** | PnL 99% 閾值與 liquidationPrice 公式對齊 |
 | 前端極速反饋 | **高** | 股市/賭場操作先顯示結果再等後端/上鏈確認（optimistic UI） |
 | 後端非阻塞 | **中** | 交易操作立即回傳，上鏈等慢操作背景排隊處理 |

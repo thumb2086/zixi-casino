@@ -665,6 +665,24 @@ export class GameSettlementWrapper {
       await this.checkAndUnlockTitles(userId, address);
       // Grant XP based on bet amount
       await this.grantGameXp(userId, betAmount, address).catch(() => {});
+      // Track mission progress (fire-and-forget)
+      // Track mission progress (fire-and-forget) — pass game from metadata
+      const gameName = betAmount > 0 ? 'unknown' : '';
+      this.trackMission(address, betAmount, winAmount || 0).catch(() => {});
+    }
+  }
+
+  private async trackMission(address: string, betAmount: number, winAmount: number): Promise<void> {
+    const { kv } = await import("@repo/infrastructure");
+    const today = new Date().toISOString().slice(0, 10);
+    const addr = address.toLowerCase();
+    // Track daily bet total
+    const prevBet = await kv.get<number>(`mission:bet:${addr}:${today}`);
+    await kv.set(`mission:bet:${addr}:${today}`, (prevBet || 0) + betAmount);
+    // Track daily wins
+    if (winAmount > 0) {
+      const prevWin = await kv.get<number>(`mission:win:${addr}:${today}`);
+      await kv.set(`mission:win:${addr}:${today}`, (prevWin || 0) + 1);
     }
   }
 
