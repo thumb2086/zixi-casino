@@ -83,19 +83,6 @@ export default function WalletView() {
 
   const numberMode = amountDisplay === 'full' ? 'full' : 'short';
 
-  const { data: myTxData } = useQuery({
-    queryKey: ['wallet-my-tx', myAddress],
-    enabled: !!myAddress,
-    queryFn: async () => {
-      const res = await api.get('/api/v1/dashboard/transactions', { params: { address: myAddress, limit: 20, page: 1 } });
-      return (res.data.data?.items || []) as {
-        id: string; type: string; amount: string; tokenSymbol?: string;
-        status: string; gameType?: string; roundId: string | number;
-        createdAt: string;
-      }[];
-    },
-    refetchInterval: 15000,
-  });
   const walletSummary = summary.data?.summary;
   const assets = summary.data?.assets;
   const onchain = summary.data?.onchain;
@@ -221,9 +208,9 @@ export default function WalletView() {
               <Link to="/app/transactions" className="text-[10px] font-bold text-[#fcc025] hover:underline">查看全部</Link>
             </div>
             <div className="space-y-2">
-              {!myTxData && <div className="text-xs text-[#adaaaa]">載入中...</div>}
-              {myTxData?.length === 0 && <div className="text-xs text-[#adaaaa]">暫無交易</div>}
-              {(myTxData || []).slice(0, 10).map((tx) => {
+              {summary.isLoading && <div className="text-xs text-[#adaaaa]">載入中...</div>}
+              {!summary.isLoading && (!walletSummary?.recentTransactions || walletSummary.recentTransactions.length === 0) && <div className="text-xs text-[#adaaaa]">暫無交易</div>}
+              {(walletSummary?.recentTransactions || []).slice(0, 10).map((tx: any) => {
                 const amt = Number(tx.amount);
                 const isCredit = tx.type === 'payout' || tx.type === 'deposit' || tx.type === 'airdrop' || tx.type === 'admin_credit' || tx.type === 'chest_compensation';
                 return (
@@ -234,9 +221,9 @@ export default function WalletView() {
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className={`text-xs font-black ${isCredit ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                        {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {tx.tokenSymbol || 'ZXC'}
+                        {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {tx.token || tx.tokenSymbol || 'ZXC'}
                       </p>
-                      <p className="text-[10px] text-[#adaaaa]">{TX_STATUS_LABEL[tx.status] || tx.status}</p>
+                      <p className="text-[10px] text-[#adaaaa]">{TX_STATUS_LABEL[tx.status] || '已確認'}</p>
                     </div>
                   </div>
                 );

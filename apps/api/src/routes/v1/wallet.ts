@@ -297,7 +297,7 @@ export async function walletRoutes(fastify: FastifyInstance) {
     }
 
     return createApiEnvelope({
-      summary,
+      summary: { ...summary, recentTransactions: (ledger || []).slice(0, 25) },
       assets: {
         walletBalance: summary.balances,
         market: marketAssets,
