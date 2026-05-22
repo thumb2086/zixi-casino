@@ -14,7 +14,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.6** | 寶箱 + XP | 8 層寶箱平衡、物品/當舖值調整、保底修正、經驗加成系統 | ✅ 開發完成 |
 | **v1.0.7** | Coinflip | Route 統一使用 GameManager 賠率 | ✅ |
 | **v1.0.8** | Slots（前端） | 補齊遺失常數 REEL_CELLS/SYMBOLS/reelDelay 等 | ✅ |
-| **v1.0.9** | Roulette + 靶心任務 | Roulette 數字賠 35x 應為 36x；新增靶心任務系統 | ⏳ |
+| **v1.0.9** | Roulette + 靶心任務 | Roulette 數字賠 35x 應為 36x；新增靶心任務系統 | ✅ |
 | **v1.0.10** | Horse Racing | RTP_SCALE=2.0 導致 -5.5% 玩家優勢，重新設計 | ⏳ |
 | **v1.0.11** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
 | **v1.0.12** | Dragon Tiger | `Math.random()`→FNV、賠率 redesign、HE 過高 | ⏳ |
@@ -79,6 +79,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | Admin 干預端點 | **高** | 調整 symbol 價格/波動率、注入 shock、改利率 |
 | futures_close tick | **中** | API 補上 tick 參數傳遞 |
 | futures_open 遺漏 TP/SL 參數 | **高** | API `apps/api/src/routes/v1/market.ts:141,171` 未將 `takeProfitPrice`/`stopLossPrice` 從 request body 傳入 domain `openFutures()`，導致開倉永遠沒有停利停損價 |
+| 持倉 TP/SL 即時調整 UI | **高** | 現有倉位無法事後修改停利停損點。需在持倉卡片內新增可直接編輯的 TP/SL 輸入框（類似開倉表單），並新增 API action 如 `futures_modify_tp_sl` 即時更新倉位的 `takeProfitPrice`/`stopLossPrice` |
 | 清算檢查一致性 | **中** | PnL 99% 閾值與 liquidationPrice 公式對齊 |
 | 前端極速反饋 | **高** | 股市/賭場操作先顯示結果再等後端/上鏈確認（optimistic UI） |
 | 後端非阻塞 | **中** | 交易操作立即回傳，上鏈等慢操作背景排隊處理 |
