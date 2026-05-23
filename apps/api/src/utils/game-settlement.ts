@@ -676,10 +676,10 @@ export class GameSettlementWrapper {
     const { kv } = await import("@repo/infrastructure");
     const today = new Date().toISOString().slice(0, 10);
     const addr = address.toLowerCase();
-    // Track daily bet total
     const prevBet = await kv.get<number>(`mission:bet:${addr}:${today}`);
     await kv.set(`mission:bet:${addr}:${today}`, (prevBet || 0) + betAmount);
-    // Track daily wins
+    const prevPlay = await kv.get<number>(`mission:play:${addr}:${today}`);
+    await kv.set(`mission:play:${addr}:${today}`, (prevPlay || 0) + 1);
     if (winAmount > 0) {
       const prevWin = await kv.get<number>(`mission:win:${addr}:${today}`);
       await kv.set(`mission:win:${addr}:${today}`, (prevWin || 0) + 1);
