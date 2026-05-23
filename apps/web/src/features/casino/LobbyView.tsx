@@ -396,16 +396,7 @@ export default function LobbyView() {
               </Link>
             </div>
           </div>
-          <GlassCard
-            to="/app/inventory"
-            icon={Archive}
-            title={t('lobby.collection')}
-            subtitle={t('lobby.collection_subtitle')}
-          >
-            <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
-              {t('lobby.collection_description')}
-            </p>
-          </GlassCard>
+
           <GlassCard
             to="/app/company"
             icon={Building2}
