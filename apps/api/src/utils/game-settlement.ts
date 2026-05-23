@@ -622,8 +622,8 @@ export class GameSettlementWrapper {
       }).catch((err: any) => console.error('Failed to save payout ledger entry:', err));
     }
 
-    // Broadcast win notification to global chat
-    if (game && userId && payout > 0) {
+    // Broadcast win notification to global chat (skip refunds: payout must exceed bet)
+    if (game && userId && payout > 0 && (!betAmount || payout > betAmount)) {
       this.broadcastWin(address, game, payout, userId);
     }
 
