@@ -59,6 +59,7 @@ const TX_TYPE_LABEL: Record<string, string> = {
   market_buy: '市場買入',
   market_sell: '市場賣出',
   futures_pnl: '合約損益',
+  market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
 };
 
 const TX_STATUS_LABEL: Record<string, string> = {

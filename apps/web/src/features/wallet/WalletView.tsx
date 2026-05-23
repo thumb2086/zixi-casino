@@ -50,6 +50,7 @@ const TX_TYPE_LABEL: Record<string, string> = {
   convert: 'YJC兌換', stock_buy: '買入股票', stock_sell: '賣出股票',
   futures_open: '開合約', futures_close: '平合約',
   futures_liquidated: '合約爆倉',
+  market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
   bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
   loan_borrow: '貸款', loan_repay: '還款',
   item_use: '代幣使用', mission_reward: '任務獎勵',

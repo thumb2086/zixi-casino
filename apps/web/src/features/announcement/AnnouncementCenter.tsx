@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Megaphone, AlertTriangle, ShieldAlert, Gift,
-  ChevronDown, Loader2, X,
+  ChevronDown, Loader2, X, Clock,
 } from 'lucide-react';
 import { formatNumber } from '@repo/shared';
 import { useTranslation } from 'react-i18next';
@@ -84,13 +84,103 @@ function formatRewardSummary(r: any): string {
   return parts.length ? parts.join(' + ') : '獎勵';
 }
 
+const TX_TYPE_LABEL: Record<string, string> = {
+  bet: '下注', payout: '派彩', deposit: '存入',
+  withdrawal: '提領', transfer: '轉帳',
+  chest_buy: '購買寶箱', chest_compensation: '寶箱補償',
+  airdrop: '空投', admin_credit: '系統發放', admin_debit: '系統扣回',
+  convert: 'YJC兌換', stock_buy: '買入股票', stock_sell: '賣出股票',
+  futures_open: '開合約', futures_close: '平合約',
+  futures_liquidated: '合約爆倉',
+  bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
+  loan_borrow: '貸款', loan_repay: '還款',
+  item_use: '代幣使用', mission_reward: '任務獎勵',
+  market_buy: '市場買入', market_sell: '市場賣出',
+  market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
+};
+
+function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
+  const { data: txData } = useQuery({
+    queryKey: ['public-transactions-feed'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/dashboard/transactions?limit=30');
+      return res.data?.data as { data: any[] } | undefined;
+    },
+    refetchInterval: 15000,
+  });
+  const { data: healthData } = useQuery({
+    queryKey: ['health-feed'],
+    queryFn: async () => {
+      const res = await api.get('/health');
+      return res.data as any;
+    },
+    refetchInterval: 20000,
+  });
+
+  const rawItems = txData?.data || [];
+  const merged: any[] = [
+    ...rawItems.map((e: any) => ({
+      id: e.id || `tx-${Math.random()}`,
+      type: e.type || e.gameType || 'unknown',
+      amount: Number(e.amount),
+      token: e.tokenSymbol || e.token || 'ZXC',
+      createdAt: e.createdAt,
+    })),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+   .slice(0, 50);
+
+  const serverUptimeLabel = healthData?.stats?.serverUptimeLabel ?? '';
+
+  return (
+    <section className="space-y-4">
+      {serverUptimeLabel && (
+        <div className="bg-[#1a1919] rounded-xl p-4 border border-[#494847]/10 flex items-center gap-3">
+          <Clock size={16} className="text-[#fcc025]" />
+          <span className="text-xs font-bold text-[#adaaaa]">
+            伺服器運行 {serverUptimeLabel}
+          </span>
+        </div>
+      )}
+
+      {merged.length === 0 ? (
+        <div className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] px-4 py-8 text-center text-sm text-[#adaaaa]">
+          暫無交易紀錄
+        </div>
+      ) : (
+        merged.map((item) => {
+          const amt = Number(item.amount);
+          const isCredit = amt >= 0;
+          return (
+            <div key={item.id}
+              className="bg-[#1a1919] rounded-xl p-4 border border-[#494847]/10 flex items-center gap-4"
+            >
+              <div className={`w-2 h-2 rounded-full shrink-0 ${isCredit ? 'bg-green-500' : 'bg-red-500'}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-white truncate">
+                  {TX_TYPE_LABEL[item.type] || item.type}
+                </p>
+                <p className="text-[10px] text-[#494847] font-bold mt-0.5">
+                  {new Date(item.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <p className={`text-xs font-black whitespace-nowrap ${isCredit ? 'text-green-500' : 'text-red-500'}`}>
+                {isCredit ? '+' : ''}{nf(Math.abs(amt))} {item.token === 'zhixi' ? 'ZXC' : item.token || 'ZXC'}
+              </p>
+            </div>
+          );
+        })
+      )}
+    </section>
+  );
+}
+
 export default function AnnouncementCenter() {
   const { t } = useTranslation();
   const { sessionId } = useAuthStore();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
 
-  const [filter, setFilter] = useState<'ANNOUNCEMENT' | 'EVENTS'>('ANNOUNCEMENT');
+  const [filter, setFilter] = useState<'ANNOUNCEMENT' | 'EVENTS' | 'TRANSACTIONS'>('ANNOUNCEMENT');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [items, setItems] = useState<AnnouncementItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -239,6 +329,9 @@ export default function AnnouncementCenter() {
             </section>
           </>
         )}
+
+        {/* Transactions Tab */}
+        {filter === 'TRANSACTIONS' && <TransactionsFeed nf={nf} />}
 
         {/* Events Tab */}
         {filter === 'EVENTS' && (
