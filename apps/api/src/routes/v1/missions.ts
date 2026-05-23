@@ -87,11 +87,14 @@ function pickDailyMissions(today: string, addr: string, yjcVip: number) {
   return picked;
 }
 
-function getProgress(m: typeof ALL_MISSIONS[0], betRaw: number, winRaw: number, streakRaw: number, playRaw: number): number {
+const PER_GAME_TRACKS = new Set(['coinflip', 'roulette', 'horse', 'sicbo', 'bingo', 'slots', 'blackjack', 'crash', 'poker', 'duel', 'dragon', 'bluffdice']);
+
+function getProgress(m: typeof ALL_MISSIONS[0], betRaw: number, winRaw: number, streakRaw: number, playRaw: number, gameRaws: Record<string, number>): number {
   if (m.track === 'bet') return Math.min(betRaw, m.target);
   if (m.track === 'win') return Math.min(winRaw, m.target);
   if (m.track === 'streak') return Math.min(streakRaw, m.target);
   if (m.track === 'play') return Math.min(playRaw, m.target);
+  if (PER_GAME_TRACKS.has(m.track)) return Math.min(gameRaws[m.track] || 0, m.target);
   return 0;
 }
 
@@ -106,14 +109,18 @@ export async function missionRoutes(fastify: FastifyInstance) {
 
     const today = new Date().toISOString().slice(0, 10);
     const addr = ctx.address.toLowerCase();
-    const [betRaw, winRaw, streakRaw, playRaw, claimedRaw, yjcVip] = await Promise.all([
+    const [betRaw, winRaw, streakRaw, playRaw, claimedRaw, yjcVip, ...gameRawsArr] = await Promise.all([
       kv.get<number>(`mission:bet:${addr}:${today}`),
       kv.get<number>(`mission:win:${addr}:${today}`),
       kv.get<number>(`checkin_streak:${addr}`),
       kv.get<number>(`mission:play:${addr}:${today}`),
       kv.get<string[]>(`mission:claimed:${addr}:${today}`),
       getYjcVipLevel(addr),
+      ...[...PER_GAME_TRACKS].map(g => kv.get<number>(`mission:game:${g}:${addr}:${today}`)),
     ]);
+    const gameRaws: Record<string, number> = {};
+    let gi = 0;
+    for (const g of PER_GAME_TRACKS) gameRaws[g] = gameRawsArr[gi++] || 0;
 
     const claimed = claimedRaw || [];
     const dailyMissions = pickDailyMissions(today, addr, yjcVip);
@@ -121,7 +128,7 @@ export async function missionRoutes(fastify: FastifyInstance) {
       if (claimed.includes(m.id)) return null;
       return {
         id: m.id, name: m.name, desc: m.desc, target: m.target, reward: m.reward,
-        progress: getProgress(m, betRaw || 0, winRaw || 0, streakRaw || 0, playRaw || 0),
+        progress: getProgress(m, betRaw || 0, winRaw || 0, streakRaw || 0, playRaw || 0, gameRaws),
         locked: false,
       };
     }).filter(Boolean);
@@ -151,6 +158,7 @@ export async function missionRoutes(fastify: FastifyInstance) {
     else if (mission.track === 'win') progress = await kv.get<number>(`mission:win:${addr}:${today}`) || 0;
     else if (mission.track === 'streak') progress = await kv.get<number>(`checkin_streak:${addr}`) || 0;
     else if (mission.track === 'play') progress = await kv.get<number>(`mission:play:${addr}:${today}`) || 0;
+    else if (PER_GAME_TRACKS.has(mission.track)) progress = await kv.get<number>(`mission:game:${mission.track}:${addr}:${today}`) || 0;
     if (progress < mission.target) return createApiEnvelope({ error: { message: `進度不足 (${progress}/${mission.target})` } }, request.id);
 
     const prev = await gameSettlement.getBalance(addr, "zhixi");

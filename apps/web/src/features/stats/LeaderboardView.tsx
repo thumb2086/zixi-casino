@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Crown, Loader2, Target, Timer, Trophy, Wallet } from 'lucide-react';
+import { Crown, Loader2, Target, TrendingUp, Trophy, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
@@ -7,83 +7,37 @@ import { usePreferencesStore } from '../../store/usePreferencesStore';
 import { useLeaderboard, type LeaderboardType } from '../../hooks/useLeaderboard';
 import AppBottomNav from '../../components/AppBottomNav';
 
-type LeaderboardCategory = 'betting' | 'asset' | 'kings';
-type FilterLabel = 'WEEKLY' | 'MONTHLY' | 'SEASON' | 'ALL-TIME';
-
-const FILTER_MAP: Record<FilterLabel, LeaderboardType> = {
-  WEEKLY: 'week',
-  MONTHLY: 'month',
-  SEASON: 'season',
-  'ALL-TIME': 'all',
-};
-
-const FILTER_LABELS: FilterLabel[] = ['WEEKLY', 'MONTHLY', 'SEASON', 'ALL-TIME'];
+type LeaderboardCategory = 'xp' | 'asset';
+type FilterLabel = 'ALL-TIME';
 
 const getAvatarUrl = (seed: string) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
 
 const getDisplayName = (entry: { displayName: string | null; address: string }) =>
   entry.displayName || `${entry.address.slice(0, 6)}...${entry.address.slice(-4)}`;
 
-const getTimeRemaining = (type: LeaderboardType): string => {
-  const now = new Date();
-  let end: Date;
 
-  switch (type) {
-    case 'week': {
-      end = new Date(now);
-      const day = end.getUTCDay();
-      const daysUntilSunday = (7 - day) % 7 || 7;
-      end.setUTCDate(end.getUTCDate() + daysUntilSunday);
-      end.setUTCHours(0, 0, 0, 0);
-      break;
-    }
-    case 'month':
-      end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0));
-      break;
-    case 'season': {
-      const nextQuarterMonth = (Math.floor(now.getUTCMonth() / 3) + 1) * 3;
-      end = new Date(Date.UTC(now.getUTCFullYear(), nextQuarterMonth, 1, 0, 0, 0, 0));
-      break;
-    }
-    default:
-      return '';
-  }
-
-  const diff = Math.max(0, end.getTime() - now.getTime());
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  return `${days}D ${hours}H ${minutes}M`;
-};
 
 export default function LeaderboardView() {
   const { t } = useTranslation();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { address } = useUserStore();
-  const [category, setCategory] = useState<LeaderboardCategory>('betting');
-  const [filter, setFilter] = useState<FilterLabel>('ALL-TIME');
+  const [category, setCategory] = useState<LeaderboardCategory>('xp');
 
   const currentType: LeaderboardType = useMemo(() => {
     if (category === 'asset') return 'asset';
-    if (category === 'kings') return 'kings';
-    return FILTER_MAP[filter];
-  }, [category, filter]);
+    return 'xp';
+  }, [category]);
 
   const { data, isLoading, error } = useLeaderboard(currentType, 50);
 
   const categoryTabs = [
-    { id: 'betting' as LeaderboardCategory, icon: Target, label: '\u62bc\u6ce8\u699c' },
-    { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '\u8cc7\u7522\u699c' },
-    { id: 'kings' as LeaderboardCategory, icon: Crown, label: '\u699c\u738b' },
+    { id: 'xp' as LeaderboardCategory, icon: TrendingUp, label: '經驗榜' },
+    { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產榜' },
   ];
 
-  const metricLabel = category === 'asset'
-    ? '\u8cc7\u7522\u699c'
-    : category === 'kings'
-      ? '\u6b21\u6578'
-      : '\u62bc\u6ce8\u699c';
-  const unit = category === 'kings' ? '\u6b21' : 'ZXC';
+  const metricLabel = category === 'asset' ? '資產' : '經驗';
+  const unit = category === 'asset' ? 'ZXC' : 'XP';
 
   const { topThree, otherPlayers, selfEntry } = useMemo(() => {
     const entries = data?.entries ?? [];
@@ -123,8 +77,8 @@ export default function LeaderboardView() {
     return [topThree[1], topThree[0], topThree[2]].filter(Boolean);
   }, [topThree]);
 
-  const showTimeRemaining = category === 'betting' && currentType !== 'all';
-  const timeRemaining = useMemo(() => getTimeRemaining(currentType), [currentType]);
+  const showTimeRemaining = false;
+  const timeRemaining = '';
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
@@ -268,22 +222,7 @@ export default function LeaderboardView() {
               )}
             </section>
 
-            {category === 'betting' && (
-              <div className="flex overflow-x-auto rounded-xl border border-[#494847]/20 bg-[#1a1919] p-1.5">
-                {FILTER_LABELS.map((entry) => (
-                  <button
-                    key={entry}
-                    type="button"
-                    onClick={() => setFilter(entry)}
-                    className={`flex-1 whitespace-nowrap rounded-lg px-2 py-2.5 text-xs font-bold uppercase tracking-widest transition-all ${
-                      filter === entry ? 'bg-[#fcc025] text-black shadow-lg' : 'text-[#adaaaa] hover:text-white'
-                    }`}
-                  >
-                    {entry}
-                  </button>
-                ))}
-              </div>
-            )}
+
 
             <section className="space-y-3">
               {otherPlayers.map((player) => (
