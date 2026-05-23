@@ -1,77 +1,68 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { api } from '../store/api';
 
+const API_BASE = (import.meta as any).env?.VITE_API_URL || 'https://zixi-casino-api.onrender.com';
+
 export default function ChatRoom() {
   const [inputText, setInputText] = useState('');
   const { t } = useTranslation();
   const { username } = useUserStore();
-  const { isAuthorized } = useAuthStore();
-  const queryClient = useQueryClient();
+  const { isAuthorized, sessionId, address } = useAuthStore();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [localMessages, setLocalMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const { data: chatData } = useQuery({
-    queryKey: ['chat-messages'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/support/chat/messages');
-      return res.data.data;
-    },
-    enabled: isAuthorized,
-    refetchInterval: 3000,
-  });
+  // Load initial messages
+  useEffect(() => {
+    api.get('/api/v1/support/chat/messages', { params: { limit: 50 } })
+      .then((res) => {
+        setMessages(res.data.data?.messages || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
-  const { sessionId, address } = useAuthStore();
+  // SSE stream for real-time updates
+  useEffect(() => {
+    if (!isAuthorized) return;
+    const url = `${API_BASE}/api/v1/support/chat/stream`;
+    const source = new EventSource(url);
 
-  const messagesLenRef = useRef(0);
+    source.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === msg.id)) return prev;
+          return [msg, ...prev];
+        });
+      } catch {}
+    };
+
+    source.onerror = () => {
+      // Reconnect automatically (EventSource default behavior)
+    };
+
+    return () => source.close();
+  }, [isAuthorized]);
 
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
-      await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
-    },
-    onMutate: async (text) => {
-      const optimisticMsg = {
-        id: `temp-${Date.now()}`,
-        address,
-        displayName: username || '我',
-        text,
-        createdAt: Date.now(),
-      };
-      setLocalMessages((prev) => [...prev, optimisticMsg]);
-    },
-    onSettled: () => {
-      // Immediately refetch so real messages arrive quickly
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+      const res = await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
+      if (!res.data.success) throw new Error(res.data.data?.error?.message || '發送失敗');
     },
     onError: (_err) => {
-      setLocalMessages((prev) => prev.filter((m) => !m.id.startsWith('temp-')));
+      // Message failed to send — SSE won't confirm it either
     },
   });
 
-  const serverMessages = chatData?.messages || [];
-  const messages = useMemo(() => {
-    // Deduplicate: remove optimistic messages that have been confirmed by server
-    // Match by same text + same sender address + close timestamp (<5s apart)
-    const optimistic = localMessages.filter((lm) => {
-      if (!lm.id.startsWith('temp-')) return true;
-      return !serverMessages.some((sm: any) =>
-        sm.text === lm.text &&
-        sm.address?.toLowerCase() === lm.address?.toLowerCase() &&
-        Math.abs((sm.createdAt || 0) - (lm.createdAt || 0)) < 5000
-      );
-    });
-    return [...serverMessages, ...optimistic];
-  }, [serverMessages, localMessages]);
-
   useEffect(() => {
-    // Only auto-scroll when messages grow (new msg), not when they shrink (dedup)
-    if (messages.length > messagesLenRef.current && scrollRef.current) {
+    if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-    messagesLenRef.current = messages.length;
   }, [messages]);
 
   return (
@@ -84,7 +75,13 @@ export default function ChatRoom() {
       </div>
 
       <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-4">
-        {messages.map((m: any) => {
+        {loading && (
+          <div className="text-xs text-slate-600 text-center py-8">載入中...</div>
+        )}
+        {!loading && messages.length === 0 && (
+          <div className="text-xs text-slate-600 text-center py-8">暫無訊息</div>
+        )}
+        {[...messages].reverse().map((m: any) => {
           const isOwn = m.address?.toLowerCase() === address?.toLowerCase();
           return (
             <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>

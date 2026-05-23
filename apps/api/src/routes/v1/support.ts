@@ -5,7 +5,8 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
 import { SupportManager, IdentityManager } from "@repo/domain";
-import { AnnouncementRepository, SessionRepository, UserRepository, kv, OpsRepository } from "@repo/infrastructure";
+import { AnnouncementRepository, SessionRepository, UserRepository, OpsRepository, WalletRepository } from "@repo/infrastructure";
+import { addSSEClient, broadcastChatMessage } from "../../utils/sse.js";
 
 export async function supportRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -13,10 +14,10 @@ export async function supportRoutes(fastify: FastifyInstance) {
   const supportManager = new SupportManager();
   const identityManager = new IdentityManager();
   const announcementRepo = new AnnouncementRepository();
-  
   const sessionRepo = new SessionRepository();
   const userRepo = new UserRepository();
   const opsRepo = new OpsRepository();
+  const walletRepo = new WalletRepository();
 
   const getContext = async (req: any) => {
     const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
@@ -27,7 +28,14 @@ export async function supportRoutes(fastify: FastifyInstance) {
     return { session, user };
   };
 
-  // ─── Announcements ────────────────────────────────────────────────────────
+  // ─── SSE Stream ─────────────────────────────────────────────────────────────
+
+  typedFastify.get("/chat/stream", async (request, reply) => {
+    const clientId = `sse_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    addSSEClient(clientId, reply);
+  });
+
+  // ─── Announcements ──────────────────────────────────────────────────────────
 
   typedFastify.get("/announcements", async (request) => {
     const dbAnnouncements = await announcementRepo.listActiveAnnouncements();
@@ -47,7 +55,7 @@ export async function supportRoutes(fastify: FastifyInstance) {
     return createApiEnvelope({ announcements: active }, request.id);
   });
 
-  // ─── Ticketing (Feedback/Reports) ────────────────────────────────────────
+  // ─── Ticketing ──────────────────────────────────────────────────────────────
 
   typedFastify.post("/tickets", {
     schema: {
@@ -81,7 +89,6 @@ export async function supportRoutes(fastify: FastifyInstance) {
       mode: ctx.session.mode
     });
 
-    // Save ticket to DB
     try {
       const db = await (await import("@repo/infrastructure/db/index.js")).requireDb();
       const { supportTickets } = await import("@repo/infrastructure/db/schema.js");
@@ -106,12 +113,8 @@ export async function supportRoutes(fastify: FastifyInstance) {
     }
 
     await opsRepo.logEvent({
-      channel: "support",
-      severity: "info",
-      source: "ticketing",
-      kind: "ticket_created",
-      userId: ctx.user.id,
-      address: ctx.session.address,
+      channel: "support", severity: "info", source: "ticketing", kind: "ticket_created",
+      userId: ctx.user.id, address: ctx.session.address,
       message: `Support ticket created: ${ticket.title}`,
       meta: { reportId: ticket.reportId, category: ticket.category }
     });
@@ -119,10 +122,12 @@ export async function supportRoutes(fastify: FastifyInstance) {
     return createApiEnvelope({ success: true, reportId: ticket.reportId }, request.id);
   });
 
-  // ─── Chat Logic ──────────────────────────────────────────────────────────
+  // ─── Chat ───────────────────────────────────────────────────────────────────
 
   typedFastify.get("/chat/messages", async (request) => {
-    const messages = await kv.lrange<any>("chat:global:messages", 0, 49);
+    const query = request.query as any;
+    const limit = Math.min(parseInt(query?.limit || "50"), 100);
+    const messages = await walletRepo.listChatMessages(limit);
     return createApiEnvelope({ messages }, request.id);
   });
 
@@ -143,11 +148,20 @@ export async function supportRoutes(fastify: FastifyInstance) {
       address: ctx.session.address,
       displayName: ctx.user.displayName || "匿名玩家",
       text: request.body.text,
-      createdAt: Date.now()
+      type: 'user' as const,
     };
 
-    await kv.lpush("chat:global:messages", newMessage);
-    await kv.ltrim("chat:global:messages", 0, 49);
+    await walletRepo.saveChatMessage(newMessage);
+
+    // Push to SSE clients
+    broadcastChatMessage({
+      id: newMessage.id,
+      address: newMessage.address,
+      displayName: newMessage.displayName,
+      text: newMessage.text,
+      type: 'user',
+      createdAt: new Date().toISOString(),
+    });
 
     return createApiEnvelope({ message: newMessage }, request.id);
   });

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../../store/useAuthStore';
 import {
   Bell,
   ChevronRight,
@@ -16,7 +17,6 @@ import {
   Trophy,
   User,
   Landmark,
-  Archive,
   Building2,
   TrendingUp,
   CalendarClock,
@@ -74,6 +74,7 @@ export default function LobbyView() {
   const { username, address, balance } = useUserStore();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
+  const queryClient = useQueryClient();
   const { summary } = useWallet();
   const { data: leaderboardData } = useLeaderboard('all', 50);
   const selfRank = leaderboardData?.selfRank?.rank;
@@ -88,6 +89,29 @@ export default function LobbyView() {
   });
   const isAdmin = Boolean(profileData?.isAdmin);
   const vipLevel = profileData?.vipLevel || '普通會員';
+
+  const { data: missionsData } = useQuery({
+    queryKey: ['missions'],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/api/v1/missions');
+        return res.data?.data?.missions || [];
+      } catch { return []; }
+    },
+    staleTime: 30000,
+    retry: 1,
+  });
+  const missions = missionsData || [];
+  const claimMission = useCallback(async (missionId: string) => {
+    try {
+      const { sessionId } = useAuthStore.getState();
+      const res = await api.post('/api/v1/missions/claim', { sessionId, missionId });
+      if (res.data?.data?.success) {
+        queryClient.invalidateQueries({ queryKey: ['missions'] });
+        queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
+      }
+    } catch {}
+  }, [queryClient]);
   const ZXC_PER_YJC = 100_000_000;
   const liveZxc = resolvePreferredBalance({
     onchainBalance: summary.data?.onchain?.zxc?.balance,
@@ -209,28 +233,61 @@ export default function LobbyView() {
         </section>
 
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <GlassCard
-              to="/app/company"
-              icon={Building2}
-              title={t('lobby.my_company')}
-              subtitle={t('lobby.ai_chip_simulation')}>
-              <div className="absolute top-2 right-2 bg-[#fcc025] text-[#0e0e0e] text-[8px] font-black px-2 py-0.5 rounded-full">BETA</div>
-              <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
-                {t('lobby.company_description')}
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <TrendingUp className="h-3 w-3 text-emerald-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-                  {t('lobby.simulation_label')}
-                </span>
+          {/* Missions at top */}
+          <div className="rounded-2xl border border-[#fcc025]/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-[0_0_30px_rgba(252,192,37,0.05)] md:col-span-2 lg:col-span-3">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🎯</span>
+                <h2 className="text-sm font-black uppercase tracking-widest text-[#fcc025]">每日任務</h2>
               </div>
-            </GlassCard>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {missions.filter((m: any) => !m.claimed).map((m: any) => {
+                const pct = m.target > 0 ? Math.min(100, (m.progress / m.target) * 100) : 0;
+                const done = m.progress >= m.target;
+                const locked = m.locked;
+                return (
+                  <div key={m.id} className={`rounded-xl border ${locked ? 'border-[#494847]/10 opacity-50' : done ? 'border-[#fcc025]/40' : 'border-[#494847]/20'} bg-[#0e0e0e] p-4`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-xs font-bold text-white">{locked ? '🔒 ' : ''}{m.name}</p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{locked ? `需要 VIP ${m.vip} 以上` : m.desc}</p>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#fcc025] shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-[#1a1919] mb-2">
+                      <div className="h-full rounded-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]" style={{ width: `${locked ? 0 : pct}%` }} />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-[#adaaaa]">{locked ? '-' : `${m.progress}/${m.target}`}</span>
+                      {locked ? null : done ? (
+                        <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-[#fcc025] px-2 py-1 rounded-lg hover:brightness-110">領取</button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           <GlassCard
             to="/app/announcement"
             icon={CalendarClock}
             title="公告與活動"
-            subtitle={t('lobby.events_subtitle')}
+            subtitle={pinnedCount > 0 ? `${pinnedCount} 則置頂` : t('lobby.events_subtitle')}
           >
+            <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa]">
+              {!recentTxs || recentTxs.length === 0 ? (
+                <div className="flex gap-2">
+                  <History size={12} className="text-[#fcc025]" />
+                  {t('lobby.no_activity')}
+                </div>
+              ) : recentTxs.slice(0, 2).map((tx, i) => (
+                <div key={i} className="flex gap-2 truncate">
+                  <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="truncate">{tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
+                </div>
+              ))}
+            </div>
           </GlassCard>
 
           <GlassCard
@@ -240,28 +297,7 @@ export default function LobbyView() {
             value={selfRank ? `#${selfRank}` : '-'}
             subtitle={t('lobby.global_sector')}
           />
-          <GlassCard
-            to="/app/transactions"
-            icon={History}
-            title={t('lobby.activity')}
-            subtitle={t('lobby.recent_traces')}
-          >
-            <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa]">
-              {!recentTxs || recentTxs.length === 0 ? (
-                <>
-                  <div className="flex gap-2">
-                    <span className="text-[#fcc025]">--</span>
-                    {t('lobby.no_activity')}
-                  </div>
-                </>
-              ) : recentTxs.map((tx, i) => (
-                <div key={i} className="flex gap-2 truncate">
-                  <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="truncate">{tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
+
 
           <GlassCard
             to="/app/inventory"
@@ -280,23 +316,7 @@ export default function LobbyView() {
               ))}
             </div>
           </GlassCard>
-          <GlassCard
-            to="/app/shop"
-            icon={ShoppingBag}
-            title={t('lobby.shop')}
-            subtitle={t('lobby.shop_subtitle')}
-          >
-            <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
-              <div className="flex gap-2">
-                <span className="text-[#fcc025]">🛒</span>
-                {t('lobby.buy_chest_keys')}
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[#fcc025]">📦</span>
-                {t('lobby.limited_bundles')}
-              </div>
-            </div>
-          </GlassCard>
+
           <div
             className={`rounded-xl bg-[#1a1919] p-6 transition-all border-l-4 border-l-[#fcc025]/40`}
           >
@@ -346,15 +366,22 @@ export default function LobbyView() {
               </Link>
             </div>
           </div>
+
           <GlassCard
-            to="/app/collection"
-            icon={Archive}
-            title={t('lobby.collection')}
-            subtitle={t('lobby.collection_subtitle')}
-          >
-            <p className="mt-2 text-xs font-bold uppercase tracking-tight text-[#adaaaa]">
-              {t('lobby.collection_description')}
+            to="/app/company"
+            icon={Building2}
+            title={t('lobby.my_company')}
+            subtitle={t('lobby.ai_chip_simulation')}>
+            <div className="absolute top-2 right-2 bg-[#fcc025] text-[#0e0e0e] text-[8px] font-black px-2 py-0.5 rounded-full">BETA</div>
+            <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
+              {t('lobby.company_description')}
             </p>
+            <div className="mt-2 flex items-center gap-2">
+              <TrendingUp className="h-3 w-3 text-emerald-400" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                {t('lobby.simulation_label')}
+              </span>
+            </div>
           </GlassCard>
           {isAdmin && (
             <GlassCard
@@ -374,6 +401,8 @@ export default function LobbyView() {
               </div>
             </GlassCard>
           )}
+
+
         </section>
       </main>
 

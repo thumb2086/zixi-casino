@@ -584,14 +584,47 @@ export class GameSettlementWrapper {
     currentBalance: string,
     payout: number,
     game?: string,
-    userId?: string
+    userId?: string,
+    betAmount?: number
   ): Promise<string> {
     const finalBalance = (parseFloat(currentBalance) + payout).toString();
     await this.setBalance(address, token, finalBalance);
 
-    // Broadcast win notification to global chat
-    if (game && userId && payout > 0) {
-      this.broadcastWin(address, game, payout, userId).catch(() => {});
+    // Save ledger entry for bet (debit)
+    if (userId && betAmount && betAmount > 0) {
+      this.walletRepo.saveLedgerEntry({
+        id: randomUUID(),
+        userId,
+        address: address.toLowerCase(),
+        token,
+        type: 'bet',
+        amount: `-${betAmount}`,
+        balanceBefore: currentBalance,
+        balanceAfter: finalBalance,
+        game: game || null,
+        createdAt: new Date(),
+      }).catch((err: any) => console.error('Failed to save bet ledger entry:', err));
+    }
+
+    // Save ledger entry for payout (credit)
+    if (userId) {
+      this.walletRepo.saveLedgerEntry({
+        id: randomUUID(),
+        userId,
+        address: address.toLowerCase(),
+        token,
+        type: 'payout',
+        amount: payout.toString(),
+        balanceBefore: currentBalance,
+        balanceAfter: finalBalance,
+        game: game || null,
+        createdAt: new Date(),
+      }).catch((err: any) => console.error('Failed to save payout ledger entry:', err));
+    }
+
+    // Broadcast win notification to global chat (skip refunds: payout must exceed bet)
+    if (game && userId && payout > 0 && (!betAmount || payout > betAmount)) {
+      this.broadcastWin(address, game, payout, userId);
     }
 
     return finalBalance;
@@ -599,10 +632,7 @@ export class GameSettlementWrapper {
 
   private async broadcastWin(address: string, game: string, payout: number, userId: string): Promise<void> {
     try {
-      const { kv } = await import("@repo/infrastructure");
-      const { UserRepository } = await import("@repo/infrastructure");
-      const userRepo = new UserRepository();
-      const user = await userRepo.getUserById(userId);
+      const user = await this.userRepo.getUserById(userId);
       const displayName = user?.displayName || address.toLowerCase().slice(0, 6);
       const isBig = payout >= 100000;
       const msg = {
@@ -612,33 +642,15 @@ export class GameSettlementWrapper {
         text: isBig
           ? `🔥 ${displayName} 在 ${game} 中大獎 ${payout.toLocaleString()} ZXC！`
           : `${displayName} 在 ${game} 贏得 ${payout.toLocaleString()} ZXC`,
-        createdAt: Date.now(),
+        type: 'system' as const,
+        game,
       };
-      const { isAutoRoundGame, getRoundInfo } = await import("@repo/domain/games/auto-round.js");
-      const isAutoRound = isAutoRoundGame(game);
-      if (isAutoRound) {
-        const round = getRoundInfo(game);
-        if (Date.now() < round.closesAt) {
-          // Round still open — defer message until round closes
-          const deferredKey = `chat:deferred:${game}:${round.roundId}`;
-          await kv.lpush(deferredKey, msg);
-          return;
-        }
-        // Round closed — flush any deferred messages for this round too
-        const deferredKey = `chat:deferred:${game}:${round.roundId}`;
-        const deferred = await kv.lrange<any>(deferredKey, 0, -1);
-        await kv.del(deferredKey);
-        const allMsgs = [...deferred, msg];
-        for (const m of allMsgs) {
-          await kv.lpush("chat:global:messages", m);
-        }
-        await kv.ltrim("chat:global:messages", 0, 49);
-        return;
-      }
-      // Non auto-round games: post directly
-      await kv.lpush("chat:global:messages", msg);
-      await kv.ltrim("chat:global:messages", 0, 49);
-    } catch {}
+      await this.walletRepo.saveChatMessage(msg);
+      const { broadcastChatMessage } = await import("../utils/sse.js");
+      broadcastChatMessage({ ...msg, createdAt: new Date().toISOString() });
+    } catch (err) {
+      console.error('broadcastWin error:', err);
+    }
   }
 
   /**
@@ -665,6 +677,24 @@ export class GameSettlementWrapper {
       await this.checkAndUnlockTitles(userId, address);
       // Grant XP based on bet amount
       await this.grantGameXp(userId, betAmount, address).catch(() => {});
+      // Track mission progress (fire-and-forget)
+      // Track mission progress (fire-and-forget) — pass game from metadata
+      const gameName = betAmount > 0 ? 'unknown' : '';
+      this.trackMission(address, betAmount, winAmount || 0).catch(() => {});
+    }
+  }
+
+  private async trackMission(address: string, betAmount: number, winAmount: number): Promise<void> {
+    const { kv } = await import("@repo/infrastructure");
+    const today = new Date().toISOString().slice(0, 10);
+    const addr = address.toLowerCase();
+    const prevBet = await kv.get<number>(`mission:bet:${addr}:${today}`);
+    await kv.set(`mission:bet:${addr}:${today}`, (prevBet || 0) + betAmount);
+    const prevPlay = await kv.get<number>(`mission:play:${addr}:${today}`);
+    await kv.set(`mission:play:${addr}:${today}`, (prevPlay || 0) + 1);
+    if (winAmount > 0) {
+      const prevWin = await kv.get<number>(`mission:win:${addr}:${today}`);
+      await kv.set(`mission:win:${addr}:${today}`, (prevWin || 0) + 1);
     }
   }
 
@@ -725,23 +755,20 @@ export class GameSettlementWrapper {
 
       // Send global notification
       try {
-        const { kv } = await import("@repo/infrastructure");
         const titleLabels = newTitles.map((t: string) => {
           const def = ALL_ITEMS[t];
           return def?.name || t;
         });
         const msg = {
           id: crypto.randomUUID(),
-          userId: "system",
           address: "",
           displayName: "🎉 系統",
           text: `玩家獲得稱號：${titleLabels.join("、")}！`,
-          createdAt: Date.now(),
+          type: 'system' as const,
         };
-        const messages = (await kv.get<any[]>("chat:global:messages")) || [];
-        messages.push(msg);
-        if (messages.length > 50) messages.shift();
-        await kv.set("chat:global:messages", messages);
+        await this.walletRepo.saveChatMessage(msg);
+        const { broadcastChatMessage } = await import("../utils/sse.js");
+        broadcastChatMessage({ ...msg, createdAt: new Date().toISOString() });
       } catch (err) {
         console.error("Failed to send title unlock notification:", err);
       }

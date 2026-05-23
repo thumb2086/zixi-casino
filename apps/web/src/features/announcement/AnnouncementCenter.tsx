@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Megaphone, AlertTriangle, ShieldAlert, Gift,
-  ChevronDown, Loader2, X,
+  ChevronDown, Loader2, X, Clock, HeartPulse, Coins, Sparkles,
 } from 'lucide-react';
 import { formatNumber } from '@repo/shared';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useUserStore } from '../../store/useUserStore';
 import { usePreferencesStore } from '../../store/usePreferencesStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
@@ -83,13 +85,221 @@ function formatRewardSummary(r: any): string {
   return parts.length ? parts.join(' + ') : '獎勵';
 }
 
+const TX_TYPE_LABEL: Record<string, string> = {
+  bet: '下注', payout: '派彩', deposit: '存入',
+  withdrawal: '提領', transfer: '轉帳',
+  chest_buy: '購買寶箱', chest_compensation: '寶箱補償',
+  airdrop: '空投', admin_credit: '系統發放', admin_debit: '系統扣回',
+  convert: 'YJC兌換', stock_buy: '買入股票', stock_sell: '賣出股票',
+  futures_open: '開合約', futures_close: '平合約',
+  futures_liquidated: '合約爆倉',
+  bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
+  loan_borrow: '貸款', loan_repay: '還款',
+  item_use: '代幣使用', mission_reward: '任務獎勵',
+  market_buy: '市場買入', market_sell: '市場賣出',
+  market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
+};
+
+type DashboardTx = {
+  id: string;
+  roundId: string | number;
+  userAddress: string;
+  type: string;
+  amount: string;
+  tokenSymbol?: string;
+  status: string;
+  txHash?: string;
+  gameType?: string;
+  createdAt: string;
+};
+
+type LedgerEntry = {
+  id: string;
+  type: string;
+  amount: string;
+  token: string;
+  address: string;
+  balanceBefore: string;
+  balanceAfter: string;
+  createdAt: string;
+};
+
+const TX_STATUS_LABEL: Record<string, string> = {
+  pending: '等待中',
+  broadcasted: '廣播中',
+  confirmed: '已確認',
+  failed: '失敗',
+};
+
+function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
+  const { t } = useTranslation();
+  const { address, username, balance } = useUserStore();
+  const { address: authAddress } = useAuthStore();
+  const displayAddress = address || authAddress || '';
+
+  const { data: txData, isLoading } = useQuery({
+    queryKey: ['public-transactions'],
+    queryFn: async () => {
+      const [txRes, summaryRes] = await Promise.all([
+        api.get('/api/v1/dashboard/transactions', { params: { limit: 40, page: 1 } }),
+        api.get('/api/v1/dashboard/summary'),
+      ]);
+      return {
+        items: (txRes.data.data?.items || []) as DashboardTx[],
+        summary: summaryRes.data.data as {
+          total: number;
+          confirmed: number;
+          failed: number;
+          pending: number;
+          successRate: number;
+        },
+      };
+    },
+    refetchInterval: 15000,
+  });
+
+  const { data: recentTxData } = useQuery({
+    queryKey: ['recent-txs-inline'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/stats/recent-txs');
+      return res.data.data as { events: LedgerEntry[] };
+    },
+    refetchInterval: 10000,
+  });
+
+  const { data: healthData } = useQuery({
+    queryKey: ['health-stats-inline'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/stats/health');
+      return res.data.data as {
+        stats?: {
+          uptime?: string;
+          failureRate?: string;
+          nodes?: string;
+          startedAt?: number;
+          serverUptime?: number;
+          serverUptimeLabel?: string;
+        };
+      };
+    },
+    refetchInterval: 30000,
+  });
+
+  const txItems = txData?.items || [];
+  const ledgerEvents = recentTxData?.events || [];
+  const mergedItems: DashboardTx[] = [
+    ...txItems,
+    ...ledgerEvents.map((e: LedgerEntry) => ({
+      id: e.id,
+      roundId: '',
+      userAddress: e.address,
+      type: e.type,
+      amount: e.amount,
+      tokenSymbol: e.token,
+      status: 'confirmed' as const,
+      createdAt: e.createdAt,
+    })),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+   .slice(0, 50);
+  const items = mergedItems;
+  const summary = txData?.summary;
+  const serviceStats = healthData?.stats;
+
+  const successRatePct = summary?.total
+    ? Number(((summary.confirmed / summary.total) * 100).toFixed(2))
+    : 0;
+
+  return (
+    <>
+      <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 flex items-center gap-6">
+        <div className="flex-1 min-w-0">
+          <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
+          <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{displayAddress || ''}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xl font-black italic text-[#fcc025]">{nf(balance || 0)} ZXC</p>
+        </div>
+      </section>
+
+      <div className="flex items-center gap-3 bg-[#1a1919] rounded-2xl px-5 py-3 border border-[#494847]/10">
+        <Clock size={14} className="text-[#fcc025]" />
+        <span className="text-[10px] font-bold text-[#adaaaa] uppercase tracking-wider">
+          伺服器運行
+        </span>
+        <span className="text-xs font-black text-emerald-400 ml-auto">
+          {serviceStats?.serverUptimeLabel || '...'}
+        </span>
+        <span className="text-[10px] font-bold text-[#adaaaa]">
+          {serviceStats?.uptime ? `可用 ${serviceStats.uptime}` : ''}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Coins size={14} className="text-[#fcc025]" />
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">總交易</span>
+          </div>
+          <p className="text-xl font-black italic text-[#fcc025]">{nf(summary?.total ?? 0)}</p>
+        </div>
+        <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles size={14} className="text-emerald-400" />
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功</span>
+          </div>
+          <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
+        </div>
+        <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+          <div className="flex items-center gap-2 mb-2">
+            <HeartPulse size={14} className="text-[#fcc025]" />
+            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功率</span>
+          </div>
+          <p className="text-xl font-black italic text-[#fcc025]">{summary?.total ? `${successRatePct}%` : '0%'}</p>
+        </div>
+      </div>
+
+      <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+          最新市場與錢包動態
+        </p>
+        <div className="mt-4 space-y-3">
+          {isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
+          {!isLoading && items.length === 0 && (
+            <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
+              {t('transactions.empty')}
+            </div>
+          )}
+          {items.map((item: DashboardTx) => (
+            <div key={item.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-black tracking-[0.14em] text-white">
+                    {`${TX_TYPE_LABEL[item.type] || item.type} • ${nf(Number(item.amount))} ${item.tokenSymbol || 'ZXC'}`}
+                  </p>
+                  <p className="mt-1 text-xs font-bold tracking-[0.12em] text-[#adaaaa]">
+                    {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'…' : String(item.roundId)}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-xs font-bold text-[#fcc025]">{TX_STATUS_LABEL[item.status] || item.status}</p>
+                  <p className="mt-1 text-xs font-bold text-[#adaaaa]">{new Date(item.createdAt).toLocaleString('zh-TW')}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function AnnouncementCenter() {
   const { t } = useTranslation();
   const { sessionId } = useAuthStore();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
 
-  const [filter, setFilter] = useState<'ANNOUNCEMENT' | 'EVENTS'>('ANNOUNCEMENT');
+  const [filter, setFilter] = useState<'ANNOUNCEMENT' | 'EVENTS' | 'TRANSACTIONS'>('ANNOUNCEMENT');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [items, setItems] = useState<AnnouncementItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,7 +327,7 @@ export default function AnnouncementCenter() {
   }, [claimMsg]);
 
   const featured = useMemo(() => {
-    return items.find((item) => item.type === 'urgent') || items[0] || null;
+    return items.find((item) => item.type === 'urgent') || null;
   }, [items]);
 
   const getBadgeStyle = (type: AnnouncementItem['type']) => {
@@ -131,7 +341,7 @@ export default function AnnouncementCenter() {
   const typeLabel = (type: AnnouncementItem['type']) => {
     if (type === 'urgent') return t('announcement.type_urgent');
     if (type === 'warning') return t('announcement.type_warning');
-    return t('announcement.events');
+    return t('announcement.type_info');
   };
 
   async function claim(campaignId: string) {
@@ -164,11 +374,11 @@ export default function AnnouncementCenter() {
       <main className="pt-24 px-6 max-w-2xl mx-auto space-y-8">
         {/* Tabs */}
         <div className="flex bg-[#1a1919] p-1.5 rounded-xl border border-[#494847]/20">
-          {(['ANNOUNCEMENT', 'EVENTS'] as const).map((entry) => (
+          {(['ANNOUNCEMENT', 'EVENTS', 'TRANSACTIONS'] as const).map((entry) => (
             <button key={entry} type="button" onClick={() => setFilter(entry)}
               className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === entry ? 'bg-[#fcc025] text-black shadow-lg' : 'text-[#adaaaa] hover:text-white'}`}
             >
-              {entry === 'ANNOUNCEMENT' ? '公告' : '活動'}
+              {entry === 'ANNOUNCEMENT' ? '公告' : entry === 'EVENTS' ? '活動' : '動態'}
             </button>
           ))}
         </div>
@@ -238,6 +448,9 @@ export default function AnnouncementCenter() {
             </section>
           </>
         )}
+
+        {/* Transactions Tab */}
+        {filter === 'TRANSACTIONS' && <TransactionsFeed nf={nf} />}
 
         {/* Events Tab */}
         {filter === 'EVENTS' && (

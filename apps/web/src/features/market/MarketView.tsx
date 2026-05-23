@@ -1,16 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  BarChart3,
-  ChevronDown,
-  CircleDollarSign,
-  Landmark,
-  LineChart,
-  PanelRightClose,
-  PanelRightOpen,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
+  BarChart3, ChevronDown,
+  CircleDollarSign, LineChart,
+  PanelLeftClose, PanelLeftOpen,
+  TrendingDown, TrendingUp, Clock,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
@@ -19,19 +13,32 @@ import AppBottomNav from '../../components/AppBottomNav';
 import { useMarket } from './useMarket';
 
 type Quote = {
-  symbol: string;
-  name: string;
-  price: number;
-  type: string;
-  sector: string;
-  changePct: number;
+  symbol: string; name: string; price: number; type: string;
+  sector: string; changePct: number;
 };
 
 type MarketActionParams =
   | { type: 'stock_buy' | 'stock_sell'; symbol: string; quantity: string }
-  | { type: 'bank_deposit' | 'bank_withdraw'; amount: string }
+  | { type: 'bank_deposit' | 'bank_withdraw' | 'loan_borrow' | 'loan_repay'; amount: string }
   | { type: 'futures_open'; symbol: string; side: string; amount: string; leverage: string; takeProfitPrice?: number; stopLossPrice?: number }
   | { type: 'futures_close'; positionId: string };
+
+function MiniChart({ data, color, height = 60 }: { data: number[]; color: string; height?: number }) {
+  if (data.length < 2) return null;
+  const w = 200;
+  const mn = Math.min(...data), mx = Math.max(...data);
+  const range = mx - mn || 1;
+  const path = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = height - ((v - mn) / range) * (height - 8) - 4;
+    return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  return (
+    <svg viewBox={`0 0 ${w} ${height}`} className="w-full" style={{ height }}>
+      <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function MarketView() {
   const { t } = useTranslation();
@@ -48,7 +55,6 @@ export default function MarketView() {
   const [actionNotice, setActionNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Futures state
-  const [tradeMode, setTradeMode] = useState<'spot' | 'futures'>('spot');
   const [futuresSide, setFuturesSide] = useState<'long' | 'short'>('long');
   const [futuresLeverage, setFuturesLeverage] = useState(5);
   const [futuresMargin, setFuturesMargin] = useState('1000');
@@ -57,12 +63,20 @@ export default function MarketView() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [chartOpen, setChartOpen] = useState(true);
   const [panelTab, setPanelTab] = useState<'spot' | 'futures' | 'bank'>('spot');
+  const [showIndexChart, setShowIndexChart] = useState(true);
+  const [showActivity, setShowActivity] = useState(false);
+  const [showFloatingChart, setShowFloatingChart] = useState(true);
+  const [fp, setFp] = useState({ x: 16, y: window.innerHeight - 300 });
+  const dragRef = useRef<{ startX: number; startY: number; fpX: number; fpY: number } | null>(null);
 
   useEffect(() => {
     if (actionNotice) { const t = setTimeout(() => setActionNotice(null), 3000); return () => clearTimeout(t); }
   }, [actionNotice]);
+
+  useEffect(() => {
+    setShowFloatingChart(true);
+  }, [selectedSymbol]);
 
   const runAction = async (params: MarketActionParams, successMsg: string) => {
     try {
@@ -83,9 +97,15 @@ export default function MarketView() {
   const tabCls = (tab: 'spot' | 'futures' | 'bank') =>
     `flex-1 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all ${panelTab === tab ? 'bg-[#fcc025] text-black shadow' : 'text-[#adaaaa]'}`;
 
+  const indexHistory: number[] = marketSnapshot?.marketHistory?.index || [];
+  const indexColor = (marketSnapshot?.marketTrendPct || 0) >= 0 ? '#00f59b' : '#ff6d6d';
+
+  const stockHistory: number[] = selectedQuote ? (marketSnapshot?.history?.[selectedQuote.symbol] || []) : [];
+  const isUp = (selectedQuote?.changePct || 0) >= 0;
+  const stockColor = isUp ? '#00f59b' : '#ff6d6d';
+
   const executionPanel = (
     <div className="h-full flex flex-col gap-4">
-      {/* Tabs: Spot / Futures / Bank */}
       <div className="flex gap-1 rounded-xl bg-[#0e0e0e] p-1 border border-[#494847]/20">
         <button onClick={() => setPanelTab('spot')} className={tabCls('spot')}>{t('market.spot')}</button>
         <button onClick={() => setPanelTab('futures')} className={tabCls('futures')}>{t('market.futures')}</button>
@@ -101,7 +121,6 @@ export default function MarketView() {
         </select>
       )}
 
-      {/* --- Spot tab --- */}
       {panelTab === 'spot' && (
         <div className="space-y-3">
           <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
@@ -122,7 +141,6 @@ export default function MarketView() {
         </div>
       )}
 
-      {/* --- Futures tab --- */}
       {panelTab === 'futures' && (
         <div className="space-y-3">
           <div className="flex gap-2">
@@ -167,7 +185,6 @@ export default function MarketView() {
         </div>
       )}
 
-      {/* --- Bank tab --- */}
       {panelTab === 'bank' && (
         <div className="space-y-3">
           <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
@@ -180,43 +197,39 @@ export default function MarketView() {
               onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
               className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
+          <div className="border-t border-[#494847]/10 pt-3">
+            <p className="text-[10px] font-bold text-[#adaaaa] mb-2">貸款</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" disabled={execute.isPending}
+                onClick={() => runAction({ type: 'loan_borrow', amount: cashMoveAmount }, '貸款成功')}
+                className="rounded-xl bg-violet-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-violet-500">借貸</button>
+              <button type="button" disabled={execute.isPending}
+                onClick={() => runAction({ type: 'loan_repay', amount: cashMoveAmount }, '還款成功')}
+                className="rounded-xl bg-slate-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-slate-500">還款</button>
+            </div>
+            {summary && summary.loanPrincipal > 0 && (
+              <p className="text-[10px] text-[#adaaaa] mt-2">當前貸款: {nf(summary.loanPrincipal)} ZXC</p>
+            )}
+            {summary && summary.maxBorrow > 0 && (
+              <p className="text-[10px] text-[#adaaaa]">可借上限: {nf(summary.maxBorrow)} ZXC</p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Stock detail chart (always visible when selected) */}
-      {selectedQuote && chartOpen && (() => {
-        const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
-        const isUp = (selectedQuote.changePct || 0) >= 0;
-        const color = isUp ? '#00f59b' : '#ff6d6d';
-        const path = history.length > 1 ? (() => {
-          const w = 600, h = 160;
-          const min = Math.min(...history), max = Math.max(...history);
-          const range = max - min || 1;
-          return history.map((v, i) => {
-            const x = (i / (history.length - 1)) * w;
-            const y = h - ((v - min) / range) * (h - 16) - 8;
-            return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-          }).join(' ');
-        })() : '';
-        return (
-          <div className="border-t border-[#494847]/10 pt-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol} — {selectedQuote.name}</span>
-              <div className="text-right">
-                <p className="text-sm font-black italic tracking-tight text-[#fcc025]">{nf(Number(selectedQuote.price || 0))}</p>
-                <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                  {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
-                </p>
-              </div>
+      {panelTab !== 'bank' && selectedQuote && (
+        <div className="border-t border-[#494847]/10 pt-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol}</span>
+            <div className="text-right">
+              <p className="text-sm font-black italic tracking-tight text-[#fcc025]">{nf(Number(selectedQuote.price || 0))}</p>
+              <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
+              </p>
             </div>
-            {path && (
-              <svg viewBox="0 0 600 160" className="w-full h-32">
-                <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
           </div>
-        );
-      })()}
+        </div>
+      )}
     </div>
   );
 
@@ -229,18 +242,22 @@ export default function MarketView() {
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">{t('market.title')}</h1>
           </div>
           <div className="flex items-center gap-4">
-            {/* Mobile: trade drawer toggle */}
             <button onClick={() => setMobileDrawerOpen(o => !o)} className="lg:hidden text-xs font-black uppercase tracking-[0.18em] text-[#fcc025]">
               {mobileDrawerOpen ? t('market.close_order') : t('market.place_order')}
             </button>
-            <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa] hidden sm:inline">
               {t('market.public_feed')}
             </Link>
+            <div className="hidden lg:flex items-center gap-2">
+              <button onClick={() => setShowActivity(!showActivity)}
+                className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa] hover:text-white">
+                <Clock size={14} className="inline mr-1" />活動
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile trade drawer */}
       {mobileDrawerOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileDrawerOpen(false)} />
@@ -254,27 +271,24 @@ export default function MarketView() {
       )}
 
       <main className="mx-auto flex max-w-7xl gap-6 px-6 pt-24">
-        {/* Desktop left sidebar — collapsible */}
         <aside className={`hidden lg:flex flex-col shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-0 overflow-hidden'}`}>
           <div className={`sticky top-24 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl ${sidebarOpen ? '' : 'hidden'}`}>
             <div className="flex justify-end mb-1">
               <button onClick={() => setSidebarOpen(false)} className="text-[#adaaaa] hover:text-white">
-                <PanelRightClose size={16} />
+                <PanelLeftClose size={16} />
               </button>
             </div>
             {executionPanel}
           </div>
         </aside>
 
-        {/* Collapsed sidebar toggle (desktop) */}
         {!sidebarOpen && (
           <button onClick={() => setSidebarOpen(true)}
             className="hidden lg:flex sticky top-24 self-start mt-2 rounded-r-xl border border-l-0 border-[#494847]/10 bg-[#1a1919] px-2 py-6 text-[#adaaaa] hover:text-white">
-            <PanelRightOpen size={18} />
+            <PanelLeftOpen size={18} />
           </button>
         )}
 
-        {/* Main content */}
         <div className="flex-1 min-w-0 space-y-6">
           {actionNotice && (
             <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border shadow-lg shadow-black/50 text-sm font-bold animate-[fadeIn_0.3s_ease-out] whitespace-nowrap ${
@@ -284,54 +298,98 @@ export default function MarketView() {
             </div>
           )}
 
-          <section className="grid gap-4 lg:grid-cols-3">
-            <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl lg:col-span-2">
-              <div className="flex items-center gap-3">
-                <CircleDollarSign className="text-[#fcc025]" size={18} />
-                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.market_pulse')}</h2>
+          {/* Market Pulse + Index Chart */}
+          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <CircleDollarSign className="text-[#fcc025]" size={18} />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.market_pulse')}</h2>
+              <button onClick={() => setShowIndexChart(!showIndexChart)}
+                className="ml-auto text-[10px] font-bold text-[#fcc025] bg-[#fcc025]/10 px-2.5 py-1 rounded-lg hover:bg-[#fcc025]/20 transition-colors">
+                <LineChart size={14} className="inline mr-1" />{showIndexChart ? '隱藏' : '圖表'}
+              </button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3 mb-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.market_index')}</p>
+                <p className="mt-1 text-3xl font-black italic tracking-tight text-[#fcc025]">{nf(marketSnapshot?.marketIndex || 0)}</p>
               </div>
-              <div className="mt-5 grid gap-4 md:grid-cols-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.market_index')}</p>
-                  <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">{nf(marketSnapshot?.marketIndex || 0)}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.trend')}</p>
-                  <p className={`mt-2 text-2xl font-black italic tracking-tight ${(marketSnapshot?.marketTrendPct || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                    {(marketSnapshot?.marketTrendPct || 0) >= 0 ? '+' : ''}{(marketSnapshot?.marketTrendPct || 0).toFixed(2)}%
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.fear_greed')}</p>
-                  <p className="mt-2 text-2xl font-black italic tracking-tight text-white">{marketSnapshot?.fearGreedIndex ?? 0}</p>
-                </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.trend')}</p>
+                <p className={`mt-1 text-2xl font-black italic tracking-tight ${(marketSnapshot?.marketTrendPct || 0) >= 0 ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                  {(marketSnapshot?.marketTrendPct || 0) >= 0 ? '+' : ''}{(marketSnapshot?.marketTrendPct || 0).toFixed(2)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.fear_greed')}</p>
+                <p className="mt-1 text-2xl font-black italic tracking-tight text-white">{marketSnapshot?.fearGreedIndex ?? 0}</p>
               </div>
             </div>
-            <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-              <div className="flex items-center gap-3">
-                <Wallet className="text-[#fcc025]" size={18} />
-                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.account')}</h2>
-              </div>
-              <div className="mt-4 space-y-3">
-                <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.net_worth')}</p>
-                  <p className="mt-1 text-2xl font-black italic tracking-tight text-[#fcc025]">{nf(summary?.netWorth || 0)}</p>
+
+            {showIndexChart && indexHistory.length > 1 && (
+              <div className="border-t border-[#494847]/10 pt-4">
+                <svg viewBox="0 0 800 200" className="w-full" style={{ height: 200 }}>
+                  <defs>
+                    <linearGradient id="indexGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={indexColor} stopOpacity="0.2" />
+                      <stop offset="100%" stopColor={indexColor} stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {(() => {
+                    const w = 800, h = 200;
+                    const mn = Math.min(...indexHistory), mx = Math.max(...indexHistory);
+                    const range = mx - mn || 1;
+                    const pts = indexHistory.map((v, i) => {
+                      const x = (i / (indexHistory.length - 1)) * w;
+                      const y = h - ((v - mn) / range) * (h - 20) - 10;
+                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+                    }).join(' ');
+                    const areaPts = pts + ` L${w},${h} L0,${h} Z`;
+                    return (
+                      <>
+                        <path d={areaPts} fill="url(#indexGrad)" />
+                        <path d={pts} fill="none" stroke={indexColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </>
+                    );
+                  })()}
+                </svg>
+                <div className="flex justify-between mt-1 text-[8px] text-[#494847]">
+                  <span>{(marketSnapshot?.updatedAt ? new Date(marketSnapshot.updatedAt).getTime() - 48 * 60000 : Date.now() - 48 * 60000).toLocaleString()}</span>
+                  <span>{marketSnapshot?.updatedAt ? new Date(marketSnapshot.updatedAt).toLocaleString() : ''}</span>
                 </div>
-                <div className="grid gap-3 grid-cols-2">
-                  <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.cash')}</p>
-                    <p className="mt-1 text-lg font-black text-white">{nf(summary?.cash || 0)}</p>
-                  </div>
-                  <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.bank')}</p>
-                    <p className="mt-1 text-lg font-black text-white">{nf(summary?.bankBalance || 0)}</p>
-                  </div>
-                </div>
               </div>
-            </div>
+            )}
           </section>
 
-          {/* Portfolio summary - above everything */}
+          {/* Account + Net Worth */}
+          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="grid gap-4 sm:grid-cols-4">
+              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4 sm:col-span-1">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.net_worth')}</p>
+                <p className="mt-1 text-2xl font-black italic tracking-tight text-[#fcc025]">{nf(summary?.netWorth || 0)}</p>
+              </div>
+              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.cash')}</p>
+                <p className="mt-1 text-xl font-black text-white">{nf(summary?.cash || 0)}</p>
+              </div>
+              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">{t('market.bank')}</p>
+                <p className="mt-1 text-xl font-black text-white">{nf(summary?.bankBalance || 0)}</p>
+              </div>
+              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
+                <p className="text-xs font-black uppercase tracking-[0.14em] text-[#adaaaa]">股票</p>
+                <p className="mt-1 text-xl font-black text-white">{nf(summary?.stockValue || 0)}</p>
+              </div>
+            </div>
+            {summary && (summary.loanPrincipal > 0 || summary.maxBorrow > 0) && (
+              <div className="mt-3 flex items-center gap-4 text-[10px] text-[#adaaaa]">
+                <span>貸款: {nf(summary.loanPrincipal)}</span>
+                <span>最大可借: {nf(summary.maxBorrow)}</span>
+              </div>
+            )}
+          </section>
+
+          {/* Portfolio */}
           {(summary?.futuresPositions?.length > 0 || summary?.stockPositions?.length > 0) && (
             <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa] mb-4">{t('market.portfolio')}</h2>
@@ -389,6 +447,9 @@ export default function MarketView() {
                         <p className="text-[10px] text-[#adaaaa] mt-1">
                           {t('market.position_detail', { entry: nf(pos.entryPrice), mark: nf(pos.markPrice ?? 0), liquidation: nf(pos.liquidationPrice) })}
                         </p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">
+                          保證金: <span className="text-white font-bold">{nf(pos.margin)} ZXC</span>
+                        </p>
                         {(pos.takeProfitPrice || pos.stopLossPrice) && (
                           <div className="flex gap-3 mt-1 text-[10px]">
                             {pos.takeProfitPrice ? <span className="text-emerald-400">{t('market.take_profit')} {nf(pos.takeProfitPrice)}</span> : null}
@@ -421,64 +482,80 @@ export default function MarketView() {
             </section>
           )}
 
-          <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <div className="space-y-6">
-              {/* Stock grid (chart moved to execution panel sidebar) */}
-              <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <BarChart3 className="text-[#fcc025]" size={18} />
-                  <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
-                  {selectedQuote && (
-                    <button onClick={() => setChartOpen(!chartOpen)}
-                      className="ml-auto text-[10px] font-bold text-[#fcc025] bg-[#fcc025]/10 px-2.5 py-1 rounded-lg hover:bg-[#fcc025]/20 transition-colors">
-                      {t('market.chart_detail')} {chartOpen ? '▲' : '▼'}
-                    </button>
-                  )}
-                </div>
+          {/* Stock grid */}
+          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <BarChart3 className="text-[#fcc025]" size={18} />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {stockSymbols.map((quote) => (
-                    <button key={quote.symbol} type="button" onClick={() => { setSelectedSymbol(quote.symbol); setChartOpen(true); }}
-                      className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
-                              {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
-                            </span>
-                          </div>
-                          <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
-                        </div>
-                        {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {stockSymbols.map((quote) => (
+                <button key={quote.symbol} type="button" onClick={() => { setSelectedSymbol(quote.symbol); }}
+                  className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
+                          {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
+                        </span>
                       </div>
-                      <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{nf(Number(quote.price || 0))}</p>
-                    </button>
-                  ))}
-                </div>
+                      <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                    </div>
+                    {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
+                  </div>
+                  <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{nf(Number(quote.price || 0))}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Recent Activity (collapsible) */}
+          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <button onClick={() => setShowActivity(!showActivity)}
+              className="w-full flex items-center gap-3">
+              <Clock className="text-[#fcc025]" size={18} />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.recent_activity')}</h2>
+              <ChevronDown size={14} className={`ml-auto text-[#494847] transition-transform ${showActivity ? 'rotate-0' : '-rotate-90'}`} />
+            </button>
+            {showActivity && (
+              <div className="mt-4 space-y-3">
+                {summary?.history?.length ? (
+                  summary.history.map((entry: any, index: number) => (
+                    <div key={`${entry.at}-${index}`} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
+                      <p className="text-xs font-black uppercase tracking-[0.12em] text-white">{entry.summary || entry.type}</p>
+                      <p className="mt-1 text-xs font-bold text-[#adaaaa]">{new Date(entry.at).toLocaleString('zh-TW')}</p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">{t('market.no_activity')}</div>
+                )}
               </div>
-            </div>
-
-            <div className="space-y-6">
-              <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-                <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.recent_activity')}</h2>
-                <div className="mt-4 space-y-3">
-                  {summary?.history?.length ? (
-                    summary.history.map((entry: any, index: number) => (
-                      <div key={`${entry.at}-${index}`} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.12em] text-white">{entry.summary || entry.type}</p>
-                        <p className="mt-1 text-xs font-bold text-[#adaaaa]">{new Date(entry.at).toLocaleString('zh-TW')}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">{t('market.no_activity')}</div>
-                  )}
-                </div>
-              </section>
-            </div>
+            )}
           </section>
         </div>
       </main>
+
+      {/* Draggable floating stock chart */}
+      {selectedQuote && stockHistory.length > 1 && showFloatingChart && (
+        <div className="fixed z-40 w-56 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-64"
+          style={{ left: fp.x, top: fp.y + 80, right: fp.x ? undefined : 16 }}>
+          <div className="flex items-center justify-between p-3 pb-0 cursor-grab active:cursor-grabbing select-none"
+            onMouseDown={(e) => { dragRef.current = { startX: e.clientX, startY: e.clientY, fpX: fp.x, fpY: fp.y }; const handler = (ev: MouseEvent) => { if (!dragRef.current) return; setFp({ x: dragRef.current.fpX + ev.clientX - dragRef.current.startX, y: dragRef.current.fpY + ev.clientY - dragRef.current.startY }); }; const up = () => { dragRef.current = null; window.removeEventListener('mousemove', handler); window.removeEventListener('mouseup', up); }; window.addEventListener('mousemove', handler); window.addEventListener('mouseup', up); }}
+            onTouchStart={(e) => { const t = e.touches[0]; dragRef.current = { startX: t.clientX, startY: t.clientY, fpX: fp.x, fpY: fp.y }; const handler = (ev: TouchEvent) => { if (!dragRef.current) return; setFp({ x: dragRef.current.fpX + ev.touches[0].clientX - dragRef.current.startX, y: dragRef.current.fpY + ev.touches[0].clientY - dragRef.current.startY }); }; const up = () => { dragRef.current = null; window.removeEventListener('touchmove', handler); window.removeEventListener('touchend', up); }; window.addEventListener('touchmove', handler); window.addEventListener('touchend', up); }}>
+            <p className="text-xs font-black text-white">{selectedQuote.symbol}</p>
+            <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+              {nf(Number(selectedQuote.price || 0))} ({isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%)
+            </p>
+          </div>
+          <div className="px-3 pb-3">
+            <MiniChart data={stockHistory} color={stockColor} height={60} />
+          </div>
+          <button onClick={() => setShowFloatingChart(false)}
+            className="absolute top-1 right-2 text-[10px] text-[#adaaaa] hover:text-white">✕</button>
+        </div>
+      )}
 
       <AppBottomNav current="market" />
     </div>

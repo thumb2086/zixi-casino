@@ -31,6 +31,21 @@ function toExplorerUrl(txHash: string) {
   return `${base}${txHash}`;
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  pending: '等待中',
+  broadcasted: '廣播中',
+  confirmed: '已確認',
+  failed: '失敗',
+};
+
+const TYPE_LABEL: Record<string, string> = {
+  bet: '下注',
+  payout: '派彩',
+  deposit: '存入',
+  withdrawal: '提領',
+  transfer: '轉帳',
+};
+
 export default function TransactionsDashboardView() {
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
@@ -88,37 +103,37 @@ export default function TransactionsDashboardView() {
     <div className="min-h-screen bg-[#0e0e0e] pb-28 text-white">
       <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
-          <h1 className="text-lg font-black uppercase tracking-[0.1em] text-[#fcc025]">Dashboard / Transactions</h1>
-          <Link to="/app" className="text-xs font-bold text-[#adaaaa] hover:text-[#fcc025]">Back</Link>
+          <h1 className="text-lg font-black uppercase tracking-[0.1em] text-[#fcc025]">交易紀錄</h1>
+          <Link to="/app" className="text-xs font-bold text-[#adaaaa] hover:text-[#fcc025]">返回</Link>
         </div>
       </header>
 
       <main className="app-shell pt-24 space-y-4">
         <section className="grid gap-3 md:grid-cols-5">
           <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="rounded-lg bg-[#1a1919] p-2 text-sm">
-            <option value="">All status</option>
-            <option value="pending">pending</option>
-            <option value="broadcasted">broadcasted</option>
-            <option value="confirmed">confirmed</option>
-            <option value="failed">failed</option>
+            <option value="">全部狀態</option>
+            <option value="pending">等待中</option>
+            <option value="broadcasted">廣播中</option>
+            <option value="confirmed">已確認</option>
+            <option value="failed">失敗</option>
           </select>
-          <input value={address} onChange={(e) => { setAddress(e.target.value); setPage(1); }} placeholder="Address" className="rounded-lg bg-[#1a1919] p-2 text-sm" />
-          <input value={gameType} onChange={(e) => { setGameType(e.target.value); setPage(1); }} placeholder="Game type" className="rounded-lg bg-[#1a1919] p-2 text-sm" />
+          <input value={address} onChange={(e) => { setAddress(e.target.value); setPage(1); }} placeholder="地址" className="rounded-lg bg-[#1a1919] p-2 text-sm" />
+          <input value={gameType} onChange={(e) => { setGameType(e.target.value); setPage(1); }} placeholder="遊戲類型" className="rounded-lg bg-[#1a1919] p-2 text-sm" />
           <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPage(1); }} className="rounded-lg bg-[#1a1919] p-2 text-sm" />
           <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPage(1); }} className="rounded-lg bg-[#1a1919] p-2 text-sm" />
         </section>
 
         <section className="grid gap-3 md:grid-cols-4">
-          <div className="rounded-xl border border-[#494847]/20 bg-gradient-to-br from-[#1e1d1d] to-[#151414] p-3 text-sm">Total: <b>{nf(summary?.total ?? 0)}</b></div>
-          <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/20 to-[#151414] p-3 text-sm">Confirmed: <b>{summary?.confirmed ?? 0}</b></div>
-          <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-900/20 to-[#151414] p-3 text-sm">Pending: <b>{summary?.pending ?? 0}</b></div>
-          <div className="rounded-xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 to-[#151414] p-3 text-sm">Success: <b>{((summary?.successRate ?? 0) * 100).toFixed(2)}%</b></div>
+          <div className="rounded-xl border border-[#494847]/20 bg-gradient-to-br from-[#1e1d1d] to-[#151414] p-3 text-sm">總筆數: <b>{nf(summary?.total ?? 0)}</b></div>
+          <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/20 to-[#151414] p-3 text-sm">已確認: <b>{summary?.confirmed ?? 0}</b></div>
+          <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-900/20 to-[#151414] p-3 text-sm">等待中: <b>{summary?.pending ?? 0}</b></div>
+          <div className="rounded-xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 to-[#151414] p-3 text-sm">成功率: <b>{((summary?.successRate ?? 0) * 100).toFixed(2)}%</b></div>
         </section>
 
         <section className="grid gap-2 md:grid-cols-4">
           {['confirmed', 'pending', 'broadcasted', 'failed'].map((st) => (
-            <div key={st} className="rounded-lg border border-[#494847]/20 bg-[#141313] p-2 text-xs uppercase text-[#adaaaa]">
-              {st}: <span className="text-white font-bold">{statusCounts[st] || 0}</span>
+            <div key={st} className="rounded-lg border border-[#494847]/20 bg-[#141313] p-2 text-xs text-[#adaaaa]">
+              {STATUS_LABEL[st] || st}: <span className="text-white font-bold">{statusCounts[st] || 0}</span>
             </div>
           ))}
         </section>
@@ -127,29 +142,29 @@ export default function TransactionsDashboardView() {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-[#494847]/20 text-left text-[#adaaaa]">
-                <th className="p-3">時間</th>
-                <th className="p-3">回合ID</th>
-                <th className="p-3">地址</th>
-                <th className="p-3">類型</th>
-                <th className="p-3">金額</th>
-                <th className="p-3">狀態</th>
-                <th className="p-3">TxHash</th>
-                <th className="p-3">遊戲</th>
+                <th className="p-3 text-xs">時間</th>
+                <th className="p-3 text-xs">回合</th>
+                <th className="p-3 text-xs">地址</th>
+                <th className="p-3 text-xs">類型</th>
+                <th className="p-3 text-xs">金額</th>
+                <th className="p-3 text-xs">狀態</th>
+                <th className="p-3 text-xs">TxHash</th>
+                <th className="p-3 text-xs">遊戲</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td className="p-3" colSpan={8}>Loading...</td></tr>
+                <tr><td className="p-3" colSpan={8}>載入中...</td></tr>
               ) : (data?.items || []).map((row) => (
                 <tr key={row.id} className="border-b border-[#494847]/10">
-                  <td className="p-3">{new Date(row.createdAt).toLocaleString('zh-TW')}</td>
-                  <td className="p-3">{String(row.roundId)}</td>
-                  <td className="p-3">{row.userAddress}</td>
-                  <td className="p-3 uppercase">{row.type}</td>
+                  <td className="p-3 text-xs">{new Date(row.createdAt).toLocaleString('zh-TW')}</td>
+                  <td className="p-3 text-xs">{String(row.roundId).length > 16 ? String(row.roundId).slice(0,16)+'…' : String(row.roundId)}</td>
+                  <td className="p-3 text-xs">{row.userAddress}</td>
+                  <td className="p-3 text-xs">{TYPE_LABEL[row.type] || row.type}</td>
                   <td className="p-3">{nf(Number(row.amount))} {row.tokenSymbol || ''}</td>
                   <td className="p-3">
                     <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${statusColors[row.status] || 'bg-white/10 text-white border-white/20'}`}>
-                      {row.status}
+                      {STATUS_LABEL[row.status] || row.status}
                     </span>
                   </td>
                   <td className="p-3">
@@ -165,9 +180,9 @@ export default function TransactionsDashboardView() {
         </section>
 
         <div className="flex items-center justify-between text-sm text-[#adaaaa]">
-          <button className="rounded border border-[#494847]/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>Prev</button>
-          <span>Page {page} / {totalPages}</span>
-          <button className="rounded border border-[#494847]/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>Next</button>
+          <button className="rounded border border-[#494847]/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>上一頁</button>
+          <span>第 {page} / {totalPages} 頁</span>
+          <button className="rounded border border-[#494847]/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>下一頁</button>
         </div>
       </main>
 

@@ -895,6 +895,61 @@ export class WalletRepository implements IWalletRepository {
       orderBy: (entries: any, { desc }: any) => [desc(entries.createdAt)],
     });
   }
+
+  // ─── Chat Messages ──────────────────────────────────────────────────────
+
+  private async ensureChatTable() {
+    const conn = await requireDb();
+    await conn.execute(drizzleSql`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID,
+        address TEXT NOT NULL DEFAULT '',
+        display_name TEXT NOT NULL,
+        text TEXT NOT NULL,
+        type TEXT NOT NULL DEFAULT 'user',
+        game TEXT,
+        round_id TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+  }
+
+  async saveChatMessage(msg: {
+    id: string; userId?: string; address?: string; displayName: string;
+    text: string; type: 'user' | 'system'; game?: string; roundId?: string;
+  }) {
+    const conn = await requireDb();
+    await this.ensureChatTable();
+    await conn.execute(drizzleSql`
+      INSERT INTO chat_messages (id, user_id, address, display_name, text, type, game, round_id, created_at)
+      VALUES (${msg.id}, ${msg.userId || null}, ${msg.address || ''}, ${msg.displayName}, ${msg.text}, ${msg.type}, ${msg.game || null}, ${msg.roundId || null}, NOW())
+    `);
+  }
+
+  async listChatMessages(limit = 50) {
+    const conn = await requireDb();
+    await this.ensureChatTable();
+    const result = await conn.execute(drizzleSql`
+      SELECT id, user_id, address, display_name, text, type, game, round_id, created_at
+      FROM chat_messages
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `);
+    const items: any[] = [];
+    for (let i = 0; i < (result as any).length; i++) items.push((result as any)[i]);
+    return items.map((r: any) => ({
+      id: r.id,
+      userId: r.user_id,
+      address: r.address,
+      displayName: r.display_name,
+      text: r.text,
+      type: r.type,
+      game: r.game,
+      roundId: r.round_id,
+      createdAt: r.created_at,
+    }));
+  }
 }
 
 export class MarketRepository implements IMarketRepository {

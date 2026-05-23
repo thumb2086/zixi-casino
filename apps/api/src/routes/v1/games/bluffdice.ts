@@ -133,7 +133,8 @@ export async function bluffdiceRoutes(fastify: FastifyInstance) {
         validation.balanceAfter,
         settlement.finalPayout,
         'bluffdice',
-        userId
+        userId,
+        betAmount
       );
 
       // 5. Update total bet

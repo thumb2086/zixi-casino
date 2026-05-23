@@ -126,7 +126,8 @@ export async function blackjackRoutes(fastify: FastifyInstance) {
           validation.balanceAfter,
           settlement.finalPayout,
           'blackjack',
-          userId
+          userId,
+          betAmount
         );
 
         // 4. Update total bet
