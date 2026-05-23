@@ -22,7 +22,6 @@ import ProfileSetup from './features/profile/ProfileSetup';
 import AnnouncementCenter from './features/announcement/AnnouncementCenter';
 import SettingsView from './features/settings/SettingsView';
 import ShopView from './features/shop/ShopView';
-import PublicTransactionsView from './features/transactions/PublicTransactionsView';
 import TransactionsDashboardView from './features/dashboard/TransactionsDashboardView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
@@ -157,7 +156,7 @@ function AppContent() {
             <Route path="collection" element={<Navigate to="/app/inventory" replace />} />
             <Route path="admin" element={<AdminView />} />
             <Route path="settings" element={<SettingsView />} />
-            <Route path="transactions" element={<PublicTransactionsView />} />
+            <Route path="transactions" element={<Navigate to="/app/announcement" replace />} />
             <Route path="dashboard/transactions" element={<TransactionsDashboardView />} />
 
             <Route path="info/vip-levels" element={<VIPLevelsView />} />
