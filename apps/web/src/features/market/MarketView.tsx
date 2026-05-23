@@ -19,7 +19,7 @@ type Quote = {
 
 type MarketActionParams =
   | { type: 'stock_buy' | 'stock_sell'; symbol: string; quantity: string }
-  | { type: 'bank_deposit' | 'bank_withdraw'; amount: string }
+  | { type: 'bank_deposit' | 'bank_withdraw' | 'loan_borrow' | 'loan_repay'; amount: string }
   | { type: 'futures_open'; symbol: string; side: string; amount: string; leverage: string; takeProfitPrice?: number; stopLossPrice?: number }
   | { type: 'futures_close'; positionId: string };
 
@@ -196,6 +196,23 @@ export default function MarketView() {
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
               className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
+          </div>
+          <div className="border-t border-[#494847]/10 pt-3">
+            <p className="text-[10px] font-bold text-[#adaaaa] mb-2">貸款</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" disabled={execute.isPending}
+                onClick={() => runAction({ type: 'loan_borrow', amount: cashMoveAmount }, '貸款成功')}
+                className="rounded-xl bg-violet-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-violet-500">借貸</button>
+              <button type="button" disabled={execute.isPending}
+                onClick={() => runAction({ type: 'loan_repay', amount: cashMoveAmount }, '還款成功')}
+                className="rounded-xl bg-slate-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-slate-500">還款</button>
+            </div>
+            {summary && summary.loanPrincipal > 0 && (
+              <p className="text-[10px] text-[#adaaaa] mt-2">當前貸款: {nf(summary.loanPrincipal)} ZXC</p>
+            )}
+            {summary && summary.maxBorrow > 0 && (
+              <p className="text-[10px] text-[#adaaaa]">可借上限: {nf(summary.maxBorrow)} ZXC</p>
+            )}
           </div>
         </div>
       )}
