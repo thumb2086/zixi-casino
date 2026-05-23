@@ -121,6 +121,30 @@ export async function supportRoutes(fastify: FastifyInstance) {
 
   // ─── Chat Logic ──────────────────────────────────────────────────────────
 
+  typedFastify.get("/chat/health", async () => {
+    const kvUrl = process.env.KV_REST_API_URL ? 'set' : 'missing';
+    const kvToken = process.env.KV_REST_API_TOKEN ? 'set' : 'missing';
+    let kvConnected = false;
+    let testWrite = false;
+    let testRead = false;
+    try {
+      const pingResult = await (kv as any).ping ? await (kv as any).ping() : null;
+      kvConnected = pingResult === true;
+    } catch {}
+    try {
+      const testId = `test_${Date.now()}`;
+      await kv.lpush("chat:global:messages", { id: testId, text: 'health_check', address: '', displayName: 'system', createdAt: Date.now() });
+      await kv.ltrim("chat:global:messages", 0, 49);
+      testWrite = true;
+      const all = await kv.lrange<any>("chat:global:messages", 0, 5);
+      testRead = Array.isArray(all);
+    } catch {}
+    return {
+      kvUrl, kvToken, kvConnected, testWrite, testRead,
+      timestamp: Date.now(),
+    };
+  });
+
   typedFastify.get("/chat/messages", async (request) => {
     const messages = await kv.lrange<any>("chat:global:messages", 0, 49);
     return createApiEnvelope({ messages }, request.id);
