@@ -8,7 +8,16 @@ import { useLeaderboard, type LeaderboardType } from '../../hooks/useLeaderboard
 import AppBottomNav from '../../components/AppBottomNav';
 
 type LeaderboardCategory = 'xp' | 'asset';
-type FilterLabel = 'ALL-TIME';
+type FilterLabel = 'WEEKLY' | 'MONTHLY' | 'SEASON' | 'ALL-TIME';
+
+const FILTER_MAP: Record<FilterLabel, string> = {
+  WEEKLY: 'week',
+  MONTHLY: 'month',
+  SEASON: 'season',
+  'ALL-TIME': 'xp',
+};
+
+const FILTER_LABELS: FilterLabel[] = ['WEEKLY', 'MONTHLY', 'SEASON', 'ALL-TIME'];
 
 const getAvatarUrl = (seed: string) => `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`;
 
@@ -23,11 +32,14 @@ export default function LeaderboardView() {
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { address } = useUserStore();
   const [category, setCategory] = useState<LeaderboardCategory>('xp');
+  const [filter, setFilter] = useState<FilterLabel>('ALL-TIME');
 
   const currentType: LeaderboardType = useMemo(() => {
     if (category === 'asset') return 'asset';
-    return 'xp';
-  }, [category]);
+    return FILTER_MAP[filter] as any;
+  }, [category, filter]);
+
+  const showTimeRemaining = category !== 'asset' && filter !== 'ALL-TIME';
 
   const { data, isLoading, error } = useLeaderboard(currentType, 50);
 
@@ -77,8 +89,7 @@ export default function LeaderboardView() {
     return [topThree[1], topThree[0], topThree[2]].filter(Boolean);
   }, [topThree]);
 
-  const showTimeRemaining = false;
-  const timeRemaining = '';
+
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
@@ -130,15 +141,29 @@ export default function LeaderboardView() {
               })}
             </section>
 
+            {category === 'xp' && (
+              <div className="flex overflow-x-auto rounded-xl border border-[#494847]/20 bg-[#1a1919] p-1.5">
+                {FILTER_LABELS.map((entry) => (
+                  <button
+                    key={entry}
+                    type="button"
+                    onClick={() => setFilter(entry)}
+                    className={`flex-1 whitespace-nowrap rounded-lg px-2 py-2.5 text-xs font-bold uppercase tracking-widest transition-all ${
+                      filter === entry ? 'bg-[#fcc025] text-black shadow-lg' : 'text-[#adaaaa] hover:text-white'
+                    }`}
+                  >
+                    {entry === 'ALL-TIME' ? '總累計' : entry}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <section className="flex flex-col items-center justify-center space-y-2">
               <div className="flex items-center gap-2 text-[#fcc025] opacity-60">
-                <Timer size={14} />
-                <span className="text-xs font-bold uppercase tracking-[0.2em]">
-                  {showTimeRemaining ? t('leaderboard.time_remaining') : t('leaderboard.all_time')}
-                </span>
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">{showTimeRemaining ? '剩餘時間' : '共 ∞'}</span>
               </div>
               <div className="text-3xl font-black italic tracking-tighter text-white shadow-[0_0_30px_rgba(252,192,37,0.1)]">
-                {showTimeRemaining ? timeRemaining : '∞'}
+                {showTimeRemaining ? '—' : '∞'}
               </div>
             </section>
 

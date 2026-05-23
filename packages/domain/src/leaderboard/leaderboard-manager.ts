@@ -63,7 +63,7 @@ export class LeaderboardManager {
   }
 
   // ─────────────────────────────────────────
-  // XP leaderboard
+  // XP leaderboard (all-time, from user_profiles)
   // ─────────────────────────────────────────
   async getXpLeaderboard(
     selfAddress?: string,
@@ -139,6 +139,64 @@ export class LeaderboardManager {
       selfRank,
       updatedAt: new Date().toISOString(),
     };
+  }
+
+  // ─────────────────────────────────────────
+  // XP leaderboard by period (from total_bets, 1 bet = 1 XP)
+  // ─────────────────────────────────────────
+  async getXpLeaderboardByPeriod(
+    type: LeaderboardType,
+    selfAddress?: string,
+    limit = 50,
+  ): Promise<LeaderboardResult> {
+    const pid = this.getCurrentPeriodId(type);
+
+    const rows = await this.db
+      .select({
+        address: schema.totalBets.address,
+        amount: schema.totalBets.amount,
+        displayName: schema.users.displayName,
+      })
+      .from(schema.totalBets)
+      .leftJoin(schema.users, eq(schema.users.address, schema.totalBets.address))
+      .where(and(eq(schema.totalBets.periodType, type), eq(schema.totalBets.periodId, pid)))
+      .orderBy(desc(schema.totalBets.amount))
+      .limit(limit);
+
+    const entries: any[] = rows.map((r, i) => ({
+      rank: i + 1,
+      address: r.address,
+      displayName: r.displayName,
+      amount: Number(r.amount ?? 0),
+    }));
+
+    let selfRank: any = null;
+    if (selfAddress) {
+      const addr = selfAddress.toLowerCase();
+      const inList = entries.find((e) => e.address.toLowerCase() === addr);
+      if (inList) {
+        selfRank = inList;
+      } else {
+        const selfRow = await this.db
+          .select({ amount: schema.totalBets.amount })
+          .from(schema.totalBets)
+          .where(and(eq(schema.totalBets.periodType, type), eq(schema.totalBets.periodId, pid), eq(schema.totalBets.address, addr)))
+          .limit(1);
+        const selfAmount = Number(selfRow[0]?.amount ?? 0);
+        const userRow = await this.db
+          .select({ displayName: schema.users.displayName })
+          .from(schema.users)
+          .where(eq(schema.users.address, addr))
+          .limit(1);
+        const rankResult = await this.db
+          .select({ cnt: sql<number>`count(*)` })
+          .from(schema.totalBets)
+          .where(and(eq(schema.totalBets.periodType, type), eq(schema.totalBets.periodId, pid), sql`${schema.totalBets.amount} > ${selfAmount}`));
+        selfRank = { rank: Number(rankResult[0]?.cnt ?? 0) + 1, address: addr, displayName: userRow[0]?.displayName ?? null, amount: selfAmount };
+      }
+    }
+
+    return { type, periodId: pid, entries, selfRank, updatedAt: new Date().toISOString() };
   }
 
   // ─────────────────────────────────────────

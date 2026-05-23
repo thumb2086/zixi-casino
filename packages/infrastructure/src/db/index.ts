@@ -1156,7 +1156,7 @@ export class AnnouncementRepository {
   async listActiveAnnouncements() {
     const conn = await requireDb();
     const columns = await this.getAnnouncementColumns(conn);
-    const hasModernColumns = columns.has("announcement_id") && columns.has("is_pinned");
+    const hasModernColumns = columns.has("announcement_id") && columns.has("is_pinned") && columns.has("type");
     if (!hasModernColumns) {
       const hasType = columns.has("type");
       const hasPinned = columns.has("is_pinned");
@@ -1202,7 +1202,7 @@ export class AnnouncementRepository {
   async listAllAnnouncements(limit: number = 50) {
     const conn = await requireDb();
     const columns = await this.getAnnouncementColumns(conn);
-    const hasModernColumns = columns.has("announcement_id") && columns.has("is_pinned");
+    const hasModernColumns = columns.has("announcement_id") && columns.has("is_pinned") && columns.has("type");
     if (!hasModernColumns) {
       const hasType = columns.has("type");
       const hasPinned = columns.has("is_pinned");

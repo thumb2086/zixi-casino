@@ -168,16 +168,23 @@ export default function WalletView() {
         {/* XP Section */}
         {profileData?.level ? (
           <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">經驗等級</p>
-                <p className="text-3xl font-black italic text-[#fcc025] mt-1">Lv.{profileData.level} {profileData.xpTierLabel || ''}</p>
-                <p className="text-xs text-[#adaaaa] mt-1">經驗值 {(profileData.xp || 0).toLocaleString()} XP</p>
+                <p className="text-3xl font-black italic text-[#fcc025] mt-1">Lv.{profileData.level} <span className="text-sm font-bold text-[#adaaaa]">{profileData.xpTierLabel || ''}</span></p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold text-[#adaaaa]"></p>
+                <p className="text-xs font-bold text-white">{(profileData.xp || 0).toLocaleString()} XP</p>
+                {profileData.xpNextLevel > 0 && (
+                  <p className="text-[10px] text-[#adaaaa] mt-0.5">下一級 {Number(profileData.xpNextLevel).toLocaleString()} XP</p>
+                )}
               </div>
             </div>
+            {profileData.xpProgress !== undefined && (
+              <div className="w-full h-2 bg-[#0e0e0e] rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-[#fcc025] to-amber-400 rounded-full transition-all" style={{ width: `${Math.min(100, profileData.xpProgress)}%` }} />
+              </div>
+            )}
           </section>
         ) : null}
 

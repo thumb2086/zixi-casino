@@ -59,12 +59,12 @@ export async function vipRoutes(fastify: FastifyInstance) {
     
     if (!status) {
       return createApiEnvelope(
-        { success: false, error: { code: "USER_NOT_FOUND", message: "VIP status not found" } },
+        { error: { code: "USER_NOT_FOUND", message: "VIP status not found" } },
         request.id
       );
     }
 
-    return createApiEnvelope({ success: true, data: status }, request.id);
+    return createApiEnvelope(status, request.id);
   });
 
   // GET /api/v1/vip/:address - Get public VIP info for address
@@ -82,21 +82,15 @@ export async function vipRoutes(fastify: FastifyInstance) {
     const level = await vipManager.getVipLevel(address);
 
     return createApiEnvelope({
-      success: true,
-      data: {
-        level: level.threshold,
-        label: level.label,
-        danmakuColor: level.danmakuColor ?? "#a0a0a0",
-        danmakuPriority: level.danmakuPriority ?? 0,
-      }
+      level: level.threshold,
+      label: level.label,
+      danmakuColor: level.danmakuColor ?? "#a0a0a0",
+      danmakuPriority: level.danmakuPriority ?? 0,
     }, request.id);
   });
 
   // GET /api/v1/vip/levels - Get full level table
   typedFastify.get("/levels", async (request) => {
-    return createApiEnvelope({
-      success: true,
-      data: LEVEL_TIERS
-    }, request.id);
+    return createApiEnvelope(LEVEL_TIERS, request.id);
   });
 }
