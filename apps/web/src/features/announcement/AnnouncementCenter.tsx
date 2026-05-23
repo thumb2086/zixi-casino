@@ -131,7 +131,7 @@ export default function AnnouncementCenter() {
   const typeLabel = (type: AnnouncementItem['type']) => {
     if (type === 'urgent') return t('announcement.type_urgent');
     if (type === 'warning') return t('announcement.type_warning');
-    return t('announcement.events');
+    return t('announcement.type_info');
   };
 
   async function claim(campaignId: string) {
