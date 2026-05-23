@@ -17,14 +17,19 @@ const TABS = [
 export default function InfoView() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>('items');
 
-  useEffect(() => {
+  const getTabFromUrl = () => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    if (tabParam === 'items' || tabParam === 'odds' || tabParam === 'vip') {
-      setActiveTab(tabParam);
-    }
+    if (tabParam === 'items' || tabParam === 'odds' || tabParam === 'vip') return tabParam;
+    return 'items' as TabId;
+  };
+
+  const [activeTab, setActiveTab] = useState<TabId>(getTabFromUrl());
+
+  // Sync tab when URL changes (e.g. user navigates from lobby)
+  useEffect(() => {
+    setActiveTab(getTabFromUrl());
   }, [location.search]);
 
   const activeLabel = useMemo(

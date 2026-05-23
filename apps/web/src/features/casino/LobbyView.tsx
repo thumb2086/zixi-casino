@@ -298,35 +298,6 @@ export default function LobbyView() {
             subtitle={t('lobby.global_sector')}
           />
 
-          <GlassCard
-            to="/app/leaderboard"
-            icon={Trophy}
-            title={t('lobby.rankings')}
-            value={selfRank ? `#${selfRank}` : '-'}
-            subtitle={t('lobby.global_sector')}
-          />
-          <GlassCard
-            to="/app/transactions"
-            icon={History}
-            title={t('lobby.activity')}
-            subtitle={t('lobby.recent_traces')}
-          >
-            <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa]">
-              {!recentTxs || recentTxs.length === 0 ? (
-                <>
-                  <div className="flex gap-2">
-                    <span className="text-[#fcc025]">--</span>
-                    {t('lobby.no_activity')}
-                  </div>
-                </>
-              ) : recentTxs.map((tx, i) => (
-                <div key={i} className="flex gap-2 truncate">
-                  <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="truncate">{tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
 
           <GlassCard
             to="/app/inventory"
