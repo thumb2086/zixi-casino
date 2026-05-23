@@ -14,6 +14,9 @@ export function addSSEClient(id: string, reply: FastifyReply) {
   reply.raw.setHeader("Content-Type", "text/event-stream");
   reply.raw.setHeader("Cache-Control", "no-cache");
   reply.raw.setHeader("Connection", "keep-alive");
+  reply.raw.setHeader("Access-Control-Allow-Origin", "*");
+  reply.raw.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  reply.raw.setHeader("Access-Control-Allow-Headers", "Content-Type, x-session-id");
   reply.raw.flushHeaders();
 
   // Send initial keepalive
