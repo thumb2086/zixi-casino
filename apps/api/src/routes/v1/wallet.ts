@@ -355,187 +355,49 @@ export async function walletRoutes(fastify: FastifyInstance) {
       const baseFallback = 100000;
       const streakFallback = Math.floor(baseFallback * streakMultiplier);
 
-      let onChainRuntime: { client: any; tokenRuntime: any; decimals: number } | null = null;
-      try {
-        onChainRuntime = await getTokenRuntime(token);
-      } catch {
-        const fallbackAmount = String(streakFallback);
-        const address = ctx.session.address;
-        const prevBalance = await gameSettlement.getBalance(address, token);
-        const newBalance = (parseFloat(prevBalance || "0") + parseFloat(fallbackAmount)).toString();
-        await gameSettlement.setBalance(address, token, newBalance);
+      // Fast direct-credit path (async settlement — balance credited immediately, chain tx queued)
+      const rewardAmount = String(streakFallback);
+      const prevBalance = await gameSettlement.getBalance(address, token);
+      const newBalance = (parseFloat(prevBalance || "0") + parseFloat(rewardAmount)).toString();
+      await gameSettlement.setBalance(address, token, newBalance);
 
-        // Create a tx_intent so the worker can sync this to chain later
-        const airdropIntent: any = walletManager.createTxIntent(ctx.user.id, "ZXC", "admin_credit", fallbackAmount);
-        airdropIntent.address = address;
-        airdropIntent.meta = { source: "daily_airdrop", mode: "direct_credit_fallback" };
-        await walletRepo.saveTxIntent(airdropIntent);
+      const airdropIntent: any = walletManager.createTxIntent(ctx.user.id, "ZXC", "admin_credit", rewardAmount);
+      airdropIntent.address = address;
+      airdropIntent.meta = { source: "daily_airdrop", mode: "direct_credit" };
+      await walletRepo.saveTxIntent(airdropIntent);
 
-        await walletRepo.saveLedgerEntry({
-          id: randomUUID(),
-          userId: ctx.user.id,
-          address,
-          token,
-          type: "airdrop",
-          amount: fallbackAmount,
-          balanceBefore: prevBalance || "0",
-          balanceAfter: newBalance,
-          txIntentId: airdropIntent.id,
-          txHash: null,
-          meta: { source: "daily_airdrop", mode: "direct_credit", intentId: airdropIntent.id },
-          createdAt: new Date(),
-        });
-        await Promise.all([
-          kv.set(`last_airdrop:${address}`, now),
-          kv.set(`checkin_streak:${address}`, streak),
-          kv.set(`checkin_history:${address}`, [...history, todayDate].slice(-30)),
-        ]);
-        await opsRepo.logEvent({
-          channel: "wallet",
-          severity: "info",
-          source: "airdrop",
-          kind: "airdrop_claimed",
-          userId: ctx.user.id,
-          address,
-          message: `Direct credit airdrop: ${fallbackAmount} ZXC to ${address}`,
-          meta: { mode: "direct_credit", fallbackAmount, intentId: airdropIntent.id },
-        });
-        return createApiEnvelope({ reward: fallbackAmount, method: "direct_credit", intentId: airdropIntent.id }, request.id);
-      }
-
-      const { client, tokenRuntime, decimals } = onChainRuntime!;
-      const distributedWei = normalizeAirdropDistributedWei(distributedTotalRaw);
-      const policy = calculateAirdropRewardWei(decimals, distributedWei);
-      const fromAddress = client.getWalletAddress();
-      const amountWei = policy.rewardWei;
-      const rewardAmount = client.formatUnits(amountWei, decimals);
-      const [adminBalanceWeiBefore, recipientBalanceWeiBefore] = await Promise.all([
-        client.getBalance(fromAddress, tokenRuntime.contractAddress),
-        client.getBalance(address, tokenRuntime.contractAddress),
+      await walletRepo.saveLedgerEntry({
+        id: randomUUID(),
+        userId: ctx.user.id,
+        address,
+        token,
+        type: "airdrop",
+        amount: rewardAmount,
+        balanceBefore: prevBalance || "0",
+        balanceAfter: newBalance,
+        txIntentId: airdropIntent.id,
+        txHash: null,
+        meta: { source: "daily_airdrop", mode: "direct_credit", intentId: airdropIntent.id },
+        createdAt: new Date(),
+      });
+      await Promise.all([
+        kv.set(`last_airdrop:${address}`, now),
+        kv.set(`checkin_streak:${address}`, streak),
+        kv.set(`checkin_history:${address}`, [...history, todayDate].slice(-30)),
       ]);
 
-      if (adminBalanceWeiBefore < amountWei) {
-        return createApiEnvelope({ error: { message: "Admin wallet has insufficient on-chain balance for airdrop" } }, request.id);
-      }
+      await opsRepo.logEvent({
+        channel: "wallet",
+        severity: "info",
+        source: "airdrop",
+        kind: "airdrop_claimed",
+        userId: ctx.user.id,
+        address,
+        message: `Direct credit airdrop: ${rewardAmount} ZXC to ${address}`,
+        meta: { mode: "direct_credit", rewardAmount, intentId: airdropIntent.id },
+      });
 
-      const intent: any = walletManager.createTxIntent(ctx.user.id, "ZXC", "deposit", rewardAmount);
-      intent.address = address;
-      intent.contractAddress = tokenRuntime.contractAddress;
-      intent.meta = {
-        source: "daily_airdrop",
-        fromAddress,
-        toAddress: address,
-        mode: "admin_wallet_transfer",
-        decimals,
-        halvingCount: policy.halvingCount,
-        distributedBefore: client.formatUnits(distributedWei, decimals),
-      };
-      await walletRepo.saveTxIntent(intent);
-
-      let txHash: string | null = null;
-      try {
-        const tx = await client.transfer(address, amountWei, tokenRuntime.contractAddress);
-        txHash = tx.hash;
-        await saveAttempt({
-          txIntentId: intent.id,
-          attemptNumber: 1,
-          status: "broadcasting",
-          txHash,
-          broadcastAt: new Date(),
-        });
-
-        const receipt = await tx.wait();
-        const reverted = !receipt || receipt.status !== 1;
-        await saveAttempt({
-          txIntentId: intent.id,
-          attemptNumber: 1,
-          status: reverted ? "reverted" : "confirmed",
-          txHash,
-          confirmedAt: new Date(),
-        });
-        await saveReceipt(intent.id, txHash!, receipt, reverted ? "reverted" : "confirmed");
-
-        if (reverted) {
-          await walletRepo.saveTxIntent(walletManager.processTxIntent(intent, "reverted", txHash!, "Transaction reverted"));
-          return createApiEnvelope({ error: { message: "Airdrop reverted on-chain" } }, request.id);
-        }
-
-        await walletRepo.saveTxIntent(walletManager.processTxIntent(intent, "confirmed", txHash!));
-
-        const [adminBalanceWeiAfter, recipientBalanceWeiAfter] = await Promise.all([
-          client.getBalance(fromAddress, tokenRuntime.contractAddress),
-          client.getBalance(address, tokenRuntime.contractAddress),
-        ]);
-        const adminBalanceAfter = client.formatUnits(adminBalanceWeiAfter, decimals);
-        const recipientBalanceBefore = client.formatUnits(recipientBalanceWeiBefore, decimals);
-        const recipientBalanceAfter = client.formatUnits(recipientBalanceWeiAfter, decimals);
-
-        await Promise.all([
-          syncBalanceIfKnownUser(address, token, recipientBalanceAfter),
-          syncBalanceIfKnownUser(fromAddress, token, adminBalanceAfter),
-        ]);
-
-        await walletRepo.saveLedgerEntry({
-          id: randomUUID(),
-          userId: ctx.user.id,
-          address,
-          token,
-          type: "airdrop",
-          amount: rewardAmount,
-          balanceBefore: recipientBalanceBefore,
-          balanceAfter: recipientBalanceAfter,
-          txIntentId: intent.id,
-          txHash,
-          meta: {
-            source: "daily_airdrop",
-            fromAddress,
-            mode: "admin_wallet_transfer",
-          },
-          createdAt: new Date(),
-        });
-        await Promise.all([
-          kv.set(`last_airdrop:${address}`, now),
-          kv.set(AIRDROP_DISTRIBUTED_TOTAL_KEY, (distributedWei + amountWei).toString()),
-          kv.set(`checkin_streak:${address}`, streak),
-          kv.set(`checkin_history:${address}`, [...history, todayDate].slice(-30)),
-        ]);
-
-        await opsRepo.logEvent({
-          channel: "wallet",
-          severity: "info",
-          source: "airdrop",
-          kind: "airdrop_claimed",
-          userId: ctx.user.id,
-          address,
-          token,
-          txIntentId: intent.id,
-          txHash,
-          message: `Admin wallet transferred ${rewardAmount} ZXC airdrop to ${address}`,
-          meta: {
-            fromAddress,
-            contractAddress: tokenRuntime.contractAddress,
-            halvingCount: policy.halvingCount,
-            distributedBefore: client.formatUnits(distributedWei, decimals),
-            distributedAfter: client.formatUnits(distributedWei + amountWei, decimals),
-          },
-        });
-
-        return createApiEnvelope({ reward: rewardAmount, txHash, balance: recipientBalanceAfter }, request.id);
-      } catch (error: any) {
-        await saveAttempt({
-          txIntentId: intent.id,
-          attemptNumber: 1,
-          status: "failed",
-          txHash,
-          error: error?.message || "Airdrop failed",
-          errorCode: "TX_BROADCAST_ERROR",
-          confirmedAt: new Date(),
-        });
-        await walletRepo.saveTxIntent(
-          walletManager.processTxIntent(intent, "failed", txHash || undefined, error?.message || "Airdrop failed")
-        );
-        throw error;
-      }
+      return createApiEnvelope({ reward: rewardAmount, method: "direct_credit", intentId: airdropIntent.id, balance: newBalance }, request.id);
     } catch (error: any) {
       await opsRepo.logEvent({
         channel: "wallet",
