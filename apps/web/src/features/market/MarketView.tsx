@@ -372,35 +372,6 @@ export default function MarketView() {
             )}
           </section>
 
-          {/* Stock grid */}
-          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <BarChart3 className="text-[#fcc025]" size={18} />
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {stockSymbols.map((quote) => (
-                <button key={quote.symbol} type="button" onClick={() => { setSelectedSymbol(quote.symbol); }}
-                  className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
-                          {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
-                        </span>
-                      </div>
-                      <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
-                    </div>
-                    {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
-                  </div>
-                  <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{nf(Number(quote.price || 0))}</p>
-                </button>
-              ))}
-            </div>
-          </section>
-
           {/* Portfolio */}
           {(summary?.futuresPositions?.length > 0 || summary?.stockPositions?.length > 0) && (
             <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
@@ -490,6 +461,35 @@ export default function MarketView() {
               )}
             </section>
           )}
+
+          {/* Stock grid */}
+          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <BarChart3 className="text-[#fcc025]" size={18} />
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {stockSymbols.map((quote) => (
+                <button key={quote.symbol} type="button" onClick={() => { setSelectedSymbol(quote.symbol); }}
+                  className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
+                          {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                    </div>
+                    {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
+                  </div>
+                  <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{nf(Number(quote.price || 0))}</p>
+                </button>
+              ))}
+            </div>
+          </section>
 
           {/* Recent Activity (collapsible) */}
           <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
