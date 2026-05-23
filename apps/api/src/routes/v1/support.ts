@@ -160,23 +160,18 @@ export async function supportRoutes(fastify: FastifyInstance) {
   });
 
   typedFastify.get("/chat/messages", async (request) => {
-    // Test write first
     const testId = `get_test_${Date.now()}`;
-    await kv.lpush("chat:global:messages", { id: testId, text: 'get_test', address: '', displayName: 'test', createdAt: Date.now() });
-    await kv.ltrim("chat:global:messages", 0, 49);
-    const raw = await kv.lrange<any>("chat:global:messages", 0, 49);
-    return createApiEnvelope({
+    await kv.lpush("chat:global:messages", { id: testId, text: 'get_test', address: '', displayName: 'test', createdAt: Date.now() }).catch((e: any) => console.error('lpush fail:', e));
+    await kv.ltrim("chat:global:messages", 0, 49).catch((e: any) => console.error('ltrim fail:', e));
+    const raw = await kv.lrange<any>("chat:global:messages", 0, 49).catch((e: any) => { console.error('lrange fail:', e); return []; });
+    const result = {
+      version: 'v3',
+      serverTime: Date.now(),
       messages: raw,
-      debug: {
-        wroteTest: true,
-        count: raw?.length,
-        sample: raw?.map((m: any) => m.text).slice(0, 5),
-        firstId: raw?.[0]?.id?.slice(0, 16),
-        testFound: raw?.some((m: any) => m.id === testId),
-        rawType: typeof raw,
-        isArray: Array.isArray(raw),
-      }
-    }, request.id);
+      count: raw?.length ?? -1,
+      testFound: raw?.some((m: any) => m.id === testId) ?? false,
+    };
+    return createApiEnvelope(result, request.id);
   });
 
   typedFastify.post("/chat/messages", {
