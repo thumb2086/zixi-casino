@@ -240,7 +240,11 @@ export async function walletRoutes(fastify: FastifyInstance) {
       onchain.yjc.error = error?.message || "On-chain runtime unavailable";
     }
 
-    const nextAirdropAt = lastAirdrop ? lastAirdrop + 24 * 60 * 60 * 1000 : null;
+    // Midnight reset: next claim available at 00:00 tomorrow
+    const nextMidnight = new Date();
+    nextMidnight.setDate(nextMidnight.getDate() + 1);
+    nextMidnight.setHours(0, 0, 0, 0);
+    const nextAirdropAt = Date.now() < nextMidnight.getTime() ? nextMidnight.getTime() : nextMidnight.getTime() + 86400000;
     const summary = walletManager.buildSummary(address, balances, ledger.map((entry: any) => ({
       ...entry,
       token: tokenToSymbol(entry.token === "yjc" ? "yjc" : "zhixi"),
