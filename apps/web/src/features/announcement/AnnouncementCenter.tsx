@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Megaphone, AlertTriangle, ShieldAlert, Gift,
   ChevronDown, Loader2, X,
@@ -117,7 +118,7 @@ export default function AnnouncementCenter() {
   }, [claimMsg]);
 
   const featured = useMemo(() => {
-    return items.find((item) => item.type === 'urgent') || items[0] || null;
+    return items.find((item) => item.type === 'urgent') || null;
   }, [items]);
 
   const getBadgeStyle = (type: AnnouncementItem['type']) => {
@@ -164,11 +165,11 @@ export default function AnnouncementCenter() {
       <main className="pt-24 px-6 max-w-2xl mx-auto space-y-8">
         {/* Tabs */}
         <div className="flex bg-[#1a1919] p-1.5 rounded-xl border border-[#494847]/20">
-          {(['ANNOUNCEMENT', 'EVENTS'] as const).map((entry) => (
+          {(['ANNOUNCEMENT', 'EVENTS', 'TRANSACTIONS'] as const).map((entry) => (
             <button key={entry} type="button" onClick={() => setFilter(entry)}
               className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === entry ? 'bg-[#fcc025] text-black shadow-lg' : 'text-[#adaaaa] hover:text-white'}`}
             >
-              {entry === 'ANNOUNCEMENT' ? '公告' : '活動'}
+              {entry === 'ANNOUNCEMENT' ? '公告' : entry === 'EVENTS' ? '活動' : '動態'}
             </button>
           ))}
         </div>

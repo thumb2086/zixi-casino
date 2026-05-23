@@ -54,6 +54,11 @@ const TX_TYPE_LABEL: Record<string, string> = {
   bank_withdraw: '銀行提領',
   loan_borrow: '貸款',
   loan_repay: '還款',
+  item_use: '代幣使用',
+  mission_reward: '任務獎勵',
+  market_buy: '市場買入',
+  market_sell: '市場賣出',
+  futures_pnl: '合約損益',
 };
 
 const TX_STATUS_LABEL: Record<string, string> = {
@@ -247,7 +252,7 @@ export default function PublicTransactionsView() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-black tracking-[0.14em] text-white">
-                      {`${TX_TYPE_LABEL[item.type] || item.type} • ${nf(Number(item.amount))} ${item.tokenSymbol || 'ZXC'}`}
+                      {`${TX_TYPE_LABEL[item.type] || item.type} • ${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
                     </p>
                     <p className="mt-1 text-xs font-bold tracking-[0.12em] text-[#adaaaa]">
                       {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'…' : String(item.roundId)}
