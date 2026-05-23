@@ -66,10 +66,15 @@ export default function MarketView() {
   const [panelTab, setPanelTab] = useState<'spot' | 'futures' | 'bank'>('spot');
   const [showIndexChart, setShowIndexChart] = useState(true);
   const [showActivity, setShowActivity] = useState(false);
+  const [showFloatingChart, setShowFloatingChart] = useState(true);
 
   useEffect(() => {
     if (actionNotice) { const t = setTimeout(() => setActionNotice(null), 3000); return () => clearTimeout(t); }
   }, [actionNotice]);
+
+  useEffect(() => {
+    setShowFloatingChart(true);
+  }, [selectedSymbol]);
 
   const runAction = async (params: MarketActionParams, successMsg: string) => {
     try {
@@ -528,6 +533,23 @@ export default function MarketView() {
           </section>
         </div>
       </main>
+
+      {/* Floating stock chart (always visible when a stock is selected, regardless of scroll) */}
+      {selectedQuote && stockHistory.length > 1 && showFloatingChart && (
+        <div className="fixed bottom-28 right-4 z-40 w-56 rounded-xl border border-[#494847]/10 bg-[#1a1919]/95 backdrop-blur-xl p-3 shadow-2xl lg:bottom-auto lg:top-24 lg:right-6 lg:w-64">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="text-xs font-black text-white">{selectedQuote.symbol}</p>
+              <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                {nf(Number(selectedQuote.price || 0))} ({isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%)
+              </p>
+            </div>
+            <button onClick={() => setShowFloatingChart(false)}
+              className="text-[10px] text-[#adaaaa] hover:text-white p-1">✕</button>
+          </div>
+          <MiniChart data={stockHistory} color={stockColor} height={60} />
+        </div>
+      )}
 
       <AppBottomNav current="market" />
     </div>
