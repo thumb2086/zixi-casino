@@ -430,6 +430,9 @@ export default function MarketView() {
                         <p className="text-[10px] text-[#adaaaa] mt-1">
                           {t('market.position_detail', { entry: nf(pos.entryPrice), mark: nf(pos.markPrice ?? 0), liquidation: nf(pos.liquidationPrice) })}
                         </p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">
+                          保證金: <span className="text-white font-bold">{nf(pos.margin)} ZXC</span>
+                        </p>
                         {(pos.takeProfitPrice || pos.stopLossPrice) && (
                           <div className="flex gap-3 mt-1 text-[10px]">
                             {pos.takeProfitPrice ? <span className="text-emerald-400">{t('market.take_profit')} {nf(pos.takeProfitPrice)}</span> : null}
