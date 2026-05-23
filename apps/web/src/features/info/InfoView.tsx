@@ -11,9 +11,9 @@ type TabId = 'items' | 'odds' | 'vip' | 'xp';
 
 const TABS = [
   { id: 'items' as TabId, label: '物品圖鑑', icon: Package },
-  { id: 'odds' as TabId, label: '遊戲機率', icon: Calculator },
   { id: 'xp' as TabId, label: '經驗等級', icon: TrendingUp },
-  { id: 'vip' as TabId, label: 'VIP 說明', icon: Crown },
+  { id: 'vip' as TabId, label: 'VIP 通行證', icon: Crown },
+  { id: 'odds' as TabId, label: '遊戲機率', icon: Calculator },
 ];
 
 export default function InfoView() {
