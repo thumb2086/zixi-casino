@@ -366,48 +366,51 @@ export default function MarketView() {
             )}
           </section>
 
-          {/* Stock grid */}
+          {/* Stock grid + detail chart side by side */}
           <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
               <BarChart3 className="text-[#fcc025]" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.symbols')}</h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {stockSymbols.map((quote) => (
-                <button key={quote.symbol} type="button" onClick={() => { setSelectedSymbol(quote.symbol); }}
-                  className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
-                          {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
-                        </span>
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 flex-1">
+                {stockSymbols.map((quote) => (
+                  <button key={quote.symbol} type="button" onClick={() => { setSelectedSymbol(quote.symbol); }}
+                    className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-[#fcc025]/55 bg-[#121212]' : 'border-[#494847]/10 bg-[#141414] hover:border-[#fcc025]/20'}`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
+                            {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                      {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
                     </div>
-                    {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
-                  </div>
-                  <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{nf(Number(quote.price || 0))}</p>
-                </button>
-              ))}
-            </div>
-
-            {/* Selected stock detail chart */}
-            {selectedQuote && stockHistory.length > 1 && (
-              <div className="mt-4 border-t border-[#494847]/10 pt-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <LineChart size={16} className="text-[#fcc025]" />
-                  <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol} — {selectedQuote.name}</span>
-                  <span className="ml-auto text-sm font-black italic tracking-tight text-[#fcc025]">{nf(Number(selectedQuote.price || 0))}</span>
-                  <span className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                    {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
-                  </span>
-                </div>
-                <MiniChart data={stockHistory} color={stockColor} height={120} />
+                    <p className="mt-2 text-base font-black italic tracking-tight text-[#fcc025]">{nf(Number(quote.price || 0))}</p>
+                  </button>
+                ))}
               </div>
-            )}
+
+              {/* Selected stock detail chart (right side on desktop, below on mobile) */}
+              {selectedQuote && stockHistory.length > 1 && (
+                <div className="lg:w-72 shrink-0 rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <LineChart size={16} className="text-[#fcc025]" />
+                    <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol}</span>
+                    <span className="ml-auto text-sm font-black italic tracking-tight text-[#fcc025]">{nf(Number(selectedQuote.price || 0))}</span>
+                    <span className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                      {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-[#adaaaa] mb-2">{selectedQuote.name}</p>
+                  <MiniChart data={stockHistory} color={stockColor} height={100} />
+                </div>
+              )}
+            </div>
           </section>
 
           {/* Portfolio */}
