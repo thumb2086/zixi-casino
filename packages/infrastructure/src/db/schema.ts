@@ -413,6 +413,7 @@ export const announcements = pgTable("announcements", {
   announcementId: text("announcement_id").notNull().unique(),
   title: text("title").notNull(),
   content: text("content").notNull(),
+  type: text("type").default('info'), // 'info' | 'warning' | 'urgent'
   isPinned: boolean("is_pinned").default(false),
   isActive: boolean("is_active").default(true),
   publishedBy: text("published_by"),
