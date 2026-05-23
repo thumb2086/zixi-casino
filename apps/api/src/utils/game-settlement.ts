@@ -754,7 +754,6 @@ export class GameSettlementWrapper {
 
       // Send global notification
       try {
-        const { kv } = await import("@repo/infrastructure");
         const titleLabels = newTitles.map((t: string) => {
           const def = ALL_ITEMS[t];
           return def?.name || t;
@@ -767,10 +766,8 @@ export class GameSettlementWrapper {
           text: `玩家獲得稱號：${titleLabels.join("、")}！`,
           createdAt: Date.now(),
         };
-        const messages = (await kv.get<any[]>("chat:global:messages")) || [];
-        messages.push(msg);
-        if (messages.length > 50) messages.shift();
-        await kv.set("chat:global:messages", messages);
+        await kv.lpush("chat:global:messages", msg);
+        await kv.ltrim("chat:global:messages", 0, 49);
       } catch (err) {
         console.error("Failed to send title unlock notification:", err);
       }

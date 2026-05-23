@@ -19,7 +19,8 @@ export class UpstashKV implements KVClient {
     if (!this.redis) return null;
     try {
       return await this.redis.get<T>(key);
-    } catch {
+    } catch (err) {
+      console.error(`KV get error (${key}):`, err);
       return null;
     }
   }
@@ -33,7 +34,8 @@ export class UpstashKV implements KVClient {
         await this.redis.set(key, value);
       }
       return "OK";
-    } catch {
+    } catch (err) {
+      console.error(`KV set error (${key}):`, err);
       return "OK";
     }
   }
@@ -78,7 +80,8 @@ export class UpstashKV implements KVClient {
     if (!this.redis) return 0;
     try {
       return await this.redis.lpush(key, ...(values as [any, ...any[]]));
-    } catch {
+    } catch (err) {
+      console.error(`KV lpush error (${key}):`, err);
       return 0;
     }
   }
@@ -87,7 +90,8 @@ export class UpstashKV implements KVClient {
     if (!this.redis) return [];
     try {
       return await this.redis.lrange(key, start, stop);
-    } catch {
+    } catch (err) {
+      console.error(`KV lrange error (${key}):`, err);
       return [];
     }
   }
@@ -97,7 +101,8 @@ export class UpstashKV implements KVClient {
     try {
       await this.redis.ltrim(key, start, stop);
       return "OK";
-    } catch {
+    } catch (err) {
+      console.error(`KV ltrim error (${key}):`, err);
       return "OK";
     }
   }
