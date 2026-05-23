@@ -183,8 +183,8 @@ export default function MarketView() {
         </div>
       )}
 
-      {/* Stock detail chart (always visible when selected) */}
-      {selectedQuote && chartOpen && (() => {
+      {/* Stock detail chart (hidden on bank tab) */}
+      {panelTab !== 'bank' && selectedQuote && chartOpen && (() => {
         const history: number[] = marketSnapshot?.history?.[selectedQuote.symbol] || [];
         const isUp = (selectedQuote.changePct || 0) >= 0;
         const color = isUp ? '#00f59b' : '#ff6d6d';
