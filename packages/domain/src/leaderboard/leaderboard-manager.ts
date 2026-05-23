@@ -11,6 +11,8 @@ export interface LeaderboardEntry {
   address: string;
   displayName: string | null;
   amount: number;
+  level?: number;
+  tierLabel?: string;
   // Asset leaderboard extra field
   balance?: number;
 }
@@ -61,65 +63,47 @@ export class LeaderboardManager {
   }
 
   // ─────────────────────────────────────────
-  // Main query: Bet leaderboard (day/week/month/all)
+  // XP leaderboard
   // ─────────────────────────────────────────
-  async getBetLeaderboard(
-    type: LeaderboardType,
+  async getXpLeaderboard(
     selfAddress?: string,
-    limit = 50,
-    periodId?: string
+    limit = 50
   ): Promise<LeaderboardResult> {
-    let pid = periodId ?? this.getCurrentPeriodId(type);
+    const { levelForXp, getXpTierLabel } = await import("../experience/experience-manager.js");
 
-    // 1. Query main leaderboard list (JOIN users to get display_name)
-    let rows = await this.db
+    const rows = await this.db
       .select({
-        address: schema.totalBets.address,
-        amount: schema.totalBets.amount,
+        address: schema.userProfiles.address,
+        xp: schema.userProfiles.xp,
+        level: schema.userProfiles.level,
         displayName: schema.users.displayName,
       })
-      .from(schema.totalBets)
-      .leftJoin(schema.users, eq(schema.users.address, schema.totalBets.address))
-      .where(
-        and(
-          eq(schema.totalBets.periodType, type),
-          eq(schema.totalBets.periodId, pid)
-        )
-      )
-      .orderBy(desc(schema.totalBets.amount))
+      .from(schema.userProfiles)
+      .leftJoin(schema.users, eq(schema.users.address, schema.userProfiles.address))
+      .orderBy(desc(schema.userProfiles.xp))
       .limit(limit);
-
-    // Note: Removed fallback to 'all' period - week/month/season should show only current period data
 
     const entries: LeaderboardEntry[] = rows.map((r, i) => ({
       rank: i + 1,
       address: r.address,
       displayName: r.displayName,
-      amount: Number(r.amount ?? 0),
+      amount: Number(r.xp ?? 0),
+      level: Number(r.level ?? 1),
+      tierLabel: getXpTierLabel(Number(r.level ?? 1)),
     }));
 
-    // 2. Query self rank (if selfAddress provided and not in top limit)
     let selfRank: LeaderboardEntry | null = null;
 
     if (selfAddress) {
       const addr = selfAddress.toLowerCase();
-      const inList = entries.find(
-        (e) => e.address.toLowerCase() === addr
-      );
+      const inList = entries.find((e) => e.address.toLowerCase() === addr);
       if (inList) {
         selfRank = inList;
       } else {
-        // Calculate self rank using COUNT
         const selfRow = await this.db
-          .select({ amount: schema.totalBets.amount })
-          .from(schema.totalBets)
-          .where(
-            and(
-              eq(schema.totalBets.periodType, type),
-              eq(schema.totalBets.periodId, pid),
-              eq(schema.totalBets.address, addr)
-            )
-          )
+          .select({ xp: schema.userProfiles.xp, level: schema.userProfiles.level })
+          .from(schema.userProfiles)
+          .where(eq(schema.userProfiles.address, addr))
           .limit(1);
 
         const userRow = await this.db
@@ -128,35 +112,29 @@ export class LeaderboardManager {
           .where(eq(schema.users.address, addr))
           .limit(1);
 
-        // Even if user has no total_bets row yet, still return a self rank row with amount=0
-        // so Device Linker app users can always see themselves on leaderboard.
-        // Also allow session-address users to appear even when users profile row is not ready yet.
-        const selfAmount = Number(selfRow[0]?.amount ?? 0);
+        const selfXp = Number(selfRow[0]?.xp ?? 0);
+        const selfLevel = Number(selfRow[0]?.level ?? 1);
 
         const rankResult = await this.db
           .select({ cnt: sql<number>`count(*)` })
-          .from(schema.totalBets)
-          .where(
-            and(
-              eq(schema.totalBets.periodType, type),
-              eq(schema.totalBets.periodId, pid),
-              sql`${schema.totalBets.amount} > ${selfAmount}`
-            )
-          );
+          .from(schema.userProfiles)
+          .where(sql`${schema.userProfiles.xp} > ${selfXp}`);
 
         const rank = Number(rankResult[0]?.cnt ?? 0) + 1;
         selfRank = {
           rank,
           address: addr,
           displayName: userRow[0]?.displayName ?? null,
-          amount: selfAmount,
+          amount: selfXp,
+          level: selfLevel,
+          tierLabel: getXpTierLabel(selfLevel),
         };
       }
     }
 
     return {
-      type,
-      periodId: pid,
+      type: "xp" as any,
+      periodId: "",
       entries,
       selfRank,
       updatedAt: new Date().toISOString(),

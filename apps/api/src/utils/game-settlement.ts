@@ -711,7 +711,6 @@ export class GameSettlementWrapper {
     const currentXp = Number(profile?.xp || 0);
     const currentLevel = Number(profile?.level || 1);
 
-    // Get VIP daily bonus multiplier
     let vipDailyBonusMult = 1;
     if (address) {
       try {
@@ -720,7 +719,11 @@ export class GameSettlementWrapper {
       } catch {}
     }
 
-    const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs, vipDailyBonusMult);
+    const { kv } = await import("@repo/infrastructure");
+    const eventMult = Number(await kv.get<string>('xp_event_multiplier') || '0');
+    const eventBonus = Math.max(0, eventMult - 1);
+
+    const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
 
     await db.execute(sql`
       UPDATE user_profiles SET xp = ${result.totalXp}, level = ${result.newLevel}, updated_at = NOW() WHERE user_id = ${userId}
