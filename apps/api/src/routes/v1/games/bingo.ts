@@ -115,7 +115,8 @@ export async function bingoRoutes(fastify: FastifyInstance) {
         validation.balanceAfter,
         settlement.finalPayout,
         'bingo',
-        userId
+        userId,
+        betAmount
       );
 
       // 5. Update total bet

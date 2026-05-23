@@ -55,7 +55,6 @@ const routeCacheConfig: Record<string, CacheConfig> = {
 
   // Support & Chat
   "GET:/api/v1/support/announcements": { ttl: 120 },
-  "GET:/api/v1/support/chat/messages": { ttl: 10 },
   "GET:/api/v1/announcements": { ttl: 120 },
 
   // VIP
@@ -65,12 +64,23 @@ const routeCacheConfig: Record<string, CacheConfig> = {
   "GET:/api/v1/games/rooms": { ttl: 15 },
   "GET:/api/v1/games/coinflip/round": { ttl: 5 },
   "GET:/api/v1/games/horse/round": { ttl: 5 },
+  "GET:/api/v1/games/roulette/round": { ttl: 5 },
+  "GET:/api/v1/games/sicbo/round": { ttl: 5 },
+  "GET:/api/v1/games/bingo/round": { ttl: 5 },
 
   // Gift
   "GET:/api/v1/gift/recipients": { ttl: 30 },
 
   // Admin (public, non-sensitive)
   "GET:/api/v1/admin/ops/health": { ttl: 30 },
+  "GET:/api/v1/admin/ops/events": { ttl: 15 },
+  "GET:/api/v1/admin/announcements": { ttl: 60 },
+  "GET:/api/v1/admin/reward-catalog": { ttl: 120 },
+  "GET:/api/v1/admin/submissions": { ttl: 30 },
+  "GET:/api/v1/admin/campaigns": { ttl: 60 },
+  "GET:/api/v1/admin/users": { ttl: 15 },
+  "GET:/api/v1/admin/tickets": { ttl: 30 },
+  "GET:/api/v1/admin/blacklist": { ttl: 30 },
 
   // Health ping
   "GET:/health": { ttl: 60 },

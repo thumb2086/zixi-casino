@@ -92,7 +92,8 @@ export async function slotsRoutes(fastify: FastifyInstance) {
       validation.balanceAfter,
       payout,
       'slots',
-      userId
+      userId,
+      betAmount
     );
 
     // Respond immediately — remaining work fires in background

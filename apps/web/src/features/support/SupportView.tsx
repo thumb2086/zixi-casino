@@ -165,7 +165,7 @@ export default function SupportView() {
             <p className="text-sm text-[#adaaaa]">{t('support.no_announcements')}</p>
           ) : (
             <ul className="space-y-3">
-              {announcements.slice(0, 5).map((a) => (
+              {announcements.slice(0, 3).map((a) => (
                 <li key={a.id} className="border-l-2 border-[#fcc025]/50 pl-3">
                   <div className="flex items-center gap-2">
                     {a.isPinned && <span className="text-xs font-black uppercase text-[#fcc025]">{t('support.pinned')}</span>}
@@ -248,47 +248,7 @@ export default function SupportView() {
           )}
         </section>
 
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-          <div className="flex items-center gap-2 mb-4">
-            <MessageCircle size={18} className="text-[#fcc025]" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('support.chat_title')}</h2>
-          </div>
-          <div className="bg-[#0e0e0e] border border-[#494847]/20 rounded-lg p-3 h-60 overflow-y-auto flex flex-col gap-2 mb-3">
-            {chatLoading && chatMessages.length === 0 ? (
-              <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> {t('support.loading')}</div>
-            ) : chatMessages.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">{t('support.no_messages')}</p>
-            ) : (
-              chatMessages.slice(-50).map((msg) => (
-                <div key={msg.id} className="text-xs">
-                  <span className="font-bold text-[#fcc025] mr-2">{msg.displayName || msg.address?.slice(0, 6) || t('support.anonymous_player')}</span>
-                  <span className="text-white whitespace-pre-wrap">{msg.text}</span>
-                </div>
-              ))
-            )}
-          </div>
-          {isAuthorized ? (
-            <form onSubmit={handleSendChat} className="flex gap-2">
-              <input
-                type="text"
-                value={chatText}
-                onChange={(e) => setChatText(e.target.value)}
-                className="flex-1 bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
-                placeholder={t('support.chat_placeholder')}
-                maxLength={500}
-              />
-              <button
-                type="submit"
-                disabled={chatSending || !chatText.trim()}
-                className="bg-[#fcc025] text-[#0e0e0e] font-black uppercase tracking-widest text-xs px-4 rounded-lg disabled:opacity-50"
-              >
-                {chatSending ? <Loader2 size={14} className="animate-spin" /> : t('support.send')}
-              </button>
-            </form>
-          ) : (
-            <p className="text-xs text-[#adaaaa]">{t('support.login_to_chat')}</p>
-          )}
-        </section>
+
       </main>
 
       <AppBottomNav current="none" />

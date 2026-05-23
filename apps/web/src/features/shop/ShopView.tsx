@@ -120,24 +120,19 @@ export default function ShopView() {
   const CONVERSION_RATE = 100_000_000; // 1 YJC = 100M ZXC
 
   const fetchItems = useCallback(async () => {
-    setLoading(true);
     try {
-      const [catalogRes, summaryRes, invRes, pawnInvRes] = await Promise.all([
+      const [catalogRes, summaryRes, invRes] = await Promise.all([
         api.get('/api/v1/rewards/catalog'),
         api.get('/api/v1/wallet/summary', { params: { sessionId } }).catch(() => null),
         api.get('/api/v1/inventory', { params: { sessionId } }).catch(() => null),
-        api.get('/api/v1/inventory', { params: { sessionId } }).catch(() => null),
       ]);
       const catalog = catalogRes.data?.data?.customItems || [];
-      const shopItems = catalog.filter((i: any) => i.source === 'shop' && Number(i.price) > 0);
-      setItems(shopItems);
+      setItems(catalog.filter((i: any) => i.source === 'shop' && Number(i.price) > 0));
       if (invRes?.data?.data) {
         setOwnedAvatars(invRes.data.data.ownedAvatars || []);
         setOwnedTitles(invRes.data.data.ownedTitles || []);
         setPurchasedBundles(invRes.data.data.purchasedBundles || []);
-      }
-      if (pawnInvRes?.data?.data?.items) {
-        setInvItems(pawnInvRes.data.data.items.filter((i: any) => i.type !== 'avatar' && i.type !== 'title'));
+        if (invRes.data.data.items) setInvItems(invRes.data.data.items.filter((i: any) => i.type !== 'avatar' && i.type !== 'title'));
       }
       if (summaryRes?.data?.data) {
         const s = summaryRes.data.data;
@@ -145,32 +140,10 @@ export default function ShopView() {
         setBalance(String(bal));
         setYjcBalance(s?.summary?.balances?.YJC || s?.balances?.yjc?.balance || '0');
       }
-      // Fetch stock holdings for pawn
-      try {
-        const [marketRes, snapshotRes] = await Promise.all([
-          api.get('/api/v1/market/me', { params: { sessionId } }),
-          api.get('/api/v1/market/snapshot').catch(() => null),
-        ]);
-        const acct = marketRes.data?.data?.account;
-        if (acct?.stockPositions) {
-          setStockHoldings(acct.stockPositions);
-        } else if (acct?.stockHoldings) {
-          setStockHoldings(Object.entries(acct.stockHoldings).map(([symbol, h]: any) => ({ symbol, ...h })));
-        }
-        if (snapshotRes?.data?.data?.history) {
-          setStockHistory(snapshotRes.data.data.history);
-        }
-      } catch {}
-    } catch {
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    } catch { setItems([]); } finally { setLoading(false); }
+  }, [sessionId]);
 
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+  useEffect(() => { fetchItems(); }, [fetchItems]);
 
   const [chests, setChests] = useState<any[]>([]);
   const [buyingChest, setBuyingChest] = useState<string | null>(null);

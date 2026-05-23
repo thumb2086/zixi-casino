@@ -636,11 +636,26 @@ export async function creditItemValue(
   const token = outcome.currencyType || "zhixi";
   // lazy-import to avoid circular dependency
   const { gameSettlement } = await import("./game-settlement.js");
+  const { WalletRepository } = await import("@repo/infrastructure");
+  const walletRepo = new WalletRepository();
 
   try {
     const current = parseFloat(await gameSettlement.getBalance(address, token)) || 0;
     const updated = (current + outcome.currencyGranted).toString();
     await gameSettlement.setBalance(address, token, updated);
+    // Record in wallet ledger so it appears in transaction history
+    await walletRepo.saveLedgerEntry({
+      id: crypto.randomUUID(),
+      userId,
+      address: address.toLowerCase(),
+      token,
+      type: "item_use",
+      amount: String(outcome.currencyGranted),
+      balanceBefore: current.toString(),
+      balanceAfter: updated,
+      meta: { itemId: outcome.item.id, itemName: outcome.item.name },
+      createdAt: new Date(),
+    }).catch(() => {});
     return updated;
   } catch (err: any) {
     // Credit failed — restore the pre-use inventory snapshot

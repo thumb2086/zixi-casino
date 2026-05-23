@@ -2,7 +2,6 @@
 // 统一分局模块 - 参考 main 分支的实现
 
 export const GAME_INTERVAL_MS: Record<string, number> = {
-  coinflip: 15000,
   roulette: 20000,
   horse: 30000,
   sicbo: 20000,
@@ -10,7 +9,6 @@ export const GAME_INTERVAL_MS: Record<string, number> = {
 };
 
 export const GAME_BET_LOCK_MS: Record<string, number> = {
-  coinflip: 4000,
   roulette: 4000,
   horse: 5000,
   sicbo: 4000,

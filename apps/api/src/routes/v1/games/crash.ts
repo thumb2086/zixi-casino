@@ -129,7 +129,8 @@ export async function crashRoutes(fastify: FastifyInstance) {
           validation.balanceAfter,
           settlement.finalPayout,
           'crash',
-          userId
+          userId,
+          betAmount
         );
 
         // 4. Update total bet

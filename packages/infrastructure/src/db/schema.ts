@@ -170,6 +170,20 @@ export const walletLedgerEntries = pgTable("wallet_ledger_entries", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// ─── Chat Messages ─────────────────────────────────────────────────────────────
+
+export const chatMessages = pgTable("chat_messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id"),
+  address: text("address").notNull().default(''),
+  displayName: text("display_name").notNull(),
+  text: text("text").notNull(),
+  type: text("type").notNull().default('user'), // 'user' | 'system'
+  game: text("game"),
+  roundId: text("round_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const walletBalanceSnapshots = pgTable("wallet_balance_snapshots", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => users.id),

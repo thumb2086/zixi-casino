@@ -295,6 +295,8 @@ export class MarketManager {
         notional: round(toPositiveNumber(pos.notional, 0), 6),
         openedAt: toNumber(pos.openedAt, ts),
         liquidationPrice: round(toPositiveNumber(pos.liquidationPrice, 0), 6),
+        takeProfitPrice: pos.takeProfitPrice ? round(toPositiveNumber(pos.takeProfitPrice, 0), 6) : undefined,
+        stopLossPrice: pos.stopLossPrice ? round(toPositiveNumber(pos.stopLossPrice, 0), 6) : undefined,
       } as FuturesPosition))
       .filter((p: FuturesPosition) => p.id && TRADEABLE_FUTURES.has(p.symbol) && p.margin > 0 && p.quantity > 0);
 

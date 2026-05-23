@@ -121,10 +121,13 @@ export async function giftRoutes(fastify: FastifyInstance) {
           address: "",
           displayName: "🎁 系統",
           text: `🫵 ${senderName} 贈送 ${summary} 給 ${recipient.displayName || toAddr.slice(0, 6)}`,
-          createdAt: Date.now(),
+          type: 'system' as const,
         };
-        await kv.lpush("chat:global:messages", chatMsg);
-        await kv.ltrim("chat:global:messages", 0, 49);
+        const { WalletRepository } = await import("@repo/infrastructure");
+        const walletRepo = new WalletRepository();
+        await walletRepo.saveChatMessage(chatMsg);
+        const { broadcastChatMessage } = await import("../../utils/sse.js");
+        broadcastChatMessage({ ...chatMsg, createdAt: new Date().toISOString() });
       } catch {}
 
       await opsRepo.logEvent({

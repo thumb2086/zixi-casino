@@ -12,16 +12,6 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const gameManager = new GameManager();
 
-  // GET /api/v1/games/coinflip/round - Server time sync
-  typedFastify.get("/round", async (request) => {
-    return createApiEnvelope({
-      success: true,
-      data: {
-        serverNow: Date.now(),
-      },
-    }, request.id);
-  });
-
   const getContext = async (req: any) => {
     const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
     if (!sessionId) return null;
@@ -47,184 +37,67 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
     },
   }, async (request) => {
     const { betAmount, selection, token } = request.body as { sessionId: string; betAmount: number; selection: "heads" | "tails"; token: "zhixi" | "yjc" };
-
     const ctx = await getContext(request);
     if (!ctx || !ctx.user) {
-      return createApiEnvelope(
-        { success: false, error: "UNAUTHORIZED: Invalid session" },
-        request.id,
-        false
-      );
+      return createApiEnvelope({ success: false, error: "UNAUTHORIZED" }, request.id, false);
     }
-
     const address = ctx.session.address;
     const userId = ctx.user.id;
     if (!address) {
-      return createApiEnvelope(
-        { success: false, error: "USER_NOT_FOUND: Address not found" },
-        request.id,
-        false
-      );
+      return createApiEnvelope({ success: false, error: "ADDRESS_NOT_FOUND" }, request.id, false);
     }
 
-    // Turn-based: unique round per bet (no auto-round window)
     const roundId = `coinflip_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
     const amountStr = betAmount.toString();
 
     // 1. Validate and deduct balance
-    const validation = await gameSettlement.validateAndDeductBalance(
-      address,
-      token,
-      amountStr,
-      `total_bet:${address}`
-    );
-
+    const validation = await gameSettlement.validateAndDeductBalance(address, token, amountStr, `total_bet:${address}`);
     if (!validation.success) {
-      return createApiEnvelope(
-        { success: false, error: validation.error },
-        request.id,
-        false,
-        validation.error?.message || "Validation failed"
-      );
+      return createApiEnvelope({ success: false, error: validation.error }, request.id, false, validation.error?.message || "Validation failed");
     }
 
     try {
-      // 2. Resolve game using GameManager (deterministic FNV hash)
+      // 2. Resolve game
       const result = gameManager.resolveCoinflip(selection, `coinflip:${roundId}`);
-      const isWin = result.isWin;
-      const payout = isWin ? betAmount * result.multiplier : 0;
-      const payoutStr = payout.toString();
+      const isWin = result.winner === selection;
+      const payout = isWin ? betAmount * 1.96 : 0;
+      const fee = isWin ? Math.min(payout * 0.01, payout * 0.1) : 0; // simplified fee
+      const netPayout = Math.max(0, payout - fee);
 
-      // 3. Execute on-chain settlement
-      const settlement = await gameSettlement.executeSettlement({
-        userId,
-        address,
-        game: "coinflip",
-        token: token === "yjc" ? "YJC" : "ZXC",
-        betAmount: amountStr,
-        payoutAmount: payoutStr,
-        roundId,
-        requestId: request.id,
-      });
+      // 3. Credit payout directly (no executeSettlement, same as slots)
+      const finalBalance = await gameSettlement.creditPayout(address, token, validation.balanceAfter, netPayout, 'coinflip', userId, betAmount);
 
-      if (!settlement.success) {
-        // Rollback balance on settlement error
-        await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
-        return createApiEnvelope(
-          { success: false },
-          request.id,
-          false,
-          settlement.error?.message || "Settlement failed"
-        );
-      }
-
-      // 4. Credit payout to balance
-      const finalBalance = await gameSettlement.creditPayout(
-        address,
-        token,
-        validation.balanceAfter,
-        settlement.finalPayout,
-        'coinflip',
-        userId
-      );
-
-      // 5-8. Background: updateTotalBet (XP/titles), game session, log event, save round
+      // 4. Background: XP, session, events
       void (async () => {
         try {
           await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
+          if (isWin && netPayout > 0) {
+            await gameSettlement.updateTotalWin(address, netPayout);
+          }
           const db = await requireDb();
           const sessionManager = new GameSessionManager(db);
           await sessionManager.recordGame({
-            userId,
-            address,
-            game: "coinflip",
-            betAmount,
-            gameResult: {
-              result: settlement.isWin ? "win" : "lose",
-              payout: settlement.finalPayout,
-              meta: { 
-                winner: result.winner, 
-                selection,
-                betTxHash: settlement.betTxHash,
-                payoutTxHash: settlement.payoutTxHash,
-                fee: settlement.feeAmount,
-                roundId,
-              },
-            },
+            userId, address, game: "coinflip",
+            betAmount, gameResult: { result: isWin ? "win" : "lose", payout: netPayout, meta: { winner: result.winner, selection, betTxHash: null, payoutTxHash: null, fee, roundId } },
           });
           await gameSettlement.logGameEvent({
-            game: "coinflip",
-            userId,
-            address,
-            amount: amountStr,
-            payout: settlement.finalPayout.toString(),
-            fee: settlement.feeAmount.toString(),
-            isWin: settlement.isWin,
-            multiplier: result.multiplier,
-            betTxHash: settlement.betTxHash,
-            payoutTxHash: settlement.payoutTxHash,
-            roundId,
+            game: "coinflip", userId, address, amount: amountStr, payout: netPayout.toString(), fee: fee.toString(),
+            isWin, multiplier: isWin ? 1.96 : 0, betTxHash: undefined, payoutTxHash: undefined, roundId,
           });
-          await gameSettlement.saveRound("coinflip", roundId, {
-            winner: result.winner,
-            selection,
-            isWin,
-          });
+          await gameSettlement.saveRound("coinflip", roundId, { winner: result.winner, selection, isWin });
         } catch {}
       })();
 
       return createApiEnvelope({
-        success: true,
-        data: {
-          sessionId: roundId,
-          roundId,
-          selection,
-          winner: result.winner,
-          result: settlement.isWin ? "win" : "lose",
-          payout: settlement.finalPayout,
-          betAmount,
-          multiplier: result.multiplier,
-          fee: settlement.feeAmount,
-          balance: finalBalance,
-          betTxHash: settlement.betTxHash,
-          payoutTxHash: settlement.payoutTxHash,
-        }
+        roundId, selection, winner: result.winner,
+        result: isWin ? "win" : "lose",
+        payout: netPayout, betAmount, multiplier: isWin ? 1.96 : 0,
+        fee, balance: finalBalance,
       }, request.id);
 
-    } catch (err: any) {
+    } catch (error: any) {
       await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
-      return createApiEnvelope(
-        { success: false },
-        request.id,
-        false,
-        err?.message || "Unexpected error"
-      );
+      return createApiEnvelope({ success: false }, request.id, false, error?.message || "Unexpected error");
     }
-  });
-
-  typedFastify.get("/history", {
-    schema: { querystring: z.object({ sessionId: z.string() }) },
-  }, async (request) => {
-    const ctx = await getContext(request);
-    if (!ctx || !ctx.user) {
-      return createApiEnvelope(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Invalid session" } },
-        request.id
-      );
-    }
-
-    const address = ctx.session.address;
-    if (!address) {
-      return createApiEnvelope(
-        { success: false, error: { code: "USER_NOT_FOUND", message: "Address not found" } },
-        request.id
-      );
-    }
-
-    const db = await requireDb();
-    const manager = new GameSessionManager(db);
-    const history = await manager.getHistory(address, "coinflip", 20);
-    
-    return createApiEnvelope({ success: true, data: history }, request.id);
   });
 }

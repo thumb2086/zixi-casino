@@ -138,7 +138,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
   }, async (request) => {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
-    const { type, symbol, amount, quantity, side, leverage, positionId } = request.body;
+    const { type, symbol, amount, quantity, side, leverage, positionId, takeProfitPrice, stopLossPrice } = request.body;
     const nowTs = Date.now();
     const snapshot = marketManager.buildSnapshot(nowTs);
     const account = await hydrateAccount(ctx.session.address, ctx.user.id, nowTs);
@@ -168,7 +168,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "bank_withdraw") result = marketManager.bankWithdraw(account, amount);
       else if (type === "loan_borrow") result = marketManager.borrowLoan(account, snapshot, amount);
       else if (type === "loan_repay") result = marketManager.repayLoan(account, amount);
-      else if (type === "futures_open") result = marketManager.openFutures(account, snapshot, { symbol, side, margin: amount, leverage });
+      else if (type === "futures_open") result = marketManager.openFutures(account, snapshot, { symbol, side, margin: amount, leverage, takeProfitPrice, stopLossPrice });
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
       else throw new Error("Unsupported market action payload");
 
