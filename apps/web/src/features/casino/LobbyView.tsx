@@ -10,7 +10,6 @@ import {
   Dice5,
   History,
   LayoutGrid,
-  Megaphone,
   Package,
   Settings as SettingsIcon,
   ShoppingBag,
@@ -30,6 +29,13 @@ import AppBottomNav from '../../components/AppBottomNav';
 import { useWallet } from '../wallet/useWallet';
 import { resolvePreferredBalance } from '../../utils/balance';
 import { useLeaderboard } from '../../hooks/useLeaderboard';
+
+const TX_TYPE_LABEL: Record<string, string> = {
+  bet: '下注', payout: '派彩', deposit: '存入',
+  withdrawal: '提領', transfer: '轉帳',
+  chest_buy: '購買寶箱', airdrop: '空投',
+  mission_reward: '任務獎勵', market_buy: '市場買入', market_sell: '市場賣出',
+};
 
 function GlassCard({
   to,
@@ -83,7 +89,16 @@ export default function LobbyView() {
     queryKey: ['my-profile'],
     queryFn: async () => {
       const res = await api.get('/api/v1/me/profile');
-      return res.data?.data?.profile as { isAdmin?: boolean; vipLevel?: string; maxBet?: number } | undefined;
+      return res.data?.data?.profile as {
+        isAdmin?: boolean;
+        vipLevel?: string;
+        maxBet?: number;
+        level?: number;
+        xp?: number;
+        xpTierLabel?: string;
+        xpNextLevel?: number;
+        xpProgress?: number;
+      } | undefined;
     },
     staleTime: 60000,
   });
@@ -232,6 +247,32 @@ export default function LobbyView() {
           </div>
         </section>
 
+        {profileData?.level ? (
+          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">經驗等級</p>
+                <p className="text-3xl font-black italic text-[#fcc025] mt-1">
+                  Lv.{profileData.level}{' '}
+                  <span className="text-sm font-bold text-[#adaaaa]">{profileData.xpTierLabel || ''}</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-bold text-white">{(profileData.xp || 0).toLocaleString()} XP</p>
+                {profileData.xpNextLevel > 0 && (
+                  <p className="text-[10px] text-[#adaaaa] mt-0.5">下一級 {Number(profileData.xpNextLevel).toLocaleString()} XP</p>
+                )}
+              </div>
+            </div>
+            {profileData.xpProgress !== undefined && (
+              <div className="w-full h-2 bg-[#0e0e0e] rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-[#fcc025] to-amber-400 rounded-full transition-all"
+                     style={{ width: `${Math.min(100, profileData.xpProgress)}%` }} />
+              </div>
+            )}
+          </section>
+        ) : null}
+
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Missions at top */}
           <div className="rounded-2xl border border-[#fcc025]/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-[0_0_30px_rgba(252,192,37,0.05)] md:col-span-2 lg:col-span-3">
@@ -272,7 +313,7 @@ export default function LobbyView() {
           <GlassCard
             to="/app/announcement"
             icon={CalendarClock}
-            title="公告與活動"
+            title={t('lobby.events')}
             subtitle={pinnedCount > 0 ? `${pinnedCount} 則置頂` : t('lobby.events_subtitle')}
           >
             <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa]">
@@ -284,7 +325,7 @@ export default function LobbyView() {
               ) : recentTxs.slice(0, 2).map((tx, i) => (
                 <div key={i} className="flex gap-2 truncate">
                   <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="truncate">{tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
+                  <span className="truncate">{TX_TYPE_LABEL[tx.type] || tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
                 </div>
               ))}
             </div>
