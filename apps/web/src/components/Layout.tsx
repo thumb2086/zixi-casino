@@ -1,9 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
 import { MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
 import { APP_VERSION } from '@repo/shared';
 import { api } from '../store/api';
 import ChatRoom from './ChatRoom';
@@ -12,20 +11,16 @@ export default function Layout() {
   const [chatOpen, setChatOpen] = useState(false);
   const { t } = useTranslation();
   const location = useLocation();
+  const [lastMessage, setLastMessage] = useState<any>(null);
 
-  const { data: chatData } = useQuery({
-    queryKey: ['chat-messages-preview'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/support/chat/messages');
-      return res.data.data;
-    },
-    refetchInterval: 5000,
-  });
-
-  const lastMessage = useMemo(() => {
-    const msgs = chatData?.messages || [];
-    return msgs.length > 0 ? msgs[msgs.length - 1] : null;
-  }, [chatData]);
+  useEffect(() => {
+    api.get('/api/v1/support/chat/messages', { params: { limit: 1 } })
+      .then((res) => {
+        const msgs = res.data.data?.messages || [];
+        if (msgs.length > 0) setLastMessage(msgs[0]);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0e0e0e] font-manrope-emoji text-white">

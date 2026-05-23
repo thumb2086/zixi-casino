@@ -895,6 +895,34 @@ export class WalletRepository implements IWalletRepository {
       orderBy: (entries: any, { desc }: any) => [desc(entries.createdAt)],
     });
   }
+
+  // ─── Chat Messages ──────────────────────────────────────────────────────
+
+  async saveChatMessage(msg: {
+    id: string; userId?: string; address?: string; displayName: string;
+    text: string; type: 'user' | 'system'; game?: string; roundId?: string;
+  }) {
+    const conn = await requireDb();
+    await conn.insert((schema as any).chatMessages).values({
+      id: msg.id,
+      userId: msg.userId || null,
+      address: msg.address || '',
+      displayName: msg.displayName,
+      text: msg.text,
+      type: msg.type,
+      game: msg.game || null,
+      roundId: msg.roundId || null,
+      createdAt: new Date(),
+    });
+  }
+
+  async listChatMessages(limit = 50) {
+    const conn = await requireDb();
+    return await conn.query.chatMessages.findMany({
+      limit,
+      orderBy: (msgs: any, { desc }: any) => [desc(msgs.createdAt)],
+    });
+  }
 }
 
 export class MarketRepository implements IMarketRepository {

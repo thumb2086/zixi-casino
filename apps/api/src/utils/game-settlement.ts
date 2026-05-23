@@ -19,7 +19,6 @@ import {
   SessionRepository,
   UserRepository,
   ChainClient,
-  kv,
 } from "@repo/infrastructure";
 import { consumePreventLossBuff, restorePreventLossBuff, grantBundleToUser, loadInventoryState, ALL_ITEMS } from "./inventory.js";
 import { getOnChainConfig, SettlementServiceImpl, ViemRepository, VipBetLevelService, BetPayoutService } from "@repo/on-chain";
@@ -643,11 +642,12 @@ export class GameSettlementWrapper {
         text: isBig
           ? `🔥 ${displayName} 在 ${game} 中大獎 ${payout.toLocaleString()} ZXC！`
           : `${displayName} 在 ${game} 贏得 ${payout.toLocaleString()} ZXC`,
-        createdAt: Date.now(),
+        type: 'system' as const,
+        game,
       };
-      await kv.lpush("chat:global:messages", msg);
-      await kv.ltrim("chat:global:messages", 0, 49);
-      await kv.del("api:GET:/api/v1/support/chat/messages:").catch(() => {});
+      await this.walletRepo.saveChatMessage(msg);
+      const { broadcastChatMessage } = await import("../utils/sse.js");
+      broadcastChatMessage({ ...msg, createdAt: new Date().toISOString() });
     } catch (err) {
       console.error('broadcastWin error:', err);
     }
@@ -761,14 +761,14 @@ export class GameSettlementWrapper {
         });
         const msg = {
           id: crypto.randomUUID(),
-          userId: "system",
           address: "",
           displayName: "🎉 系統",
           text: `玩家獲得稱號：${titleLabels.join("、")}！`,
-          createdAt: Date.now(),
+          type: 'system' as const,
         };
-        await kv.lpush("chat:global:messages", msg);
-        await kv.ltrim("chat:global:messages", 0, 49);
+        await this.walletRepo.saveChatMessage(msg);
+        const { broadcastChatMessage } = await import("../utils/sse.js");
+        broadcastChatMessage({ ...msg, createdAt: new Date().toISOString() });
       } catch (err) {
         console.error("Failed to send title unlock notification:", err);
       }

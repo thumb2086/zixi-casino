@@ -969,10 +969,13 @@ export async function adminRoutes(fastify: FastifyInstance) {
       const chatMsg = {
         id: crypto.randomUUID(), address: "", displayName: "🛠️ 管理員",
         text: `🛠️ 管理員贈送 ${summaryParts.join(' + ')} 給 ${normalized.slice(0, 6)}`,
-        createdAt: Date.now(),
+        type: 'system' as const,
       };
-      await kv.lpush("chat:global:messages", chatMsg);
-      await kv.ltrim("chat:global:messages", 0, 49);
+      const { WalletRepository } = await import("@repo/infrastructure");
+      const walletRepo = new WalletRepository();
+      await walletRepo.saveChatMessage(chatMsg);
+      const { broadcastChatMessage } = await import("../../utils/sse.js");
+      broadcastChatMessage({ ...chatMsg, createdAt: new Date().toISOString() });
     } catch {}
 
     return createApiEnvelope({ success: true, bundle: bundleSummary }, request.id);
