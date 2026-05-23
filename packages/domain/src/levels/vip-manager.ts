@@ -190,7 +190,8 @@ export class VipManager {
         .from(schema.userProfiles)
         .where(eq(schema.userProfiles.address, address.toLowerCase()))
         .limit(1);
-      const buffs: any[] = (profile[0]?.activeBuffs as any[]) || [];
+      const rawBuffs: any = profile[0]?.activeBuffs;
+      const buffs: any[] = typeof rawBuffs === 'string' ? JSON.parse(rawBuffs) : (Array.isArray(rawBuffs) ? rawBuffs : []);
       if (buffs.some((b: any) => b.id === 'vip_2_permanent' || (b.type === 'vip_tier' && b.value === 2))) return YJC_VIP_TIERS[2];
       if (buffs.some((b: any) => b.id === 'vip_1_permanent' || (b.type === 'vip_tier' && b.value === 1))) return YJC_VIP_TIERS[1];
     } catch {
