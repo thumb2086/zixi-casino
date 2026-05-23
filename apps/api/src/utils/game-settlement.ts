@@ -656,7 +656,7 @@ export class GameSettlementWrapper {
   /**
    * Update total bet tracking
    */
-  async updateTotalBet(address: string, betAmount: number, winAmount?: number, userId?: string): Promise<void> {
+  async updateTotalBet(address: string, betAmount: number, winAmount?: number, userId?: string, game?: string): Promise<void> {
     const { requireDb } = await import("@repo/infrastructure/db/index.js");
     const db = await requireDb();
     const addr = address.toLowerCase();
@@ -675,16 +675,12 @@ export class GameSettlementWrapper {
     }
     if (userId) {
       await this.checkAndUnlockTitles(userId, address);
-      // Grant XP based on bet amount
       await this.grantGameXp(userId, betAmount, address).catch(() => {});
-      // Track mission progress (fire-and-forget)
-      // Track mission progress (fire-and-forget) — pass game from metadata
-      const gameName = betAmount > 0 ? 'unknown' : '';
-      this.trackMission(address, betAmount, winAmount || 0).catch(() => {});
+      this.trackMission(address, betAmount, winAmount || 0, game).catch(() => {});
     }
   }
 
-  private async trackMission(address: string, betAmount: number, winAmount: number): Promise<void> {
+  private async trackMission(address: string, betAmount: number, winAmount: number, game?: string): Promise<void> {
     const { kv } = await import("@repo/infrastructure");
     const today = new Date().toISOString().slice(0, 10);
     const addr = address.toLowerCase();
@@ -695,6 +691,10 @@ export class GameSettlementWrapper {
     if (winAmount > 0) {
       const prevWin = await kv.get<number>(`mission:win:${addr}:${today}`);
       await kv.set(`mission:win:${addr}:${today}`, (prevWin || 0) + 1);
+    }
+    if (game) {
+      const prevGame = await kv.get<number>(`mission:game:${game}:${addr}:${today}`);
+      await kv.set(`mission:game:${game}:${addr}:${today}`, (prevGame || 0) + 1);
     }
   }
 
