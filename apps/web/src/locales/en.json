@@ -700,6 +700,20 @@
     "horse_racing": "Horse Racing",
     "roulette": "Roulette"
   },
+  "game": {
+    "coinflip": "Coinflip",
+    "slots": "Slots",
+    "roulette": "Roulette",
+    "blackjack": "Blackjack",
+    "horse": "Horse Racing",
+    "dragon": "Dragon Tiger",
+    "sicbo": "Sicbo",
+    "bingo": "Bingo",
+    "crash": "Crash",
+    "duel": "Duel",
+    "poker": "Poker",
+    "bluffdice": "Bluff Dice"
+  },
   "company": {
     "loading": "Loading...",
     "title": "Company",

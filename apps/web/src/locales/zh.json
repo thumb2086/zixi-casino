@@ -701,6 +701,20 @@
     "horse_racing": "賽馬",
     "roulette": "輪盤"
   },
+  "game": {
+    "coinflip": "猜硬幣",
+    "slots": "老虎機",
+    "roulette": "輪盤",
+    "blackjack": "21 點",
+    "horse": "賽馬",
+    "dragon": "龍虎門",
+    "sicbo": "骰寶",
+    "bingo": "賓果",
+    "crash": "暴衝",
+    "duel": "對決",
+    "poker": "撲克",
+    "bluffdice": "吹牛"
+  },
   "company": {
     "loading": "載入中...",
     "title": "公司",
