@@ -77,8 +77,7 @@ export default function LeaderboardView() {
     return [topThree[1], topThree[0], topThree[2]].filter(Boolean);
   }, [topThree]);
 
-  const showTimeRemaining = false;
-  const timeRemaining = '';
+
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
@@ -132,13 +131,10 @@ export default function LeaderboardView() {
 
             <section className="flex flex-col items-center justify-center space-y-2">
               <div className="flex items-center gap-2 text-[#fcc025] opacity-60">
-                <Timer size={14} />
-                <span className="text-xs font-bold uppercase tracking-[0.2em]">
-                  {showTimeRemaining ? t('leaderboard.time_remaining') : t('leaderboard.all_time')}
-                </span>
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">{t('leaderboard.all_time')}</span>
               </div>
               <div className="text-3xl font-black italic tracking-tighter text-white shadow-[0_0_30px_rgba(252,192,37,0.1)]">
-                {showTimeRemaining ? timeRemaining : '∞'}
+                ∞
               </div>
             </section>
 
