@@ -8,6 +8,7 @@ export interface Announcement {
   announcementId: string;
   title: string;
   content: string;
+  type: string;
   isPinned: boolean;
   isActive: boolean;
   publishedBy?: string;
@@ -113,10 +114,11 @@ export class SupportManager {
 
   // ─── Announcements ───────────────────────────────────────────────────────────
 
-  sanitizeAnnouncementInput(input: any): { title: string; content: string; isPinned: boolean; isActive: boolean } {
+  sanitizeAnnouncementInput(input: any): { title: string; content: string; type?: string; isPinned: boolean; isActive: boolean } {
     return {
       title: this._trim(input.title, 200),
       content: this._trim(input.content, 10000),
+      type: ['info', 'warning', 'urgent'].includes(input.type) ? input.type : undefined,
       isPinned: this._toBoolean(input.isPinned ?? input.pinned),
       isActive: this._toBoolean(input.isActive ?? true),
     };
@@ -129,7 +131,7 @@ export class SupportManager {
   }
 
   createAnnouncement(
-    input: { title: string; content: string; isPinned?: boolean; isActive?: boolean; publishedBy?: string }
+    input: { title: string; content: string; type?: string; isPinned?: boolean; isActive?: boolean; publishedBy?: string }
   ): Announcement {
     const now = new Date().toISOString();
     return {
@@ -137,6 +139,7 @@ export class SupportManager {
       announcementId: `ann_${Date.now()}_${randomUUID().slice(0, 8)}`,
       title: input.title,
       content: input.content,
+      type: input.type || 'info',
       isPinned: input.isPinned ?? false,
       isActive: input.isActive ?? true,
       publishedBy: input.publishedBy,

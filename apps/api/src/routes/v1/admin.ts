@@ -317,6 +317,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         title: z.string(),
         content: z.string(),
+        type: z.enum(["info", "warning", "urgent"]).optional(),
         isPinned: z.boolean().optional(),
         isActive: z.boolean().optional()
       })
@@ -351,6 +352,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         title: z.string().optional(),
         content: z.string().optional(),
+        type: z.enum(["info", "warning", "urgent"]).optional(),
         isPinned: z.boolean().optional(),
         isActive: z.boolean().optional(),
       }),
@@ -360,11 +362,12 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
     const { announcementId } = request.params as { announcementId: string };
-    const { title, content, isPinned, isActive } = request.body as any;
+    const { title, content, type, isPinned, isActive } = request.body as any;
 
     await announcementRepo.updateFields(announcementId, {
       title,
       content,
+      type,
       isPinned,
       isActive,
       updatedBy: ctx.session.address,
