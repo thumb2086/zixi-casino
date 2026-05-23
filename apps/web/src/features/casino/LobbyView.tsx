@@ -17,7 +17,6 @@ import {
   Trophy,
   User,
   Landmark,
-  Archive,
   Building2,
   TrendingUp,
   CalendarClock,
