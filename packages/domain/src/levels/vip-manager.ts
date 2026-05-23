@@ -191,8 +191,8 @@ export class VipManager {
         .where(eq(schema.userProfiles.address, address.toLowerCase()))
         .limit(1);
       const buffs: any[] = (profile[0]?.activeBuffs as any[]) || [];
-      if (buffs.some((b: any) => b.id === 'vip_2_permanent')) return YJC_VIP_TIERS[2];
-      if (buffs.some((b: any) => b.id === 'vip_1_permanent')) return YJC_VIP_TIERS[1];
+      if (buffs.some((b: any) => b.id === 'vip_2_permanent' || (b.type === 'vip_tier' && b.value === 2))) return YJC_VIP_TIERS[2];
+      if (buffs.some((b: any) => b.id === 'vip_1_permanent' || (b.type === 'vip_tier' && b.value === 1))) return YJC_VIP_TIERS[1];
     } catch {
       // ignore
     }

@@ -234,22 +234,43 @@ export default function LobbyView() {
         </section>
 
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <GlassCard
-              to="/app/company"
-              icon={Building2}
-              title={t('lobby.my_company')}
-              subtitle={t('lobby.ai_chip_simulation')}>
-              <div className="absolute top-2 right-2 bg-[#fcc025] text-[#0e0e0e] text-[8px] font-black px-2 py-0.5 rounded-full">BETA</div>
-              <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
-                {t('lobby.company_description')}
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <TrendingUp className="h-3 w-3 text-emerald-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
-                  {t('lobby.simulation_label')}
-                </span>
+          {/* Missions at top */}
+          <div className="rounded-2xl border border-[#fcc025]/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-[0_0_30px_rgba(252,192,37,0.05)] md:col-span-2 lg:col-span-3">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🎯</span>
+                <h2 className="text-sm font-black uppercase tracking-widest text-[#fcc025]">每日任務</h2>
               </div>
-            </GlassCard>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {missions.map((m: any) => {
+                const pct = m.target > 0 ? Math.min(100, (m.progress / m.target) * 100) : 0;
+                const done = m.progress >= m.target;
+                return (
+                  <div key={m.id} className={`rounded-xl border ${done && !m.claimed ? 'border-[#fcc025]/40' : 'border-[#494847]/20'} bg-[#0e0e0e] p-4`}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-xs font-bold text-white">{m.name}</p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{m.desc}</p>
+                      </div>
+                      <span className="text-[10px] font-bold text-[#fcc025] shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-[#1a1919] mb-2">
+                      <div className="h-full rounded-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]" style={{ width: `${pct}%` }} />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-[#adaaaa]">{m.progress}/{m.target}</span>
+                      {m.claimed ? (
+                        <span className="text-[10px] font-bold text-emerald-400">✅ 已領取</span>
+                      ) : done ? (
+                        <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-[#fcc025] px-2 py-1 rounded-lg hover:brightness-110">領取</button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           <GlassCard
             to="/app/announcement"
             icon={CalendarClock}
@@ -305,23 +326,7 @@ export default function LobbyView() {
               ))}
             </div>
           </GlassCard>
-          <GlassCard
-            to="/app/shop"
-            icon={ShoppingBag}
-            title={t('lobby.shop')}
-            subtitle={t('lobby.shop_subtitle')}
-          >
-            <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-[#adaaaa] opacity-80">
-              <div className="flex gap-2">
-                <span className="text-[#fcc025]">🛒</span>
-                {t('lobby.buy_chest_keys')}
-              </div>
-              <div className="flex gap-2">
-                <span className="text-[#fcc025]">📦</span>
-                {t('lobby.limited_bundles')}
-              </div>
-            </div>
-          </GlassCard>
+
           <div
             className={`rounded-xl bg-[#1a1919] p-6 transition-all border-l-4 border-l-[#fcc025]/40`}
           >
@@ -381,6 +386,22 @@ export default function LobbyView() {
               {t('lobby.collection_description')}
             </p>
           </GlassCard>
+          <GlassCard
+            to="/app/company"
+            icon={Building2}
+            title={t('lobby.my_company')}
+            subtitle={t('lobby.ai_chip_simulation')}>
+            <div className="absolute top-2 right-2 bg-[#fcc025] text-[#0e0e0e] text-[8px] font-black px-2 py-0.5 rounded-full">BETA</div>
+            <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-[#adaaaa]">
+              {t('lobby.company_description')}
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <TrendingUp className="h-3 w-3 text-emerald-400" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                {t('lobby.simulation_label')}
+              </span>
+            </div>
+          </GlassCard>
           {isAdmin && (
             <GlassCard
               to="/app/admin"
@@ -400,43 +421,7 @@ export default function LobbyView() {
             </GlassCard>
           )}
 
-          {/* Bullseye Missions */}
-          <div className="rounded-2xl border border-[#fcc025]/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-[0_0_30px_rgba(252,192,37,0.05)]">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">🎯</span>
-                <h2 className="text-sm font-black uppercase tracking-widest text-[#fcc025]">每日任務</h2>
-              </div>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              {missions.map((m: any) => {
-                const pct = m.target > 0 ? Math.min(100, (m.progress / m.target) * 100) : 0;
-                const done = m.progress >= m.target;
-                return (
-                  <div key={m.id} className={`rounded-xl border ${done && !m.claimed ? 'border-[#fcc025]/40' : 'border-[#494847]/20'} bg-[#0e0e0e] p-4`}>
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <p className="text-xs font-bold text-white">{m.name}</p>
-                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{m.desc}</p>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#fcc025]">{m.reward.toLocaleString()} ZXC</span>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full bg-[#1a1919] mb-2">
-                      <div className="h-full rounded-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]" style={{ width: `${pct}%` }} />
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-[#adaaaa]">{m.progress}/{m.target}</span>
-                      {m.claimed ? (
-                        <span className="text-[10px] font-bold text-emerald-400">✅ 已領取</span>
-                      ) : done ? (
-                        <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-[#fcc025] px-2 py-1 rounded-lg hover:brightness-110">領取</button>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+
         </section>
       </main>
 
