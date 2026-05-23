@@ -395,8 +395,9 @@ typedFastify.post(
           (d: any) => d.item.rarity === "legendary" || d.item.rarity === "mythic" || d.item.rarity === "chaos" || d.item.rarity === "abyss" || d.item.rarity === "oracle"
         );
         if (rareDrops.length > 0) {
-          const { UserRepository } = await import("@repo/infrastructure");
+          const { UserRepository, WalletRepository } = await import("@repo/infrastructure");
           const userRepo = new UserRepository();
+          const walletRepo = new WalletRepository();
           const user = await userRepo.getUserById(ctx.userId);
           const name = user?.displayName || ctx.address.toLowerCase().slice(0, 6);
           const dropTexts = rareDrops.map((d: any) => `${d.item.icon}${d.item.name}`).join("、");
@@ -405,10 +406,11 @@ typedFastify.post(
             address: "",
             displayName: "📦 寶箱",
             text: `${name} 從${config.name}中獲得 ${dropTexts}！`,
-            createdAt: Date.now(),
+            type: 'system' as const,
           };
-          await kv.lpush("chat:global:messages", msg);
-          await kv.ltrim("chat:global:messages", 0, 49);
+          await walletRepo.saveChatMessage(msg);
+          const { broadcastChatMessage } = await import("../../utils/sse.js");
+          broadcastChatMessage({ ...msg, createdAt: new Date().toISOString() });
         }
       } catch {}
 
