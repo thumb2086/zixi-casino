@@ -52,7 +52,7 @@ const TX_TYPE_LABEL: Record<string, string> = {
   futures_liquidated: '合約爆倉',
   bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
   loan_borrow: '貸款', loan_repay: '還款',
-  item_use: '代幣使用',
+  item_use: '代幣使用', mission_reward: '任務獎勵',
 };
 const TX_STATUS_LABEL: Record<string, string> = {
   pending: '等待中', broadcasted: '廣播中', confirmed: '已確認', failed: '失敗',
@@ -110,9 +110,13 @@ export default function WalletView() {
   const totalBalance = (Number(walletOnlyTotal) + Number(marketNetWorth || 0)).toFixed(4);
 
   const nextAirdropLabel = useMemo(() => {
-    if (!nextAirdropAt || canClaimAirdrop) return t('vault.airdrop_now');
-    return new Date(nextAirdropAt).toLocaleString('zh-TW');
-  }, [canClaimAirdrop, nextAirdropAt, t]);
+    if (canClaimAirdrop) return t('vault.airdrop_now');
+    // Show next midnight in user's local time
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return `明日 ${tomorrow.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`;
+  }, [canClaimAirdrop, t]);
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] pb-40 font-manrope-emoji text-white">
@@ -222,7 +226,7 @@ export default function WalletView() {
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className={`text-xs font-black ${isCredit ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
-                        {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {tx.token || tx.tokenSymbol || 'ZXC'}
+                        {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {(tx.token === 'zhixi' ? 'ZXC' : tx.token === 'yjc' ? 'YJC' : tx.token || tx.tokenSymbol || 'ZXC')}
                       </p>
                       <p className="text-[10px] text-[#adaaaa]">{TX_STATUS_LABEL[tx.status] || '已確認'}</p>
                     </div>
