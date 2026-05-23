@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   BarChart3, ChevronDown,
   CircleDollarSign, LineChart,
-  PanelRightClose, PanelRightOpen,
+  PanelLeftClose, PanelLeftOpen,
   TrendingDown, TrendingUp, Clock,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -258,7 +258,7 @@ export default function MarketView() {
           <div className={`sticky top-24 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-2xl ${sidebarOpen ? '' : 'hidden'}`}>
             <div className="flex justify-end mb-1">
               <button onClick={() => setSidebarOpen(false)} className="text-[#adaaaa] hover:text-white">
-                <PanelRightClose size={16} />
+                <PanelLeftClose size={16} />
               </button>
             </div>
             {executionPanel}
@@ -268,7 +268,7 @@ export default function MarketView() {
         {!sidebarOpen && (
           <button onClick={() => setSidebarOpen(true)}
             className="hidden lg:flex sticky top-24 self-start mt-2 rounded-r-xl border border-l-0 border-[#494847]/10 bg-[#1a1919] px-2 py-6 text-[#adaaaa] hover:text-white">
-            <PanelRightOpen size={18} />
+            <PanelLeftOpen size={18} />
           </button>
         )}
 
