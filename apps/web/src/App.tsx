@@ -52,6 +52,7 @@ function useFastLogin() {
     const rememberMe = localStorage.getItem('custody_remember_me') === 'true';
     if (!rememberMe) {
       setIsRestoring(false);
+      return;
     }
 
     const startTime = Date.now();

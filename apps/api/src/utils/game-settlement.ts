@@ -647,6 +647,7 @@ export class GameSettlementWrapper {
       };
       await kv.lpush("chat:global:messages", msg);
       await kv.ltrim("chat:global:messages", 0, 49);
+      kv.del("api:GET:/api/v1/support/chat/messages:").catch(() => {});
     } catch (err) {
       console.error('broadcastWin error:', err);
     }

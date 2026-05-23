@@ -30,7 +30,11 @@ export default function ChatRoom() {
 
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
-      await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
+      const res = await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
+      const payload = res.data;
+      if (!payload.success || payload.data?.error) {
+        throw new Error(payload.data?.error?.message || payload.data?.error?.code || '發送失敗');
+      }
     },
     onMutate: async (text) => {
       const optimisticMsg = {
