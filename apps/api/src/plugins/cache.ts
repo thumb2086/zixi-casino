@@ -55,7 +55,6 @@ const routeCacheConfig: Record<string, CacheConfig> = {
 
   // Support & Chat
   "GET:/api/v1/support/announcements": { ttl: 120 },
-  "GET:/api/v1/support/chat/messages": { ttl: 10 },
   "GET:/api/v1/announcements": { ttl: 120 },
 
   // VIP
