@@ -329,13 +329,14 @@ export async function walletRoutes(fastify: FastifyInstance) {
       ]);
       const lastAirdrop = lastAirdropRaw || 0;
 
-      if (now - lastAirdrop < 24 * 60 * 60 * 1000) {
-        const waitMinutes = Math.ceil((24 * 60 * 60 * 1000 - (now - lastAirdrop)) / (60 * 1000));
-        return createApiEnvelope({ error: { code: "COOLDOWN", message: `Please wait ${waitMinutes} more minutes` } }, request.id);
+      // Midnight reset: compare date strings, not 24h
+      const todayDate = new Date().toISOString().slice(0, 10);
+      const lastDate = lastAirdrop > 0 ? new Date(lastAirdrop).toISOString().slice(0, 10) : null;
+      if (lastDate === todayDate) {
+        return createApiEnvelope({ error: { code: "COOLDOWN", message: "今日已簽到，請明天再來" } }, request.id);
       }
 
       // Calculate streak
-      const todayDate = new Date().toISOString().slice(0, 10);
       const yesterdayDate = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
       const lastCheckinDate = lastAirdrop > 0 ? new Date(lastAirdrop).toISOString().slice(0, 10) : null;
       let streak = streakRaw || 0;

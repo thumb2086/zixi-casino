@@ -405,7 +405,7 @@ export default function LobbyView() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <span className="text-xl">🎯</span>
-                <h2 className="text-sm font-black uppercase tracking-widest text-[#fcc025]">靶心任務</h2>
+                <h2 className="text-sm font-black uppercase tracking-widest text-[#fcc025]">每日任務</h2>
               </div>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
