@@ -14,7 +14,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.6** | 寶箱 + XP | 8 層寶箱平衡、物品/當舖值調整、保底修正、經驗加成系統 | ✅ 開發完成 |
 | **v1.0.7** | Coinflip | Route 統一使用 GameManager 賠率 | ✅ |
 | **v1.0.8** | Slots（前端） | 補齊遺失常數 REEL_CELLS/SYMBOLS/reelDelay 等 | ✅ |
-| **v1.0.9** | Roulette + 靶心任務 | Roulette 數字賠 35x 應為 36x；新增靶心任務系統 | ✅ |
+| **v1.0.9** | Roulette + 每日任務 | Roulette 數字賠 35x 應為 36x；新增每日任務系統，午夜刷新 | ✅ |
 | **v1.0.10** | Horse Racing | RTP_SCALE=2.0 導致 -5.5% 玩家優勢，重新設計 | ⏳ |
 | **v1.0.11** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
 | **v1.0.12** | Dragon Tiger | `Math.random()`→FNV、賠率 redesign、HE 過高 | ⏳ |
