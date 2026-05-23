@@ -378,7 +378,7 @@ export default function LobbyView() {
             </div>
           </div>
           <GlassCard
-            to="/app/collection"
+            to="/app/inventory"
             icon={Archive}
             title={t('lobby.collection')}
             subtitle={t('lobby.collection_subtitle')}
