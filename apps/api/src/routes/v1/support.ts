@@ -44,6 +44,7 @@ export async function supportRoutes(fastify: FastifyInstance) {
       announcementId: item.announcementId,
       title: item.title,
       content: item.content,
+      type: item.type || 'info',
       isPinned: item.isPinned ?? false,
       isActive: item.isActive ?? true,
       publishedBy: item.publishedBy || undefined,

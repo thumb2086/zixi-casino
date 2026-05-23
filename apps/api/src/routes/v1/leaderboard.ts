@@ -20,13 +20,10 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
   const onchainWallet = new OnchainWalletManager();
   const rewardCatalogRepo = new RewardCatalogRepository();
 
-  // Attach each leaderboard entry's equipped avatar + title (emoji + label)
   const enrichEntriesWithCosmetics = async (entries: Array<any>) => {
     if (!entries?.length) return;
     const db = await requireDb();
     const addresses = entries.map((e) => String(e?.address || "").toLowerCase()).filter(Boolean);
-
-    // Batch fetch all profiles at once
     const profiles: Array<{ address: string; selectedAvatarId: string | null; selectedTitleId: string | null }> = [];
     if (addresses.length > 0) {
       try {
@@ -39,7 +36,6 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       } catch {}
     }
     const profileMap = new Map(profiles.map((p) => [p.address.toLowerCase(), p]));
-
     const customItems = await rewardCatalogRepo.listItems({}).catch(() => [] as any[]);
     const avatarMap = new Map<string, { id: string; icon?: string; label?: string }>();
     const titleMap = new Map<string, { id: string; label?: string }>();
@@ -54,7 +50,6 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         if (item.type === "title" && !titleMap.has(item.id)) titleMap.set(item.id, { id: item.id, label: item.name });
       }
     }
-
     for (const entry of entries) {
       const addr = String(entry?.address || "").toLowerCase();
       if (!addr) continue;
@@ -67,60 +62,47 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       entry.activeAvatarIcon = av?.icon ?? null;
       entry.activeTitleId = ti?.id ?? null;
       entry.activeTitleLabel = ti?.label ?? null;
-
       entry.vipLevel = entry.tierLabel || LEVEL_TIERS[0]?.label || "普通會員";
     }
   };
 
-  // Helper to get context and address
   const getAddressFromRequest = async (req: any) => {
     const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
     if (!sessionId) return undefined;
-    
     const db = await requireDb();
     const session = await db.query.sessions.findFirst({
       where: (sessions: any, { eq }: any) => eq(sessions.id, sessionId)
     });
-    
     if (!session || session.status !== "authorized") return undefined;
     return session.address;
   };
 
-  // GET /api/v1/leaderboard?type=xp&limit=50
   typedFastify.get("/", {
     schema: {
       querystring: z.object({
-        type: z.enum(["xp", "asset", "all", "week", "month", "season", "kings"]).default("xp"),
+        type: z.enum(["xp", "week", "month", "season", "asset", "all", "kings"]).default("xp"),
         limit: z.coerce.number().min(1).max(100).default(50),
+        periodId: z.string().optional(),
         sync: z.enum(["auto", "force", "off"]).default("auto"),
         sessionId: z.string().optional(),
       }),
     },
   }, async (request) => {
-    const { type, limit, sync } = request.query as {
-      type: string;
-      limit: number;
-      sync: string;
-    };
-    // Map legacy types to xp
-    const mappedType = (["all", "week", "month", "season", "kings"].includes(type)) ? "xp" : type;
-    
+    const { type, limit, periodId, sync } = request.query as any;
     const selfAddress = await getAddressFromRequest(request);
 
     try {
       const db = await requireDb();
       const manager = new LeaderboardManager(db);
 
-      if (mappedType === "asset") {
+      if (type === "asset") {
+        // ... unchanged asset leaderboard ...
         const syncEnabled = String(process.env.ASSET_LEADERBOARD_SYNC_ONCHAIN_ON_READ ?? "true").toLowerCase() !== "false";
         if (syncEnabled && sync !== "off") {
           const now = Date.now();
           const lastSyncAt = Number(await kv.get<number>(ASSET_LB_SYNC_KEY) || 0);
           const syncEveryRead = String(process.env.ASSET_LEADERBOARD_SYNC_EVERY_READ ?? "false").toLowerCase() !== "false";
-          const shouldSync = sync === "force"
-            || syncEveryRead
-            || (!syncEveryRead && (now - lastSyncAt >= ASSET_LB_SYNC_INTERVAL_MS));
-
+          const shouldSync = sync === "force" || syncEveryRead || (!syncEveryRead && (now - lastSyncAt >= ASSET_LB_SYNC_INTERVAL_MS));
           if (shouldSync) {
             try {
               const runtime = onchainWallet.getRuntimeConfig();
@@ -128,7 +110,6 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
                 { key: "zhixi" as const, config: runtime.tokens?.zhixi },
                 { key: "yjc" as const, config: runtime.tokens?.yjc },
               ].filter((t) => t.config?.enabled && t.config?.contractAddress);
-
               if (runtime.rpcUrl && runtime.adminPrivateKey && tokens.length > 0) {
                 const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
                 const tokenMeta = await Promise.all(tokens.map(async (t) => ({
@@ -136,7 +117,6 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
                   contractAddress: t.config!.contractAddress,
                   decimals: await client.getDecimals(t.config!.contractAddress, 18),
                 })));
-
                 const userAddresses: Array<{ address: string }> = await db
                   .selectDistinct({ address: schema.users.address })
                   .from(schema.users);
@@ -147,14 +127,11 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
                 const walletAddresses: Array<{ address: string }> = await db
                   .selectDistinct({ address: schema.walletAccounts.address })
                   .from(schema.walletAccounts);
-
                 const addresses = Array.from(new Set([
                   ...userAddresses.map((r) => r.address),
                   ...sessionAddresses.map((r) => String(r.address || "").toLowerCase()).filter(Boolean),
                   ...walletAddresses.map((r) => r.address),
                 ]));
-
-                // Batch sync with concurrency limit to avoid RPC flood
                 const BATCH_SIZE = 10;
                 const normalizedAddrs = addresses.map((a) => a.toLowerCase());
                 for (let i = 0; i < normalizedAddrs.length; i += BATCH_SIZE) {
@@ -176,7 +153,6 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
             }
           }
         }
-
         const includeMarketAssets = process.env.ASSET_LEADERBOARD_INCLUDE_MARKET === "true";
         const result = await manager.getAssetLeaderboard(selfAddress, limit, includeMarketAssets);
         await enrichEntriesWithCosmetics(result.entries);
@@ -184,10 +160,30 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: true, data: result }, request.id);
       }
 
-      const result = await manager.getXpLeaderboard(selfAddress, limit);
+      // XP leaderboard: week/month/season → period-based, others → all-time
+      const isPeriodType = ["week", "month", "season", "all"].includes(type);
+      const result = isPeriodType
+        ? await manager.getXpLeaderboardByPeriod(type, selfAddress, limit)
+        : await manager.getXpLeaderboard(selfAddress, limit);
+
+      // Track king (#1 on period-based XP leaderboard, store in KV for simplicity)
+      if (isPeriodType && result.entries?.[0]) {
+        try {
+          const kingAddr = result.entries[0].address.toLowerCase();
+          const kingName = result.entries[0].displayName;
+          const kingAmt = result.entries[0].amount;
+          const kingKey = `lb_kings:xp:${type}:${result.periodId}`;
+          const current = await kv.get<string>(kingKey);
+          if (!current) {
+            await kv.set(kingKey, JSON.stringify({ address: kingAddr, displayName: kingName, amount: kingAmt, crownedAt: Date.now() }));
+          }
+        } catch {}
+      }
+
       await enrichEntriesWithCosmetics(result.entries);
       if (result.selfRank) await enrichEntriesWithCosmetics([result.selfRank]);
       return createApiEnvelope({ success: true, data: result }, request.id);
+
     } catch (err: any) {
       console.error("[leaderboard] error:", err);
       return createApiEnvelope(
