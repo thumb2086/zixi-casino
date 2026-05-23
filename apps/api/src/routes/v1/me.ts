@@ -99,7 +99,7 @@ export async function meRoutes(fastify: FastifyInstance) {
          balanceZxc: zxcBal || "0",
          balanceYjc: yjcBal || "0",
          totalAssetsZxc: totalAssets.toFixed(4),
-         vipLevel: vip?.level?.label || "普通會員",
+         vipLevel: xpTierLabel,
          maxBet: Number(vip?.level?.maxBet || 1000),
          title: titleLabel || "新手",
          avatar: avatarIcon || "🪙",
