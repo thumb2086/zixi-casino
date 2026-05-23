@@ -140,7 +140,7 @@ export default function ShopView() {
         setBalance(String(bal));
         setYjcBalance(s?.summary?.balances?.YJC || s?.balances?.yjc?.balance || '0');
       }
-    } catch { setItems([]); }
+    } catch { setItems([]); } finally { setLoading(false); }
   }, [sessionId]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);

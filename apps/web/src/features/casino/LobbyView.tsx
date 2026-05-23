@@ -246,21 +246,22 @@ export default function LobbyView() {
               {missions.map((m: any) => {
                 const pct = m.target > 0 ? Math.min(100, (m.progress / m.target) * 100) : 0;
                 const done = m.progress >= m.target;
+                const locked = m.locked;
                 return (
-                  <div key={m.id} className={`rounded-xl border ${done && !m.claimed ? 'border-[#fcc025]/40' : 'border-[#494847]/20'} bg-[#0e0e0e] p-4`}>
+                  <div key={m.id} className={`rounded-xl border ${locked ? 'border-[#494847]/10 opacity-50' : done && !m.claimed ? 'border-[#fcc025]/40' : 'border-[#494847]/20'} bg-[#0e0e0e] p-4 ${locked ? '' : ''}`}>
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-xs font-bold text-white">{m.name}</p>
-                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{m.desc}</p>
+                        <p className="text-xs font-bold text-white">{locked ? '🔒 ' : ''}{m.name}</p>
+                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{locked ? `需要 VIP ${m.vip} 以上` : m.desc}</p>
                       </div>
                       <span className="text-[10px] font-bold text-[#fcc025] shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-[#1a1919] mb-2">
-                      <div className="h-full rounded-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]" style={{ width: `${pct}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]" style={{ width: `${locked ? 0 : pct}%` }} />
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-[#adaaaa]">{m.progress}/{m.target}</span>
-                      {m.claimed ? (
+                      <span className="text-[10px] text-[#adaaaa]">{locked ? '-' : `${m.progress}/${m.target}`}</span>
+                      {locked ? null : m.claimed ? (
                         <span className="text-[10px] font-bold text-emerald-400">✅ 已領取</span>
                       ) : done ? (
                         <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-[#fcc025] px-2 py-1 rounded-lg hover:brightness-110">領取</button>
