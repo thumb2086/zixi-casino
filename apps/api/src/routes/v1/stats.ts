@@ -100,7 +100,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
         serverUptime: uptimeSeconds,
         serverUptimeLabel: uptimeMinutes >= 60
           ? `${Math.floor(uptimeMinutes / 60)}h ${uptimeMinutes % 60}m`
-          : `${uptimeMinutes}m`,
+          : uptimeMinutes > 0 ? `${uptimeMinutes}m` : '< 1m',
         last24h: {
           success: hourly.map((h) => h.success),
           failure: hourly.map((h) => h.failure)
