@@ -70,7 +70,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
       // 4. Background: XP, session, events
       void (async () => {
         try {
-          await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
+          await gameSettlement.updateTotalBet(address, betAmount, netPayout > 0 ? netPayout : undefined, userId, 'coinflip');
           if (isWin && netPayout > 0) {
             await gameSettlement.updateTotalWin(address, netPayout);
           }
