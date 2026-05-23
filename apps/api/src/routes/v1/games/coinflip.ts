@@ -125,7 +125,8 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
         validation.balanceAfter,
         settlement.finalPayout,
         'coinflip',
-        userId
+        userId,
+        betAmount
       );
 
       // 5-8. Background: updateTotalBet (XP/titles), game session, log event, save round

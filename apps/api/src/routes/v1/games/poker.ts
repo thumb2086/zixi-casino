@@ -133,7 +133,8 @@ export async function pokerRoutes(fastify: FastifyInstance) {
         validation.balanceAfter,
         settlement.finalPayout,
         'poker',
-        userId
+        userId,
+        betAmount
       );
 
       // 5. Update total bet

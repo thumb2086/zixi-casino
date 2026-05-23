@@ -136,7 +136,8 @@ export async function duelRoutes(fastify: FastifyInstance) {
         validation.balanceAfter,
         settlement.finalPayout,
         'duel',
-        userId
+        userId,
+        betAmount
       );
 
       // 5. Update total bet

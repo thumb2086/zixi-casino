@@ -19,6 +19,7 @@ import {
   SessionRepository,
   UserRepository,
   ChainClient,
+  kv,
 } from "@repo/infrastructure";
 import { consumePreventLossBuff, restorePreventLossBuff, grantBundleToUser, loadInventoryState, ALL_ITEMS } from "./inventory.js";
 import { getOnChainConfig, SettlementServiceImpl, ViemRepository, VipBetLevelService, BetPayoutService } from "@repo/on-chain";
@@ -584,14 +585,47 @@ export class GameSettlementWrapper {
     currentBalance: string,
     payout: number,
     game?: string,
-    userId?: string
+    userId?: string,
+    betAmount?: number
   ): Promise<string> {
     const finalBalance = (parseFloat(currentBalance) + payout).toString();
     await this.setBalance(address, token, finalBalance);
 
+    // Save ledger entry for bet (debit)
+    if (userId && betAmount && betAmount > 0) {
+      this.walletRepo.saveLedgerEntry({
+        id: randomUUID(),
+        userId,
+        address: address.toLowerCase(),
+        token,
+        type: 'bet',
+        amount: `-${betAmount}`,
+        balanceBefore: currentBalance,
+        balanceAfter: finalBalance,
+        game: game || null,
+        createdAt: new Date(),
+      }).catch((err: any) => console.error('Failed to save bet ledger entry:', err));
+    }
+
+    // Save ledger entry for payout (credit)
+    if (userId) {
+      this.walletRepo.saveLedgerEntry({
+        id: randomUUID(),
+        userId,
+        address: address.toLowerCase(),
+        token,
+        type: 'payout',
+        amount: payout.toString(),
+        balanceBefore: currentBalance,
+        balanceAfter: finalBalance,
+        game: game || null,
+        createdAt: new Date(),
+      }).catch((err: any) => console.error('Failed to save payout ledger entry:', err));
+    }
+
     // Broadcast win notification to global chat
     if (game && userId && payout > 0) {
-      this.broadcastWin(address, game, payout, userId).catch(() => {});
+      this.broadcastWin(address, game, payout, userId);
     }
 
     return finalBalance;
@@ -599,10 +633,7 @@ export class GameSettlementWrapper {
 
   private async broadcastWin(address: string, game: string, payout: number, userId: string): Promise<void> {
     try {
-      const { kv } = await import("@repo/infrastructure");
-      const { UserRepository } = await import("@repo/infrastructure");
-      const userRepo = new UserRepository();
-      const user = await userRepo.getUserById(userId);
+      const user = await this.userRepo.getUserById(userId);
       const displayName = user?.displayName || address.toLowerCase().slice(0, 6);
       const isBig = payout >= 100000;
       const msg = {
@@ -616,7 +647,9 @@ export class GameSettlementWrapper {
       };
       await kv.lpush("chat:global:messages", msg);
       await kv.ltrim("chat:global:messages", 0, 49);
-    } catch {}
+    } catch (err) {
+      console.error('broadcastWin error:', err);
+    }
   }
 
   /**
