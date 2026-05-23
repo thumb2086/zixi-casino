@@ -160,8 +160,23 @@ export async function supportRoutes(fastify: FastifyInstance) {
   });
 
   typedFastify.get("/chat/messages", async (request) => {
-    const messages = await kv.lrange<any>("chat:global:messages", 0, 49);
-    return createApiEnvelope({ messages }, request.id);
+    // Test write first
+    const testId = `get_test_${Date.now()}`;
+    await kv.lpush("chat:global:messages", { id: testId, text: 'get_test', address: '', displayName: 'test', createdAt: Date.now() });
+    await kv.ltrim("chat:global:messages", 0, 49);
+    const raw = await kv.lrange<any>("chat:global:messages", 0, 49);
+    return createApiEnvelope({
+      messages: raw,
+      debug: {
+        wroteTest: true,
+        count: raw?.length,
+        sample: raw?.map((m: any) => m.text).slice(0, 5),
+        firstId: raw?.[0]?.id?.slice(0, 16),
+        testFound: raw?.some((m: any) => m.id === testId),
+        rawType: typeof raw,
+        isArray: Array.isArray(raw),
+      }
+    }, request.id);
   });
 
   typedFastify.post("/chat/messages", {
