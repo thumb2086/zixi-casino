@@ -78,7 +78,8 @@ export const CoinflipView: React.FC = () => {
       }
     },
     onSuccess: (data) => {
-      showResult(data.winner, data.result === 'win', Number(data.payout));
+      const won = data.winner === data.selection;
+      showResult(data.winner, won, Number(data.payout));
       queryClient.invalidateQueries({ queryKey: ['user'] });
       queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     },

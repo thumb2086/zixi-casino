@@ -119,7 +119,6 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
       }
 
       // 4. Credit payout to balance
-      console.log(`COINFLIP DEBUG: selection=${selection} winner=${result.winner} gameIsWin=${result.isWin} settleIsWin=${settlement.isWin} finalPayout=${settlement.finalPayout} betAmount=${betAmount}`);
       const finalBalance = await gameSettlement.creditPayout(
         address,
         token,
@@ -182,7 +181,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
           roundId,
           selection,
           winner: result.winner,
-          result: settlement.isWin && result.isWin ? "win" : "lose",
+          result: settlement.isWin ? "win" : "lose",
           payout: settlement.finalPayout,
           betAmount,
           multiplier: result.multiplier,
