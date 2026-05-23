@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Calculator, ChevronLeft, Crown, Package, Sparkles } from 'lucide-react';
+import { Calculator, ChevronLeft, Crown, Package, Sparkles, TrendingUp } from 'lucide-react';
 import AppBottomNav from '../../components/AppBottomNav';
 import ItemsTab from './tabs/ItemsTab';
 import OddsTab from './tabs/OddsTab';
 import VIPTab from './tabs/VIPTab';
+import XpTab from './tabs/XpTab';
 
-type TabId = 'items' | 'odds' | 'vip';
+type TabId = 'items' | 'odds' | 'vip' | 'xp';
 
 const TABS = [
   { id: 'items' as TabId, label: '物品圖鑑', icon: Package },
   { id: 'odds' as TabId, label: '遊戲機率', icon: Calculator },
+  { id: 'xp' as TabId, label: '經驗等級', icon: TrendingUp },
   { id: 'vip' as TabId, label: 'VIP 說明', icon: Crown },
 ];
 
@@ -21,7 +23,7 @@ export default function InfoView() {
   const getTabFromUrl = () => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    if (tabParam === 'items' || tabParam === 'odds' || tabParam === 'vip') return tabParam;
+    if (tabParam === 'items' || tabParam === 'odds' || tabParam === 'vip' || tabParam === 'xp') return tabParam;
     return 'items' as TabId;
   };
 
@@ -83,6 +85,7 @@ export default function InfoView() {
         <div className="min-h-[500px]">
           {activeTab === 'items' && <ItemsTab />}
           {activeTab === 'odds' && <OddsTab />}
+          {activeTab === 'xp' && <XpTab />}
           {activeTab === 'vip' && <VIPTab />}
         </div>
       </main>
