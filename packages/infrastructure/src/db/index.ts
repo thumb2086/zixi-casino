@@ -930,13 +930,15 @@ export class WalletRepository implements IWalletRepository {
   async listChatMessages(limit = 50) {
     const conn = await requireDb();
     await this.ensureChatTable();
-    const rows = await conn.execute(drizzleSql`
+    const result = await conn.execute(drizzleSql`
       SELECT id, user_id, address, display_name, text, type, game, round_id, created_at
       FROM chat_messages
       ORDER BY created_at DESC
       LIMIT ${limit}
     `);
-    return (rows as any[]).map((r: any) => ({
+    const items: any[] = [];
+    for (let i = 0; i < (result as any).length; i++) items.push((result as any)[i]);
+    return items.map((r: any) => ({
       id: r.id,
       userId: r.user_id,
       address: r.address,
