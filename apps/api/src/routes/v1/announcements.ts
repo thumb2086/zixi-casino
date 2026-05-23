@@ -6,9 +6,10 @@ import { AnnouncementRepository } from "@repo/infrastructure";
 import { randomUUID } from "crypto";
 
 function inferAnnouncementType(item: { title?: string | null; content?: string | null; isPinned?: boolean | null }) {
+  if (item.isPinned) return "urgent" as const;
   const haystack = `${item.title || ""} ${item.content || ""}`.toLowerCase();
-  if (item.isPinned || /urgent|critical|alert|緊急|重大|警報/.test(haystack)) return "urgent" as const;
-  if (/maintenance|maintain|維護|停機|更新/.test(haystack)) return "warning" as const;
+  if (/urgent|critical|alert|緊急|重大|警報/.test(haystack)) return "urgent" as const;
+  if (/maintenance|maintain|維護|停機/.test(haystack)) return "warning" as const;
   return "info" as const;
 }
 
