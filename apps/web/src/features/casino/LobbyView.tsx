@@ -251,7 +251,10 @@ export default function LobbyView() {
           <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">經驗等級</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">經驗等級</p>
+                  <span className="rounded-lg bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">{vipLevel}</span>
+                </div>
                 <p className="text-3xl font-black italic text-[#fcc025] mt-1">
                   Lv.{profileData.level}{' '}
                   <span className="text-sm font-bold text-[#adaaaa]">{profileData.xpTierLabel || ''}</span>
