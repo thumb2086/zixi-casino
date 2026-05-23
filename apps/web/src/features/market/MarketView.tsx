@@ -67,7 +67,7 @@ export default function MarketView() {
   const [showIndexChart, setShowIndexChart] = useState(true);
   const [showActivity, setShowActivity] = useState(false);
   const [showFloatingChart, setShowFloatingChart] = useState(true);
-  const [fp, setFp] = useState({ x: window.innerWidth - 280, y: 0 });
+  const [fp, setFp] = useState({ x: 16, y: window.innerHeight - 300 });
   const dragRef = useRef<{ startX: number; startY: number; fpX: number; fpY: number } | null>(null);
 
   useEffect(() => {
