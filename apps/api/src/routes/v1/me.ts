@@ -84,8 +84,11 @@ export async function meRoutes(fastify: FastifyInstance) {
     }
 
     const xpData = profile ? { xp: Number(profile.xp || 0), level: Number(profile.level || 1) } : { xp: 0, level: 1 };
-    const { getXpTierLabel } = await import("@repo/domain");
+    const { getXpTierLabel, xpForLevel } = await import("@repo/domain");
     const xpTierLabel = getXpTierLabel(xpData.level);
+    const nextLevelXp = xpForLevel(xpData.level + 1);
+    const currentLevelXp = xpForLevel(xpData.level);
+    const xpProgress = nextLevelXp > currentLevelXp ? ((xpData.xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100 : 100;
 
     return createApiEnvelope({
        profile: {
@@ -105,6 +108,8 @@ export async function meRoutes(fastify: FastifyInstance) {
          xp: xpData.xp,
          level: xpData.level,
          xpTierLabel,
+         xpNextLevel: nextLevelXp,
+         xpProgress: Math.round(xpProgress),
          isAdmin: Boolean(ctx.user.isAdmin),
          mode: ctx.session.mode,
          createdAt: ctx.user.createdAt

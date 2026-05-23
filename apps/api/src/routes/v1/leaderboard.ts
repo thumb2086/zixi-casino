@@ -90,7 +90,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
   typedFastify.get("/", {
     schema: {
       querystring: z.object({
-        type: z.enum(["xp", "asset"]).default("xp"),
+        type: z.enum(["xp", "asset", "all", "week", "month", "season", "kings"]).default("xp"),
         limit: z.coerce.number().min(1).max(100).default(50),
         sync: z.enum(["auto", "force", "off"]).default("auto"),
         sessionId: z.string().optional(),
@@ -98,10 +98,12 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
     },
   }, async (request) => {
     const { type, limit, sync } = request.query as {
-      type: "xp" | "asset";
+      type: string;
       limit: number;
-      sync: "auto" | "force" | "off";
+      sync: string;
     };
+    // Map legacy types to xp
+    const mappedType = (["all", "week", "month", "season", "kings"].includes(type)) ? "xp" : type;
     
     const selfAddress = await getAddressFromRequest(request);
 
@@ -109,7 +111,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       const db = await requireDb();
       const manager = new LeaderboardManager(db);
 
-      if (type === "asset") {
+      if (mappedType === "asset") {
         const syncEnabled = String(process.env.ASSET_LEADERBOARD_SYNC_ONCHAIN_ON_READ ?? "true").toLowerCase() !== "false";
         if (syncEnabled && sync !== "off") {
           const now = Date.now();
