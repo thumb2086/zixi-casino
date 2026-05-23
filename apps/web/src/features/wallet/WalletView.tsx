@@ -64,6 +64,14 @@ export default function WalletView() {
   const { amountDisplay } = usePreferencesStore();
   const { balance: syncedBalance, address: userAddress } = useUserStore();
   const { summary, airdrop, transfer, convert } = useWallet();
+  const { data: profileData } = useQuery({
+    queryKey: ['my-profile'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/me/profile');
+      return res.data?.data?.profile || {};
+    },
+    staleTime: 30000,
+  });
   const [transferTo, setTransferTo] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [transferToken, setTransferToken] = useState<'zhixi' | 'yjc'>('zhixi');
@@ -156,6 +164,22 @@ export default function WalletView() {
             <AssetCard label={t('vault.yjc_label')} value={formatNumber(yjcBalance, numberMode)} token={t('wallet.yjc_with_zxc', { amount: formatNumber(yjcNum * ZXC_PER_YJC, numberMode) })} />
           </div>
         </section>
+
+        {/* XP Section */}
+        {profileData?.level ? (
+          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">經驗等級</p>
+                <p className="text-3xl font-black italic text-[#fcc025] mt-1">Lv.{profileData.level} {profileData.xpTierLabel || ''}</p>
+                <p className="text-xs text-[#adaaaa] mt-1">經驗值 {(profileData.xp || 0).toLocaleString()} XP</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-bold text-[#adaaaa]"></p>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
