@@ -327,7 +327,7 @@ export default function AnnouncementCenter() {
   }, [claimMsg]);
 
   const featured = useMemo(() => {
-    return items.find((item) => item.type === 'urgent') || null;
+    return items.find((item) => item.type === 'urgent' || item.active === false) || null;
   }, [items]);
 
   const getBadgeStyle = (type: AnnouncementItem['type']) => {

@@ -5,7 +5,8 @@ import { createApiEnvelope } from "@repo/shared";
 import { AnnouncementRepository } from "@repo/infrastructure";
 import { randomUUID } from "crypto";
 
-function inferAnnouncementType(item: { title?: string | null; content?: string | null; isPinned?: boolean | null }) {
+function inferAnnouncementType(item: { type?: string | null; title?: string | null; content?: string | null; isPinned?: boolean | null }) {
+  if (item.type) return item.type as "info" | "warning" | "urgent";
   if (item.isPinned) return "urgent" as const;
   const haystack = `${item.title || ""} ${item.content || ""}`.toLowerCase();
   if (/urgent|critical|alert|緊急|重大|警報/.test(haystack)) return "urgent" as const;
@@ -50,6 +51,7 @@ export async function announcementRoutes(fastify: FastifyInstance) {
       announcementId: `ann_${Date.now()}_${randomUUID().slice(0, 8)}`,
       title: request.body.title,
       content: request.body.content,
+      type: request.body.type,
       isPinned: request.body.type === "urgent",
       isActive: true,
       publishedBy: "system",
@@ -81,6 +83,7 @@ export async function announcementRoutes(fastify: FastifyInstance) {
       announcementId: id,
       title,
       content,
+      type,
       isPinned: type === "urgent",
       isActive: active,
       updatedBy: "system",

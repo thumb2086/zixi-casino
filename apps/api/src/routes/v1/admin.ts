@@ -317,6 +317,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         title: z.string(),
         content: z.string(),
+        type: z.enum(["info", "warning", "urgent"]).optional(),
         isPinned: z.boolean().optional(),
         isActive: z.boolean().optional()
       })
@@ -351,6 +352,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         title: z.string().optional(),
         content: z.string().optional(),
+        type: z.enum(["info", "warning", "urgent"]).optional(),
         isPinned: z.boolean().optional(),
         isActive: z.boolean().optional(),
       }),
@@ -360,11 +362,12 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
     const { announcementId } = request.params as { announcementId: string };
-    const { title, content, isPinned, isActive } = request.body as any;
+    const { title, content, type, isPinned, isActive } = request.body as any;
 
     await announcementRepo.updateFields(announcementId, {
       title,
       content,
+      type,
       isPinned,
       isActive,
       updatedBy: ctx.session.address,
@@ -1172,6 +1175,31 @@ export async function adminRoutes(fastify: FastifyInstance) {
       catchUpCommand: "cd /opt/render/project/src && npx tsx apps/worker/src/catchup.ts",
       catchUpDryRunCommand: "cd /opt/render/project/src && DRY_RUN=true npx tsx apps/worker/src/catchup.ts",
     }, request.id);
+  });
+
+  // XP event multiplier
+  typedFastify.post("/xp-multiplier", {
+    schema: {
+      body: z.object({
+        sessionId: z.string(),
+        multiplier: z.number().min(1).max(100),
+      }),
+    },
+  }, async (request) => {
+    const ctx = await getAdminContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+
+    await kv.set('xp_event_multiplier', String(request.body.multiplier));
+
+    await opsRepo.logEvent({
+      channel: "admin", severity: "info", source: "admin",
+      kind: "xp_multiplier_set",
+      userId: ctx.user.id, address: ctx.session.address,
+      message: `Set XP event multiplier to ${request.body.multiplier}x`,
+      meta: { multiplier: request.body.multiplier },
+    });
+
+    return createApiEnvelope({ success: true, multiplier: request.body.multiplier }, request.id);
   });
 }
 

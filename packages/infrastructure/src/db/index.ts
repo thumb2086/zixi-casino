@@ -1158,6 +1158,7 @@ export class AnnouncementRepository {
     const columns = await this.getAnnouncementColumns(conn);
     const hasModernColumns = columns.has("announcement_id") && columns.has("is_pinned");
     if (!hasModernColumns) {
+      const hasType = columns.has("type");
       const hasPinned = columns.has("is_pinned");
       const hasActive = columns.has("is_active");
       const hasPublishedBy = columns.has("published_by");
@@ -1172,6 +1173,7 @@ export class AnnouncementRepository {
             id AS "announcementId",
             title,
             content,
+            ${hasType ? `type` : `'info'`} AS "type",
             ${hasPinned ? `is_pinned` : `FALSE`} AS "isPinned",
             ${hasActive ? `is_active` : `TRUE`} AS "isActive",
             ${hasPublishedBy ? `published_by` : `NULL`} AS "publishedBy",
@@ -1181,7 +1183,7 @@ export class AnnouncementRepository {
             ${hasUpdatedAt ? `updated_at` : `created_at`} AS "updatedAt"
           FROM announcements
           WHERE ${hasActive ? `is_active IS DISTINCT FROM FALSE` : `TRUE`}
-          ORDER BY ${hasPinned ? `is_pinned DESC,` : ``} ${hasPublishedAt ? `published_at DESC NULLS LAST,` : ``} created_at DESC
+          ORDER BY is_pinned DESC, ${hasActive ? `is_active DESC,` : ``} ${hasPublishedAt ? `published_at DESC NULLS LAST,` : ``} created_at DESC
         `)
       );
       return rows;
@@ -1190,6 +1192,7 @@ export class AnnouncementRepository {
       where: (announcements: any, { eq }: any) => eq(announcements.isActive, true),
       orderBy: (announcements: any, { desc }: any) => [
         desc(announcements.isPinned),
+        desc(announcements.isActive),
         desc(announcements.publishedAt),
         desc(announcements.createdAt),
       ],
@@ -1201,6 +1204,7 @@ export class AnnouncementRepository {
     const columns = await this.getAnnouncementColumns(conn);
     const hasModernColumns = columns.has("announcement_id") && columns.has("is_pinned");
     if (!hasModernColumns) {
+      const hasType = columns.has("type");
       const hasPinned = columns.has("is_pinned");
       const hasActive = columns.has("is_active");
       const hasPublishedBy = columns.has("published_by");
@@ -1215,6 +1219,7 @@ export class AnnouncementRepository {
             id AS "announcementId",
             title,
             content,
+            ${hasType ? `type` : `'info'`} AS "type",
             ${hasPinned ? `is_pinned` : `FALSE`} AS "isPinned",
             ${hasActive ? `is_active` : `TRUE`} AS "isActive",
             ${hasPublishedBy ? `published_by` : `NULL`} AS "publishedBy",
@@ -1223,7 +1228,7 @@ export class AnnouncementRepository {
             created_at AS "createdAt",
             ${hasUpdatedAt ? `updated_at` : `created_at`} AS "updatedAt"
           FROM announcements
-          ORDER BY ${hasPinned ? `is_pinned DESC,` : ``} ${hasPublishedAt ? `published_at DESC NULLS LAST,` : ``} created_at DESC
+          ORDER BY is_pinned DESC, ${hasActive ? `is_active DESC,` : ``} ${hasPublishedAt ? `published_at DESC NULLS LAST,` : ``} created_at DESC
           LIMIT ${safeLimit}
         `)
       );
@@ -1233,6 +1238,7 @@ export class AnnouncementRepository {
       limit,
       orderBy: (announcements: any, { desc }: any) => [
         desc(announcements.isPinned),
+        desc(announcements.isActive),
         desc(announcements.publishedAt),
         desc(announcements.createdAt),
       ],
@@ -1244,6 +1250,7 @@ export class AnnouncementRepository {
     announcementId: string;
     title: string;
     content: string;
+    type?: string;
     isPinned?: boolean;
     isActive?: boolean;
     publishedBy?: string | null;
@@ -1269,6 +1276,10 @@ export class AnnouncementRepository {
         `'${String(announcement.content || "").replace(/'/g, "''")}'`,
         `'${(announcement.createdAt ? new Date(announcement.createdAt) : new Date()).toISOString()}'`,
       ];
+      if (announcement.type) {
+        fields.push("type");
+        values.push(`'${String(announcement.type).replace(/'/g, "''")}'`);
+      }
       if (hasPinned) {
         fields.push("is_pinned");
         values.push(announcement.isPinned ? "TRUE" : "FALSE");
@@ -1310,6 +1321,7 @@ export class AnnouncementRepository {
       announcementId: announcement.announcementId,
       title: announcement.title,
       content: announcement.content,
+      type: announcement.type || 'info',
       isPinned: announcement.isPinned ?? false,
       isActive: announcement.isActive ?? true,
       publishedBy: announcement.publishedBy || null,
@@ -1322,6 +1334,7 @@ export class AnnouncementRepository {
       set: {
         title: announcement.title,
         content: announcement.content,
+        type: announcement.type || 'info',
         isPinned: announcement.isPinned ?? false,
         isActive: announcement.isActive ?? true,
         publishedBy: announcement.publishedBy || null,
@@ -1332,18 +1345,20 @@ export class AnnouncementRepository {
     });
   }
 
-  async updateFields(announcementId: string, fields: { title?: string; content?: string; isPinned?: boolean; isActive?: boolean; updatedBy: string }) {
+  async updateFields(announcementId: string, fields: { title?: string; content?: string; type?: string; isPinned?: boolean; isActive?: boolean; updatedBy: string }) {
     const conn = await requireDb();
+    const updateData: any = {
+      title: fields.title,
+      content: fields.content,
+      isPinned: fields.isPinned,
+      isActive: fields.isActive,
+      updatedBy: fields.updatedBy,
+      updatedAt: new Date(),
+    };
+    if (fields.type !== undefined) updateData.type = fields.type;
     await conn
       .update(schema.announcements)
-      .set({
-        title: fields.title,
-        content: fields.content,
-        isPinned: fields.isPinned,
-        isActive: fields.isActive,
-        updatedBy: fields.updatedBy,
-        updatedAt: new Date(),
-      })
+      .set(updateData)
       .where(eq(schema.announcements.announcementId, announcementId));
   }
 

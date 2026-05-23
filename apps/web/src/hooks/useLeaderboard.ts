@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../store/api';
 
-export type LeaderboardType = 'all' | 'week' | 'month' | 'season' | 'asset' | 'winnings' | 'kings';
+export type LeaderboardType = 'xp' | 'asset';
 
 export interface LeaderboardEntry {
   rank: number;

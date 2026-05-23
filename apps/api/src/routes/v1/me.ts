@@ -83,6 +83,10 @@ export async function meRoutes(fastify: FastifyInstance) {
       if (custom?.type === "avatar") avatarIcon = custom.icon;
     }
 
+    const xpData = profile ? { xp: Number(profile.xp || 0), level: Number(profile.level || 1) } : { xp: 0, level: 1 };
+    const { getXpTierLabel } = await import("@repo/domain");
+    const xpTierLabel = getXpTierLabel(xpData.level);
+
     return createApiEnvelope({
        profile: {
          id: ctx.user.id,
@@ -98,10 +102,13 @@ export async function meRoutes(fastify: FastifyInstance) {
          avatar: avatarIcon || "🪙",
          avatarId: activeAvatarId,
          titleId: activeTitleId,
-          isAdmin: Boolean(ctx.user.isAdmin),
-          mode: ctx.session.mode,
-          createdAt: ctx.user.createdAt
-        }
+         xp: xpData.xp,
+         level: xpData.level,
+         xpTierLabel,
+         isAdmin: Boolean(ctx.user.isAdmin),
+         mode: ctx.session.mode,
+         createdAt: ctx.user.createdAt
+       }
     }, request.id);
   });
 

@@ -68,12 +68,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
       entry.activeTitleId = ti?.id ?? null;
       entry.activeTitleLabel = ti?.label ?? null;
 
-      const betAmount = Number(entry?.amount || 0);
-      let vipLevel = LEVEL_TIERS[0]?.label || "普通會員";
-      for (let i = LEVEL_TIERS.length - 1; i >= 0; i--) {
-        if (betAmount >= LEVEL_TIERS[i].threshold) { vipLevel = LEVEL_TIERS[i].label; break; }
-      }
-      entry.vipLevel = vipLevel;
+      entry.vipLevel = entry.tierLabel || LEVEL_TIERS[0]?.label || "普通會員";
     }
   };
 
@@ -91,22 +86,20 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
     return session.address;
   };
 
-  // GET /api/v1/leaderboard?type=all&limit=50&periodId=optional
+  // GET /api/v1/leaderboard?type=xp&limit=50
   typedFastify.get("/", {
     schema: {
       querystring: z.object({
-        type: z.enum(["all", "week", "month", "season", "asset", "kings"]).default("all"),
+        type: z.enum(["xp", "asset"]).default("xp"),
         limit: z.coerce.number().min(1).max(100).default(50),
-        periodId: z.string().optional(),
         sync: z.enum(["auto", "force", "off"]).default("auto"),
         sessionId: z.string().optional(),
       }),
     },
   }, async (request) => {
-    const { type, limit, periodId, sync } = request.query as {
-      type: "all" | "week" | "month" | "season" | "asset" | "kings";
+    const { type, limit, sync } = request.query as {
+      type: "xp" | "asset";
       limit: number;
-      periodId?: string;
       sync: "auto" | "force" | "off";
     };
     
@@ -189,62 +182,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: true, data: result }, request.id);
       }
 
-      if (type === "kings") {
-        const db = await requireDb();
-        const kings = await db.query.leaderboardKings.findMany({
-          orderBy: (k: any, { desc }: any) => [desc(k.winCount)],
-          limit,
-        });
-        const sorted = kings.map((k: any, i: number) => ({
-          rank: i + 1,
-          address: k.address,
-          displayName: k.displayName || null,
-          amount: k.winCount,
-        }));
-        const result = { type: "kings", periodId: "all", entries: sorted, selfRank: null, updatedAt: new Date().toISOString() };
-        await enrichEntriesWithCosmetics(result.entries);
-        return createApiEnvelope({ success: true, data: result }, request.id);
-      }
-
-      const result = await manager.getBetLeaderboard(type, selfAddress, limit, periodId);
-
-      // Track king (#1 on all-time betting leaderboard)
-      if (type === "all" && result.entries?.[0]) {
-        try {
-          const db = await requireDb();
-          const kingAddr = result.entries[0].address.toLowerCase();
-          const kingName = result.entries[0].displayName;
-          const [existing] = await db.execute(
-            (await import("drizzle-orm")).sql`SELECT id, win_count FROM leaderboard_kings WHERE address = ${kingAddr} AND category = 'all' LIMIT 1`
-          );
-          if (existing) {
-            await db.update(schema.leaderboardKings).set({
-              winCount: Number(existing.winCount || 0) + 1,
-              displayName: kingName,
-              lastWinAt: new Date(),
-              updatedAt: new Date(),
-            }).where(eq(schema.leaderboardKings.id, existing.id));
-          } else {
-            const user = await db.query.users.findFirst({
-              where: (u: any, { eq }: any) => eq(u.address, kingAddr),
-            });
-            if (user) {
-              await db.insert(schema.leaderboardKings).values({
-                id: crypto.randomUUID(),
-                category: "all",
-                userId: user.id,
-                address: kingAddr,
-                displayName: kingName || null,
-                winCount: 1,
-                lastWinAt: new Date(),
-                periodId: "",
-              }).onConflictDoNothing();
-            }
-          }
-        } catch (e: any) {
-          console.error("king tracking error:", e?.message);
-        }
-      }
+      const result = await manager.getXpLeaderboard(selfAddress, limit);
       await enrichEntriesWithCosmetics(result.entries);
       if (result.selfRank) await enrichEntriesWithCosmetics([result.selfRank]);
       return createApiEnvelope({ success: true, data: result }, request.id);

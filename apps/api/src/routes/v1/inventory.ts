@@ -10,7 +10,7 @@ import { SessionRepository, OpsRepository, RewardCatalogRepository, WalletReposi
 import { WalletManager, OnchainWalletManager } from "@repo/domain";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
-import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser, useAllTokenItems, rollbackUseAllTokens, type UseAllTokensResult } from "../../utils/inventory.js";
+import { loadInventoryState, persistInventoryState, useItem, creditItemValue, grantBundleToUser, useAllTokenItems, rollbackUseAllTokens, type UseAllTokensResult, type ActiveBuff } from "../../utils/inventory.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import * as schema from "@repo/infrastructure/db/schema.js";
 import { eq, sql } from "drizzle-orm";
@@ -438,24 +438,19 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       // Deduct balance for ALL items (including VIP passes)
       await gameSettlement.setBalance(ctx.address, paymentToken, (balance - price).toString());
 
-      // VIP passes: grant permanent buff in user_profiles
+      // VIP passes: grant permanent buff via persistInventoryState (handles missing user_profiles row)
       if (itemId === 'vip_pass' || itemId === 'vip2_pass') {
         try {
-          const db = await requireDb();
+          const state = await loadInventoryState(ctx.userId);
           const tier = itemId === 'vip2_pass' ? 'vip_2_permanent' : 'vip_1_permanent';
-          await db.execute(sql`
-            UPDATE user_profiles
-            SET active_buffs = COALESCE(active_buffs, '[]'::jsonb) || ${JSON.stringify([{
-              id: tier,
-              type: "vip_tier",
-              label: itemId === 'vip2_pass' ? 'VIP 2 永久' : 'VIP 1 永久',
-              value: itemId === 'vip2_pass' ? 2 : 1,
-              source: 'shop',
-              acquiredAt: new Date().toISOString(),
-            }])}::jsonb,
-            updated_at = NOW()
-            WHERE user_id = ${ctx.userId} AND address = ${ctx.address.toLowerCase()}
-          `);
+          const newBuff: ActiveBuff = {
+            id: tier,
+            type: "vip_tier",
+            value: itemId === 'vip2_pass' ? 2 : 1,
+            source: 'shop',
+          };
+          state.activeBuffs.push(newBuff);
+          await persistInventoryState(ctx.userId, state);
           await opsRepo.logEvent({
             channel: "rewards",
             severity: "info",
