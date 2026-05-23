@@ -127,6 +127,9 @@ export async function supportRoutes(fastify: FastifyInstance) {
     let kvConnected = false;
     let testWrite = false;
     let testRead = false;
+    let messages: any[] = [];
+    let cacheKey = '';
+    let cacheValue: string | null = null;
     try {
       const pingResult = await (kv as any).ping ? await (kv as any).ping() : null;
       kvConnected = pingResult === true;
@@ -136,11 +139,22 @@ export async function supportRoutes(fastify: FastifyInstance) {
       await kv.lpush("chat:global:messages", { id: testId, text: 'health_check', address: '', displayName: 'system', createdAt: Date.now() });
       await kv.ltrim("chat:global:messages", 0, 49);
       testWrite = true;
-      const all = await kv.lrange<any>("chat:global:messages", 0, 5);
-      testRead = Array.isArray(all);
+      messages = await kv.lrange<any>("chat:global:messages", 0, 5);
+      testRead = Array.isArray(messages);
+    } catch (err) {
+      return { error: String(err) };
+    }
+    try {
+      cacheKey = "api:GET:/api/v1/support/chat/messages:";
+      cacheValue = await kv.get<string>(cacheKey);
     } catch {}
     return {
       kvUrl, kvToken, kvConnected, testWrite, testRead,
+      messageCount: messages.length,
+      messages: messages.map((m: any) => ({ id: m.id?.slice(0, 12), text: m.text, displayName: m.displayName })),
+      cacheKey,
+      cacheHit: cacheValue !== null,
+      cachePreview: cacheValue ? cacheValue.slice(0, 100) : null,
       timestamp: Date.now(),
     };
   });
@@ -157,11 +171,9 @@ export async function supportRoutes(fastify: FastifyInstance) {
         text: z.string().min(1).max(500),
       })
     }
-  }, async (request, reply) => {
+  }, async (request) => {
     const ctx = await getContext(request);
-    if (!ctx) {
-      return reply.code(401).send(createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id));
-    }
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
     const newMessage = {
       id: crypto.randomUUID(),
@@ -172,14 +184,15 @@ export async function supportRoutes(fastify: FastifyInstance) {
       createdAt: Date.now()
     };
 
-    await kv.lpush("chat:global:messages", newMessage);
-    await kv.ltrim("chat:global:messages", 0, 49);
+    const pushResult = await kv.lpush("chat:global:messages", newMessage);
+    const trimResult = await kv.ltrim("chat:global:messages", 0, 49);
+    console.log(`Chat POST: saved msg=${newMessage.id?.slice(0,12)} push=${pushResult} trim=${trimResult}`);
 
     // Invalidate GET cache so new message appears immediately
-    kv.del("api:GET:/api/v1/support/chat/messages:").catch((err) =>
-      console.error("Failed to invalidate chat cache:", err)
-    );
+    try { await kv.del("api:GET:/api/v1/support/chat/messages:"); } catch (e: any) {
+      console.error("Failed to invalidate chat cache:", e);
+    }
 
-    return createApiEnvelope({ message: newMessage }, request.id);
+    return createApiEnvelope({ message: newMessage, pushResult, trimResult }, request.id);
   });
 }

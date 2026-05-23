@@ -44,7 +44,8 @@ export class UpstashKV implements KVClient {
     if (!this.redis) return 0;
     try {
       return await this.redis.del(key);
-    } catch {
+    } catch (err) {
+      console.error(`KV del error (${key}):`, err);
       return 0;
     }
   }
