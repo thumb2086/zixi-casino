@@ -67,21 +67,28 @@ export default function XpTab() {
   const userLevel = profile?.level || 1;
   const userXp = profile?.xp || 0;
   const userTier = profile?.xpTierLabel || '普通會員';
+  const nextLevelXp = profile?.xpNextLevel || 0;
+  const xpProgress = profile?.xpProgress !== undefined ? profile.xpProgress : (nextLevelXp > 0 ? Math.round((Number(userXp) / nextLevelXp) * 100) : 0);
 
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-2xl">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">我的經驗等級</p>
-            <p className="text-3xl font-black italic text-[#fcc025] mt-1">Lv.{userLevel}</p>
-            <p className="text-sm font-bold text-[#adaaaa] mt-1">{userTier}</p>
+            <p className="text-3xl font-black italic text-[#fcc025] mt-1">Lv.{userLevel} <span className="text-sm font-bold text-[#adaaaa]">{userTier}</span></p>
           </div>
           <div className="text-right">
             <p className="text-xs text-[#adaaaa]">經驗值</p>
             <p className="text-sm font-black text-white">{Number(userXp).toLocaleString()} XP</p>
+            {nextLevelXp > 0 && <p className="text-[10px] text-[#adaaaa] mt-0.5">下一級 {Number(nextLevelXp).toLocaleString()} XP</p>}
           </div>
         </div>
+        {xpProgress > 0 && (
+          <div className="w-full h-2 bg-[#0e0e0e] rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-[#fcc025] to-amber-400 rounded-full transition-all" style={{ width: `${Math.min(100, xpProgress)}%` }} />
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
