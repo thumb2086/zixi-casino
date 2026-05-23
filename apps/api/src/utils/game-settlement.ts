@@ -614,28 +614,6 @@ export class GameSettlementWrapper {
           : `${displayName} 在 ${game} 贏得 ${payout.toLocaleString()} ZXC`,
         createdAt: Date.now(),
       };
-      const { isAutoRoundGame, getRoundInfo } = await import("@repo/domain/games/auto-round.js");
-      const isAutoRound = isAutoRoundGame(game);
-      if (isAutoRound) {
-        const round = getRoundInfo(game);
-        if (Date.now() < round.closesAt) {
-          // Round still open — defer message until round closes
-          const deferredKey = `chat:deferred:${game}:${round.roundId}`;
-          await kv.lpush(deferredKey, msg);
-          return;
-        }
-        // Round closed — flush any deferred messages for this round too
-        const deferredKey = `chat:deferred:${game}:${round.roundId}`;
-        const deferred = await kv.lrange<any>(deferredKey, 0, -1);
-        await kv.del(deferredKey);
-        const allMsgs = [...deferred, msg];
-        for (const m of allMsgs) {
-          await kv.lpush("chat:global:messages", m);
-        }
-        await kv.ltrim("chat:global:messages", 0, 49);
-        return;
-      }
-      // Non auto-round games: post directly
       await kv.lpush("chat:global:messages", msg);
       await kv.ltrim("chat:global:messages", 0, 49);
     } catch {}
