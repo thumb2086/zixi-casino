@@ -30,7 +30,6 @@ import { useSyncUser } from './hooks/useSyncUser';
 import Layout from './components/Layout';
 import VIPLevelsView from './features/info/VIPLevelsView';
 import InfoView from './features/info/InfoView';
-import CollectionView from './features/collection/CollectionView';
 import CompanyView from './features/company/CompanyView';
 import { Loader2 } from 'lucide-react';
 import { useFontSizeStore } from './store/useFontSizeStore';
@@ -155,7 +154,7 @@ function AppContent() {
             <Route path="announcement" element={<AnnouncementCenter />} />
             <Route path="support" element={<SupportView />} />
             <Route path="inventory" element={<ChestView />} />
-            <Route path="collection" element={<CollectionView />} />
+            <Route path="collection" element={<Navigate to="/app/inventory" replace />} />
             <Route path="admin" element={<AdminView />} />
             <Route path="settings" element={<SettingsView />} />
             <Route path="transactions" element={<PublicTransactionsView />} />
