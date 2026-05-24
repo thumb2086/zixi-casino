@@ -49,8 +49,10 @@ export const HorseRacingView: React.FC = () => {
   const [winner, setWinner] = useState<Horse | null>(null);
   const [progress, setProgress] = useState<Record<number, number>>({});
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [bettedHorseId, setBettedHorseId] = useState<number | null>(null);
+  const [bettedHorseIds, setBettedHorseIds] = useState<number[]>([]);
   const raceTimerRef = useRef<number | null>(null);
+  const winnerRef = useRef(winner);
+  winnerRef.current = winner;
 
   const { data: horseData } = useQuery({
     queryKey: ['horse-info'],
@@ -95,10 +97,10 @@ export const HorseRacingView: React.FC = () => {
       if (data?.roundId !== undefined) {
         if (data.roundId !== roundId) {
           setRoundId(data.roundId);
-          setBettedHorseId(null);
+          setBettedHorseIds([]);
           setIsRacing(false);
           setProgress({});
-          if (!winner) {
+          if (!winnerRef.current) {
             setWinner(null);
             setStatusMsg('請選擇馬匹並下注。');
             setStatusColor('#ffd36a');
@@ -128,10 +130,12 @@ export const HorseRacingView: React.FC = () => {
   }, [countdown]);
 
   const handleBet = () => {
-    if (!session || roundId === null || horses.length === 0 || bettedHorseId !== null) return;
+    if (!session || roundId === null || horses.length === 0 || roundClosed) return;
 
-    setBettedHorseId(selectedHorseId);
-    setStatusMsg(`🐎 已下注 ${horses.find(h => h.id === selectedHorseId)?.name ?? ''}，等待開獎...`);
+    if (bettedHorseIds.includes(selectedHorseId)) return;
+    setBettedHorseIds((prev) => [...prev, selectedHorseId]);
+    const names = [...bettedHorseIds, selectedHorseId].map((id) => horses.find((h) => h.id === id)?.name).filter(Boolean);
+    setStatusMsg(`🐎 已下注 ${names.join('、')}，等待開獎...`);
     setStatusColor('#ffd36a');
 
     api.post('/api/v1/games/horse/play', {
@@ -146,14 +150,14 @@ export const HorseRacingView: React.FC = () => {
   };
 
   useEffect(() => {
-    if (bettedHorseId === null || isRacing || horses.length === 0 || roundId === null) return;
+    if (bettedHorseIds.length === 0 || isRacing || horses.length === 0 || roundId === null) return;
     if (!roundClosed && (countdown === null || countdown > 0)) return;
 
     const localWinner = pickWinner(horses, roundId);
     setWinner(localWinner);
     setIsRacing(true);
     setProgress(Object.fromEntries(horses.map((h) => [h.id, 0])));
-  }, [bettedHorseId, roundClosed, countdown, isRacing, horses, roundId]);
+  }, [bettedHorseIds, roundClosed, countdown, isRacing, horses, roundId]);
 
   useEffect(() => {
     if (!isRacing || horses.length === 0) return;
@@ -201,10 +205,16 @@ export const HorseRacingView: React.FC = () => {
 
   useEffect(() => {
     if (!winner || isRacing) return;
-    const isWin = winner.id === (bettedHorseId ?? selectedHorseId);
-    const payout = isWin ? Number(betAmount) * winner.multiplier : 0;
-    setStatusMsg(`🐎 ${winner.name} 獲勝！${isWin ? ` 🎉 贏得 ${payout} ZXC` : ' 😢 下次好運！'}`);
-    setStatusColor(isWin ? '#00ff88' : '#ff4d4d');
+    const won = bettedHorseIds.includes(winner.id);
+    const payout = won ? Number(betAmount) * winner.multiplier : 0;
+    const anyWin = bettedHorseIds.length > 0 && bettedHorseIds.includes(winner.id);
+    if (bettedHorseIds.length <= 1) {
+      setStatusMsg(`🐎 ${winner.name} 獲勝！${anyWin ? ` 🎉 贏得 ${payout} ZXC` : ' 😢 下次好運！'}`);
+    } else {
+      const wonNames = bettedHorseIds.filter((id) => id === winner.id).map((id) => horses.find((h) => h.id === id)?.name).filter(Boolean);
+      setStatusMsg(`🐎 ${winner.name} 獲勝！${anyWin ? ` 🎉 中獎 ${wonNames.join('、')}，贏得 ${payout} ZXC` : ` 😢 未中獎（共下 ${bettedHorseIds.length} 匹）`}`);
+    }
+    setStatusColor(anyWin ? '#00ff88' : '#ff4d4d');
   }, [winner, isRacing]);
 
   return (
@@ -227,7 +237,7 @@ export const HorseRacingView: React.FC = () => {
           <div className="start-lights">
             {isRacing ? (
               <><span className="light green" /><span className="light green" /><span className="light green" /></>
-            ) : bettedHorseId !== null ? (
+            ) : bettedHorseIds.length > 0 ? (
               <><span className="light red" /><span className="light red" /><span className="light red" /></>
             ) : (
               <><span className="light" /><span className="light" /><span className="light" /></>
@@ -263,12 +273,13 @@ export const HorseRacingView: React.FC = () => {
         {horses.map((horse) => {
           const color = HORSE_COLORS[horse.id] ?? '#fff';
           const pct = Math.round(horse.weight / 104 * 100);
-          const disabled = bettedHorseId !== null || isRacing;
+          const isBetted = bettedHorseIds.includes(horse.id);
+          const disabled = isRacing || roundClosed;
           return (
             <button
               key={horse.id}
               type="button"
-              className={`horse-choice ${selectedHorseId === horse.id ? 'active' : ''} ${bettedHorseId === horse.id ? 'betted' : ''}`}
+              className={`horse-choice ${selectedHorseId === horse.id ? 'active' : ''} ${isBetted ? 'betted' : ''}`}
               style={selectedHorseId === horse.id ? { borderColor: color, background: `${color}22` } : {}}
               onClick={() => !disabled && setSelectedHorseId(horse.id)}
               disabled={disabled}
@@ -279,7 +290,7 @@ export const HorseRacingView: React.FC = () => {
                 <span className="horse-choice-mult" style={{ color }}>{horse.multiplier}x</span>
                 <span className="horse-choice-odds">勝率 {pct}%</span>
               </span>
-              {bettedHorseId === horse.id && <span className="betted-badge">✓</span>}
+              {isBetted && <span className="betted-badge">✓</span>}
             </button>
           );
         })}
@@ -290,11 +301,11 @@ export const HorseRacingView: React.FC = () => {
           type="number"
           value={betAmount}
           onChange={(e) => setBetAmount(e.target.value)}
-          disabled={bettedHorseId !== null || isRacing}
+          disabled={isRacing || roundClosed}
         />
         <BetQuickActions amount={betAmount} onChange={setBetAmount} maxBet={maxBet} />
-        <button className="btn-bet" onClick={handleBet} disabled={roundId === null || bettedHorseId !== null || isRacing || roundClosed}>
-          {bettedHorseId !== null ? '已下注' : isRacing ? '比賽中...' : '立即下注'}
+        <button className="btn-bet" onClick={handleBet} disabled={roundId === null || isRacing || roundClosed || bettedHorseIds.includes(selectedHorseId)}>
+          {isRacing ? '比賽中...' : roundClosed ? '等待開獎' : bettedHorseIds.includes(selectedHorseId) ? '已下注此馬' : bettedHorseIds.length > 0 ? '加注' : '立即下注'}
         </button>
       </div>
 
