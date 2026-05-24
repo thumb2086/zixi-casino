@@ -220,30 +220,6 @@ export const HorseRacingView: React.FC = () => {
         </div>
       </div>
 
-      <div className="horse-choices">
-        {horses.map((horse) => {
-          const color = HORSE_COLORS[horse.id] ?? '#fff';
-          const pct = Math.round(horse.weight / 104 * 100);
-          const disabled = bettedHorseId !== null || isRacing;
-          return (
-            <button
-              key={horse.id}
-              type="button"
-              className={`horse-choice ${selectedHorseId === horse.id ? 'active' : ''} ${bettedHorseId === horse.id ? 'betted' : ''}`}
-              style={selectedHorseId === horse.id ? { borderColor: color, background: `${color}22` } : {}}
-              onClick={() => !disabled && setSelectedHorseId(horse.id)}
-              disabled={disabled}
-            >
-              <span className="horse-choice-emoji">🐎</span>
-              <span className="horse-choice-name">{horse.name}</span>
-              <span className="horse-choice-mult" style={{ color }}>{horse.multiplier}x</span>
-              <span className="horse-choice-odds">{pct}%</span>
-              {bettedHorseId === horse.id && <span className="betted-badge">✓</span>}
-            </button>
-          );
-        })}
-      </div>
-
       <div className="race-track">
         <div className="race-hud">
           <div className="start-lights">
@@ -279,6 +255,30 @@ export const HorseRacingView: React.FC = () => {
         <div className="status-panel" style={{ color: statusColor }}>
           {statusMsg}
         </div>
+      </div>
+
+      <div className="horse-choices">
+        {horses.map((horse) => {
+          const color = HORSE_COLORS[horse.id] ?? '#fff';
+          const pct = Math.round(horse.weight / 104 * 100);
+          const disabled = bettedHorseId !== null || isRacing;
+          return (
+            <button
+              key={horse.id}
+              type="button"
+              className={`horse-choice ${selectedHorseId === horse.id ? 'active' : ''} ${bettedHorseId === horse.id ? 'betted' : ''}`}
+              style={selectedHorseId === horse.id ? { borderColor: color, background: `${color}22` } : {}}
+              onClick={() => !disabled && setSelectedHorseId(horse.id)}
+              disabled={disabled}
+            >
+              <span className="horse-choice-emoji">🐎</span>
+              <span className="horse-choice-name">{horse.name}</span>
+              <span className="horse-choice-mult" style={{ color }}>{horse.multiplier}x</span>
+              <span className="horse-choice-odds">{pct}%</span>
+              {bettedHorseId === horse.id && <span className="betted-badge">✓</span>}
+            </button>
+          );
+        })}
       </div>
 
       <div className="betting-controls">
