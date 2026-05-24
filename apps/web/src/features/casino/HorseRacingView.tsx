@@ -50,6 +50,7 @@ export const HorseRacingView: React.FC = () => {
   const [progress, setProgress] = useState<Record<number, number>>({});
   const [countdown, setCountdown] = useState<number | null>(null);
   const [bettedHorseIds, setBettedHorseIds] = useState<number[]>([]);
+  const [raceBets, setRaceBets] = useState<number[]>([]);
   const raceTimerRef = useRef<number | null>(null);
   const winnerRef = useRef(winner);
   winnerRef.current = winner;
@@ -102,6 +103,7 @@ export const HorseRacingView: React.FC = () => {
           setProgress({});
           if (!winnerRef.current) {
             setWinner(null);
+            setRaceBets([]);
             setStatusMsg('請選擇馬匹並下注。');
             setStatusColor('#ffd36a');
           }
@@ -155,6 +157,7 @@ export const HorseRacingView: React.FC = () => {
 
     const localWinner = pickWinner(horses, roundId);
     setWinner(localWinner);
+    setRaceBets(bettedHorseIds);
     setIsRacing(true);
     setProgress(Object.fromEntries(horses.map((h) => [h.id, 0])));
   }, [bettedHorseIds, roundClosed, countdown, isRacing, horses, roundId]);
@@ -205,17 +208,16 @@ export const HorseRacingView: React.FC = () => {
 
   useEffect(() => {
     if (!winner || isRacing) return;
-    const won = bettedHorseIds.includes(winner.id);
-    const payout = won ? Number(betAmount) * winner.multiplier : 0;
-    const anyWin = bettedHorseIds.length > 0 && bettedHorseIds.includes(winner.id);
-    if (bettedHorseIds.length <= 1) {
+    const bets = raceBets.length > 0 ? raceBets : bettedHorseIds;
+    const anyWin = bets.includes(winner.id);
+    const payout = anyWin ? Number(betAmount) * winner.multiplier : 0;
+    if (bets.length <= 1) {
       setStatusMsg(`🐎 ${winner.name} 獲勝！${anyWin ? ` 🎉 贏得 ${payout} ZXC` : ' 😢 下次好運！'}`);
     } else {
-      const wonNames = bettedHorseIds.filter((id) => id === winner.id).map((id) => horses.find((h) => h.id === id)?.name).filter(Boolean);
-      setStatusMsg(`🐎 ${winner.name} 獲勝！${anyWin ? ` 🎉 中獎 ${wonNames.join('、')}，贏得 ${payout} ZXC` : ` 😢 未中獎（共下 ${bettedHorseIds.length} 匹）`}`);
+      setStatusMsg(`🐎 ${winner.name} 獲勝！${anyWin ? ` 🎉 贏得 ${payout} ZXC` : ` 😢 未中獎（共下 ${bets.length} 匹）`}`);
     }
     setStatusColor(anyWin ? '#00ff88' : '#ff4d4d');
-  }, [winner, isRacing]);
+  }, [winner, isRacing, raceBets]);
 
   return (
     <div className="horse-racing-container">
