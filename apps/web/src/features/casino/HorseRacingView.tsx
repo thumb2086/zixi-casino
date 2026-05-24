@@ -93,14 +93,16 @@ export const HorseRacingView: React.FC = () => {
       const res = await api.get('/api/v1/games/horse/round');
       const data = res.data?.data?.data ?? res.data?.data;
       if (data?.roundId !== undefined) {
-        if (data.roundId !== roundId && !winner) {
+        if (data.roundId !== roundId) {
           setRoundId(data.roundId);
           setBettedHorseId(null);
-          setWinner(null);
           setIsRacing(false);
           setProgress({});
-          setStatusMsg('請選擇馬匹並下注。');
-          setStatusColor('#ffd36a');
+          if (!winner) {
+            setWinner(null);
+            setStatusMsg('請選擇馬匹並下注。');
+            setStatusColor('#ffd36a');
+          }
         }
         setRoundClosed(!data.isBettingOpen);
         if (data.bettingClosesAt) {
