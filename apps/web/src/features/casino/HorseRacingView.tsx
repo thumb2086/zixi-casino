@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
@@ -6,16 +6,19 @@ import './HorseRacing.css';
 import './CasinoCommon.css';
 import { BetQuickActions } from './BetQuickActions';
 
-const HORSES = [
-  { id: 1, name: '赤焰', multiplier: 3.6 },
-  { id: 2, name: '雷霆', multiplier: 4.4 },
-  { id: 3, name: '幻影', multiplier: 5.8 },
-  { id: 4, name: '夜刃', multiplier: 8.0 },
-  { id: 5, name: '霜牙', multiplier: 11.6 },
-  { id: 6, name: '流星', multiplier: 17.0 },
-];
+interface Horse {
+  id: number; name: string; multiplier: number; weight: number;
+}
 
-// Same FNV-1a hash as server (auto-round.ts)
+const HORSE_THEMES: Record<number, { emoji: string; color: string }> = {
+  1: { emoji: '🔥', color: '#ff4444' },
+  2: { emoji: '⚡', color: '#ffdd00' },
+  3: { emoji: '👻', color: '#bb66ff' },
+  4: { emoji: '🗡️', color: '#aaaaaa' },
+  5: { emoji: '❄️', color: '#66ddff' },
+  6: { emoji: '⭐', color: '#ffcc00' },
+};
+
 function fnv1a32(input: string): number {
   let hash = 0x811c9dc5;
   for (let i = 0; i < input.length; i++) {
@@ -25,24 +28,39 @@ function fnv1a32(input: string): number {
   return hash >>> 0;
 }
 
-function hashInt(seed: string): number {
-  return fnv1a32(String(seed));
-}
-
-function pickWinner(roundId: number): typeof HORSES[0] {
-  const weighted = HORSES.map(h => ({ ...h, weight: 1 / h.multiplier }));
-  const totalWeight = weighted.reduce((s, h) => s + h.weight, 0);
-  let cursor = hashInt(`horse:${roundId}`) % Math.ceil(totalWeight);
-  for (const h of weighted) {
+function pickWinner(horses: Horse[], roundId: number): Horse {
+  const totalWeight = horses.reduce((s, h) => s + h.weight, 0);
+  let cursor = fnv1a32(`horse:${roundId}`) % totalWeight;
+  for (const h of horses) {
     cursor -= h.weight;
     if (cursor < 0) return h;
   }
-  return HORSES[HORSES.length - 1];
+  return horses[horses.length - 1];
 }
 
 export const HorseRacingView: React.FC = () => {
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const [betAmount, setBetAmount] = useState('10');
+  const [selectedHorseId, setSelectedHorseId] = useState(1);
+  const [statusMsg, setStatusMsg] = useState('請選擇馬匹並下注。');
+  const [statusColor, setStatusColor] = useState('#ffd36a');
+  const [isRacing, setIsRacing] = useState(false);
+  const [winner, setWinner] = useState<Horse | null>(null);
+  const [progress, setProgress] = useState<Record<number, number>>({});
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const raceTimerRef = useRef<number | null>(null);
+
+  const { data: horseData } = useQuery({
+    queryKey: ['horse-info'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/games/horse/horses');
+      return res.data?.data as Horse[] | undefined;
+    },
+    staleTime: 300000,
+  });
+  const horses = horseData ?? [];
+
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
     queryFn: async () => {
@@ -52,25 +70,19 @@ export const HorseRacingView: React.FC = () => {
     staleTime: 60000,
   });
   const maxBet = profile?.maxBet ?? 1_000_000;
-  const [selectedHorseId, setSelectedHorseId] = useState(1);
-  const [betAmount, setBetAmount] = useState('10');
-  const [statusMsg, setStatusMsg] = useState('請選擇馬匹並下注。');
-  const [statusColor, setStatusColor] = useState('#ffd36a');
-  const [isRacing, setIsRacing] = useState(false);
-  const [winner, setWinner] = useState<typeof HORSES[0] | null>(null);
-  const [progress, setProgress] = useState<Record<number, number>>(() =>
-    HORSES.reduce((acc, horse) => ({ ...acc, [horse.id]: 0 }), {})
-  );
 
-  // Sync round info from server
   const [roundId, setRoundId] = useState<number | null>(null);
 
   const fetchRound = useCallback(async () => {
     try {
-      const res = await api.get("/api/v1/games/horse/round");
+      const res = await api.get('/api/v1/games/horse/round');
       const data = res.data?.data?.data ?? res.data?.data;
       if (data?.roundId !== undefined) {
         setRoundId(data.roundId);
+        if (data.bettingClosesAt) {
+          const msLeft = Math.max(0, data.bettingClosesAt - Date.now());
+          setCountdown(Math.ceil(msLeft / 1000));
+        }
       }
     } catch {}
   }, []);
@@ -81,23 +93,23 @@ export const HorseRacingView: React.FC = () => {
     return () => clearInterval(interval);
   }, [fetchRound]);
 
-  const handleBet = () => {
-    if (!session || roundId === null) return;
+  useEffect(() => {
+    if (countdown === null || countdown <= 0) return;
+    const cd = window.setInterval(() => {
+      setCountdown((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(cd);
+  }, [countdown]);
 
-    // Compute winner LOCALLY — instant result
-    const localWinner = pickWinner(roundId);
-    const isWin = localWinner.id === selectedHorseId;
-    const payout = isWin ? Number(betAmount) * localWinner.multiplier : 0;
+  const handleBet = () => {
+    if (!session || roundId === null || horses.length === 0) return;
+
+    const localWinner = pickWinner(horses, roundId);
 
     setWinner(localWinner);
     setIsRacing(true);
-    setStatusMsg(`🏇 ${localWinner.name} 獲勝！${isWin ? `🎉 贏得 ${payout} ZXC` : '😢 下次好運！'}`);
-    setStatusColor(isWin ? '#00ff88' : '#ff4d4d');
+    setProgress(Object.fromEntries(horses.map((h) => [h.id, 0])));
 
-    // Start race animation
-    setProgress(HORSES.reduce((acc, horse) => ({ ...acc, [horse.id]: 0 }), {}));
-
-    // Fire settlement API in background (no queue)
     api.post('/api/v1/games/horse/play', {
       sessionId: session.id,
       betAmount: Number(betAmount),
@@ -109,67 +121,125 @@ export const HorseRacingView: React.FC = () => {
     });
   };
 
-  // Race animation
   useEffect(() => {
-    if (!isRacing) return;
+    if (!isRacing || horses.length === 0) return;
 
-    const raceTimer = window.setInterval(() => {
+    raceTimerRef.current = window.setInterval(() => {
       setProgress((prev) => {
-        let allFinished = true;
         const next: Record<number, number> = {};
-        for (const horse of HORSES) {
-          const speed = winner?.id === horse.id ? 1.6 : 0.75 + Math.random() * 0.5;
-          const value = Math.min(100, (prev[horse.id] ?? 0) + speed);
-          next[horse.id] = value;
+        let allFinished = true;
+        for (const h of horses) {
+          const speed = winner?.id === h.id ? 1.8 : 0.6 + Math.random() * 0.7;
+          const value = Math.min(100, (prev[h.id] ?? 0) + speed);
+          next[h.id] = value;
           if (value < 100) allFinished = false;
         }
-        if (allFinished) window.clearInterval(raceTimer);
+        if (allFinished && raceTimerRef.current) {
+          window.clearInterval(raceTimerRef.current);
+          raceTimerRef.current = null;
+        }
         return next;
       });
-    }, 90);
+    }, 80);
 
-    return () => window.clearInterval(raceTimer);
-  }, [isRacing, winner]);
+    return () => {
+      if (raceTimerRef.current) {
+        window.clearInterval(raceTimerRef.current);
+        raceTimerRef.current = null;
+      }
+    };
+  }, [isRacing, winner, horses]);
+
+  useEffect(() => {
+    if (!isRacing && raceTimerRef.current) {
+      window.clearInterval(raceTimerRef.current);
+      raceTimerRef.current = null;
+    }
+  }, [isRacing]);
+
+  useEffect(() => {
+    if (!winner || isRacing) return;
+    const theme = HORSE_THEMES[winner.id] ?? { emoji: '🐎', color: '#fff' };
+    const isWin = winner.id === selectedHorseId;
+    const payout = isWin ? Number(betAmount) * winner.multiplier : 0;
+    setStatusMsg(`${theme.emoji} ${winner.name} 獲勝！${isWin ? ` 🎉 贏得 ${payout} ZXC` : ' 😢 下次好運！'}`);
+    setStatusColor(isWin ? '#00ff88' : '#ff4d4d');
+  }, [winner, isRacing]);
 
   return (
     <div className="horse-racing-container">
-      <h2>賽馬</h2>
-      <p className="text-xs text-[#adaaaa] mb-2">第 {roundId ?? '...'} 局</p>
+      <div className="horse-header">
+        <h2>🏇 賽馬</h2>
+        <div className="horse-round-info">
+          <span className="round-badge">第 {roundId ?? '...'} 局</span>
+          {countdown !== null && countdown > 0 && (
+            <span className="countdown-badge">⏱ {countdown}s</span>
+          )}
+          {countdown !== null && countdown <= 0 && (
+            <span className="countdown-badge closed">🔒 封盤</span>
+          )}
+        </div>
+      </div>
 
       <div className="horse-choices">
-        {HORSES.map((horse) => (
-          <button
-            key={horse.id}
-            type="button"
-            className={`horse-choice ${selectedHorseId === horse.id ? 'active' : ''}`}
-            onClick={() => setSelectedHorseId(horse.id)}
-          >
-            <span>{horse.name}</span>
-            <span className="multiplier">{horse.multiplier}x</span>
-          </button>
-        ))}
+        {horses.map((horse) => {
+          const theme = HORSE_THEMES[horse.id] ?? { emoji: '🐎', color: '#fff' };
+          return (
+            <button
+              key={horse.id}
+              type="button"
+              className={`horse-choice ${selectedHorseId === horse.id ? 'active' : ''}`}
+              style={selectedHorseId === horse.id ? { borderColor: theme.color, background: `${theme.color}22` } : {}}
+              onClick={() => setSelectedHorseId(horse.id)}
+            >
+              <span className="horse-choice-emoji">{theme.emoji}</span>
+              <span className="horse-choice-name">{horse.name}</span>
+              <span className="horse-choice-mult" style={{ color: theme.color }}>{horse.multiplier}x</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="race-track">
         <div className="race-hud">
+          <div className="start-lights">
+            {isRacing ? (
+              <>
+                <span className="light green" />
+                <span className="light green" />
+                <span className="light green" />
+              </>
+            ) : (
+              <>
+                <span className="light red" />
+                <span className="light red" />
+                <span className="light red" />
+              </>
+            )}
+          </div>
           <div className="pace-meter">
-            <div className="pace-fill" style={{ width: `${Math.max(...Object.values(progress))}%` }} />
+            <div className="pace-fill" style={{ width: `${Math.max(...Object.values(progress), 0)}%` }} />
           </div>
         </div>
-        {HORSES.map((horse) => (
-          <div key={horse.id} className="lane">
-            <span className="lane-tag">#{horse.id}</span>
-            <span
-              className={`horse-avatar ${isRacing ? 'running' : ''} ${winner?.id === horse.id && !isRacing ? 'winner' : ''}`}
-              style={{ left: `${Math.min(92, progress[horse.id] ?? 0)}%` }}
-            >
-              🐎
-            </span>
-          </div>
-        ))}
+        {horses.map((horse) => {
+          const theme = HORSE_THEMES[horse.id] ?? { emoji: '🐎', color: '#fff' };
+          const pct = progress[horse.id] ?? 0;
+          return (
+            <div key={horse.id} className="lane">
+              <span className="lane-name" style={{ color: theme.color }}>{theme.emoji}</span>
+              <div
+                className={`horse-runner ${isRacing ? 'running' : ''} ${winner?.id === horse.id && !isRacing ? 'winner' : ''}`}
+                style={{ left: `${Math.min(90, pct)}%`, '--horse-color': theme.color } as React.CSSProperties}
+              >
+                <span className="horse-icon">{theme.emoji}</span>
+              </div>
+              <div className="lane-line" style={{ borderColor: `${theme.color}33` }} />
+            </div>
+          );
+        })}
+        <div className="finish-line" />
         <div className="status-panel" style={{ color: statusColor }}>
           {statusMsg}
-          
         </div>
       </div>
 
@@ -178,10 +248,11 @@ export const HorseRacingView: React.FC = () => {
           type="number"
           value={betAmount}
           onChange={(e) => setBetAmount(e.target.value)}
+          disabled={isRacing}
         />
         <BetQuickActions amount={betAmount} onChange={setBetAmount} maxBet={maxBet} />
-        <button className="btn-bet" onClick={handleBet} disabled={roundId === null}>
-          立即下注
+        <button className="btn-bet" onClick={handleBet} disabled={roundId === null || isRacing}>
+          {isRacing ? '比賽中...' : '立即下注'}
         </button>
       </div>
     </div>
