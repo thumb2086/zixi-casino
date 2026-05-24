@@ -134,10 +134,9 @@ export const HorseRacingView: React.FC = () => {
   const handleBet = () => {
     if (!session || roundId === null || horses.length === 0 || roundClosed) return;
 
-    if (bettedHorseIds.includes(selectedHorseId)) return;
     setBettedHorseIds((prev) => [...prev, selectedHorseId]);
-    const names = [...bettedHorseIds, selectedHorseId].map((id) => horses.find((h) => h.id === id)?.name).filter(Boolean);
-    setStatusMsg(`🐎 已下注 ${names.join('、')}，等待開獎...`);
+    const newCount = bettedHorseIds.length + 1;
+    setStatusMsg(`🐎 已下注 ${newCount} 筆，等待開獎...`);
     setStatusColor('#ffd36a');
 
     api.post('/api/v1/games/horse/play', {
@@ -306,8 +305,8 @@ export const HorseRacingView: React.FC = () => {
           disabled={isRacing || roundClosed}
         />
         <BetQuickActions amount={betAmount} onChange={setBetAmount} maxBet={maxBet} />
-        <button className="btn-bet" onClick={handleBet} disabled={roundId === null || isRacing || roundClosed || bettedHorseIds.includes(selectedHorseId)}>
-          {isRacing ? '比賽中...' : roundClosed ? '等待開獎' : bettedHorseIds.includes(selectedHorseId) ? '已下注此馬' : bettedHorseIds.length > 0 ? '加注' : '立即下注'}
+        <button className="btn-bet" onClick={handleBet} disabled={roundId === null || isRacing || roundClosed}>
+          {isRacing ? '比賽中...' : roundClosed ? '等待開獎' : bettedHorseIds.length > 0 ? `加注 (${bettedHorseIds.length})` : '立即下注'}
         </button>
       </div>
 
