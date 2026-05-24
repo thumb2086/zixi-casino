@@ -701,15 +701,10 @@ export class GameSettlementWrapper {
   private async grantGameXp(userId: string, betAmount: number, address?: string): Promise<void> {
     const { requireDb } = await import("@repo/infrastructure/db/index.js");
     const db = await requireDb();
-    const { grantXp } = await import("@repo/domain");
+    const { grantXp, levelForXp } = await import("@repo/domain");
     const { loadInventoryState } = await import("./inventory.js");
 
     const state = await loadInventoryState(userId);
-    const [profile] = await db.execute(sql`
-      SELECT COALESCE(xp, 0) as xp, COALESCE(level, 1) as level FROM user_profiles WHERE user_id = ${userId}
-    `);
-    const currentXp = Number(profile?.xp || 0);
-    const currentLevel = Number(profile?.level || 1);
 
     let vipDailyBonusMult = 1;
     if (address) {
@@ -723,13 +718,17 @@ export class GameSettlementWrapper {
     const eventMult = Number(await kv.get<string>('xp_event_multiplier') || '0');
     const eventBonus = Math.max(0, eventMult - 1);
 
-    const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
+    const { xpGained } = grantXp(0, 1, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
 
-    await db.execute(sql`
+    const [result] = await db.execute(sql`
       INSERT INTO user_profiles (user_id, xp, level, updated_at)
-      VALUES (${userId}, ${result.totalXp}, ${result.newLevel}, NOW())
-      ON CONFLICT (user_id) DO UPDATE SET xp = ${result.totalXp}, level = ${result.newLevel}, updated_at = NOW()
+      VALUES (${userId}, ${xpGained}, 1, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET xp = user_profiles.xp + ${xpGained}, updated_at = NOW()
+      RETURNING xp
     `);
+    const newTotalXp = Number(result?.xp || 0);
+    const newLevel = levelForXp(newTotalXp);
+    await db.execute(sql`UPDATE user_profiles SET level = ${newLevel} WHERE user_id = ${userId} AND level < ${newLevel}`);
   }
 
   async updateTotalWin(address: string, winAmount: number): Promise<void> {
