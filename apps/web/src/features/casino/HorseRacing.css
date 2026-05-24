@@ -5,22 +5,61 @@
     color: #eee;
 }
 
+.horse-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.horse-header h2 {
+    margin: 0;
+}
+
+.horse-round-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.round-badge {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #adaaaa;
+}
+
+.countdown-badge {
+    background: rgba(255, 204, 0, 0.15);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #ffcc00;
+}
+
+.countdown-badge.closed {
+    background: rgba(255, 77, 77, 0.15);
+    color: #ff4d4d;
+}
+
 .horse-choices {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin: 20px 0;
+    gap: 10px;
+    margin: 16px 0;
 }
 
 .horse-choice {
     border: 1px solid #3a3a3a;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 15px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 12px 10px;
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
+    gap: 4px;
     transition: all 0.2s;
 }
 
@@ -30,91 +69,137 @@
 
 .horse-choice.active {
     border-color: #ffcc00;
-    background: rgba(255, 204, 0, 0.15);
+    background: rgba(255, 204, 0, 0.12);
 }
 
-.horse-choice .multiplier {
-    color: #ffcc00;
+.horse-choice-emoji {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.horse-choice-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.horse-choice-mult {
     font-weight: bold;
+    font-size: 0.85rem;
 }
 
 .race-track {
     background: linear-gradient(180deg, #1a1200 0%, #0a0800 100%);
-    border: 2px solid rgba(255, 204, 0, 0.3);
+    border: 2px solid rgba(255, 204, 0, 0.25);
     border-radius: 16px;
-    padding: 20px;
-    margin: 20px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
     position: relative;
+    overflow: hidden;
+}
+
+.finish-line {
+    position: absolute;
+    right: 20px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: repeating-linear-gradient(
+        0deg,
+        #fff 0px, #fff 6px,
+        #333 6px, #333 12px
+    );
+    opacity: 0.5;
+    z-index: 1;
 }
 
 .lane {
     position: relative;
-    height: 50px;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    height: 48px;
     display: flex;
     align-items: center;
 }
 
-.lane:last-child {
-    border-bottom: none;
+.lane-name {
+    position: absolute;
+    left: 4px;
+    font-size: 1.1rem;
+    z-index: 3;
+    width: 24px;
+    text-align: center;
 }
 
-.lane-tag {
+.lane-line {
     position: absolute;
-    left: 10px;
-    color: #666;
-    font-size: 0.8rem;
-    z-index: 1;
+    left: 32px;
+    right: 24px;
+    bottom: 0;
+    border-bottom: 1px dashed;
+    opacity: 0.2;
+    z-index: 0;
 }
 
-.horse-avatar {
+.lane:last-child .lane-line {
+    display: none;
+}
+
+.horse-runner {
     position: absolute;
-    left: 16px;
-    font-size: 2rem;
-    transition: left 0.2s linear;
     z-index: 2;
-    transform: scaleX(-1);
+    transition: left 0.08s linear;
+    filter: drop-shadow(0 0 4px var(--horse-color, #fff));
 }
 
-.horse-avatar.running {
-    animation: horse-bob 0.4s ease-in-out infinite alternate;
+.horse-icon {
+    font-size: 1.8rem;
+    display: block;
 }
 
-.horse-avatar.winner {
-    filter: drop-shadow(0 0 10px #ffcc00);
+.horse-runner.running .horse-icon {
+    animation: horse-bob 0.25s ease-in-out infinite alternate;
+}
+
+.horse-runner.winner .horse-icon {
+    filter: drop-shadow(0 0 12px var(--horse-color, #ffcc00));
+    animation: horse-win 0.5s ease-in-out infinite alternate;
 }
 
 @keyframes horse-bob {
-    from { transform: translateY(-2px) scaleX(-1); }
-    to { transform: translateY(2px) scaleX(-1); }
+    from { transform: translateY(-2px); }
+    to { transform: translateY(2px); }
+}
+
+@keyframes horse-win {
+    from { transform: translateY(-2px) scale(1.1); }
+    to { transform: translateY(2px) scale(1.1); }
 }
 
 .race-hud {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
 .start-lights {
     display: flex;
-    gap: 12px;
+    gap: 8px;
 }
 
 .light {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: #333;
+    transition: all 0.3s;
 }
 
-.light.red { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
-.light.green { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
+.light.red { background: #ff4d4d; box-shadow: 0 0 8px #ff4d4d; }
+.light.green { background: #00ff88; box-shadow: 0 0 8px #00ff88; }
 
 .pace-meter {
     width: 100%;
-    height: 6px;
+    height: 5px;
     background: #222;
     border-radius: 3px;
     overflow: hidden;
@@ -123,20 +208,21 @@
 .pace-fill {
     height: 100%;
     background: linear-gradient(90deg, #ffcc00, #ff8800);
-    transition: width 0.2s linear;
+    transition: width 0.08s linear;
 }
 
 .status-panel {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 8px;
-    padding: 15px;
-    margin: 15px 0;
-    min-height: 60px;
+    padding: 12px;
+    margin: 12px 0 0;
+    min-height: 48px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    font-size: 0.95rem;
 }
 
 .betting-controls {
@@ -155,6 +241,10 @@
     font-size: 1rem;
 }
 
+.betting-controls input:disabled {
+    opacity: 0.4;
+}
+
 .btn-bet {
     padding: 12px 30px;
     background: linear-gradient(180deg, #ffcc00, #d4a017);
@@ -163,6 +253,7 @@
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .btn-bet:disabled {
@@ -170,29 +261,16 @@
     cursor: not-allowed;
 }
 
-.stats-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-size: 0.9rem;
-}
-
-.stats-table th, .stats-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-}
-
-.stats-table th {
-    color: #888;
-}
-
 @media (max-width: 768px) {
     .horse-choices {
         grid-template-columns: 1fr 1fr;
     }
+    .horse-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
 }
-
 
 @media (max-width: 640px) {
   .betting-controls { flex-direction: column; }
