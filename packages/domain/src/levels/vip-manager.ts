@@ -121,12 +121,65 @@ export class VipManager {
     return LEVEL_TIERS[currentIndex + 1] ?? null;
   }
 
-  // Get VIP status for address
+  // Map XP level → LEVEL_TIERS index (merge XP system with membership)
+  private getLevelByXpLevel(xpLevel: number): LevelTier {
+    const map: number[] = [
+      0, 0,  // Lv.1-2  → 普通會員
+      1,     // Lv.3    → 青銅會員
+      2,     // Lv.4    → 白銀會員
+      3,     // Lv.5    → 黃金會員
+      4,     // Lv.6    → 白金會員
+      5, 5,  // Lv.7-8  → 鑽石等級
+      6, 6,  // Lv.9-10 → 黑鑽等級
+      7, 7,  // Lv.11-12→ 菁英等級
+      8, 8,  // Lv.13-14→ 宗師等級
+      9, 9,  // Lv.15-16→ 王者等級
+      10, 10,// Lv.17-18→ 至尊等級
+      11, 11,// Lv.19-20→ 蒼穹等級
+      12, 12,// Lv.21-22→ 寰宇等級
+      13, 13,// Lv.23-24→ 星穹等級
+      14, 14,// Lv.25-26→ 萬界等級
+      15, 15,// Lv.27-28→ 創世等級
+      16, 16,// Lv.29-30→ 永恆等級
+      17, 17,// Lv.31-32→ 深淵等級
+      18, 18,// Lv.33-34→ 神諭等級
+      19, 19,// Lv.35-36→ 神諭一階
+      20, 20,// Lv.37-38→ 神諭二階
+      21,    // Lv.39   → 神諭三階
+      22,    // Lv.40   → 神諭四階
+      23,    // Lv.41   → 神諭五階
+      24,    // Lv.42   → 神諭六階
+      25,    // Lv.43   → 神諭七階
+      26,    // Lv.44   → 神諭八階
+      27,    // Lv.45   → 神諭九階
+      28,    // Lv.46   → 神諭十階
+      29,    // Lv.47   → 神諭十一階
+      30,    // Lv.48   → 神諭十二階
+      30,    // Lv.49+  → 神諭十二階 (cap)
+    ];
+    const idx = Math.min(map[xpLevel] ?? 0, LEVEL_TIERS.length - 1);
+    return LEVEL_TIERS[idx];
+  }
+
+  // Get VIP status for address (merged: based on XP level)
   async getVipStatus(address: string): Promise<VipFullStatus | null> {
     const addr = address.toLowerCase();
     const db = await this.getDb();
 
-    // 1. Get total bets for 'all' period
+    // 1. Get XP level from user_profiles
+    const profileRows = await db
+      .select({ xp: schema.userProfiles.xp, level: schema.userProfiles.level })
+      .from(schema.userProfiles)
+      .where(eq(schema.userProfiles.address, addr))
+      .limit(1);
+    const xpLevel = Number(profileRows[0]?.level ?? 1);
+    const xpAmt = Number(profileRows[0]?.xp ?? 0);
+
+    // 2. Determine level from XP level (merged system)
+    const level = this.getLevelByXpLevel(xpLevel);
+    const nextLevel = this.getNextLevel(level);
+
+    // 3. Get total bets + YJC (for display/reference only)
     const betRow = await db
       .select({ amount: schema.totalBets.amount })
       .from(schema.totalBets)
@@ -138,28 +191,22 @@ export class VipManager {
         )
       )
       .limit(1);
-
     const totalBetAll = Number(betRow[0]?.amount ?? 0);
-
-    // 2. Get YJC token balance (prefer on-chain balance when available)
     const yjcBalance = await this.resolveYjcBalance(db, addr);
-
-    // 3. VIP score = weighted combination: 70% total_bets + 30% YJC holdings
     const score = Math.floor(totalBetAll * 0.7 + yjcBalance * 0.3);
 
-    // 4. Determine level (based on score/总投注)
-    const level = this.getVipTierByScore(score);
-    const nextLevel = this.getNextLevel(level);
-
-    // 5. Determine YJC VIP tier (based on purchased VIP pass buffs)
+    // 4. Determine YJC VIP tier (based on purchased VIP pass buffs)
     const yjcVipTier = await this.getYjcVipTier(addr);
 
-    // 6. Calculate progress to next level
+    // 5. Calculate progress to next level (based on XP)
     let progressPct = 100;
     if (nextLevel) {
-      const span = nextLevel.threshold - level.threshold;
-      const done = score - level.threshold;
-      progressPct = Math.min(100, Math.floor((done / span) * 100));
+      const { xpForLevel } = await import("../experience/experience-manager.js");
+      const nextLevelXp = xpForLevel(xpLevel + 1);
+      const currentLevelXp = xpForLevel(xpLevel);
+      const span = nextLevelXp - currentLevelXp;
+      const done = xpAmt - currentLevelXp;
+      progressPct = span > 0 ? Math.min(100, Math.floor((done / span) * 100)) : 100;
     }
 
     return {
