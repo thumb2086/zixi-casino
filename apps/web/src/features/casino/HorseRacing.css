@@ -179,6 +179,7 @@
     z-index: 2;
     transition: left 0.08s linear;
     filter: drop-shadow(0 0 4px var(--horse-color, #fff));
+    transform: scaleX(-1);
 }
 
 .horse-icon {
