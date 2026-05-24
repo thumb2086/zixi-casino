@@ -98,7 +98,6 @@ export const HorseRacingView: React.FC = () => {
       if (data?.roundId !== undefined) {
         if (data.roundId !== roundId) {
           setRoundId(data.roundId);
-          setBettedHorseIds([]);
           setIsRacing(false);
           setProgress({});
           if (!winnerRef.current) {
@@ -157,6 +156,7 @@ export const HorseRacingView: React.FC = () => {
     const localWinner = pickWinner(horses, roundId);
     setWinner(localWinner);
     setRaceBets(bettedHorseIds);
+    setBettedHorseIds([]);
     setIsRacing(true);
     setProgress(Object.fromEntries(horses.map((h) => [h.id, 0])));
   }, [bettedHorseIds, roundClosed, countdown, isRacing, horses, roundId]);
