@@ -221,12 +221,30 @@ export class GameSettlementWrapper {
       }
     }
 
-    // Prevent-loss buff: refund losing bets if the user has an active buff.
-    // Only runs on first settlement attempt (after idempotency check) so buff
-    // is not consumed twice for the same round.
-    let preventLossApplied = false;
     const betValue = parseFloat(ctx.betAmount);
     const payoutValue = parseFloat(ctx.payoutAmount);
+    let preventLossApplied = false;
+
+    // Profit boost: increase payout if user has active profit_boost buffs
+    if (ctx.userId && payoutValue > 0) {
+      try {
+        const { loadInventoryState } = await import("./inventory.js");
+        const state = await loadInventoryState(ctx.userId);
+        const now = Date.now();
+        let profitBoostTotal = 0;
+        for (const buff of state.activeBuffs) {
+          if (buff.type !== "profit_boost") continue;
+          if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
+          profitBoostTotal += Number(buff.value || 0);
+        }
+        if (profitBoostTotal > 0) {
+          const boosted = Math.floor(payoutValue * (1 + profitBoostTotal));
+          ctx = { ...ctx, payoutAmount: String(boosted) };
+        }
+      } catch {}
+    }
+
+    // Prevent-loss buff: refund losing bets if the user has an active buff.
     if (Number.isFinite(betValue) && Number.isFinite(payoutValue) && payoutValue < betValue && ctx.userId) {
       try {
         const buff = await consumePreventLossBuff(ctx.userId);
@@ -696,6 +714,21 @@ export class GameSettlementWrapper {
       const prevGame = await kv.get<number>(`mission:game:${game}:${addr}:${today}`);
       await kv.set(`mission:game:${game}:${addr}:${today}`, (prevGame || 0) + 1);
     }
+  }
+
+  async getLuckBias(userId: string): Promise<number> {
+    try {
+      const { loadInventoryState } = await import("./inventory.js");
+      const state = await loadInventoryState(userId);
+      const now = Date.now();
+      let total = 0;
+      for (const buff of state.activeBuffs) {
+        if (buff.type !== "luck_boost") continue;
+        if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
+        total += Number(buff.value || 0);
+      }
+      return total;
+    } catch { return 0; }
   }
 
   private async grantGameXp(userId: string, betAmount: number, address?: string): Promise<void> {
