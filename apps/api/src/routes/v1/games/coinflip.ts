@@ -58,7 +58,8 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game
-      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundId}`);
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundId}`, luckBias);
       const isWin = result.winner === selection;
       const payout = isWin ? betAmount * 1.96 : 0;
       const fee = isWin ? Math.min(payout * 0.01, payout * 0.1) : 0; // simplified fee

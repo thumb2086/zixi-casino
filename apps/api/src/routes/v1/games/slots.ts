@@ -81,7 +81,8 @@ export async function slotsRoutes(fastify: FastifyInstance) {
     }
 
     // 2. Resolve game (in-memory, fast)
-    const gameResult = gameManager.resolveSlots(betAmount, roundId);
+    const luckBias = await gameSettlement.getLuckBias(userId);
+    const gameResult = gameManager.resolveSlots(betAmount, roundId, luckBias);
     const isWin = gameResult.multiplier > 0;
     const payout = isWin ? betAmount * gameResult.multiplier : 0;
 

@@ -68,7 +68,8 @@ export async function blackjackRoutes(fastify: FastifyInstance) {
     }
 
     const roundId = `blackjack_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const gameResult = gameManager.resolveBlackjack(action, state, roundId);
+    const luckBias = await gameSettlement.getLuckBias(userId);
+    const gameResult = gameManager.resolveBlackjack(action, state, roundId, luckBias);
     
     // Only record settled games
     if (gameResult.status === "settled") {

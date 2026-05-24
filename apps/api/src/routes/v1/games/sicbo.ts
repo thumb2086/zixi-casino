@@ -86,7 +86,8 @@ export async function sicboRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game
-      const gameResult = gameManager.resolveSicbo(bets, roundId);
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const gameResult = gameManager.resolveSicbo(bets, roundId, luckBias);
       const isWin = gameResult.totalPayoutMultiplier > 0;
       const payout = isWin ? betAmount * gameResult.totalPayoutMultiplier : 0;
       const payoutStr = payout.toString();
