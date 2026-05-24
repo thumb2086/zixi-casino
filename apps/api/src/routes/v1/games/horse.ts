@@ -5,20 +5,9 @@ import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
 import { GameSessionManager } from "@repo/domain/games/game-session-manager.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
-import { GameManager } from "@repo/domain/games/game-manager.js";
-import { getRoundInfo, hashInt, pickWeighted } from "@repo/domain/games/auto-round.js";
+import { GameManager, HORSES } from "@repo/domain/games/game-manager.js";
+import { getRoundInfo } from "@repo/domain/games/auto-round.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
-
-const RTP_SCALE = 2.0;
-
-const HORSES = [
-  { id: 1, name: "赤焰", multiplier: 1.8 * RTP_SCALE },
-  { id: 2, name: "雷霆", multiplier: 2.2 * RTP_SCALE },
-  { id: 3, name: "幻影", multiplier: 2.9 * RTP_SCALE },
-  { id: 4, name: "夜刃", multiplier: 4.0 * RTP_SCALE },
-  { id: 5, name: "霜牙", multiplier: 5.8 * RTP_SCALE },
-  { id: 6, name: "流星", multiplier: 8.5 * RTP_SCALE }
-];
 
 export async function horseRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -127,14 +116,10 @@ export async function horseRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // 2. Resolve game using deterministic hash based on roundId
-      const winner = pickWeighted(
-        `horse:${roundInfo.roundId}`,
-        HORSES.map(h => ({ ...h, weight: 1 / h.multiplier })),
-        'weight'
-      );
-      const isWin = winner.id === horseId;
-      const payout = isWin ? betAmount * winner.multiplier : 0;
+      // 2. Resolve game using GameManager deterministic horse race
+      const result = gameManager.resolveHorseRace(horseId, `horse:${roundInfo.roundId}`);
+      const isWin = result.isWin;
+      const payout = isWin ? betAmount * result.multiplier : 0;
       const payoutStr = payout.toString();
 
       // 3. Execute on-chain settlement
@@ -187,8 +172,8 @@ export async function horseRoutes(fastify: FastifyInstance) {
           payout: settlement.finalPayout,
           meta: { 
             selectedHorse: horseId,
-            winnerId: winner.id,
-            winnerName: winner.name,
+            winnerId: result.winnerId,
+            winnerName: result.winnerName,
             betTxHash: settlement.betTxHash,
             payoutTxHash: settlement.payoutTxHash,
             fee: settlement.feeAmount,
@@ -207,7 +192,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
         payout: settlement.finalPayout.toString(),
         fee: settlement.feeAmount.toString(),
         isWin: settlement.isWin,
-        multiplier: winner.multiplier,
+        multiplier: result.multiplier,
         betTxHash: settlement.betTxHash,
         payoutTxHash: settlement.payoutTxHash,
         roundId,
@@ -216,8 +201,8 @@ export async function horseRoutes(fastify: FastifyInstance) {
       // 8. Save round
       await gameSettlement.saveRound("horse", roundId, {
         selectedHorse: horseId,
-        winnerId: winner.id,
-        winnerName: winner.name,
+        winnerId: result.winnerId,
+        winnerName: result.winnerName,
         isWin,
         roundInfo,
       });
@@ -228,12 +213,12 @@ export async function horseRoutes(fastify: FastifyInstance) {
           sessionId: session.id,
           roundId: roundInfo.roundId,
           selectedHorse: horseId,
-          winnerId: winner.id,
-          winnerName: winner.name,
+          winnerId: result.winnerId,
+          winnerName: result.winnerName,
           result: settlement.isWin ? "win" : "lose",
           payout: settlement.finalPayout,
           betAmount,
-          multiplier: winner.multiplier,
+          multiplier: result.multiplier,
           fee: settlement.feeAmount,
           balance: finalBalance,
           betTxHash: settlement.betTxHash,
