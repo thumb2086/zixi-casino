@@ -93,7 +93,7 @@ export const HorseRacingView: React.FC = () => {
       const res = await api.get('/api/v1/games/horse/round');
       const data = res.data?.data?.data ?? res.data?.data;
       if (data?.roundId !== undefined) {
-        if (data.roundId !== roundId) {
+        if (data.roundId !== roundId && !winner) {
           setRoundId(data.roundId);
           setBettedHorseId(null);
           setWinner(null);
