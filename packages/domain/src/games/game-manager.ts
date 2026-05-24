@@ -1,5 +1,14 @@
 import { GameRound, GameRoundSchema, GameAction, GameActionSchema } from "@repo/shared";
 
+export const HORSES = [
+  { id: 1, name: "赤焰", multiplier: 2.5, weight: 40 },
+  { id: 2, name: "雷霆", multiplier: 3.7, weight: 27 },
+  { id: 3, name: "幻影", multiplier: 6.2, weight: 16 },
+  { id: 4, name: "夜刃", multiplier: 10, weight: 10 },
+  { id: 5, name: "霜牙", multiplier: 14, weight: 7 },
+  { id: 6, name: "流星", multiplier: 25, weight: 4 },
+];
+
 export interface GameDomain {
   createRound(game: string, externalRoundId: string, opensAt: Date, closesAt: Date, bettingClosesAt: Date): GameRound;
   lockRound(round: GameRound): GameRound;
@@ -125,15 +134,6 @@ export class GameManager implements GameDomain {
   }
 
   resolveHorseRace(horseId: number, seed: string, bias: number = 0): { winnerId: number; winnerName: string; isWin: boolean; multiplier: number } {
-    const HORSES = [
-      { id: 1, name: "赤焰", multiplier: 2.0, weight: 500 },   // ~50% chance
-      { id: 2, name: "雷霆", multiplier: 3.0, weight: 333 },   // ~33% chance
-      { id: 3, name: "幻影", multiplier: 5.0, weight: 200 },   // ~20% chance
-      { id: 4, name: "夜刃", multiplier: 8.0, weight: 125 },   // ~12.5% chance
-      { id: 5, name: "霜牙", multiplier: 12.0, weight: 83 },    // ~8.3% chance
-      { id: 6, name: "流星", multiplier: 20.0, weight: 50 }     // ~5% chance
-    ];
-    
     const totalWeight = HORSES.reduce((sum, h) => sum + h.weight, 0);
     let hash = this._fnv1a32(seed);
     let random = hash % totalWeight;
