@@ -45,15 +45,23 @@ export class RewardManager {
     return TITLES;
   }
 
-  checkTitleUnlock(userId: string, stats: any): string[] {
+  checkTitleUnlock(userId: string, stats: any, xpLevel?: number): string[] {
     const unlocked: string[] = [];
     if (stats.totalBet > 1000000) unlocked.push("title_highroller");
     if (stats.totalWin > 100000000) unlocked.push("title_god");
 
-    // Member tier titles: if totalBet >= threshold, unlock corresponding title
+    // XP-level → LEVEL_TIERS index mapping (mirrors vip-manager.ts getLevelByXpLevel)
+    const xpToTierIndex: number[] = [
+      0, 0, 1, 2, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8,
+      9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15,
+      16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 22, 23,
+      24, 25, 26, 27, 28, 29, 30, 30,
+    ];
+    const tierIndex = xpLevel && xpLevel < xpToTierIndex.length ? xpToTierIndex[xpLevel] : -1;
+
+    // Member tier titles: use XP-based tier if higher than totalBet-based
     for (let i = 0; i < LEVEL_TIERS.length; i++) {
-      const tier = LEVEL_TIERS[i];
-      if (stats.totalBet >= tier.threshold) {
+      if (stats.totalBet >= LEVEL_TIERS[i].threshold || (tierIndex >= 0 && i <= tierIndex)) {
         unlocked.push(`title_member_${i + 1}`);
       }
     }
