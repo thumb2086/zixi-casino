@@ -379,6 +379,12 @@ export class GameManager implements GameDomain {
         if (sVal > min && sVal < max) resultType = 'win';
         else if (sVal === min || sVal === max) resultType = 'pillar';
 
+        if (bias > 0 && resultType !== 'win') {
+            if ((this._fnv1a32(`${seed}:bias`) % 100) < bias * 100) {
+                resultType = 'win';
+            }
+        }
+
         return {
             ...state,
             shot,
