@@ -761,14 +761,19 @@ export class GameSettlementWrapper {
     `);
     const newTotalXp = Number(result?.xp || 0);
     const newLevel = levelForXp(newTotalXp);
-    await db.execute(sql`UPDATE user_profiles SET level = ${newLevel} WHERE user_id = ${userId} AND level < ${newLevel}`);
+    const [prev] = await db.execute(sql`SELECT level FROM user_profiles WHERE user_id = ${userId}`);
+    const prevLevel = Number(prev?.[0]?.level || 1);
+    if (newLevel > prevLevel) {
+      await db.execute(sql`UPDATE user_profiles SET level = ${newLevel} WHERE user_id = ${userId}`);
+      if (address) await this.checkAndUnlockTitles(userId, address, newLevel);
+    }
   }
 
   async updateTotalWin(address: string, winAmount: number): Promise<void> {
     await this.updateTotalBet(address, 0, winAmount);
   }
 
-  async checkAndUnlockTitles(userId: string, address: string): Promise<void> {
+  async checkAndUnlockTitles(userId: string, address: string, xpLevel?: number): Promise<void> {
     try {
       const db = await (await import("@repo/infrastructure/db/index.js")).requireDb();
       const addr = address.toLowerCase();
@@ -781,7 +786,7 @@ export class GameSettlementWrapper {
         totalWin: Number(row?.totalWin || row?.total_win || 0),
       };
       const rewardManager = new RewardManager();
-      const unlocked = rewardManager.checkTitleUnlock(userId, stats);
+      const unlocked = rewardManager.checkTitleUnlock(userId, stats, xpLevel);
       if (unlocked.length === 0) return;
 
       const state = await loadInventoryState(userId);
