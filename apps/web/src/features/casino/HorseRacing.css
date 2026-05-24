@@ -63,8 +63,13 @@
     transition: all 0.2s;
 }
 
-.horse-choice:hover {
+.horse-choice:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
+}
+
+.horse-choice:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .horse-choice.active {
@@ -85,6 +90,28 @@
 .horse-choice-mult {
     font-weight: bold;
     font-size: 0.85rem;
+}
+
+.horse-choice.betted {
+    opacity: 0.6;
+    cursor: default;
+    position: relative;
+}
+
+.betted-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #00ff88;
+    color: #000;
+    font-size: 0.7rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
 
 .race-track {
