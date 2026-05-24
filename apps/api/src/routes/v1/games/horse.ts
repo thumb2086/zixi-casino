@@ -116,8 +116,9 @@ export async function horseRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // 2. Resolve game using GameManager deterministic horse race
-      const result = gameManager.resolveHorseRace(horseId, `horse:${roundInfo.roundId}`);
+      // 2. Resolve game using GameManager deterministic horse race (with luck bias)
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const result = gameManager.resolveHorseRace(horseId, `horse:${roundInfo.roundId}`, luckBias);
       const isWin = result.isWin;
       const payout = isWin ? betAmount * result.multiplier : 0;
       const payoutStr = payout.toString();
