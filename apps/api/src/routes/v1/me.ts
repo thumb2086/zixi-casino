@@ -84,8 +84,8 @@ export async function meRoutes(fastify: FastifyInstance) {
     }
 
     const xpData = profile ? { xp: Number(profile.xp || 0), level: Number(profile.level || 1) } : { xp: 0, level: 1 };
-    const { getXpTierLabel, xpForLevel } = await import("@repo/domain");
-    const xpTierLabel = getXpTierLabel(xpData.level);
+    const { xpForLevel } = await import("@repo/domain");
+    const membershipLabel = vip?.level?.label ?? "普通會員";
     const nextLevelXp = xpForLevel(xpData.level + 1);
     const currentLevelXp = xpForLevel(xpData.level);
     const xpProgress = nextLevelXp > currentLevelXp ? ((xpData.xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100 : 100;
@@ -99,7 +99,7 @@ export async function meRoutes(fastify: FastifyInstance) {
          balanceZxc: zxcBal || "0",
          balanceYjc: yjcBal || "0",
          totalAssetsZxc: totalAssets.toFixed(4),
-         vipLevel: xpTierLabel,
+         vipLevel: membershipLabel,
          maxBet: Number(vip?.level?.maxBet || 1000),
          title: titleLabel || "新手",
          avatar: avatarIcon || "🪙",
@@ -107,7 +107,7 @@ export async function meRoutes(fastify: FastifyInstance) {
          titleId: activeTitleId,
          xp: xpData.xp,
          level: xpData.level,
-         xpTierLabel,
+         xpTierLabel: membershipLabel,
          xpNextLevel: nextLevelXp,
          xpProgress: Math.round(xpProgress),
          isAdmin: Boolean(ctx.user.isAdmin),
