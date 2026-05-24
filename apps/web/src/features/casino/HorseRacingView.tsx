@@ -273,8 +273,10 @@ export const HorseRacingView: React.FC = () => {
             >
               <span className="horse-choice-emoji">🐎</span>
               <span className="horse-choice-name">{horse.name}</span>
-              <span className="horse-choice-mult" style={{ color }}>{horse.multiplier}x</span>
-              <span className="horse-choice-odds">{pct}%</span>
+              <span className="horse-choice-stats">
+                <span className="horse-choice-mult" style={{ color }}>{horse.multiplier}x</span>
+                <span className="horse-choice-odds">勝率 {pct}%</span>
+              </span>
               {bettedHorseId === horse.id && <span className="betted-badge">✓</span>}
             </button>
           );
