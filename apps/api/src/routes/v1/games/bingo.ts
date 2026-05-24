@@ -81,7 +81,8 @@ export async function bingoRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game
-      const gameResult = gameManager.resolveBingo(numbers, roundId);
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const gameResult = gameManager.resolveBingo(numbers, roundId, luckBias);
       const isWin = gameResult.multiplier > 0;
       const payout = isWin ? betAmount * gameResult.multiplier : 0;
       const payoutStr = payout.toString();
