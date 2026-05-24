@@ -158,6 +158,14 @@ export const HorseRacingView: React.FC = () => {
   }, [isRacing]);
 
   useEffect(() => {
+    if (!isRacing || horses.length === 0) return;
+    const allDone = horses.every((h) => (progress[h.id] ?? 0) >= 100);
+    if (allDone && !raceTimerRef.current) {
+      setIsRacing(false);
+    }
+  }, [progress, isRacing, horses]);
+
+  useEffect(() => {
     if (!winner || isRacing) return;
     const theme = HORSE_THEMES[winner.id] ?? { emoji: '🐎', color: '#fff' };
     const isWin = winner.id === selectedHorseId;
