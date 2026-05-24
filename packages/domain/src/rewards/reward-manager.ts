@@ -16,6 +16,12 @@ const MEMBER_RARITY: Record<number, string> = {
   4: "epic", 5: "epic", 6: "epic",
   7: "legendary", 8: "legendary", 9: "legendary", 10: "legendary",
   11: "legendary", 12: "legendary", 13: "legendary", 14: "legendary", 15: "legendary", 16: "legendary",
+  17: "mythic", 18: "mythic", 19: "mythic", 20: "mythic", 21: "mythic", 22: "mythic",
+  23: "mythic", 24: "mythic", 25: "mythic", 26: "mythic", 27: "mythic", 28: "mythic",
+  29: "mythic", 30: "mythic", 31: "mythic", 32: "mythic", 33: "mythic", 34: "mythic",
+  35: "chaos", 36: "chaos", 37: "chaos", 38: "chaos", 39: "chaos", 40: "chaos",
+  41: "chaos", 42: "chaos", 43: "chaos", 44: "chaos", 45: "chaos", 46: "chaos",
+  47: "chaos", 48: "chaos", 49: "chaos", 50: "oracle",
 };
 
 export const TITLES: RewardTitle[] = [
@@ -50,22 +56,13 @@ export class RewardManager {
     if (stats.totalBet > 1000000) unlocked.push("title_highroller");
     if (stats.totalWin > 100000000) unlocked.push("title_god");
 
-    // XP-level → LEVEL_TIERS index mapping (mirrors vip-manager.ts getLevelByXpLevel)
-    const xpToTierIndex: number[] = [
-      0, 0, 1, 2, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8,
-      9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15,
-      16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 22, 23,
-      24, 25, 26, 27, 28, 29, 30, 30,
-    ];
-    const tierIndex = xpLevel && xpLevel < xpToTierIndex.length ? xpToTierIndex[xpLevel] : -1;
-
-    // Member tier titles: use XP-based tier if higher than totalBet-based
+    // Member tier titles: one per XP level (LEVEL_TIERS is now 1:1 with XP levels)
+    const maxIdx = xpLevel ? Math.max(0, Math.min(xpLevel - 1, LEVEL_TIERS.length - 1)) : -1;
     for (let i = 0; i < LEVEL_TIERS.length; i++) {
-      if (stats.totalBet >= LEVEL_TIERS[i].threshold || (tierIndex >= 0 && i <= tierIndex)) {
+      if (stats.totalBet >= LEVEL_TIERS[i].threshold || (maxIdx >= 0 && i <= maxIdx)) {
         unlocked.push(`title_member_${i + 1}`);
       }
     }
-
     return unlocked;
   }
 

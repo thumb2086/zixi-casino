@@ -121,43 +121,9 @@ export class VipManager {
     return LEVEL_TIERS[currentIndex + 1] ?? null;
   }
 
-  // Map XP level → LEVEL_TIERS index (merge XP system with membership)
+  // Map XP level → LEVEL_TIERS (one level per tier, 50 tiers for 50 levels)
   private getLevelByXpLevel(xpLevel: number): LevelTier {
-    const map: number[] = [
-      0, 0,  // Lv.1-2  → 普通會員
-      1,     // Lv.3    → 青銅會員
-      2,     // Lv.4    → 白銀會員
-      3,     // Lv.5    → 黃金會員
-      4,     // Lv.6    → 白金會員
-      5, 5,  // Lv.7-8  → 鑽石等級
-      6, 6,  // Lv.9-10 → 黑鑽等級
-      7, 7,  // Lv.11-12→ 菁英等級
-      8, 8,  // Lv.13-14→ 宗師等級
-      9, 9,  // Lv.15-16→ 王者等級
-      10, 10,// Lv.17-18→ 至尊等級
-      11, 11,// Lv.19-20→ 蒼穹等級
-      12, 12,// Lv.21-22→ 寰宇等級
-      13, 13,// Lv.23-24→ 星穹等級
-      14, 14,// Lv.25-26→ 萬界等級
-      15, 15,// Lv.27-28→ 創世等級
-      16, 16,// Lv.29-30→ 永恆等級
-      17, 17,// Lv.31-32→ 深淵等級
-      18, 18,// Lv.33-34→ 神諭等級
-      19, 19,// Lv.35-36→ 神諭一階
-      20, 20,// Lv.37-38→ 神諭二階
-      21,    // Lv.39   → 神諭三階
-      22,    // Lv.40   → 神諭四階
-      23,    // Lv.41   → 神諭五階
-      24,    // Lv.42   → 神諭六階
-      25,    // Lv.43   → 神諭七階
-      26,    // Lv.44   → 神諭八階
-      27,    // Lv.45   → 神諭九階
-      28,    // Lv.46   → 神諭十階
-      29,    // Lv.47   → 神諭十一階
-      30,    // Lv.48   → 神諭十二階
-      30,    // Lv.49+  → 神諭十二階 (cap)
-    ];
-    const idx = Math.min(map[xpLevel] ?? 0, LEVEL_TIERS.length - 1);
+    const idx = Math.max(0, Math.min(xpLevel - 1, LEVEL_TIERS.length - 1));
     return LEVEL_TIERS[idx];
   }
 

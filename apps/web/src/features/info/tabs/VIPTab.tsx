@@ -2,14 +2,25 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../../store/api';
 import { ChevronRight } from 'lucide-react';
 
-const TIER_LABELS: Record<string, { color: string; badge: string }> = {
-  '普通會員': { color: '#a0a0a0', badge: 'C' },
-  '青銅會員': { color: '#cd7f32', badge: 'B' },
-  '白銀會員': { color: '#c0c0c0', badge: 'S' },
-  '黃金會員': { color: '#ffd700', badge: 'G' },
-  '白金會員': { color: '#00cfff', badge: 'P' },
-  '鑽石等級': { color: '#ff4fff', badge: 'D' },
+const TIER_COLORS: Record<string, string> = {
+  '普通會員': '#a0a0a0', '普通菁英': '#a0a0a0',
+  '青銅會員': '#cd7f32', '白銀會員': '#c0c0c0',
+  '黃金會員': '#ffd700', '白金會員': '#00cfff',
+  '鑽石': '#ff4fff', '黑鑽': '#ff4fff',
+  '菁英': '#ff4fff', '宗師': '#ff4fff',
+  '王者': '#ff4fff', '至尊': '#ff4fff',
+  '蒼穹': '#ff4fff', '寰宇': '#ff4fff',
+  '星穹': '#ff4fff', '萬界': '#ff4fff',
+  '創世': '#ff4fff', '永恆': '#ff4fff',
+  '深淵': '#ff4fff', '神諭': '#ff4fff',
+  '神話': '#ff4fff',
 };
+function tierColor(label: string): string {
+  for (const [key, color] of Object.entries(TIER_COLORS)) {
+    if (label.includes(key)) return color;
+  }
+  return '#a0a0a0';
+}
 
 export default function VIPTab() {
   const { data: profile } = useQuery({
@@ -22,7 +33,7 @@ export default function VIPTab() {
   });
 
   const tierLabel = profile?.vipLevel || '普通會員';
-  const tier = TIER_LABELS[tierLabel] || { color: '#a0a0a0', badge: '?' };
+  const tierColorVal = tierColor(tierLabel);
   const maxBet = profile?.maxBet || 1000;
   const level = profile?.level || 1;
   const xp = profile?.xp || 0;
@@ -34,11 +45,11 @@ export default function VIPTab() {
       <section className="rounded-2xl border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
         <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">會員等級</h2>
         <div className="mt-4 flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-black" style={{ background: `${tier.color}22`, color: tier.color, border: `2px solid ${tier.color}44` }}>
-            {tier.badge}
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-black" style={{ background: `${tierColorVal}22`, color: tierColorVal, border: `2px solid ${tierColorVal}44` }}>
+            Lv.{level}
           </div>
           <div>
-            <p className="text-xl font-black" style={{ color: tier.color }}>{tierLabel}</p>
+            <p className="text-xl font-black" style={{ color: tierColorVal }}>{tierLabel}</p>
             <p className="text-xs font-bold text-[#adaaaa]">Lv.{level} — {xpProgress}%</p>
           </div>
         </div>
@@ -61,7 +72,7 @@ export default function VIPTab() {
           <p className="text-xs font-bold text-[#adaaaa]">{xp.toLocaleString()} / {xpNext.toLocaleString()}</p>
         </div>
         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#0e0e0e]">
-          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${xpProgress}%`, background: `linear-gradient(90deg, ${tier.color}, #fcc025)` }} />
+          <div className="h-full rounded-full transition-all duration-300" style={{ width: `${xpProgress}%`, background: `linear-gradient(90deg, ${tierColorVal}, #fcc025)` }} />
         </div>
       </section>
 
