@@ -56,7 +56,8 @@ export const HorseRacingView: React.FC = () => {
     queryKey: ['horse-info'],
     queryFn: async () => {
       const res = await api.get('/api/v1/games/horse/horses');
-      return res.data?.data as Horse[] | undefined;
+      const d = res.data?.data;
+      return (Array.isArray(d) ? d : (d as any)?.data) as Horse[] | undefined;
     },
     staleTime: 300000,
   });
