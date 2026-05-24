@@ -208,9 +208,6 @@ const ensureCoreSchema = async () => {
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS token_amount NUMERIC`.catch(() => {});
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP`.catch(() => {});
           await sql`ALTER TABLE reward_grants ADD COLUMN IF NOT EXISTS meta JSONB`.catch(() => {});
-          // XP/level columns for experience system
-          await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS xp NUMERIC DEFAULT '0'`.catch(() => {});
-          await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1`.catch(() => {});
 
           // Create new tables that may not exist yet (added after initial schema deploy)
           await sql`CREATE TABLE IF NOT EXISTS game_sessions (
@@ -331,8 +328,10 @@ const ensureCoreSchema = async () => {
             system_title_streaks JSONB DEFAULT '{}',
             win_bias NUMERIC,
             sound_prefs JSONB DEFAULT '{"amountDisplay":"compact","danmuEnabled":true,"masterVolume":0.7,"bgmEnabled":true,"bgmVolume":0.45,"sfxEnabled":true,"sfxVolume":0.75}',
+            xp NUMERIC DEFAULT '0',
+            level INTEGER DEFAULT 1,
             created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+            updated_at TIMESTAMP NOT NULL NOW()
           )
         `;
         // Migration: Add sound_prefs column if it doesn't exist (for existing tables)
@@ -588,6 +587,10 @@ const ensureCoreSchema = async () => {
           )
         `;
         await normalizeLegacyIdentityData(sql);
+
+        // Ensure xp/level columns exist (always runs, regardless of schema path)
+        await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS xp NUMERIC DEFAULT '0'`.catch(() => {});
+        await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1`.catch(() => {});
       } finally {
         await sql.end();
       }

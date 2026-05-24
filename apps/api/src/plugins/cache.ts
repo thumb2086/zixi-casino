@@ -34,14 +34,14 @@ const routeCacheConfig: Record<string, CacheConfig> = {
   // Auth & Profile
   "GET:/api/v1/auth/me": { ttl: 30, keyFn: (req) => `auth:${String((req.query as any)?.sessionId || (req.headers as any)["x-session-id"] || "")}` },
   "GET:/api/v1/auth/status": { ttl: 5 },
-  "GET:/api/v1/me/profile": { ttl: 30, keyFn: (req) => `prof:${String((req.query as any)?.sessionId || "")}` },
-  "GET:/api/v1/profile/prefs": { ttl: 120, keyFn: (req) => `prefs:${String((req.query as any)?.sessionId || "")}` },
+  "GET:/api/v1/me/profile": { ttl: 30, keyFn: (req) => `prof:${String((req.query as any)?.sessionId || (req.headers as any)["x-session-id"] || "")}` },
+  "GET:/api/v1/profile/prefs": { ttl: 120, keyFn: (req) => `prefs:${String((req.query as any)?.sessionId || (req.headers as any)["x-session-id"] || "")}` },
 
   // Wallet
-  "GET:/api/v1/wallet/summary": { ttl: 30, keyFn: (req) => `ws:${String((req.query as any)?.sessionId || "")}` },
+  "GET:/api/v1/wallet/summary": { ttl: 30, keyFn: (req) => `ws:${String((req.query as any)?.sessionId || (req.headers as any)["x-session-id"] || "")}` },
 
   // Company
-  "GET:/api/v1/company": { ttl: 15, keyFn: (req) => `company:${String((req.query as any)?.sessionId || "")}` },
+  "GET:/api/v1/company": { ttl: 15, keyFn: (req) => `company:${String((req.query as any)?.sessionId || (req.headers as any)["x-session-id"] || "")}` },
   "GET:/api/v1/company/investable": { ttl: 60 },
   "GET:/api/v1/company/hire-preview": { ttl: 300 },
 
