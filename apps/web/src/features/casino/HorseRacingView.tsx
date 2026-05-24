@@ -5,6 +5,7 @@ import { api } from '../../store/api';
 import './HorseRacing.css';
 import './CasinoCommon.css';
 import { BetQuickActions } from './BetQuickActions';
+import { formatNumber } from '@repo/shared';
 
 interface Horse {
   id: number; name: string; multiplier: number; weight: number;
@@ -134,9 +135,14 @@ export const HorseRacingView: React.FC = () => {
     if (!session || roundId === null || horses.length === 0 || roundClosed) return;
 
     const amount = Number(betAmount);
+    if (amount > maxBet) {
+      setStatusMsg(`⚠️ 單注上限 ${formatNumber(maxBet)} ZXC`);
+      setStatusColor('#ff8800');
+      return;
+    }
     setBetRecords((prev) => [...prev, { horseId: selectedHorseId, amount }]);
     const total = betRecords.reduce((s, r) => s + r.amount, 0) + amount;
-    setStatusMsg(`🐎 已下注 ${betRecords.length + 1} 筆，共 ${total} ZXC`);
+    setStatusMsg(`🐎 已下注 ${betRecords.length + 1} 筆，共 ${formatNumber(total)} ZXC`);
     setStatusColor('#ffd36a');
 
     api.post('/api/v1/games/horse/play', {
@@ -213,10 +219,10 @@ export const HorseRacingView: React.FC = () => {
     const winRecords = records.filter((r) => r.horseId === winner.id);
     const totalPayout = winRecords.reduce((s, r) => s + r.amount * winner.multiplier, 0);
     if (winRecords.length === 0) {
-      setStatusMsg(`🐎 ${winner.name} 獲勝！😢 未中獎（共下 ${records.length} 注 ${totalBet} ZXC）`);
+      setStatusMsg(`🐎 ${winner.name} 獲勝！😢 未中獎（共下 ${records.length} 注 ${formatNumber(totalBet)} ZXC）`);
       setStatusColor('#ff4d4d');
     } else {
-      setStatusMsg(`🐎 ${winner.name} 獲勝！🎉 贏得 ${totalPayout} ZXC（${winRecords.length} 注中獎，下 ${totalBet} ZXC）`);
+      setStatusMsg(`🐎 ${winner.name} 獲勝！🎉 贏得 ${formatNumber(totalPayout)} ZXC（${winRecords.length} 注中獎，下 ${formatNumber(totalBet)} ZXC）`);
       setStatusColor('#00ff88');
     }
   }, [winner, isRacing, raceBetRecords]);
