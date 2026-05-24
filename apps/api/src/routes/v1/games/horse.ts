@@ -28,7 +28,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
   };
 
   typedFastify.get("/horses", async (request) => {
-    return createApiEnvelope({ success: true, data: HORSES }, request.id);
+    return createApiEnvelope(HORSES, request.id);
   });
 
   typedFastify.get("/round", async (request) => {
