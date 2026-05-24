@@ -726,7 +726,9 @@ export class GameSettlementWrapper {
     const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
 
     await db.execute(sql`
-      UPDATE user_profiles SET xp = ${result.totalXp}, level = ${result.newLevel}, updated_at = NOW() WHERE user_id = ${userId}
+      INSERT INTO user_profiles (user_id, xp, level, updated_at)
+      VALUES (${userId}, ${result.totalXp}, ${result.newLevel}, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET xp = ${result.totalXp}, level = ${result.newLevel}, updated_at = NOW()
     `);
   }
 
