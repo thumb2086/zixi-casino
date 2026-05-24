@@ -92,6 +92,11 @@
     font-size: 0.85rem;
 }
 
+.horse-choice-odds {
+    font-size: 0.75rem;
+    color: #888;
+}
+
 .horse-choice.betted {
     opacity: 0.6;
     cursor: default;
@@ -286,6 +291,40 @@
 .btn-bet:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.lane-tag {
+    position: absolute;
+    left: 4px;
+    font-size: 0.75rem;
+    z-index: 3;
+    width: 28px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.horse-history {
+    margin-top: 12px;
+}
+
+.horse-history h3 {
+    font-size: 0.9rem;
+    color: #adaaaa;
+    margin: 0 0 8px;
+}
+
+.history-scroll {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.history-chip {
+    border: 1px solid #444;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.04);
 }
 
 @media (max-width: 768px) {
