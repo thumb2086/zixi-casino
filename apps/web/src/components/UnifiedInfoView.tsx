@@ -1,8 +1,8 @@
-import { Calculator, ChevronLeft, Crown, Package, Sparkles } from 'lucide-react';
+import { Calculator, ChevronLeft, Package, Sparkles } from 'lucide-react';
 import AppBottomNav from '../components/AppBottomNav';
 import ItemsTab from '../features/info/tabs/ItemsTab';
 import OddsTab from '../features/info/tabs/OddsTab';
-import VIPTab from '../features/info/tabs/VIPTab';
+import XpTab from '../features/info/tabs/XpTab';
 
 export default function UnifiedInfoView() {
   return (
@@ -29,7 +29,7 @@ export default function UnifiedInfoView() {
           
           <div className="relative z-10 mb-6 flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[#fcc025]/30 bg-[#262626]">
-              <Crown className="h-6 w-6 text-[#fcc025]" />
+              <Sparkles className="h-6 w-6 text-[#fcc025]" />
             </div>
             <div>
               <h2 className="text-xl font-extrabold uppercase tracking-tight text-[#fcc025]">VIP 等級系統</h2>
@@ -43,7 +43,7 @@ export default function UnifiedInfoView() {
           </div>
           
           <div className="relative z-10">
-            <VIPTab />
+            <XpTab />
           </div>
         </section>
 
