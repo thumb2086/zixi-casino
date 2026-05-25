@@ -325,13 +325,13 @@ export const HorseRacingView: React.FC = () => {
           <div className="stats-chart">
             {horses.map((horse) => {
               const wins = history.filter((h: any) => {
-                const meta = h.gameResult?.meta ?? h.meta ?? {};
-                return meta.winnerId === horse.id;
+                const m = h.meta ?? h.gameResult?.meta ?? {};
+                return m.winnerId === horse.id;
               }).length;
               const total = history.length;
               const pct = total > 0 ? Math.round((wins / total) * 100) : 0;
               const maxWins = Math.max(1, ...horses.map((h) => history.filter((x: any) => {
-                const m = x.gameResult?.meta ?? x.meta ?? {};
+                const m = x.meta ?? x.gameResult?.meta ?? {};
                 return m.winnerId === h.id;
               }).length));
               const barWidth = Math.max(4, (wins / maxWins) * 100);
@@ -350,7 +350,7 @@ export const HorseRacingView: React.FC = () => {
           <h3 className="mt-3">📋 最近賽果</h3>
           <div className="history-scroll">
             {history.slice(0, 20).map((h: any, i: number) => {
-              const meta = h.gameResult?.meta ?? h.meta ?? {};
+              const meta = h.meta ?? h.gameResult?.meta ?? {};
               const winnerId = meta.winnerId;
               const wColor = HORSE_COLORS[winnerId as number] ?? '#888';
               const wName = meta.winnerName ?? `#${winnerId}`;
