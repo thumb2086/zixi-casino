@@ -30,7 +30,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         selection: z.enum(["heads", "tails"]).default("heads"),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),

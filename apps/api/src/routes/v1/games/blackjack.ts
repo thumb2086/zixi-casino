@@ -30,7 +30,7 @@ export async function blackjackRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         action: z.enum(["start", "hit", "stand"]),
         state: z.any().optional(),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),

@@ -30,8 +30,8 @@ export async function bingoRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
-        numbers: z.array(z.number().min(1).max(75)).min(1).max(10),
+        betAmount: z.number().min(1),
+        numbers: z.array(z.number().min(1)).min(1),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
