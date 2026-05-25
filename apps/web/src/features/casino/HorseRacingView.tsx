@@ -39,6 +39,22 @@ function pickWinner(horses: Horse[], roundId: number): Horse {
   return horses[horses.length - 1];
 }
 
+const STORAGE_KEY = 'horse_race_results';
+
+function loadLocalResults(): Array<{ roundId: number; winnerId: number; winnerName: string }> {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch { return []; }
+}
+
+function saveLocalResult(result: { roundId: number; winnerId: number; winnerName: string }) {
+  const all = loadLocalResults();
+  if (!all.some((r) => r.roundId === result.roundId)) {
+    all.push(result);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all.slice(-500))); // keep last 500
+  }
+}
+
 export const HorseRacingView: React.FC = () => {
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -218,6 +234,10 @@ export const HorseRacingView: React.FC = () => {
 
   useEffect(() => {
     if (!winner || isRacing) return;
+    // Persist race result to localStorage (for long-term stats)
+    if (roundId !== null) {
+      saveLocalResult({ roundId, winnerId: winner.id, winnerName: winner.name });
+    }
     const records = raceBetRecords.length > 0 ? raceBetRecords : betRecords;
     const totalBet = records.reduce((s, r) => s + r.amount, 0);
     const winRecords = records.filter((r) => r.horseId === winner.id);
@@ -323,24 +343,28 @@ export const HorseRacingView: React.FC = () => {
         </button>
       </div>
 
-      {history && history.length > 0 && (() => {
+      {(() => {
+        // Merge API history + localStorage results, deduplicate by roundId
+        const local = loadLocalResults();
+        const allRaces = [...(history || []), ...local];
         const seenRounds = new Set<number>();
-        const uniqueRaces = history.filter((h: any) => {
-          const m = h.meta ?? h.gameResult?.meta ?? {};
-          if (seenRounds.has(m.roundId)) return false;
-          seenRounds.add(m.roundId);
+        const uniqueRaces = allRaces.filter((r: any) => {
+          const roundId = r.roundId ?? (r.meta ?? r.gameResult?.meta ?? {}).roundId;
+          if (seenRounds.has(roundId)) return false;
+          seenRounds.add(roundId);
           return true;
         });
+        if (uniqueRaces.length === 0) return null;
         const total = uniqueRaces.length;
         const maxWins = Math.max(1, ...horses.map((h) => uniqueRaces.filter((r: any) => {
-          const m = r.meta ?? r.gameResult?.meta ?? {};
-          return m.winnerId === h.id;
+          const winnerId = r.winnerId ?? (r.meta ?? r.gameResult?.meta ?? {}).winnerId;
+          return winnerId === h.id;
         }).length));
         const seen2 = new Set<number>();
-        const recentChips = history.filter((h: any) => {
-          const m = h.meta ?? h.gameResult?.meta ?? {};
-          if (seen2.has(m.roundId)) return false;
-          seen2.add(m.roundId);
+        const recentChips = allRaces.filter((r: any) => {
+          const roundId = r.roundId ?? (r.meta ?? r.gameResult?.meta ?? {}).roundId;
+          if (seen2.has(roundId)) return false;
+          seen2.add(roundId);
           return true;
         }).slice(0, 20);
         return (
@@ -348,8 +372,8 @@ export const HorseRacingView: React.FC = () => {
           <h3>🏆 勝率統計</h3>
           <div className="stats-chart">{horses.map((horse) => {
             const wins = uniqueRaces.filter((r: any) => {
-              const m = r.meta ?? r.gameResult?.meta ?? {};
-              return m.winnerId === horse.id;
+              const winnerId = r.winnerId ?? (r.meta ?? r.gameResult?.meta ?? {}).winnerId;
+              return winnerId === horse.id;
             }).length;
             const pct = total > 0 ? Math.round((wins / total) * 100) : 0;
             const barWidth = Math.max(4, (wins / maxWins) * 100);
@@ -366,10 +390,9 @@ export const HorseRacingView: React.FC = () => {
           })}</div>
           <h3 className="mt-3">📋 最近賽果</h3>
           <div className="history-scroll">{recentChips.map((h: any, i: number) => {
-            const meta = h.meta ?? h.gameResult?.meta ?? {};
-            const winnerId = meta.winnerId;
+            const winnerId = h.winnerId ?? (h.meta ?? h.gameResult?.meta ?? {}).winnerId;
             const wColor = HORSE_COLORS[winnerId as number] ?? '#888';
-            const wName = meta.winnerName ?? `#${winnerId}`;
+            const wName = h.winnerName ?? (h.meta ?? h.gameResult?.meta ?? {}).winnerName ?? `#${winnerId}`;
             return <span key={i} className="history-chip" style={{ borderColor: wColor, background: `${wColor}15` }}>{wName}</span>;
           })}</div>
         </div>);
