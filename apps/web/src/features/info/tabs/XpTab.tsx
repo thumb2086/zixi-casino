@@ -43,6 +43,25 @@ const XP_FOR_LEVEL: number[] = [
   850_000_000_000_000, 1_000_000_000_000_000,
 ];
 
+const TIER_COLORS: Record<string, string> = {
+  '普通': '#a0a0a0', '青銅': '#cd7f32', '白銀': '#c0c0c0',
+  '黃金': '#ffd700', '白金': '#00cfff',
+  '鑽石': '#ff4fff', '黑鑽': '#ff4fff',
+  '菁英': '#ff4fff', '宗師': '#ff4fff',
+  '王者': '#ff4fff', '至尊': '#ff4fff',
+  '蒼穹': '#ff4fff', '寰宇': '#ff4fff',
+  '星穹': '#ff4fff', '萬界': '#ff4fff',
+  '創世': '#ff4fff', '永恆': '#ff4fff',
+  '深淵': '#ff4fff', '神諭': '#ff4fff',
+  '神話': '#ff4fff',
+};
+function tierColor(label: string): string {
+  for (const [key, color] of Object.entries(TIER_COLORS)) {
+    if (label.includes(key)) return color;
+  }
+  return '#a0a0a0';
+}
+
 export default function XpTab() {
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -75,7 +94,7 @@ export default function XpTab() {
         </div>
         {xpProgress > 0 && (
           <div className="w-full h-2 bg-[#0e0e0e] rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-[#fcc025] to-amber-400 rounded-full transition-all" style={{ width: `${Math.min(100, xpProgress)}%` }} />
+            <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, xpProgress)}%`, background: `linear-gradient(90deg, ${tierColor(userTier)}, #fcc025)` }} />
           </div>
         )}
       </section>
