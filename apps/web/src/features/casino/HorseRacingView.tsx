@@ -156,17 +156,21 @@ export const HorseRacingView: React.FC = () => {
     });
   };
 
+  // Start race when round closes (with or without bets)
   useEffect(() => {
-    if (betRecords.length === 0 || isRacing || horses.length === 0 || roundId === null) return;
-    if (!roundClosed && (countdown === null || countdown > 0)) return;
+    if (isRacing || horses.length === 0 || roundId === null) return;
+    const shouldStart = roundClosed || (countdown !== null && countdown <= 0);
+    if (!shouldStart) return;
 
     const localWinner = pickWinner(horses, roundId);
     setWinner(localWinner);
-    setRaceBetRecords(betRecords);
-    setBetRecords([]);
+    if (betRecords.length > 0) {
+      setRaceBetRecords(betRecords);
+      setBetRecords([]);
+    }
     setIsRacing(true);
     setProgress(Object.fromEntries(horses.map((h) => [h.id, 0])));
-  }, [betRecords, roundClosed, countdown, isRacing, horses, roundId]);
+  }, [roundClosed, countdown, isRacing, horses, roundId]);
 
   useEffect(() => {
     if (!isRacing || horses.length === 0) return;
