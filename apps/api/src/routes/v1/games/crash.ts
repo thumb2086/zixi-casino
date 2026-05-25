@@ -30,7 +30,7 @@ export async function crashRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         elapsedSeconds: z.number().min(0).default(0),
         cashout: z.boolean().default(false),
         roundId: z.string().optional(),

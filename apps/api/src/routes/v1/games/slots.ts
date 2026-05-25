@@ -8,7 +8,7 @@ import { requireDb } from "@repo/infrastructure/db/index.js";
 import { GameManager } from "@repo/domain/games/game-manager.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
 
-const SYMBOLS = ["🍒", "🍋", "🍊", "🍇", "🔔", "💎", "7️⃣"];
+const SYMBOLS = ["??", "??", "??", "??", "??", "??", "7️⃣"];
 
 export async function slotsRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -32,7 +32,7 @@ export async function slotsRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
@@ -97,7 +97,7 @@ export async function slotsRoutes(fastify: FastifyInstance) {
       betAmount
     );
 
-    // Respond immediately — remaining work fires in background
+    // Respond immediately ??remaining work fires in background
     const responsePayload = {
       success: true,
       data: {

@@ -35,7 +35,7 @@ export async function sicboRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         bets: z.array(BetSchema),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),

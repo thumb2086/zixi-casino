@@ -86,7 +86,7 @@ export async function shootDragonGateRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         gateId: z.string().min(1),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),

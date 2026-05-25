@@ -50,8 +50,8 @@ export async function horseRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
-        horseId: z.number().min(1).max(6),
+        betAmount: z.number().min(1),
+        horseId: z.number().min(1),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
@@ -79,7 +79,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统一分局)
+    // Get auto-round info (统�??��?)
     const roundInfo = getRoundInfo('horse');
     if (!roundInfo.isBettingOpen) {
       return createApiEnvelope(
@@ -91,7 +91,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
         },
         request.id,
         false,
-        "本局开奖中，请等待下一局"
+        "?��?开奖中，请等�?下�?局"
       );
     }
 

@@ -37,7 +37,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         bets: z.array(BetSchema),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
@@ -66,7 +66,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统一分局)
+    // Get auto-round info (统�??��?)
     const roundInfo = getRoundInfo('roulette');
     if (!roundInfo.isBettingOpen) {
       return createApiEnvelope(
@@ -78,7 +78,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
         },
         request.id,
         false,
-        "本局开奖中，请等待下一局"
+        "?��?开奖中，请等�?下�?局"
       );
     }
 

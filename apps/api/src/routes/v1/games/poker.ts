@@ -32,7 +32,7 @@ export async function pokerRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         action: z.string().default("play"),
         token: z.enum(["zhixi", "yjc"]).optional().default("yjc"),
       }),
