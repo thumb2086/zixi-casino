@@ -323,50 +323,57 @@ export const HorseRacingView: React.FC = () => {
         </button>
       </div>
 
-      {history && history.length > 0 && (
+      {history && history.length > 0 && (() => {
+        const seenRounds = new Set<number>();
+        const uniqueRaces = history.filter((h: any) => {
+          const m = h.meta ?? h.gameResult?.meta ?? {};
+          if (seenRounds.has(m.roundId)) return false;
+          seenRounds.add(m.roundId);
+          return true;
+        });
+        const total = uniqueRaces.length;
+        const maxWins = Math.max(1, ...horses.map((h) => uniqueRaces.filter((r: any) => {
+          const m = r.meta ?? r.gameResult?.meta ?? {};
+          return m.winnerId === h.id;
+        }).length));
+        const seen2 = new Set<number>();
+        const recentChips = history.filter((h: any) => {
+          const m = h.meta ?? h.gameResult?.meta ?? {};
+          if (seen2.has(m.roundId)) return false;
+          seen2.add(m.roundId);
+          return true;
+        }).slice(0, 20);
+        return (
         <div className="horse-history">
           <h3>🏆 勝率統計</h3>
-          <div className="stats-chart">
-            {horses.map((horse) => {
-              const wins = history.filter((h: any) => {
-                const m = h.meta ?? h.gameResult?.meta ?? {};
-                return m.winnerId === horse.id;
-              }).length;
-              const total = history.length;
-              const pct = total > 0 ? Math.round((wins / total) * 100) : 0;
-              const maxWins = Math.max(1, ...horses.map((h) => history.filter((x: any) => {
-                const m = x.meta ?? x.gameResult?.meta ?? {};
-                return m.winnerId === h.id;
-              }).length));
-              const barWidth = Math.max(4, (wins / maxWins) * 100);
-              const color = HORSE_COLORS[horse.id] ?? '#888';
-              return (
-                <div key={horse.id} className="stat-row">
-                  <span className="stat-name" style={{ color }}>🐎 {horse.name}</span>
-                  <div className="stat-bar-track">
-                    <div className="stat-bar-fill" style={{ width: `${barWidth}%`, background: color }} />
-                  </div>
-                  <span className="stat-nums">{wins} 勝 ({pct}%)</span>
+          <div className="stats-chart">{horses.map((horse) => {
+            const wins = uniqueRaces.filter((r: any) => {
+              const m = r.meta ?? r.gameResult?.meta ?? {};
+              return m.winnerId === horse.id;
+            }).length;
+            const pct = total > 0 ? Math.round((wins / total) * 100) : 0;
+            const barWidth = Math.max(4, (wins / maxWins) * 100);
+            const color = HORSE_COLORS[horse.id] ?? '#888';
+            return (
+              <div key={horse.id} className="stat-row">
+                <span className="stat-name" style={{ color }}>🐎 {horse.name}</span>
+                <div className="stat-bar-track">
+                  <div className="stat-bar-fill" style={{ width: `${barWidth}%`, background: color }} />
                 </div>
-              );
-            })}
-          </div>
+                <span className="stat-nums">{wins} 勝 ({pct}%)</span>
+              </div>
+            );
+          })}</div>
           <h3 className="mt-3">📋 最近賽果</h3>
-          <div className="history-scroll">
-            {history.slice(0, 20).map((h: any, i: number) => {
-              const meta = h.meta ?? h.gameResult?.meta ?? {};
-              const winnerId = meta.winnerId;
-              const wColor = HORSE_COLORS[winnerId as number] ?? '#888';
-              const wName = meta.winnerName ?? `#${winnerId}`;
-              return (
-                <span key={i} className="history-chip" style={{ borderColor: wColor, background: `${wColor}15` }}>
-                  {wName}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-      )}
+          <div className="history-scroll">{recentChips.map((h: any, i: number) => {
+            const meta = h.meta ?? h.gameResult?.meta ?? {};
+            const winnerId = meta.winnerId;
+            const wColor = HORSE_COLORS[winnerId as number] ?? '#888';
+            const wName = meta.winnerName ?? `#${winnerId}`;
+            return <span key={i} className="history-chip" style={{ borderColor: wColor, background: `${wColor}15` }}>{wName}</span>;
+          })}</div>
+        </div>);
+      })()}
     </div>
   );
 };
