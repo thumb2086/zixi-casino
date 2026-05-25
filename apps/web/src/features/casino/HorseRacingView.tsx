@@ -321,16 +321,42 @@ export const HorseRacingView: React.FC = () => {
 
       {history && history.length > 0 && (
         <div className="horse-history">
-          <h3>最近賽果</h3>
+          <h3>🏆 勝率統計</h3>
+          <div className="stats-chart">
+            {horses.map((horse) => {
+              const wins = history.filter((h: any) => {
+                const meta = h.gameResult?.meta ?? h.meta ?? {};
+                return meta.winnerId === horse.id;
+              }).length;
+              const total = history.length;
+              const pct = total > 0 ? Math.round((wins / total) * 100) : 0;
+              const maxWins = Math.max(1, ...horses.map((h) => history.filter((x: any) => {
+                const m = x.gameResult?.meta ?? x.meta ?? {};
+                return m.winnerId === h.id;
+              }).length));
+              const barWidth = Math.max(4, (wins / maxWins) * 100);
+              const color = HORSE_COLORS[horse.id] ?? '#888';
+              return (
+                <div key={horse.id} className="stat-row">
+                  <span className="stat-name" style={{ color }}>🐎 {horse.name}</span>
+                  <div className="stat-bar-track">
+                    <div className="stat-bar-fill" style={{ width: `${barWidth}%`, background: color }} />
+                  </div>
+                  <span className="stat-nums">{wins} 勝 ({pct}%)</span>
+                </div>
+              );
+            })}
+          </div>
+          <h3 className="mt-3">📋 最近賽果</h3>
           <div className="history-scroll">
-            {history.slice(0, 15).map((h: any, i: number) => {
+            {history.slice(0, 20).map((h: any, i: number) => {
               const meta = h.gameResult?.meta ?? h.meta ?? {};
               const winnerId = meta.winnerId;
               const wColor = HORSE_COLORS[winnerId as number] ?? '#888';
               const wName = meta.winnerName ?? `#${winnerId}`;
               return (
-                <span key={i} className="history-chip" style={{ borderColor: wColor }}>
-                  🐎 {wName}
+                <span key={i} className="history-chip" style={{ borderColor: wColor, background: `${wColor}15` }}>
+                  {wName}
                 </span>
               );
             })}
