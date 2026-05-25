@@ -79,7 +79,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统�??��?)
+    // Get auto-round info (统�??��?)
     const roundInfo = getRoundInfo('horse');
     if (!roundInfo.isBettingOpen) {
       return createApiEnvelope(
@@ -91,7 +91,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
         },
         request.id,
         false,
-        "?��?开奖中，请等�?下�?局"
+        "?��?开奖中，请等�?下�?局"
       );
     }
 
@@ -265,7 +265,7 @@ export async function horseRoutes(fastify: FastifyInstance) {
 
     const db = await requireDb();
     const manager = new GameSessionManager(db);
-    const history = await manager.getHistory(address, "horse", 20);
+    const history = await manager.getHistory(address, "horse", 200);
     
     return createApiEnvelope({ success: true, data: history }, request.id);
   });
