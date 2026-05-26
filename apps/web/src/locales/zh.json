@@ -16,7 +16,8 @@
     "minutes_ago": "{{count}} 分鐘前",
     "hours_ago": "{{count}} 小時前",
     "yesterday": "昨天",
-    "days_ago": "{{count}} 天前"
+    "days_ago": "{{count}} 天前",
+    "network_error": "網路錯誤，請稍後再試"
   },
   "nav": {
     "dashboard": "主控台",

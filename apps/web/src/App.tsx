@@ -51,6 +51,7 @@ function useFastLogin() {
 
     const rememberMe = localStorage.getItem('custody_remember_me') === 'true';
     if (!rememberMe) {
+      clearAuth();
       setIsRestoring(false);
       return;
     }
