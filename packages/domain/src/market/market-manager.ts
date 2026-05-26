@@ -487,19 +487,25 @@ export class MarketManager {
     const idx = account.futuresPositions.findIndex((p) => p.id === positionId);
     if (idx < 0) throw new Error("找不到期貨倉位");
     const pos = account.futuresPositions[idx];
-    const tp = takeProfitPrice !== undefined ? round(takeProfitPrice, 4) : undefined;
-    const sl = stopLossPrice !== undefined ? round(stopLossPrice, 4) : undefined;
-    if (tp !== undefined) {
-      if (pos.side === "long" && tp <= pos.entryPrice) throw new Error("止盈價必須高於入場價");
-      if (pos.side === "short" && tp >= pos.entryPrice) throw new Error("止盈價必須低於入場價");
+    const hasTp = arguments.length >= 3 && takeProfitPrice !== undefined;
+    const hasSl = arguments.length >= 4 && stopLossPrice !== undefined;
+    if (hasTp) {
+      const tp = takeProfitPrice! > 0 ? round(takeProfitPrice!, 4) : undefined;
+      if (tp !== undefined) {
+        if (pos.side === "long" && tp <= pos.entryPrice) throw new Error("止盈價必須高於入場價");
+        if (pos.side === "short" && tp >= pos.entryPrice) throw new Error("止盈價必須低於入場價");
+      }
+      pos.takeProfitPrice = tp;
     }
-    if (sl !== undefined) {
-      if (pos.side === "long" && sl >= pos.entryPrice) throw new Error("止損價必須低於入場價");
-      if (pos.side === "short" && sl <= pos.entryPrice) throw new Error("止損價必須高於入場價");
+    if (hasSl) {
+      const sl = stopLossPrice! > 0 ? round(stopLossPrice!, 4) : undefined;
+      if (sl !== undefined) {
+        if (pos.side === "long" && sl >= pos.entryPrice) throw new Error("止損價必須低於入場價");
+        if (pos.side === "short" && sl <= pos.entryPrice) throw new Error("止損價必須高於入場價");
+      }
+      pos.stopLossPrice = sl;
     }
-    if (tp !== undefined) pos.takeProfitPrice = tp;
-    if (sl !== undefined) pos.stopLossPrice = sl;
-    appendHistory(account, { type: "futures_modify_tp_sl", id: pos.id, symbol: pos.symbol, takeProfitPrice: tp, stopLossPrice: sl });
+    appendHistory(account, { type: "futures_modify_tp_sl", id: pos.id, symbol: pos.symbol, takeProfitPrice: pos.takeProfitPrice, stopLossPrice: pos.stopLossPrice });
     return { id: pos.id, takeProfitPrice: pos.takeProfitPrice, stopLossPrice: pos.stopLossPrice };
   }
 
