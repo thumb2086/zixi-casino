@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { api } from './store/api';
 import CasinoView from './features/casino/CasinoView';
 import WalletView from './features/wallet/WalletView';
@@ -40,6 +40,7 @@ function useFastLogin() {
   const { sessionId, setAuth, clearAuth } = useAuthStore();
   const { setAddress, setBalance, setUsername, setActiveAvatar, setActiveTitle } = useUserStore();
   const [isRestoring, setIsRestoring] = useState(true);
+  const restoredRef = useRef(false);
 
   const [elapsed, setElapsed] = useState(0);
 
@@ -50,11 +51,14 @@ function useFastLogin() {
     }
 
     const rememberMe = localStorage.getItem('custody_remember_me') === 'true';
-    if (!rememberMe) {
+
+    // On page load (first run): if not rememberMe, wipe stale session
+    if (!restoredRef.current && !rememberMe) {
       clearAuth();
       setIsRestoring(false);
       return;
     }
+    restoredRef.current = true;
 
     const startTime = Date.now();
     const timer = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
