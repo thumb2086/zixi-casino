@@ -6,6 +6,7 @@ import './Slots.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
+import { formatNumber } from '@repo/shared';
 
 const REEL_CELLS = [[0, 3, 6], [1, 4, 7], [2, 5, 8]];
 const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣'];
@@ -98,7 +99,7 @@ export const SlotsView: React.FC = () => {
         setTimeout(() => {
           const won = result.multiplier > 0;
           if (won) {
-            setStatus(`🎉 中獎！倍率 ${result.multiplier}x`);
+            setStatus(`🎉 中獎！倍率 ${result.multiplier}x，彩金 ${formatNumber(result.payout || 0)} ZXC`);
             setWinSymbols(result.winLines?.flat() || []);
           } else {
             setStatus('😢 本局未中');
@@ -152,7 +153,7 @@ export const SlotsView: React.FC = () => {
     spinningRef.current = false;
     setAutoRemaining(0);
     const s = summaryRef.current;
-    setStatus(`🏁 自動旋轉結束！共 ${s.spins} 局，贏得 ${Number(s.wins || 0).toLocaleString()} ZXC`);
+    setStatus(`🏁 自動旋轉結束！共 ${s.spins} 局，贏得 ${formatNumber(s.wins || 0)} ZXC`);
   };
 
   const cancelAutoSpin = () => {
