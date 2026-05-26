@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../store/api';
 import { Link } from 'react-router-dom';
 import { formatNumber } from '@repo/shared';
@@ -31,22 +32,8 @@ function toExplorerUrl(txHash: string) {
   return `${base}${txHash}`;
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  pending: '等待中',
-  broadcasted: '廣播中',
-  confirmed: '已確認',
-  failed: '失敗',
-};
-
-const TYPE_LABEL: Record<string, string> = {
-  bet: '下注',
-  payout: '派彩',
-  deposit: '存入',
-  withdrawal: '提領',
-  transfer: '轉帳',
-};
-
 export default function TransactionsDashboardView() {
+  const { t } = useTranslation();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const [status, setStatus] = useState<string>('');
@@ -133,7 +120,7 @@ export default function TransactionsDashboardView() {
         <section className="grid gap-2 md:grid-cols-4">
           {['confirmed', 'pending', 'broadcasted', 'failed'].map((st) => (
             <div key={st} className="rounded-lg border border-[#494847]/20 bg-[#141313] p-2 text-xs text-[#adaaaa]">
-              {STATUS_LABEL[st] || st}: <span className="text-white font-bold">{statusCounts[st] || 0}</span>
+              {t('txStatus.' + st, st)}: <span className="text-white font-bold">{statusCounts[st] || 0}</span>
             </div>
           ))}
         </section>
@@ -160,11 +147,11 @@ export default function TransactionsDashboardView() {
                   <td className="p-3 text-xs">{new Date(row.createdAt).toLocaleString('zh-TW')}</td>
                   <td className="p-3 text-xs">{String(row.roundId).length > 16 ? String(row.roundId).slice(0,16)+'…' : String(row.roundId)}</td>
                   <td className="p-3 text-xs">{row.userAddress}</td>
-                  <td className="p-3 text-xs">{TYPE_LABEL[row.type] || row.type}</td>
+                  <td className="p-3 text-xs">{t('txType.' + row.type, row.type)}</td>
                   <td className="p-3">{nf(Number(row.amount))} {row.tokenSymbol || ''}</td>
                   <td className="p-3">
                     <span className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${statusColors[row.status] || 'bg-white/10 text-white border-white/20'}`}>
-                      {STATUS_LABEL[row.status] || row.status}
+                      {t('txStatus.' + row.status, row.status)}
                     </span>
                   </td>
                   <td className="p-3">
