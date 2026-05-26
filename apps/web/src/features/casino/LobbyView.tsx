@@ -30,13 +30,7 @@ import { useWallet } from '../wallet/useWallet';
 import { resolvePreferredBalance } from '../../utils/balance';
 import { useLeaderboard } from '../../hooks/useLeaderboard';
 
-const TX_TYPE_LABEL: Record<string, string> = {
-  bet: '下注', payout: '派彩', deposit: '存入',
-  withdrawal: '提領', transfer: '轉帳',
-  chest_buy: '購買寶箱', airdrop: '空投',
-  mission_reward: '任務獎勵', market_buy: '市場買入', market_sell: '市場賣出',
-  market_stock_buy: '股票買入', market_stock_sell: '股票賣出',
-};
+
 
 function GlassCard({
   to,
@@ -329,7 +323,7 @@ export default function LobbyView() {
               ) : recentTxs.slice(0, 2).map((tx, i) => (
                 <div key={i} className="flex gap-2 truncate">
                   <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="truncate">{TX_TYPE_LABEL[tx.type] || tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
+                  <span className="truncate">{t('txType.' + tx.type, tx.type)} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
                 </div>
               ))}
             </div>

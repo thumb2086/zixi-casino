@@ -42,25 +42,7 @@ function AssetCard({
   );
 }
 
-const TX_TYPE_LABEL: Record<string, string> = {
-  bet: '下注', payout: '派彩', deposit: '存入',
-  withdrawal: '提領', transfer: '轉帳',
-  chest_buy: '購買寶箱', chest_compensation: '寶箱補償',
-  airdrop: '空投', admin_credit: '系統發放', admin_debit: '系統扣回',
-  convert: 'YJC兌換', stock_buy: '買入股票', stock_sell: '賣出股票',
-  futures_open: '開合約', futures_close: '平合約',
-  futures_liquidated: '合約爆倉',
-  market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
-  bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
-  loan_borrow: '貸款', loan_repay: '還款',
-  loan_repay_all: '全部還清',
-  item_use: '代幣使用', mission_reward: '任務獎勵',
-  market_stock_buy: '股票買入', market_stock_sell: '股票賣出',
-  market_futures_modify_tp_sl: '修改止盈止損',
-};
-const TX_STATUS_LABEL: Record<string, string> = {
-  pending: '等待中', broadcasted: '廣播中', confirmed: '已確認', failed: '失敗',
-};
+
 
 export default function WalletView() {
   const { t } = useTranslation();
@@ -256,14 +238,14 @@ export default function WalletView() {
                 return (
                   <div key={tx.id} className="flex items-center justify-between rounded-xl border border-[#494847]/10 bg-[#0e0e0e] px-4 py-3">
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate">{TX_TYPE_LABEL[tx.type] || tx.type}</p>
+                      <p className="text-xs font-bold text-white truncate">{t('txType.' + tx.type, tx.type)}</p>
                       <p className="text-[10px] text-[#adaaaa] mt-0.5">{new Date(tx.createdAt).toLocaleString('zh-TW')}</p>
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className={`text-xs font-black ${isCredit ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
                         {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {(tx.token === 'zhixi' ? 'ZXC' : tx.token === 'yjc' ? 'YJC' : tx.token || tx.tokenSymbol || 'ZXC')}
                       </p>
-                      <p className="text-[10px] text-[#adaaaa]">{TX_STATUS_LABEL[tx.status] || '已確認'}</p>
+                      <p className="text-[10px] text-[#adaaaa]">{t('txStatus.' + tx.status, tx.status)}</p>
                     </div>
                   </div>
                 );

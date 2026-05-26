@@ -299,6 +299,7 @@
     "feed_online": "The announcement feed is online",
     "loading": "Loading announcements...",
     "no_category": "No announcements in this category",
+    "type_info": "INFO",
     "type_urgent": "URGENT",
     "type_warning": "WARNING",
     "welcome": "Welcome to ZiXi!",
@@ -785,6 +786,45 @@
   },
   "wallet": {
     "yjc_with_zxc": "YJC (≈ {{amount}} ZXC)"
+  },
+  "txType": {
+    "bet": "Bet",
+    "payout": "Payout",
+    "deposit": "Deposit",
+    "withdrawal": "Withdrawal",
+    "transfer": "Transfer",
+    "chest_buy": "Chest Buy",
+    "chest_compensation": "Chest Comp.",
+    "airdrop": "Airdrop",
+    "admin_credit": "System Credit",
+    "admin_debit": "System Debit",
+    "convert": "YJC Swap",
+    "stock_buy": "Buy Stock",
+    "stock_sell": "Sell Stock",
+    "futures_open": "Open Futures",
+    "futures_close": "Close Futures",
+    "futures_liquidated": "Liquidated",
+    "bank_deposit": "Bank Deposit",
+    "bank_withdraw": "Bank Withdraw",
+    "loan_borrow": "Borrow",
+    "loan_repay": "Repay",
+    "loan_repay_all": "Repay All",
+    "item_use": "Item Use",
+    "mission_reward": "Mission Reward",
+    "market_buy": "Market Buy",
+    "market_sell": "Market Sell",
+    "market_stock_buy": "Stock Buy",
+    "market_stock_sell": "Stock Sell",
+    "market_futures_open": "Futures Open",
+    "market_futures_close": "Futures Close",
+    "market_futures_modify_tp_sl": "Modify TP/SL",
+    "futures_pnl": "Futures PnL"
+  },
+  "txStatus": {
+    "pending": "Pending",
+    "broadcasted": "Broadcasted",
+    "confirmed": "Confirmed",
+    "failed": "Failed"
   }
 }
 
