@@ -120,6 +120,7 @@ export default function LoginView() {
           localStorage.setItem('custody_remember_me', 'false');
         }
         setAuth(payload.address, payload.sessionId, payload.publicKey || '0x');
+        setGlobalUsername(payload.user?.displayName || username);
       }
     } catch (err) {
       setError('NETWORK_ERROR');
