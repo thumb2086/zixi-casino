@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BarChart3, ChevronDown,
@@ -152,8 +152,6 @@ export default function MarketView() {
   const [showIndexChart, setShowIndexChart] = useState(true);
   const [showActivity, setShowActivity] = useState(false);
   const [showFloatingChart, setShowFloatingChart] = useState(true);
-  const [fp, setFp] = useState({ x: 16, y: Math.max(0, (window.innerHeight || 900) - 500) });
-  const dragRef = useRef<{ startX: number; startY: number; fpX: number; fpY: number } | null>(null);
 
   useEffect(() => {
     if (actionNotice) { const t = setTimeout(() => setActionNotice(null), 3000); return () => clearTimeout(t); }
@@ -212,7 +210,7 @@ export default function MarketView() {
             placeholder={t('market.quantity_placeholder')}
             className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
           {selectedQuote?.price && summary?.cash > 0 && (
-            <button type="button" onClick={() => { const raw = Number(summary.cash / selectedQuote.price) * 0.998; setTradeQuantity(raw > 0 ? String(Math.floor(raw * 100) / 100) : '0'); }}
+            <button type="button" onClick={() => { const raw = Number(summary.cash / selectedQuote.price) * 0.998; setTradeQuantity(raw > 0 ? String(Math.floor(raw)) : '0'); }}
               className="w-full text-xs font-bold text-[#fcc025] py-2 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10">
               {t('market.buy_all_in')}
             </button>
@@ -610,10 +608,8 @@ export default function MarketView() {
       {/* Draggable floating stock chart */}
       {selectedQuote && stockHistory.length > 1 && showFloatingChart && (
         <div className="fixed z-40 w-80 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-96"
-          style={{ left: fp.x, top: fp.y + 80, right: fp.x ? undefined : 16 }}>
-          <div className="flex items-center justify-between p-3 pb-0 cursor-grab active:cursor-grabbing select-none"
-            onMouseDown={(e) => { dragRef.current = { startX: e.clientX, startY: e.clientY, fpX: fp.x, fpY: fp.y }; const handler = (ev: MouseEvent) => { if (!dragRef.current) return; setFp({ x: dragRef.current.fpX + ev.clientX - dragRef.current.startX, y: dragRef.current.fpY + ev.clientY - dragRef.current.startY }); }; const up = () => { dragRef.current = null; window.removeEventListener('mousemove', handler); window.removeEventListener('mouseup', up); }; window.addEventListener('mousemove', handler); window.addEventListener('mouseup', up); }}
-            onTouchStart={(e) => { const t = e.touches[0]; dragRef.current = { startX: t.clientX, startY: t.clientY, fpX: fp.x, fpY: fp.y }; const handler = (ev: TouchEvent) => { if (!dragRef.current) return; setFp({ x: dragRef.current.fpX + ev.touches[0].clientX - dragRef.current.startX, y: dragRef.current.fpY + ev.touches[0].clientY - dragRef.current.startY }); }; const up = () => { dragRef.current = null; window.removeEventListener('touchmove', handler); window.removeEventListener('touchend', up); }; window.addEventListener('touchmove', handler); window.addEventListener('touchend', up); }}>
+          style={{ right: 16, bottom: 96 }}>
+          <div className="flex items-center justify-between p-3 pb-0">
             <p className="text-xs font-black text-white">{selectedQuote.symbol}</p>
             <p className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
               {nf(Number(selectedQuote.price || 0))} ({isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%)
