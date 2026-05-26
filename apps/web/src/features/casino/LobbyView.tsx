@@ -35,6 +35,7 @@ const TX_TYPE_LABEL: Record<string, string> = {
   withdrawal: '提領', transfer: '轉帳',
   chest_buy: '購買寶箱', airdrop: '空投',
   mission_reward: '任務獎勵', market_buy: '市場買入', market_sell: '市場賣出',
+  market_stock_buy: '股票買入', market_stock_sell: '股票賣出',
 };
 
 function GlassCard({

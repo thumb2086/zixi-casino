@@ -98,6 +98,8 @@ const TX_TYPE_LABEL: Record<string, string> = {
   item_use: '代幣使用', mission_reward: '任務獎勵',
   market_buy: '市場買入', market_sell: '市場賣出',
   market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
+  market_stock_buy: '股票買入', market_stock_sell: '股票賣出',
+  loan_repay_all: '全部還清',
 };
 
 type DashboardTx = {

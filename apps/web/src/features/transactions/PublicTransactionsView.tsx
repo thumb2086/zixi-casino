@@ -58,6 +58,8 @@ const TX_TYPE_LABEL: Record<string, string> = {
   mission_reward: '任務獎勵',
   market_buy: '市場買入',
   market_sell: '市場賣出',
+  market_stock_buy: '股票買入', market_stock_sell: '股票賣出',
+  market_futures_modify_tp_sl: '修改止盈止損',
   futures_pnl: '合約損益',
   market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
 };
