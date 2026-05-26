@@ -33,6 +33,7 @@ export const useMarket = () => {
       const res = await api.post(`${API_BASE}/action`, { ...params, sessionId });
       const env = res.data;
       if (env.data?.error) throw new Error(env.data.error.message || t('market.action_failed'));
+      if (env.error) throw new Error(env.error);
       return env.data;
     },
     onSuccess: () => {
