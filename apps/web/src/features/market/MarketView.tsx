@@ -212,7 +212,7 @@ export default function MarketView() {
             placeholder={t('market.quantity_placeholder')}
             className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
           {selectedQuote?.price && summary?.cash > 0 && (
-            <button type="button" onClick={() => setTradeQuantity(Number(summary.cash / selectedQuote.price).toFixed(6))}
+            <button type="button" onClick={() => setTradeQuantity(Number(summary.cash / selectedQuote.price).toFixed(2))}
               className="w-full text-xs font-bold text-[#fcc025] py-2 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10">
               {t('market.buy_all_in')}
             </button>
