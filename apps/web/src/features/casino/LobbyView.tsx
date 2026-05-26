@@ -381,7 +381,7 @@ export default function LobbyView() {
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.vip_levels')}</p>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
-                    {t('lobby.tier_active', { tier: 4 })}
+                    {t('lobby.tier_active', { tier: profileData?.vipLevel?.replace(/[^\d]/g, '') || 1 })}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
