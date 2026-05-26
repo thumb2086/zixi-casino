@@ -46,19 +46,21 @@ function useFastLogin() {
 
   useEffect(() => {
     if (!sessionId) {
+      restoredRef.current = true;
       setIsRestoring(false);
       return;
     }
 
-    const rememberMe = localStorage.getItem('custody_remember_me') === 'true';
-
-    // On page load (first run): if not rememberMe, wipe stale session
-    if (!restoredRef.current && !rememberMe) {
-      clearAuth();
-      setIsRestoring(false);
-      return;
+    // First run (page load with persisted session): clear stale session if !rememberMe
+    if (!restoredRef.current) {
+      restoredRef.current = true;
+      const rememberMe = localStorage.getItem('custody_remember_me') === 'true';
+      if (!rememberMe) {
+        clearAuth();
+        setIsRestoring(false);
+        return;
+      }
     }
-    restoredRef.current = true;
 
     const startTime = Date.now();
     const timer = setInterval(() => setElapsed(Math.floor((Date.now() - startTime) / 1000)), 1000);
