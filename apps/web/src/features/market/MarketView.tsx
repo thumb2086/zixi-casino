@@ -152,7 +152,7 @@ export default function MarketView() {
   const [showIndexChart, setShowIndexChart] = useState(true);
   const [showActivity, setShowActivity] = useState(false);
   const [showFloatingChart, setShowFloatingChart] = useState(true);
-  const [fp, setFp] = useState({ x: 16, y: window.innerHeight - 300 });
+  const [fp, setFp] = useState({ x: 16, y: Math.max(0, (window.innerHeight || 900) - 500) });
   const dragRef = useRef<{ startX: number; startY: number; fpX: number; fpY: number } | null>(null);
 
   useEffect(() => {
@@ -208,17 +208,15 @@ export default function MarketView() {
 
       {panelTab === 'spot' && (
         <div className="space-y-3">
-          <div className="flex gap-2">
-            <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
-              placeholder={t('market.quantity_placeholder')}
-              className="flex-1 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
-            {selectedQuote?.price && summary?.cash > 0 && (
-              <button type="button" onClick={() => setTradeQuantity(Number(summary.cash / selectedQuote.price).toFixed(6))}
-                className="text-xs font-bold text-[#fcc025] px-2 py-1 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10 whitespace-nowrap">
-                {t('market.buy_all_in')}
-              </button>
-            )}
-          </div>
+          <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
+            placeholder={t('market.quantity_placeholder')}
+            className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          {selectedQuote?.price && summary?.cash > 0 && (
+            <button type="button" onClick={() => setTradeQuantity(Number(summary.cash / selectedQuote.price).toFixed(6))}
+              className="w-full text-xs font-bold text-[#fcc025] py-2 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10">
+              {t('market.buy_all_in')}
+            </button>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'stock_buy', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.buy_success'))}
