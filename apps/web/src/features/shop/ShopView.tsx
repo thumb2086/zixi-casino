@@ -383,10 +383,11 @@ export default function ShopView() {
   }
 
   const visibleItems = useMemo(() => items.filter((item: any) => {
+    // Hide if already purchased (combo packs, VIP passes, etc.)
+    if (purchasedBundles.includes(item.itemId)) return false;
     const meta = item.meta as Record<string, any> | undefined;
     const bundle = meta?.bundle as Array<{ id: string; qty?: number }> | undefined;
     if (bundle) {
-      if (purchasedBundles.includes(item.itemId)) return false;
       const ownedAvatarOrTitles = bundle.filter(
         (s) => ownedAvatars.includes(s.id) || ownedTitles.includes(s.id),
       );
@@ -396,7 +397,7 @@ export default function ShopView() {
     if (item.type === 'avatar' && ownedAvatars.includes(item.itemId)) return false;
     if (item.type === 'title' && ownedTitles.includes(item.itemId)) return false;
     return true;
-  }), [items, ownedAvatars, ownedTitles, invItems]);
+  }), [items, ownedAvatars, ownedTitles, invItems, purchasedBundles]);
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">

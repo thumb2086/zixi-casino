@@ -69,8 +69,6 @@ export const HorseRacingView: React.FC = () => {
   const [betRecords, setBetRecords] = useState<Array<{ horseId: number; amount: number }>>([]);
   const [raceBetRecords, setRaceBetRecords] = useState<Array<{ horseId: number; amount: number }>>([]);
   const raceTimerRef = useRef<number | null>(null);
-  const winnerRef = useRef(winner);
-  winnerRef.current = winner;
 
   const { data: horseData } = useQuery({
     queryKey: ['horse-info'],
@@ -117,12 +115,10 @@ export const HorseRacingView: React.FC = () => {
           setRoundId(data.roundId);
           setIsRacing(false);
           setProgress({});
-          if (!winnerRef.current) {
-            setWinner(null);
-            setRaceBetRecords([]);
-            setStatusMsg('請選擇馬匹並下注。');
-            setStatusColor('#ffd36a');
-          }
+          setWinner(null);
+          setRaceBetRecords([]);
+          setStatusMsg('請選擇馬匹並下注。');
+          setStatusColor('#ffd36a');
         }
         setRoundClosed(!data.isBettingOpen);
         if (data.bettingClosesAt) {
