@@ -174,7 +174,12 @@
     "repay_all_label": "一次還清",
     "sell_all": "全部賣出",
     "buy_all_in": "全額買入",
-    "insufficient_balance": "可用子熙幣不足，需要 {{need}} ZXC，目前 {{have}} ZXC"
+    "insufficient_balance": "可用子熙幣不足，需要 {{need}} ZXC，目前 {{have}} ZXC",
+    "chart_entry": "入場",
+    "chart_tp": "止盈",
+    "chart_sl": "止損",
+    "chart_liq": "強平",
+    "chart_mark": "標記"
   },
   "casino": {
     "title": "娛樂大廳",

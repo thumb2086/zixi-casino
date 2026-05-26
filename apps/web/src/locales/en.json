@@ -174,7 +174,12 @@
     "repay_all_label": "Repay All",
     "sell_all": "Sell All",
     "buy_all_in": "Buy All-In",
-    "insufficient_balance": "Insufficient balance, need {{need}} ZXC, have {{have}} ZXC"
+    "insufficient_balance": "Insufficient balance, need {{need}} ZXC, have {{have}} ZXC",
+    "chart_entry": "Entry",
+    "chart_tp": "TP",
+    "chart_sl": "SL",
+    "chart_liq": "Liq",
+    "chart_mark": "Mk"
   },
   "casino": {
     "title": "Casino Floor",
