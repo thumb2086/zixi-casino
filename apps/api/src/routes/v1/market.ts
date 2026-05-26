@@ -124,7 +124,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        type: z.enum(["stock_buy", "stock_sell", "bank_deposit", "bank_withdraw", "loan_borrow", "loan_repay", "futures_open", "futures_close"]),
+        type: z.enum(["stock_buy", "stock_sell", "bank_deposit", "bank_withdraw", "loan_borrow", "loan_repay", "futures_open", "futures_close", "futures_modify_tp_sl"]),
         symbol: z.string().optional(),
         amount: z.string().optional(),
         quantity: z.string().optional(),
@@ -170,6 +170,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "loan_repay") result = marketManager.repayLoan(account, amount);
       else if (type === "futures_open") result = marketManager.openFutures(account, snapshot, { symbol, side, margin: amount, leverage, takeProfitPrice, stopLossPrice });
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
+      else if (type === "futures_modify_tp_sl" && positionId) result = marketManager.modifyFuturesTpSl(account, positionId, takeProfitPrice, stopLossPrice);
       else throw new Error("Unsupported market action payload");
 
       // On-chain settlement (update DB first, then fire async on-chain with logging)
