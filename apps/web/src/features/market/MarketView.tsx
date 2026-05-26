@@ -93,13 +93,13 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
             <div className="flex items-center gap-1">
               <input type="number" step={0.01} value={tpVal} onChange={(e) => setTpVal(e.target.value)}
                 className="w-20 bg-[#0e0e0e] border border-emerald-500/30 rounded px-1.5 py-0.5 text-[10px] text-emerald-400 outline-none" />
-              <button onClick={() => { runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, takeProfitPrice: Number(tpVal) }, ''); setEditTP(false); }}
+              <button onClick={() => { const v = Number(tpVal); if (tpVal === '' || v <= 0) { pos.takeProfitPrice = undefined; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, takeProfitPrice: undefined }, ''); } else { pos.takeProfitPrice = v; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, takeProfitPrice: v }, ''); } setEditTP(false); }}
                 disabled={execute.isPending} className="text-[9px] font-bold text-emerald-400">✓</button>
               <button onClick={() => setEditTP(false)} className="text-[9px] text-[#adaaaa]">✕</button>
             </div>
           ) : (
             <button onClick={() => { setTpVal(pos.takeProfitPrice ?? ''); setEditTP(true); }}
-              className="text-[10px] font-bold text-emerald-400/70 hover:text-emerald-400">
+              className="text-xs font-bold text-emerald-400">
               {t('market.take_profit')}{pos.takeProfitPrice ? ` ${nf(pos.takeProfitPrice)}` : ' —'}
             </button>
           )}
@@ -109,13 +109,13 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
             <div className="flex items-center gap-1">
               <input type="number" step={0.01} value={slVal} onChange={(e) => setSlVal(e.target.value)}
                 className="w-20 bg-[#0e0e0e] border border-red-500/30 rounded px-1.5 py-0.5 text-[10px] text-red-400 outline-none" />
-              <button onClick={() => { runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, stopLossPrice: Number(slVal) }, ''); setEditSL(false); }}
+              <button onClick={() => { const v = Number(slVal); if (slVal === '' || v <= 0) { pos.stopLossPrice = undefined; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, stopLossPrice: undefined }, ''); } else { pos.stopLossPrice = v; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, stopLossPrice: v }, ''); } setEditSL(false); }}
                 disabled={execute.isPending} className="text-[9px] font-bold text-red-400">✓</button>
               <button onClick={() => setEditSL(false)} className="text-[9px] text-[#adaaaa]">✕</button>
             </div>
           ) : (
             <button onClick={() => { setSlVal(pos.stopLossPrice ?? ''); setEditSL(true); }}
-              className="text-[10px] font-bold text-red-400/70 hover:text-red-400">
+              className="text-xs font-bold text-red-400">
               {t('market.stop_loss')}{pos.stopLossPrice ? ` ${nf(pos.stopLossPrice)}` : ' —'}
             </button>
           )}
@@ -626,12 +626,12 @@ export default function MarketView() {
               const fp = account.data?.futuresPositions?.find((p: any) => p.symbol === selectedQuote.symbol);
               const lines: { price: number; color: string; label: string }[] = [];
               if (fp) {
-                lines.push({ price: fp.entryPrice, color: '#3b82f6', label: 'Entry' });
-                if (fp.takeProfitPrice) lines.push({ price: fp.takeProfitPrice, color: '#10b981', label: 'TP' });
-                if (fp.stopLossPrice) lines.push({ price: fp.stopLossPrice, color: '#ef4444', label: 'SL' });
-                lines.push({ price: fp.liquidationPrice, color: '#f59e0b', label: 'Liq' });
+                lines.push({ price: fp.entryPrice, color: '#3b82f6', label: t('market.chart_entry') });
+                if (fp.takeProfitPrice) lines.push({ price: fp.takeProfitPrice, color: '#10b981', label: t('market.chart_tp') });
+                if (fp.stopLossPrice) lines.push({ price: fp.stopLossPrice, color: '#ef4444', label: t('market.chart_sl') });
+                lines.push({ price: fp.liquidationPrice, color: '#f59e0b', label: t('market.chart_liq') });
               }
-              lines.push({ price: Number(selectedQuote.price || 0), color: '#adaaaa', label: 'Mk' });
+              lines.push({ price: Number(selectedQuote.price || 0), color: '#adaaaa', label: t('market.chart_mark') });
               return <MiniChart data={stockHistory} color={stockColor} height={120} priceLines={lines} />;
             })()}
           </div>
