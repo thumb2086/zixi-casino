@@ -118,30 +118,14 @@ function AppContent() {
   useKeepAlive();
   const { isAuthorized } = useAuthStore();
   const { isRestoring, elapsed } = useFastLogin();
-  const { userData, isLoading } = useSyncUser();
-  const username = useUserStore((s) => s.username);
+  useSyncUser();
 
-  const needsProfileSetup = isAuthorized && !isLoading && !username;
-
-  // 驗證 session 時顯示 loading
   if (isRestoring) {
     return (
       <div className="relative min-h-screen bg-[#0e0e0e] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-[#fcc025]" />
           <p className="text-sm text-[#adaaaa]">正在恢復登入狀態{elapsed > 0 ? ` (${elapsed}秒)` : '...'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 避免在 useSyncUser 第一次載入完成前閃現大廳畫面（顯示「匿名」再跳 Identity Sync）
-  if (isAuthorized && isLoading) {
-    return (
-      <div className="relative min-h-screen bg-[#0e0e0e] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-[#fcc025]" />
-          <p className="text-sm text-[#adaaaa]">正在同步資料...</p>
         </div>
       </div>
     );
@@ -155,8 +139,6 @@ function AppContent() {
       <Routes>
         {!isAuthorized ? (
           <Route path="*" element={<LoginView />} />
-        ) : needsProfileSetup ? (
-          <Route path="*" element={<ProfileSetup onComplete={() => window.location.reload()} />} />
         ) : (
           <Route path="/app" element={<Layout />}>
             <Route index element={<LobbyView />} />
@@ -176,18 +158,16 @@ function AppContent() {
             <Route path="collection" element={<Navigate to="/app/inventory" replace />} />
             <Route path="admin" element={<AdminView />} />
             <Route path="settings" element={<SettingsView />} />
+            <Route path="profile/setup" element={<ProfileSetup onComplete={() => window.location.reload()} />} />
             <Route path="transactions" element={<Navigate to="/app/announcement" replace />} />
             <Route path="dashboard/transactions" element={<TransactionsDashboardView />} />
-
             <Route path="info/vip-levels" element={<VIPLevelsView />} />
             <Route path="info/odds" element={<Navigate to="/app/info?tab=odds" replace />} />
             <Route path="info" element={<InfoView />} />
             <Route path="company" element={<CompanyView />} />
           </Route>
         )}
-        {isAuthorized && !needsProfileSetup && (
-            <Route path="/" element={<Navigate to="/app" replace />} />
-        )}
+        {isAuthorized && <Route path="/" element={<Navigate to="/app" replace />} />}
       </Routes>
     </div>
   );
