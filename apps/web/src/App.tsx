@@ -128,6 +128,18 @@ function AppContent() {
     );
   }
 
+  // 避免在 useSyncUser 第一次載入完成前閃現大廳畫面（顯示「匿名」再跳 Identity Sync）
+  if (isAuthorized && isLoading) {
+    return (
+      <div className="relative min-h-screen bg-[#0e0e0e] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-[#fcc025]" />
+          <p className="text-sm text-[#adaaaa]">正在同步資料...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-screen bg-[#0e0e0e]">
       <FontSizeApplier />

@@ -6,25 +6,23 @@ import { useQuery } from '@tanstack/react-query';
 import { resolvePreferredBalance } from '../utils/balance';
 
 type SyncUserData = {
-  address?: string;
   balance?: string;
-  username?: string;
-  user?: {
-    displayName?: string;
-  };
+  displayName?: string | null;
   wallet: Record<string, any>;
-  activeAvatar?: string;
-  activeTitle?: string;
 };
 
 export function useSyncUser() {
   const { address, sessionId } = useAuthStore();
-  const { setBalance } = useUserStore();
+  const { setBalance, setUsername } = useUserStore();
 
   const { data: userData, isLoading } = useQuery<SyncUserData>({
     queryKey: ['user-wallet', address, sessionId],
     queryFn: async () => {
-      const walletResult = await api.get('/api/v1/wallet/summary', { params: { sessionId } });
+      const [walletResult, profileResult] = await Promise.all([
+        api.get('/api/v1/wallet/summary', { params: { sessionId } }).catch(() => ({ data: { data: {} } })),
+        api.get('/api/v1/me/profile', { params: { sessionId } }).catch(() => ({ data: { data: {} } })),
+      ]);
+
       const walletData = walletResult.data?.data || {};
 
       const walletBalance = resolvePreferredBalance({
@@ -33,9 +31,12 @@ export function useSyncUser() {
         walletBalance: walletData?.summary?.balances?.ZXC,
       });
 
+      const displayName = profileResult.data?.data?.profile?.displayName;
+
       return {
         wallet: walletData,
         balance: walletBalance,
+        displayName,
       } as SyncUserData;
     },
     enabled: !!sessionId,
@@ -47,7 +48,10 @@ export function useSyncUser() {
     if (userData?.balance) {
       setBalance(userData.balance);
     }
-  }, [userData, setBalance]);
+    if (userData?.displayName) {
+      setUsername(userData.displayName);
+    }
+  }, [userData, setBalance, setUsername]);
 
   return { userData, isLoading };
 }
