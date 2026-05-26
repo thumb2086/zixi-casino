@@ -153,7 +153,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
     };
 
     // Pre-check available cash for cost actions (account.cash already deducts locked margin)
-    const isCostAction = ["stock_buy", "bank_deposit", "futures_open", "loan_repay"].includes(type);
+    const isCostAction = ["stock_buy", "bank_deposit", "futures_open", "loan_repay", "loan_repay_all"].includes(type);
     if (isCostAction && account.cash < (type === "stock_buy"
         ? resolveAmt(quantity) * (snapshot.symbols?.[symbol || ""]?.price || 0) * (1 + 0.001)
         : resolveAmt(amount))) {

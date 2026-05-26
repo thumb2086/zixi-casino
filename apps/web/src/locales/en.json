@@ -165,7 +165,16 @@
     "open_position": "Open {{side}} {{symbol}}",
     "futures_open_success": "{{side}} position opened successfully",
     "take_profit": "TP (price)",
-    "stop_loss": "SL (price)"
+    "stop_loss": "SL (price)",
+    "loan_success": "Loan received",
+    "repay_success": "Loan repaid",
+    "repay_all_success": "All loans repaid",
+    "loan_borrow_label": "Borrow",
+    "repay_label": "Repay",
+    "repay_all_label": "Repay All",
+    "sell_all": "Sell All",
+    "buy_all_in": "Buy All-In",
+    "insufficient_balance": "Insufficient balance, need {{need}} ZXC, have {{have}} ZXC"
   },
   "casino": {
     "title": "Casino Floor",
