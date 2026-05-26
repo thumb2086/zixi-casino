@@ -535,7 +535,7 @@ export default function MarketView() {
                             <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{nf(pos.unrealizedPnl || 0)}
                             </p>
-                            <button onClick={(e) => { e.stopPropagation(); setTradeQuantity(pos.quantity.toString()); }}
+                            <button onClick={(e) => { e.stopPropagation(); setSelectedSymbol(pos.symbol); setTradeQuantity(pos.quantity.toString()); }}
                               className="text-xs font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded disabled:opacity-50 hover:bg-red-500/30">
                               {t('market.sell_all')}
                             </button>
