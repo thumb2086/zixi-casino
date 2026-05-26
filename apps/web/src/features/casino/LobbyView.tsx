@@ -140,7 +140,7 @@ export default function LobbyView() {
     walletBalance: summary.data?.summary?.balances?.YJC,
     fallbackBalance: '0',
   });
-  const liveBalance = (Number(liveZxc || 0) + Number(liveYjc || 0) * ZXC_PER_YJC).toFixed(4);
+  const liveBalance = (Number(liveZxc || 0) + Number(liveYjc || 0) * ZXC_PER_YJC).toFixed(2);
 
   const { data: inventoryData } = useQuery({
     queryKey: ['inventory-preview'],

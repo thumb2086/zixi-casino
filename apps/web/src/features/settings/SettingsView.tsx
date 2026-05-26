@@ -104,7 +104,7 @@ export default function SettingsView() {
     walletBalance: walletSummaryQuery.data?.summary?.balances?.YJC,
     fallbackBalance: '0',
   });
-  const walletPreviewBalance = (Number(previewZxc || 0) + Number(previewYjc || 0) * ZXC_PER_YJC).toFixed(4);
+  const walletPreviewBalance = (Number(previewZxc || 0) + Number(previewYjc || 0) * ZXC_PER_YJC).toFixed(2);
 
   useEffect(() => {
     setDisplayNameDraft(username || '');

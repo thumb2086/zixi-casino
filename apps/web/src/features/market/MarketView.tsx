@@ -27,7 +27,7 @@ type MarketActionParams =
 
 function MiniChart({ data, color, height = 60, priceLines }: { data: number[]; color: string; height?: number; priceLines?: { price: number; color: string; label: string }[] }) {
   if (data.length < 2) return null;
-  const w = 200;
+  const w = 240;
   const allPrices = [...data, ...(priceLines?.map(p => p.price) || [])];
   const mn = Math.min(...allPrices), mx = Math.max(...allPrices);
   const range = mx - mn || 1;
@@ -611,7 +611,7 @@ export default function MarketView() {
 
       {/* Draggable floating stock chart */}
       {selectedQuote && stockHistory.length > 1 && showFloatingChart && (
-        <div className="fixed z-40 w-56 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-64"
+        <div className="fixed z-40 w-72 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-80"
           style={{ left: fp.x, top: fp.y + 80, right: fp.x ? undefined : 16 }}>
           <div className="flex items-center justify-between p-3 pb-0 cursor-grab active:cursor-grabbing select-none"
             onMouseDown={(e) => { dragRef.current = { startX: e.clientX, startY: e.clientY, fpX: fp.x, fpY: fp.y }; const handler = (ev: MouseEvent) => { if (!dragRef.current) return; setFp({ x: dragRef.current.fpX + ev.clientX - dragRef.current.startX, y: dragRef.current.fpY + ev.clientY - dragRef.current.startY }); }; const up = () => { dragRef.current = null; window.removeEventListener('mousemove', handler); window.removeEventListener('mouseup', up); }; window.addEventListener('mousemove', handler); window.addEventListener('mouseup', up); }}
