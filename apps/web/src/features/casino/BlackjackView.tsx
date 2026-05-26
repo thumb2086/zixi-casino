@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
@@ -37,6 +38,7 @@ const INITIAL_STATE: GameState = {
 };
 
 export const BlackjackView: React.FC = () => {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
 
@@ -141,12 +143,12 @@ export const BlackjackView: React.FC = () => {
   return (
     <div className="blackjack-container">
       <div className="dealer-area">
-        <h3>莊家（{gameState.status === "in_progress" ? "?" : gameState.dealerTotal}）</h3>
+        <h3>{t('casino_game.blackjack_dealer_with_total', { total: gameState.status === "in_progress" ? "?" : gameState.dealerTotal })}</h3>
         <div className="hand">{gameState.dealerCards.map(renderCard)}</div>
       </div>
 
       <div className="player-area">
-        <h3>玩家（{gameState.playerTotal}）</h3>
+        <h3>{t('casino_game.blackjack_player_with_total', { total: gameState.playerTotal })}</h3>
         <div className="hand">{gameState.playerCards.map(renderCard)}</div>
       </div>
 
@@ -155,12 +157,12 @@ export const BlackjackView: React.FC = () => {
           <>
             <input type="number" value={betAmount} onChange={(e) => setBetAmount(e.target.value)} disabled={isAnimating} />
             <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={isAnimating} maxBet={maxBet} />
-            <button className="start-btn" onClick={() => handleAction("start")} disabled={isAnimating}>發牌</button>
+            <button className="start-btn" onClick={() => handleAction("start")} disabled={isAnimating}>{t('casino_game.blackjack_deal')}</button>
           </>
         ) : (
           <>
-            <button className="hit-btn" onClick={() => handleAction("hit")} disabled={isAnimating}>要牌</button>
-            <button className="stand-btn" onClick={() => handleAction("stand")} disabled={isAnimating}>停牌</button>
+            <button className="hit-btn" onClick={() => handleAction("hit")} disabled={isAnimating}>{t('casino_game.blackjack_hit')}</button>
+            <button className="stand-btn" onClick={() => handleAction("stand")} disabled={isAnimating}>{t('casino_game.blackjack_stand')}</button>
           </>
         )}
       </div>
@@ -169,8 +171,8 @@ export const BlackjackView: React.FC = () => {
 
       {gameState.status === "settled" && !error && (
         <div className={`result-overlay ${gameState.isWin ? "win" : gameState.isPush ? "push" : "lose"}`}>
-          <h2>{gameState.isWin ? "你贏了！" : gameState.isPush ? "和局" : gameState.reason || "本局失利"}</h2>
-          {gameState.isWin && <p>派彩：{parseFloat(betAmount) * gameState.multiplier}</p>}
+          <h2>{gameState.isWin ? t('casino_game.blackjack_you_win') : gameState.isPush ? t('casino_game.blackjack_push_label') : gameState.reason || t('casino_game.blackjack_lose_label')}</h2>
+          {gameState.isWin && <p>{t('casino_game.blackjack_payout', { amount: parseFloat(betAmount) * gameState.multiplier })}</p>}
         </div>
       )}
     </div>

@@ -3,10 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import { ChipAnimation } from '../../components/ChipAnimation';
+import { useTranslation } from 'react-i18next';
 import './Coinflip.css';
 
 export const CoinflipView: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { session } = useAuth();
 
   const { data: profile } = useQuery({
@@ -22,7 +24,7 @@ export const CoinflipView: React.FC = () => {
   const [selection, setSelection] = useState<'heads' | 'tails'>('heads');
   const [isDrawing, setIsDrawing] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [status, setStatus] = useState('選擇正面或反面，然後開始！');
+  const [status, setStatus] = useState(t('casino_game.coinflip_instruction_long'));
   const [statusColor, setStatusColor] = useState('#ffd36a');
 
   const [chipAnimations, setChipAnimations] = useState<{ id: number; amount: number; startX: number; startY: number; endX: number; endY: number }[]>([]);
@@ -31,7 +33,7 @@ export const CoinflipView: React.FC = () => {
 
   const showResult = (winner: string, isWin: boolean, payout: number) => {
     setIsDrawing(true);
-    setStatus('硬幣翻轉中...');
+    setStatus(t('casino_game.coinflip_spinning'));
     setStatusColor('#ffd36a');
 
     // Animate coin
@@ -40,10 +42,10 @@ export const CoinflipView: React.FC = () => {
 
     setTimeout(() => {
       if (isWin) {
-        setStatus(`🏆 恭喜！結果是 ${winner === 'heads' ? '正面' : '反面'}，獲得 ${payout.toLocaleString()} ZXC！`);
+        setStatus(t('casino_game.coinflip_win_result', { result: t(winner === 'heads' ? 'casino_game.coinflip_heads' : 'casino_game.coinflip_tails'), amount: payout.toLocaleString() }));
         setStatusColor('#00ff88');
       } else {
-        setStatus(`💀 結果是 ${winner === 'heads' ? '正面' : '反面'}，下次好運！`);
+        setStatus(t('casino_game.coinflip_lose_result', { result: t(winner === 'heads' ? 'casino_game.coinflip_heads' : 'casino_game.coinflip_tails') }));
         setStatusColor('#ff4d4d');
       }
       setIsDrawing(false);
@@ -86,7 +88,7 @@ export const CoinflipView: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     },
     onError: (err: Error) => {
-      setStatus(`❌ 錯誤: ${err.message}`);
+      setStatus(t('casino_game.coinflip_error', { message: err.message }));
       setStatusColor('#ff4d4d');
     }
   });
@@ -114,13 +116,13 @@ export const CoinflipView: React.FC = () => {
             className={`btn-choice ${selection === 'heads' ? 'active' : ''}`}
             onClick={() => !isDrawing && setSelection('heads')}
           >
-            正面
+            {t('casino_game.coinflip_heads')}
           </button>
           <button
             className={`btn-choice ${selection === 'tails' ? 'active' : ''}`}
             onClick={() => !isDrawing && setSelection('tails')}
           >
-            反面
+            {t('casino_game.coinflip_tails')}
           </button>
         </div>
 
@@ -136,7 +138,7 @@ export const CoinflipView: React.FC = () => {
             className="min-h-[56px] rounded-lg bg-purple-600 px-4 font-bold text-white hover:bg-purple-700 disabled:opacity-50 sm:min-w-[96px]"
             onClick={handleAllIn}
             disabled={isDrawing}
-            title="最高下注"
+            title={t('casino_game.coinflip_max_bet')}
           >
             {maxBet.toLocaleString()}
           </button>
@@ -146,7 +148,7 @@ export const CoinflipView: React.FC = () => {
             onClick={() => betMutation.mutate()}
             disabled={isDrawing || betMutation.isPending}
           >
-            {betMutation.isPending ? '處理中...' : '確認下注'}
+            {betMutation.isPending ? t('casino_game.processing') : t('casino_game.confirm_bet')}
           </button>
         </div>
       </div>

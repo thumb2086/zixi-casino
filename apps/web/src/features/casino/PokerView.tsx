@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
@@ -13,6 +14,7 @@ interface PokerResult {
 }
 
 export const PokerView: React.FC = () => {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
 
@@ -70,12 +72,12 @@ export const PokerView: React.FC = () => {
             </div>
           )}
 
-          {status === "idle" && <div className="poker-msg">準備發牌？</div>}
-          {status === "playing" && <div className="poker-msg animating">洗牌中…</div>}
+          {status === "idle" && <div className="poker-msg">{t('casino_game.poker_ready')}</div>}
+          {status === "playing" && <div className="poker-msg animating">{t('casino_game.poker_dealing')}</div>}
           {status === "settled" && result && (
             <div className={`poker-result ${result.result === "win" ? "win" : "lose"}`}>
               <div className="hand-name">{result.hand}</div>
-              <div className="result-text">{result.result === "win" ? "恭喜獲勝！" : "本局未中，再接再厲"}</div>
+              <div className="result-text">{result.result === "win" ? t('casino_game.poker_win_result') : t('casino_game.poker_lose_result')}</div>
               {result.result === "win" && <div className="payout">+{result.payout}</div>}
             </div>
           )}
@@ -101,7 +103,7 @@ export const PokerView: React.FC = () => {
           {maxBet.toLocaleString()}
         </button>
         <button className="deal-btn" onClick={handlePlay} disabled={status === "playing"}>
-          {status === "settled" ? "再來一局" : "發牌"}
+          {status === "settled" ? t('casino_game.poker_play_again_label') : t('casino_game.poker_deal')}
         </button>
       </div>
     </div>
