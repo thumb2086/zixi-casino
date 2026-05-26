@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, Dice5, HelpCircle, Shield } from 'lucide-react';
+import { CheckCircle2, Dice5, Gift, HelpCircle, Shield } from 'lucide-react';
 
 interface GameOdds {
   key: string;
@@ -17,7 +17,7 @@ const GAME_ODDS: GameOdds[] = [
   { key: 'roulette', name: '輪盤', rtp: 97.3, houseEdge: 2.7, description: '歐式 37 格（0-36），可同時下多個注種，系統會加總派彩倍率。', payout: '單號中 35x；紅黑/單雙/大小中 2x。', probability: '單號 1/37（2.70%）；紅黑 18/37（48.65%）。', fairness: '中獎號碼由 roundId 雜湊後取模 37 產生。' },
   { key: 'sicbo', name: '骰寶', rtp: 96.0, houseEdge: 4.0, description: '3 顆骰子，支援「大 / 小」與「指定總和」下注。', payout: '大/小中 2x；總和精準命中 6x。', probability: '大 107/216（49.54%）；小 107/216（49.54%）；總和依點數分布。', fairness: '同一回合由雜湊拆分出 3 顆骰點，結果可追溯。' },
   { key: 'slots', name: '老虎機', rtp: 94.0, houseEdge: 6.0, description: '7 種符號 3 軸，三軸獨立。中獎看三連或任意對子。', payout: '777 三連 50x；其他三連 10x；任意對子 2x。', probability: '任意三連 7/343（2.04%）；任意對子 126/343（36.73%）。', fairness: '3 軸結果由同一 seed 的不同位段計算，規則固定。' },
-  { key: 'horse', name: '賽馬', rtp: 105.5, houseEdge: -5.5, description: '6 匹馬固定倍率，系統依權重抽中一匹勝馬。權重與倍率成反比（低倍率馬中獎率較高）。', payout: '赤焰 3.6x、雷霆 4.4x、幻影 5.8x、夜刃 8.0x、霜牙 11.6x、流星 17.0x。', probability: '低倍率馬中獎機率較高，所有馬匹長期期望值相同。', fairness: '開獎使用固定權重 + 回合 seed，無人工干預。' },
+  { key: 'horse', name: '賽馬', rtp: 96.3, houseEdge: 3.7, description: '6 匹馬各有固定倍率與中獎權重，低倍馬中獎率高。', payout: '赤焰 2.5x（38.5%）、雷霆 3.7x（26.0%）、幻影 6.2x（15.4%）、夜刃 10x（9.6%）、霜牙 14x（6.7%）、流星 25x（3.8%）。', probability: '各馬 EV 均約 0.96（HE 約 4%），權重 [40,27,16,10,7,4]。', fairness: '開獎使用 FNV 哈希 + 固定權重，每局 seed = roundId。' },
   { key: 'shoot_dragon_gate', name: '射龍門', rtp: 96.3, houseEdge: 3.7, description: '先開左右門牌，再開中間牌。中間牌落在兩門之間即贏。', payout: '中間牌落在區間內 2x；柱倒/區間外 0x；同門牌退回本金 1x。', probability: '依三張牌點數關係決定（每局固定三次抽牌）。', fairness: '左右門與中牌皆由同局隨機流程獨立抽出。' },
   { key: 'blackjack', name: '21 點', rtp: 99.0, houseEdge: 1.0, description: '支援 start / hit / stand；莊家規則固定（小於 17 補牌）。', payout: 'Blackjack 1.5x；一般獲勝 1x；和局退回本金 1x。', probability: '與當前手牌決策相關，非固定單一勝率。', fairness: '每張牌透過 seed + index 生成，重播可還原。' },
   { key: 'crash', name: '暴漲', rtp: 96.0, houseEdge: 4.0, description: '倍率隨時間成長，玩家在爆點前 cashout 即依當前倍數派彩。', payout: '派彩 = 下注 × 當前倍數（若已爆點則 0x）。', probability: '爆點使用 0.99/(1-r)^0.05 公式，長尾分布。', fairness: '爆點由回合 hash 推導，不可於開局後修改。' },
@@ -124,6 +124,50 @@ export default function OddsTab() {
             )}
           </div>
         ))}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa] flex items-center gap-2">
+          <Gift size={14} />寶箱機率與保底
+        </h2>
+
+        <div className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-4">
+          <p className="text-sm font-bold text-[#adaaaa] mb-3">
+            每個寶箱有各自稀有度權重，每次開箱獨立抽選。若連續未抽到保證稀有度達保底次數，下次開箱必定觸發。
+          </p>
+
+          {[
+            { type: '普通寶箱', price: '100 ZXC', key: 'common', w: [50,30,15,5,0,0,0,0], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '10 次保底稀有' },
+            { type: '稀有寶箱', price: '500 ZXC', key: 'rare', w: [15,25,30,30,0,0,0,0], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '10 次保底史詩' },
+            { type: '史詩寶箱', price: '2,000 ZXC', key: 'epic', w: [0,0,10,89.8,0.2,0,0,0], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '10 次保底傳說' },
+            { type: '傳說寶箱', price: '10,000 ZXC', key: 'legendary', w: [0,0,0,75,25,0,0,0], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '每箱保底傳說' },
+            { type: '神話寶箱', price: '100,000 ZXC', key: 'mythic', w: [0,0,0,10,88,2,0,0], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '每箱保底神話' },
+            { type: '混沌寶箱', price: '1,000,000 ZXC', key: 'chaos', w: [0,0,0,68.9,0,31.1,0,0], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '每箱保底混沌' },
+            { type: '深淵寶箱', price: '10,000,000 ZXC', key: 'abyss', w: [0,0,0,0,0,85,15,0], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '每箱保底深淵' },
+            { type: '神諭寶箱', price: '100,000,000 ZXC', key: 'oracle', w: [0,0,0,0,0,70,20,10], colors: ['#adaaaa','#3b82f6','#a855f7','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'], labels: ['普通','稀有','史詩','傳說','神話','混沌','深淵','神諭'], pity: '每箱保底神諭' },
+          ].map((chest) => (
+            <div key={chest.key} className="mb-3 last:mb-0 rounded-lg border border-[#494847]/10 bg-[#0e0e0e] p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-white">{chest.type}</h3>
+                <span className="text-xs font-bold text-[#fcc025]">{chest.price}</span>
+              </div>
+              <p className="text-[10px] font-bold text-[#adaaaa] mb-2">{chest.pity}</p>
+              <div className="flex items-center gap-2">
+                {chest.w.map((pct, i) => pct > 0 && (
+                  <div key={i} className="flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full" style={{ background: chest.colors[i] }} />
+                    <span className="text-[10px] font-bold text-[#adaaaa]">{chest.labels[i]} {pct}%</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 h-2 w-full rounded-full bg-[#1a1919] flex overflow-hidden">
+                {chest.w.map((pct, i) => pct > 0 && (
+                  <div key={i} className="h-full" style={{ width: `${pct}%`, background: chest.colors[i] }} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
