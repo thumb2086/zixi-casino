@@ -16,7 +16,8 @@
     "minutes_ago": "{{count}} MIN AGO",
     "hours_ago": "{{count}} HOURS AGO",
     "yesterday": "YESTERDAY",
-    "days_ago": "{{count}} DAYS AGO"
+    "days_ago": "{{count}} DAYS AGO",
+    "network_error": "Network error, please try again later"
   },
   "nav": {
     "dashboard": "Dashboard",

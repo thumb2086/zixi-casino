@@ -1,10 +1,18 @@
 import { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { User, ArrowRight, ShieldCheck, Fingerprint } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store/useAuthStore';
 import { api } from '../../store/api';
 
+const ERROR_KEYS: Record<string, string> = {
+  USERNAME_TOO_SHORT: 'profile.name_length_error',
+  SAVE_FAILED: 'profile.name_update_failed',
+  NETWORK_ERROR: 'common.network_error',
+};
+
 export default function ProfileSetup({ onComplete }: { onComplete: () => void }) {
+  const { t } = useTranslation();
   const { sessionId } = useAuthStore();
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,13 +61,13 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
           </motion.div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-extrabold text-[#fcc025] tracking-tighter uppercase italic">Identity Sync</h1>
-            <p className="text-[#adaaaa] font-bold uppercase text-xs tracking-[0.3em] leading-relaxed">Establish your operator designation to proceed with the simulation.</p>
+            <h1 className="text-3xl font-extrabold text-[#fcc025] tracking-tighter uppercase italic">{t('profile.identity_sync')}</h1>
+            <p className="text-[#adaaaa] font-bold uppercase text-xs tracking-[0.3em] leading-relaxed">{t('profile.sync_instruction')}</p>
           </div>
 
           <form onSubmit={handleSave} className="w-full space-y-6 pt-4">
             <div className="space-y-2 text-left">
-              <label className="text-xs uppercase tracking-[0.2em] text-[#adaaaa] font-bold ml-1">Operator ID</label>
+              <label className="text-xs uppercase tracking-[0.2em] text-[#adaaaa] font-bold ml-1">{t('profile.operator_id')}</label>
               <div className="relative">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#fcc025]/40">
                   <User size={18} />
@@ -68,7 +76,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  placeholder="Enter designation..."
+                  placeholder={t('profile.nickname_placeholder')}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/20 rounded-xl pl-14 pr-6 py-5 text-white text-lg focus:border-[#fcc025]/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-[#494847] font-bold tracking-tight"
                   maxLength={20}
                   required
@@ -83,7 +91,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
                 className="text-[#ff7351] text-xs font-bold bg-[#ff7351]/10 py-4 px-4 rounded-xl border border-[#ff7351]/20 uppercase tracking-widest flex items-center gap-3"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#ff7351] animate-pulse" />
-                {error}
+                {t(ERROR_KEYS[error] || error)}
               </motion.div>
             )}
 
@@ -92,7 +100,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
               disabled={loading}
               className="w-full bg-gradient-to-br from-[#fcc025] to-[#e6ad03] text-black font-black py-5 rounded-xl shadow-[0_4px_20px_rgba(252,192,37,0.2)] hover:shadow-[0_4px_25px_rgba(252,192,37,0.3)] transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group overflow-hidden relative"
             >
-              <span className="text-sm uppercase italic tracking-tighter relative z-10">Initialize Connection</span>
+              <span className="text-sm uppercase italic tracking-tighter relative z-10">{loading ? t('profile.saving') : t('profile.save_continue')}</span>
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform relative z-10" />
               <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             </button>
@@ -100,7 +108,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
 
           <div className="pt-4 flex items-center gap-2 opacity-30">
             <ShieldCheck size={14} className="text-[#adaaaa]" />
-            <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-[#adaaaa]">Secure Protocol Active</span>
+            <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-[#adaaaa]">{t('profile.secure_protocol')}</span>
           </div>
         </div>
       </motion.div>
