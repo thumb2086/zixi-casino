@@ -54,13 +54,14 @@ function MiniChart({ data, color, height = 60, priceLines }: { data: number[]; c
   );
 }
 
-function PositionCard({ pos, runAction, execute, t, nf }: { pos: any; runAction: any; execute: any; t: any; nf: any }) {
+function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; runAction: any; execute: any; t: any; nf: any; onSelect: (symbol: string) => void }) {
   const [editTP, setEditTP] = useState(false);
   const [editSL, setEditSL] = useState(false);
   const [tpVal, setTpVal] = useState(pos.takeProfitPrice ?? '');
   const [slVal, setSlVal] = useState(pos.stopLossPrice ?? '');
   return (
-    <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+    <div onClick={() => onSelect(pos.symbol)}
+      className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3 cursor-pointer hover:border-[#fcc025]/30 transition-colors">
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex items-center gap-2">
           <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -207,9 +208,17 @@ export default function MarketView() {
 
       {panelTab === 'spot' && (
         <div className="space-y-3">
-          <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
-            placeholder={t('market.quantity_placeholder')}
-            className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          <div className="flex gap-2">
+            <input value={tradeQuantity} onChange={(e) => setTradeQuantity(e.target.value)}
+              placeholder={t('market.quantity_placeholder')}
+              className="flex-1 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+            {selectedQuote?.price && summary?.cash > 0 && (
+              <button type="button" onClick={() => setTradeQuantity(Number(summary.cash / selectedQuote.price).toFixed(6))}
+                className="text-[10px] font-bold text-[#fcc025] px-2 py-1 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10 whitespace-nowrap">
+                {t('market.buy_all_in')}
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'stock_buy', symbol: selectedSymbol, quantity: tradeQuantity }, t('market.buy_success'))}
@@ -285,14 +294,14 @@ export default function MarketView() {
             <p className="text-[10px] font-bold text-[#adaaaa] mb-2">貸款</p>
             <div className="grid grid-cols-3 gap-2">
               <button type="button" disabled={execute.isPending}
-                onClick={() => runAction({ type: 'loan_borrow', amount: cashMoveAmount }, '貸款成功')}
-                className="rounded-xl bg-violet-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-violet-500">借貸</button>
+                onClick={() => runAction({ type: 'loan_borrow', amount: cashMoveAmount }, t('market.loan_success'))}
+                className="rounded-xl bg-violet-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-violet-500">{t('market.loan_borrow_label')}</button>
               <button type="button" disabled={execute.isPending}
-                onClick={() => runAction({ type: 'loan_repay', amount: cashMoveAmount }, '還款成功')}
-                className="rounded-xl bg-slate-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-slate-500">還款</button>
+                onClick={() => runAction({ type: 'loan_repay', amount: cashMoveAmount }, t('market.repay_success'))}
+                className="rounded-xl bg-slate-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-slate-500">{t('market.repay_label')}</button>
               <button type="button" disabled={execute.isPending}
-                onClick={() => runAction({ type: 'loan_repay_all' }, '全部還清')}
-                className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">一次還清</button>
+                onClick={() => runAction({ type: 'loan_repay_all' }, t('market.repay_all_success'))}
+                className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.repay_all_label')}</button>
             </div>
             {summary && summary.loanPrincipal > 0 && (
               <p className="text-[10px] text-[#adaaaa] mt-2">當前貸款: {nf(summary.loanPrincipal)} ZXC</p>
@@ -511,7 +520,7 @@ export default function MarketView() {
                   )}
                   <div className="space-y-2">
                     {summary.futuresPositions.map((pos: any) => (
-                      <PositionCard key={pos.id} pos={pos} runAction={runAction} execute={execute} t={t} nf={nf} />
+                      <PositionCard key={pos.id} pos={pos} runAction={runAction} execute={execute} t={t} nf={nf} onSelect={setSelectedSymbol} />
                     ))}
                   </div>
                 </div>
@@ -521,12 +530,20 @@ export default function MarketView() {
                   <span className="text-[10px] font-bold text-[#adaaaa] block mb-2">{t('market.stocks')}</span>
                   <div className="space-y-2">
                     {summary.stockPositions.map((pos: any) => (
-                      <div key={pos.symbol} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+                      <div key={pos.symbol}
+                        onClick={() => setSelectedSymbol(pos.symbol)}
+                        className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3 cursor-pointer hover:border-[#fcc025]/30 transition-colors">
                         <div className="flex items-center justify-between">
                           <p className="text-xs font-black text-white">{pos.symbol} <span className="text-[10px] font-bold text-[#adaaaa]">×{nf(pos.quantity)}</span></p>
-                          <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{nf(pos.unrealizedPnl || 0)}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                              {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{nf(pos.unrealizedPnl || 0)}
+                            </p>
+                            <button onClick={(e) => { e.stopPropagation(); setTradeQuantity(pos.quantity.toString()); }}
+                              className="text-[9px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded disabled:opacity-50 hover:bg-red-500/30">
+                              {t('market.sell_all')}
+                            </button>
+                          </div>
                         </div>
                         <p className="text-[10px] text-[#adaaaa] mt-0.5">{t('market.market_value', { value: nf(pos.marketValue) })}</p>
                       </div>

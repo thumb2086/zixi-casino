@@ -165,7 +165,16 @@
     "open_position": "開倉 {{side}} {{symbol}}",
     "futures_open_success": "{{side}}倉開倉成功",
     "take_profit": "止盈價",
-    "stop_loss": "止損價"
+    "stop_loss": "止損價",
+    "loan_success": "貸款成功",
+    "repay_success": "還款成功",
+    "repay_all_success": "已全部還清",
+    "loan_borrow_label": "借貸",
+    "repay_label": "還款",
+    "repay_all_label": "一次還清",
+    "sell_all": "全部賣出",
+    "buy_all_in": "全額買入",
+    "insufficient_balance": "可用子熙幣不足，需要 {{need}} ZXC，目前 {{have}} ZXC"
   },
   "casino": {
     "title": "娛樂大廳",
