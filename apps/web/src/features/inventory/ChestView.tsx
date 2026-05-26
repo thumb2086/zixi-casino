@@ -662,7 +662,7 @@ export default function ChestView() {
                     </div>
                     <div className="text-left">
                       <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>
-                      <p className="text-lg font-black italic text-[#fcc025]">+{openCompensation} ZXC</p>
+                      <p className="text-lg font-black italic text-[#fcc025]">+{nf(openCompensation)} ZXC</p>
                     </div>
                   </div>
                 </div>
