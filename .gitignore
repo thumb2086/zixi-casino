@@ -13,3 +13,4 @@ dist
 .states/
 remix.config.json
 _check_*.mjs
+_fix_*.mjs

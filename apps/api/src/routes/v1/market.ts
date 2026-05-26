@@ -57,6 +57,14 @@ export async function marketRoutes(fastify: FastifyInstance) {
       await walletRepo.updateBalance(address, fallbackBalance, "zhixi");
     }
 
+    // If there are pending admin intents, skip on-chain sync so manually adjusted
+    // balances (e.g. compensation for bugs) are not overwritten by old on-chain data.
+    try {
+      const intents = await walletRepo.listTxIntents({ address, limit: 10 });
+      const hasPendingAdmin = intents.some((i: any) => i.status === "pending" && (i.type === "admin_credit" || i.type === "admin_debit"));
+      if (hasPendingAdmin) return fallbackBalance;
+    } catch {}
+
     try {
       const runtime = onchainManager.getRuntimeConfig();
       const tokenRuntime = runtime.tokens.zhixi;
@@ -115,8 +123,10 @@ export async function marketRoutes(fastify: FastifyInstance) {
     const nowTs = Date.now();
     const snapshot = marketManager.buildSnapshot(nowTs);
     const normalized = await hydrateAccount(ctx.session.address, ctx.user.id, nowTs);
-    marketManager.settleLiquidations(normalized, snapshot);
-    await marketRepo.saveAccount(ctx.session.address, ctx.user.id, normalized);
+    const liqEvents = marketManager.settleLiquidations(normalized, snapshot);
+    if (liqEvents.length > 0) {
+      await marketRepo.saveAccount(ctx.session.address, ctx.user.id, normalized);
+    }
     return createApiEnvelope({ account: marketManager.buildAccountSummary(normalized, snapshot) }, request.id);
   });
 
