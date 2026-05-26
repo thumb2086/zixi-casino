@@ -27,7 +27,7 @@ type MarketActionParams =
 
 function MiniChart({ data, color, height = 60, priceLines }: { data: number[]; color: string; height?: number; priceLines?: { price: number; color: string; label: string }[] }) {
   if (data.length < 2) return null;
-  const w = 240;
+  const w = 280;
   const allPrices = [...data, ...(priceLines?.map(p => p.price) || [])];
   const mn = Math.min(...allPrices), mx = Math.max(...allPrices);
   const range = mx - mn || 1;
@@ -46,7 +46,7 @@ function MiniChart({ data, color, height = 60, priceLines }: { data: number[]; c
           <g key={i}>
             <line x1={0} y1={y} x2={w} y2={y} stroke={pl.color} strokeWidth="1" strokeDasharray="4,3" opacity={0.7} />
             <rect x={w - 58} y={y - 7} width={58} height={14} rx={3} fill={pl.color} fillOpacity={0.9} />
-            <text x={w - 4} y={y + 3.5} textAnchor="end" fill="#000" fontSize="8" fontWeight="bold">{pl.label}</text>
+            <text x={w - 4} y={y + 3.5} textAnchor="end" fill="#000" fontSize="9" fontWeight="bold">{pl.label}</text>
           </g>
         );
       })}
@@ -64,11 +64,11 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
       className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3 cursor-pointer hover:border-[#fcc025]/30 transition-colors">
       <div className="flex items-center justify-between">
         <div className="min-w-0 flex items-center gap-2">
-          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
+          <span className={`text-xs font-black px-1.5 py-0.5 rounded ${pos.side === 'long' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
             {pos.side === 'long' ? t('market.long_badge') : t('market.short_badge')}
           </span>
           <p className="text-xs font-black text-white">{pos.symbol}</p>
-          <span className="text-[10px] text-[#adaaaa]">{pos.leverage}x</span>
+          <span className="text-xs text-[#adaaaa]">{pos.leverage}x</span>
         </div>
         <div className="text-right shrink-0 ml-2 flex items-center gap-2">
           <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -76,7 +76,7 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
           </p>
           <button onClick={() => runAction({ type: 'futures_close', positionId: pos.id }, t('market.position_closed'))}
             disabled={execute.isPending}
-            className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
+            className="text-xs font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
             {t('market.close_position')}
           </button>
         </div>
@@ -92,10 +92,10 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
           {editTP ? (
             <div className="flex items-center gap-1">
               <input type="number" step={0.01} value={tpVal} onChange={(e) => setTpVal(e.target.value)}
-                className="w-20 bg-[#0e0e0e] border border-emerald-500/30 rounded px-1.5 py-0.5 text-[10px] text-emerald-400 outline-none" />
+                className="w-20 bg-[#0e0e0e] border border-emerald-500/30 rounded px-1.5 py-0.5 text-xs text-emerald-400 outline-none" />
               <button onClick={() => { const v = Number(tpVal); if (tpVal === '' || v <= 0) { pos.takeProfitPrice = undefined; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, takeProfitPrice: undefined }, ''); } else { pos.takeProfitPrice = v; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, takeProfitPrice: v }, ''); } setEditTP(false); }}
-                disabled={execute.isPending} className="text-[9px] font-bold text-emerald-400">✓</button>
-              <button onClick={() => setEditTP(false)} className="text-[9px] text-[#adaaaa]">✕</button>
+                disabled={execute.isPending} className="text-xs font-bold text-emerald-400">✓</button>
+              <button onClick={() => setEditTP(false)} className="text-xs text-[#adaaaa]">✕</button>
             </div>
           ) : (
             <button onClick={() => { setTpVal(pos.takeProfitPrice ?? ''); setEditTP(true); }}
@@ -108,10 +108,10 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
           {editSL ? (
             <div className="flex items-center gap-1">
               <input type="number" step={0.01} value={slVal} onChange={(e) => setSlVal(e.target.value)}
-                className="w-20 bg-[#0e0e0e] border border-red-500/30 rounded px-1.5 py-0.5 text-[10px] text-red-400 outline-none" />
+                className="w-20 bg-[#0e0e0e] border border-red-500/30 rounded px-1.5 py-0.5 text-xs text-red-400 outline-none" />
               <button onClick={() => { const v = Number(slVal); if (slVal === '' || v <= 0) { pos.stopLossPrice = undefined; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, stopLossPrice: undefined }, ''); } else { pos.stopLossPrice = v; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, stopLossPrice: v }, ''); } setEditSL(false); }}
-                disabled={execute.isPending} className="text-[9px] font-bold text-red-400">✓</button>
-              <button onClick={() => setEditSL(false)} className="text-[9px] text-[#adaaaa]">✕</button>
+                disabled={execute.isPending} className="text-xs font-bold text-red-400">✓</button>
+              <button onClick={() => setEditSL(false)} className="text-xs text-[#adaaaa]">✕</button>
             </div>
           ) : (
             <button onClick={() => { setSlVal(pos.stopLossPrice ?? ''); setEditSL(true); }}
@@ -214,7 +214,7 @@ export default function MarketView() {
               className="flex-1 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
             {selectedQuote?.price && summary?.cash > 0 && (
               <button type="button" onClick={() => setTradeQuantity(Number(summary.cash / selectedQuote.price).toFixed(6))}
-                className="text-[10px] font-bold text-[#fcc025] px-2 py-1 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10 whitespace-nowrap">
+                className="text-xs font-bold text-[#fcc025] px-2 py-1 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10 whitespace-nowrap">
                 {t('market.buy_all_in')}
               </button>
             )}
@@ -244,7 +244,7 @@ export default function MarketView() {
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-[#adaaaa]">{t('market.leverage')}</span>
+              <span className="text-xs font-bold text-[#adaaaa]">{t('market.leverage')}</span>
               <span className="text-xs font-black text-[#fcc025]">{futuresLeverage}x</span>
             </div>
             <input type="range" min={1} max={20} value={futuresLeverage} onChange={(e) => setFuturesLeverage(Number(e.target.value))}
@@ -258,7 +258,7 @@ export default function MarketView() {
             <input type="number" min={0} step={0.01} value={futuresStopLoss} onChange={(e) => setFuturesStopLoss(e.target.value)}
               placeholder={t('market.stop_loss')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
           </div>
-          <div className="text-[10px] text-[#adaaaa] space-y-1">
+          <div className="text-xs text-[#adaaaa] space-y-1">
             <p>{t('market.notional_value', { value: nf(Number(futuresMargin || 0) * futuresLeverage) })}</p>
             <p>{t('market.liquidation_price', { value: futuresSide === 'long'
               ? nf(Math.round(Number(selectedQuote?.price || 0) * (1 - 0.96 / futuresLeverage)))
@@ -291,7 +291,7 @@ export default function MarketView() {
               className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
           <div className="border-t border-[#494847]/10 pt-3">
-            <p className="text-[10px] font-bold text-[#adaaaa] mb-2">貸款</p>
+            <p className="text-xs font-bold text-[#adaaaa] mb-2">貸款</p>
             <div className="grid grid-cols-3 gap-2">
               <button type="button" disabled={execute.isPending}
                 onClick={() => runAction({ type: 'loan_borrow', amount: cashMoveAmount }, t('market.loan_success'))}
@@ -304,10 +304,10 @@ export default function MarketView() {
                 className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.repay_all_label')}</button>
             </div>
             {summary && summary.loanPrincipal > 0 && (
-              <p className="text-[10px] text-[#adaaaa] mt-2">當前貸款: {nf(summary.loanPrincipal)} ZXC</p>
+              <p className="text-xs text-[#adaaaa] mt-2">當前貸款: {nf(summary.loanPrincipal)} ZXC</p>
             )}
             {summary && summary.maxBorrow > 0 && (
-              <p className="text-[10px] text-[#adaaaa]">可借上限: {nf(summary.maxBorrow)} ZXC</p>
+              <p className="text-xs text-[#adaaaa]">可借上限: {nf(summary.maxBorrow)} ZXC</p>
             )}
           </div>
         </div>
@@ -319,7 +319,7 @@ export default function MarketView() {
             <span className="text-xs font-black uppercase text-white">{selectedQuote.symbol}</span>
             <div className="text-right">
               <p className="text-sm font-black italic tracking-tight text-[#fcc025]">{nf(Number(selectedQuote.price || 0))}</p>
-              <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+              <p className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
                 {isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%
               </p>
             </div>
@@ -400,7 +400,7 @@ export default function MarketView() {
               <CircleDollarSign className="text-[#fcc025]" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">{t('market.market_pulse')}</h2>
               <button onClick={() => setShowIndexChart(!showIndexChart)}
-                className="ml-auto text-[10px] font-bold text-[#fcc025] bg-[#fcc025]/10 px-2.5 py-1 rounded-lg hover:bg-[#fcc025]/20 transition-colors">
+                className="ml-auto text-xs font-bold text-[#fcc025] bg-[#fcc025]/10 px-2.5 py-1 rounded-lg hover:bg-[#fcc025]/20 transition-colors">
                 <LineChart size={14} className="inline mr-1" />{showIndexChart ? '隱藏' : '圖表'}
               </button>
             </div>
@@ -449,7 +449,7 @@ export default function MarketView() {
                     );
                   })()}
                 </svg>
-                <div className="flex justify-between mt-1 text-[8px] text-[#494847]">
+                <div className="flex justify-between mt-1 text-[10px] text-[#494847]">
                   <span>{(marketSnapshot?.updatedAt ? new Date(marketSnapshot.updatedAt).getTime() - 48 * 60000 : Date.now() - 48 * 60000).toLocaleString()}</span>
                   <span>{marketSnapshot?.updatedAt ? new Date(marketSnapshot.updatedAt).toLocaleString() : ''}</span>
                 </div>
@@ -478,7 +478,7 @@ export default function MarketView() {
               </div>
             </div>
             {summary && (summary.loanPrincipal > 0 || summary.maxBorrow > 0) && (
-              <div className="mt-3 flex items-center gap-4 text-[10px] text-[#adaaaa]">
+              <div className="mt-3 flex items-center gap-4 text-xs text-[#adaaaa]">
                 <span>貸款: {nf(summary.loanPrincipal)}</span>
                 <span>最大可借: {nf(summary.maxBorrow)}</span>
               </div>
@@ -492,7 +492,7 @@ export default function MarketView() {
               {summary?.futuresPositions?.length > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold text-[#adaaaa]">{t('market.futures')}</span>
+                    <span className="text-xs font-bold text-[#adaaaa]">{t('market.futures')}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-black text-[#adaaaa]">{t('market.margin_label', { value: nf(summary.usedFuturesMargin || 0) })}</span>
                       {summary.futuresPositions.length > 1 && (
@@ -507,7 +507,7 @@ export default function MarketView() {
                           const label = totalPnl >= 0 ? 'success' : 'error';
                           setActionNotice({ type: lastErr ? 'error' : label, message: lastErr?.message || t('market.bulk_close_result', { count: summary.futuresPositions.length, pnl: `${sign}${nf(totalPnl)}` }) });
                         }} disabled={execute.isPending}
-                          className="text-[10px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
+                          className="text-xs font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-1 rounded-lg disabled:opacity-50">
                           {t('market.close_all')}
                          </button>
                       )}
@@ -527,25 +527,25 @@ export default function MarketView() {
               )}
               {summary?.stockPositions?.length > 0 && (
                 <div>
-                  <span className="text-[10px] font-bold text-[#adaaaa] block mb-2">{t('market.stocks')}</span>
+                  <span className="text-xs font-bold text-[#adaaaa] block mb-2">{t('market.stocks')}</span>
                   <div className="space-y-2">
                     {summary.stockPositions.map((pos: any) => (
                       <div key={pos.symbol}
                         onClick={() => setSelectedSymbol(pos.symbol)}
                         className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3 cursor-pointer hover:border-[#fcc025]/30 transition-colors">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-black text-white">{pos.symbol} <span className="text-[10px] font-bold text-[#adaaaa]">×{nf(pos.quantity)}</span></p>
+                          <p className="text-xs font-black text-white">{pos.symbol} <span className="text-xs font-bold text-[#adaaaa]">×{nf(pos.quantity)}</span></p>
                           <div className="flex items-center gap-2">
                             <p className={`text-xs font-black ${(pos.unrealizedPnl || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                               {(pos.unrealizedPnl || 0) >= 0 ? '+' : ''}{nf(pos.unrealizedPnl || 0)}
                             </p>
                             <button onClick={(e) => { e.stopPropagation(); setTradeQuantity(pos.quantity.toString()); }}
-                              className="text-[9px] font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded disabled:opacity-50 hover:bg-red-500/30">
+                              className="text-xs font-black bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded disabled:opacity-50 hover:bg-red-500/30">
                               {t('market.sell_all')}
                             </button>
                           </div>
                         </div>
-                        <p className="text-[10px] text-[#adaaaa] mt-0.5">{t('market.market_value', { value: nf(pos.marketValue) })}</p>
+                        <p className="text-xs text-[#adaaaa] mt-0.5">{t('market.market_value', { value: nf(pos.marketValue) })}</p>
                       </div>
                     ))}
                   </div>
@@ -569,11 +569,11 @@ export default function MarketView() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <p className="text-xs font-black uppercase tracking-[0.1em] text-white truncate">{quote.symbol}</p>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
+                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${(quote.changePct || 0) >= 0 ? 'bg-emerald-400/15 text-emerald-400' : 'bg-[#ff7351]/15 text-[#ff7351]'}`}>
                           {(quote.changePct || 0) >= 0 ? '+' : ''}{quote.changePct.toFixed(2)}%
                         </span>
                       </div>
-                      <p className="mt-0.5 text-[11px] text-[#aeb7c9] truncate">{quote.name}</p>
+                      <p className="mt-0.5 text-xs text-[#aeb7c9] truncate">{quote.name}</p>
                     </div>
                     {(quote.changePct || 0) >= 0 ? <TrendingUp className="text-emerald-400 shrink-0" size={16} /> : <TrendingDown className="text-[#ff7351] shrink-0" size={16} />}
                   </div>
@@ -611,13 +611,13 @@ export default function MarketView() {
 
       {/* Draggable floating stock chart */}
       {selectedQuote && stockHistory.length > 1 && showFloatingChart && (
-        <div className="fixed z-40 w-72 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-80"
+        <div className="fixed z-40 w-80 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-96"
           style={{ left: fp.x, top: fp.y + 80, right: fp.x ? undefined : 16 }}>
           <div className="flex items-center justify-between p-3 pb-0 cursor-grab active:cursor-grabbing select-none"
             onMouseDown={(e) => { dragRef.current = { startX: e.clientX, startY: e.clientY, fpX: fp.x, fpY: fp.y }; const handler = (ev: MouseEvent) => { if (!dragRef.current) return; setFp({ x: dragRef.current.fpX + ev.clientX - dragRef.current.startX, y: dragRef.current.fpY + ev.clientY - dragRef.current.startY }); }; const up = () => { dragRef.current = null; window.removeEventListener('mousemove', handler); window.removeEventListener('mouseup', up); }; window.addEventListener('mousemove', handler); window.addEventListener('mouseup', up); }}
             onTouchStart={(e) => { const t = e.touches[0]; dragRef.current = { startX: t.clientX, startY: t.clientY, fpX: fp.x, fpY: fp.y }; const handler = (ev: TouchEvent) => { if (!dragRef.current) return; setFp({ x: dragRef.current.fpX + ev.touches[0].clientX - dragRef.current.startX, y: dragRef.current.fpY + ev.touches[0].clientY - dragRef.current.startY }); }; const up = () => { dragRef.current = null; window.removeEventListener('touchmove', handler); window.removeEventListener('touchend', up); }; window.addEventListener('touchmove', handler); window.addEventListener('touchend', up); }}>
             <p className="text-xs font-black text-white">{selectedQuote.symbol}</p>
-            <p className={`text-[10px] font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+            <p className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
               {nf(Number(selectedQuote.price || 0))} ({isUp ? '+' : ''}{selectedQuote.changePct.toFixed(2)}%)
             </p>
           </div>
@@ -632,11 +632,11 @@ export default function MarketView() {
                 lines.push({ price: fp.liquidationPrice, color: '#f59e0b', label: t('market.chart_liq') });
               }
               lines.push({ price: Number(selectedQuote.price || 0), color: '#adaaaa', label: t('market.chart_mark') });
-              return <MiniChart data={stockHistory} color={stockColor} height={120} priceLines={lines} />;
+              return <MiniChart data={stockHistory} color={stockColor} height={180} priceLines={lines} />;
             })()}
           </div>
           <button onClick={() => setShowFloatingChart(false)}
-            className="absolute top-1 right-2 text-[10px] text-[#adaaaa] hover:text-white">✕</button>
+            className="absolute top-1 right-2 text-xs text-[#adaaaa] hover:text-white">✕</button>
         </div>
       )}
 
