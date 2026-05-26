@@ -178,7 +178,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
       const walletAction = new WalletManager();
       const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow", "loan_repay_all"].includes(type);
       const walletAmount = isReturnAction
-        ? (result?.refund || result?.total || result?.amount || 0)
+        ? (result?.refund || result?.net || result?.total || result?.amount || 0)
         : (result?.total || result?.margin || result?.amount || 0);
       const walletAbs = Math.abs(Number(walletAmount));
       if (walletAbs > 0) {
