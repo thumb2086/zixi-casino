@@ -129,7 +129,7 @@ function toPositiveNumber(value: unknown, fallback = 0): number {
   const n = toNumber(value, fallback);
   return n > 0 ? n : fallback;
 }
-function round(value: number, digits = 6): number {
+function round(value: number, digits = 2): number {
   const factor = 10 ** digits;
   return Math.round(value * factor) / factor;
 }
@@ -191,8 +191,8 @@ function positionPnl(position: FuturesPosition, currentPrice: number): number {
   const { quantity: qty, entryPrice: entry, side } = position;
   if (!qty || !entry) return 0;
   return side === "short"
-    ? round((entry - currentPrice) * qty, 6)
-    : round((currentPrice - entry) * qty, 6);
+    ? round((entry - currentPrice) * qty, 2)
+    : round((currentPrice - entry) * qty, 2);
 }
 
 function createSummary(entry: any): string {
@@ -223,7 +223,7 @@ function appendHistory(account: MarketAccount, entry: any): void {
 function requireAmount(value: unknown, fieldName = "amount"): number {
   const amount = toNumber(value, NaN);
   if (!Number.isFinite(amount) || amount <= 0) throw new Error(`${fieldName} 必須大於 0`);
-  return round(amount, 6);
+  return round(amount, 2);
 }
 function requireSymbol(value: unknown, allowed: Set<string>): string {
   const symbol = String(value || "").trim().toUpperCase();
@@ -238,15 +238,15 @@ function settleBankAndLoan(account: MarketAccount, nowTs: number): void {
   const bankDeltaMs = Math.max(0, ts - toNumber(account.bankUpdatedAt, ts));
   if (account.bankBalance > 0 && bankDeltaMs > 0) {
     const interest = account.bankBalance * BANK_ANNUAL_RATE * (bankDeltaMs / YEAR_MS);
-    account.bankBalance = round(account.bankBalance + interest, 6);
-    account.bankInterestAccrued = round(account.bankInterestAccrued + interest, 6);
+    account.bankBalance = round(account.bankBalance + interest, 2);
+    account.bankInterestAccrued = round(account.bankInterestAccrued + interest, 2);
   }
   account.bankUpdatedAt = ts;
   const loanDeltaMs = Math.max(0, ts - toNumber(account.loanUpdatedAt, ts));
   if (account.loanPrincipal > 0 && loanDeltaMs > 0) {
     const interest = account.loanPrincipal * LOAN_ANNUAL_RATE * (loanDeltaMs / YEAR_MS);
-    account.loanPrincipal = round(account.loanPrincipal + interest, 6);
-    account.loanInterestAccrued = round(account.loanInterestAccrued + interest, 6);
+    account.loanPrincipal = round(account.loanPrincipal + interest, 2);
+    account.loanInterestAccrued = round(account.loanInterestAccrued + interest, 2);
   }
   account.loanUpdatedAt = ts;
   account.lastSettledAt = ts;
@@ -280,7 +280,7 @@ export class MarketManager {
       if (!TRADEABLE_STOCKS.has(symbol)) continue;
       const h = holding as any;
       const qty = typeof h === "number" ? toNumber(h, 0) : toNumber(h?.qty, 0);
-      if (qty > 0) stockHoldings[symbol] = { qty: round(qty, 6), avgPrice: round(toNumber(h?.avgPrice, 0), 6) };
+      if (qty > 0) stockHoldings[symbol] = { qty: round(qty, 2), avgPrice: round(toNumber(h?.avgPrice, 0), 6) };
     }
 
     const futuresPositions: FuturesPosition[] = (Array.isArray(r.futuresPositions) ? r.futuresPositions : [])
@@ -387,9 +387,9 @@ export class MarketManager {
         const hitTp = pos.side === "long" ? quote.price >= pos.takeProfitPrice : quote.price <= pos.takeProfitPrice;
         if (hitTp) {
           const closedPnl = positionPnl(pos, pos.takeProfitPrice);
-          account.cash = round(account.cash + pos.margin + closedPnl, 6);
+          account.cash = round(account.cash + pos.margin + closedPnl, 2);
           events.push({ type: "take_profit", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.takeProfitPrice });
-          appendHistory(account, { type: "futures_tp", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 6), closePrice: pos.takeProfitPrice, pnl: closedPnl });
+          appendHistory(account, { type: "futures_tp", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 2), closePrice: pos.takeProfitPrice, pnl: closedPnl });
           continue;
         }
       }
@@ -399,17 +399,17 @@ export class MarketManager {
         const hitSl = pos.side === "long" ? quote.price <= pos.stopLossPrice : quote.price >= pos.stopLossPrice;
         if (hitSl) {
           const closedPnl = positionPnl(pos, pos.stopLossPrice);
-          account.cash = round(account.cash + pos.margin + closedPnl, 6);
+          account.cash = round(account.cash + pos.margin + closedPnl, 2);
           events.push({ type: "stop_loss", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.stopLossPrice });
-          appendHistory(account, { type: "futures_sl", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 6), closePrice: pos.stopLossPrice, pnl: closedPnl });
+          appendHistory(account, { type: "futures_sl", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 2), closePrice: pos.stopLossPrice, pnl: closedPnl });
           continue;
         }
       }
 
       // Check liquidation
       if (pnl <= -(pos.margin * 0.99)) {
-        events.push({ type: "liquidated", positionId: pos.id, symbol: pos.symbol, side: pos.side, marginLost: round(pos.margin, 6), markPrice: quote.price, estimatedPnl: pnl });
-        appendHistory(account, { type: "futures_liquidated", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 6), markPrice: quote.price, pnl });
+        events.push({ type: "liquidated", positionId: pos.id, symbol: pos.symbol, side: pos.side, marginLost: round(pos.margin, 2), markPrice: quote.price, estimatedPnl: pnl });
+        appendHistory(account, { type: "futures_liquidated", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 2), markPrice: quote.price, pnl });
         continue;
       }
       survivors.push(pos);
@@ -422,16 +422,16 @@ export class MarketManager {
     const symbol = requireSymbol(symbolInput, TRADEABLE_STOCKS);
     const quantity = requireAmount(quantityInput, "quantity");
     const quote = market.symbols[symbol];
-    const gross = round(quantity * quote.price, 6);
-    const fee = round(gross * STOCK_FEE_RATE, 6);
-    const total = round(gross + fee, 6);
+    const gross = round(quantity * quote.price, 2);
+    const fee = round(gross * STOCK_FEE_RATE, 2);
+    const total = round(gross + fee, 2);
     if (account.cash < total) throw new Error("可用子熙幣不足");
-    account.cash = round(account.cash - total, 6);
+    account.cash = round(account.cash - total, 2);
     const cur = account.stockHoldings[symbol] || { qty: 0, avgPrice: 0 };
     const prevQty = toNumber(cur.qty, 0);
     const prevCost = round(prevQty * toNumber(cur.avgPrice, 0), 6);
-    const newQty = round(prevQty + quantity, 6);
-    const newAvgPrice = newQty > 0 ? round((prevCost + total) / newQty, 6) : 0;
+    const newQty = round(prevQty + quantity, 2);
+    const newAvgPrice = newQty > 0 ? round((prevCost + total) / newQty, 4) : 0;
     account.stockHoldings[symbol] = { qty: newQty, avgPrice: newAvgPrice };
     appendHistory(account, { type: "stock_buy", symbol, quantity, price: quote.price, fee, total, avgPrice: newAvgPrice });
     return { symbol, quantity, price: quote.price, fee, total };
@@ -443,10 +443,10 @@ export class MarketManager {
     const holding = account.stockHoldings[symbol] || { qty: 0, avgPrice: 0 };
     if (toNumber(holding.qty, 0) < quantity) throw new Error(`${symbol} 持股不足`);
     const quote = market.symbols[symbol];
-    const gross = round(quantity * quote.price, 6);
-    const fee = round(gross * STOCK_FEE_RATE, 6);
-    const net = round(gross - fee, 6);
-    account.cash = round(account.cash + net, 6);
+    const gross = round(quantity * quote.price, 2);
+    const fee = round(gross * STOCK_FEE_RATE, 2);
+    const net = round(gross - fee, 2);
+    account.cash = round(account.cash + net, 2);
     const remainingQty = round(toNumber(holding.qty, 0) - quantity, 6);
     if (remainingQty <= 0) delete account.stockHoldings[symbol];
     else account.stockHoldings[symbol] = { qty: remainingQty, avgPrice: toNumber(holding.avgPrice, 0) };
@@ -463,12 +463,12 @@ export class MarketManager {
     if (payload.maxMargin && margin > payload.maxMargin) throw new Error(`保證金上限為 ${round(payload.maxMargin, 2).toLocaleString()} 子熙幣`);
     if (account.cash < margin) throw new Error("可用子熙幣不足");
     const quote = market.symbols[symbol];
-    const notional = round(margin * leverage, 6);
+    const notional = round(margin * leverage, 2);
     const quantity = round(notional / quote.price, 8);
-    const fee = round(notional * FUTURES_FEE_RATE, 6);
+    const fee = round(notional * FUTURES_FEE_RATE, 2);
     if (quantity <= 0) throw new Error("下單數量無效");
     if (account.cash < margin + fee) throw new Error("可用子熙幣不足支付保證金與手續費");
-    account.cash = round(account.cash - margin - fee, 6);
+    account.cash = round(account.cash - margin - fee, 2);
     const openedAt = Date.now();
     const id = `fut_${openedAt}_${hashInt(`${symbol}:${openedAt}:${Math.random()}`).toString().slice(-6)}`;
     const tp = payload.takeProfitPrice ? round(payload.takeProfitPrice, 4) : undefined;
@@ -515,9 +515,9 @@ export class MarketManager {
     const pnl = positionPnl(pos, closePrice);
     const realized = round(Math.max(-pos.margin, pnl), 6);
     const refund = round(Math.max(0, pos.margin + realized), 6);
-    const fee = round(pos.notional * FUTURES_FEE_RATE, 6);
+    const fee = round(pos.notional * FUTURES_FEE_RATE, 2);
     account.futuresPositions.splice(idx, 1);
-    account.cash = round(account.cash + refund - fee, 6);
+    account.cash = round(account.cash + refund - fee, 2);
     appendHistory(account, { type: "futures_close", id: pos.id, symbol: pos.symbol, side: pos.side, closePrice, pnl: realized, fee });
     return { id: pos.id, symbol: pos.symbol, side: pos.side, closePrice, realizedPnl: realized, refund, fee };
   }
@@ -525,8 +525,8 @@ export class MarketManager {
   bankDeposit(account: MarketAccount, amountInput: unknown) {
     const amount = requireAmount(amountInput, "amount");
     if (account.cash + MONEY_EPSILON < amount) throw new Error("可用子熙幣不足");
-    account.cash = round(account.cash - amount, 6);
-    account.bankBalance = round(account.bankBalance + amount, 6);
+    account.cash = round(account.cash - amount, 2);
+    account.bankBalance = round(account.bankBalance + amount, 2);
     appendHistory(account, { type: "bank_deposit", amount });
     return { amount };
   }
@@ -535,8 +535,8 @@ export class MarketManager {
     const amount = requireAmount(amountInput, "amount");
     if (account.bankBalance + MONEY_EPSILON < amount) throw new Error("銀行餘額不足");
     const withdrawAmount = round(Math.min(amount, account.bankBalance), 6);
-    account.bankBalance = round(account.bankBalance - withdrawAmount, 6);
-    account.cash = round(account.cash + withdrawAmount, 6);
+    account.bankBalance = round(account.bankBalance - withdrawAmount, 2);
+    account.cash = round(account.cash + withdrawAmount, 2);
     appendHistory(account, { type: "bank_withdraw", amount: withdrawAmount });
     return { amount: withdrawAmount };
   }
@@ -547,8 +547,8 @@ export class MarketManager {
     const maxBorrow = round(Math.max(0, summary.netWorth * 0.6 - account.loanPrincipal), 6);
     if (maxBorrow <= 0) throw new Error("目前資產不足以繼續貸款");
     if (amount > maxBorrow) throw new Error(`目前最多可貸 ${maxBorrow.toFixed(2)}`);
-    account.loanPrincipal = round(account.loanPrincipal + amount, 6);
-    account.cash = round(account.cash + amount, 6);
+    account.loanPrincipal = round(account.loanPrincipal + amount, 2);
+    account.cash = round(account.cash + amount, 2);
     appendHistory(account, { type: "loan_borrow", amount });
     return { amount, maxBorrow };
   }
@@ -557,9 +557,18 @@ export class MarketManager {
     const amount = requireAmount(amountInput, "amount");
     const payAmount = round(Math.min(amount, account.cash + MONEY_EPSILON, account.loanPrincipal + MONEY_EPSILON), 6);
     if (payAmount <= 0) throw new Error("沒有可償還的貸款");
-    account.cash = round(account.cash - payAmount, 6);
-    account.loanPrincipal = round(account.loanPrincipal - payAmount, 6);
+    account.cash = round(account.cash - payAmount, 2);
+    account.loanPrincipal = round(account.loanPrincipal - payAmount, 2);
     appendHistory(account, { type: "loan_repay", amount: payAmount });
+    return { amount: payAmount, remainingLoan: account.loanPrincipal };
+  }
+
+  repayAllLoan(account: MarketAccount) {
+    const payAmount = round(Math.min(account.loanPrincipal, account.cash));
+    if (payAmount <= 0) throw new Error("沒有可償還的貸款");
+    account.cash = round(account.cash - payAmount);
+    account.loanPrincipal = round(account.loanPrincipal - payAmount);
+    appendHistory(account, { type: "loan_repay_all", amount: payAmount });
     return { amount: payAmount, remainingLoan: account.loanPrincipal };
   }
 
@@ -572,9 +581,9 @@ export class MarketManager {
       const quote = market.symbols[symbol];
       if (!quote) continue;
       const avgPrice = round(toNumber(holding.avgPrice, 0), 6);
-      const value = round(qty * quote.price, 6);
+      const value = round(qty * quote.price, 2);
       stockValue += value;
-      stockPositions.push({ symbol, name: MARKET_SYMBOLS[symbol]?.name, sector: MARKET_SYMBOLS[symbol]?.sector, quantity: round(qty, 6), avgPrice, price: quote.price, marketValue: value, unrealizedPnl: round((quote.price - avgPrice) * qty, 6), roiPct: avgPrice > 0 ? round(((quote.price - avgPrice) / avgPrice) * 100, 4) : 0, dayChangePct: round(quote.changePct, 4) });
+      stockPositions.push({ symbol, name: MARKET_SYMBOLS[symbol]?.name, sector: MARKET_SYMBOLS[symbol]?.sector, quantity: round(qty, 2), avgPrice, price: quote.price, marketValue: value, unrealizedPnl: round((quote.price - avgPrice) * qty, 2), roiPct: avgPrice > 0 ? round(((quote.price - avgPrice) / avgPrice) * 100, 4) : 0, dayChangePct: round(quote.changePct, 4) });
     }
 
     let totalFuturesUnrealized = 0, totalUsedMargin = 0;
@@ -585,13 +594,13 @@ export class MarketManager {
       const unrealizedPnl = positionPnl(pos, quote.price);
       totalFuturesUnrealized += unrealizedPnl;
       totalUsedMargin += pos.margin;
-      futuresPositions.push({ ...pos, markPrice: quote.price, symbolName: MARKET_SYMBOLS[pos.symbol]?.name || pos.symbol, unrealizedPnl: round(unrealizedPnl, 6), roiPct: pos.margin > 0 ? round((unrealizedPnl / pos.margin) * 100, 3) : 0 });
+      futuresPositions.push({ ...pos, markPrice: quote.price, symbolName: MARKET_SYMBOLS[pos.symbol]?.name || pos.symbol, unrealizedPnl: round(unrealizedPnl, 2), roiPct: pos.margin > 0 ? round((unrealizedPnl / pos.margin) * 100, 3) : 0 });
     }
 
-    const cash = round(account.cash, 6);
-    const bankBalance = round(account.bankBalance, 6);
-    const loanPrincipal = round(account.loanPrincipal, 6);
-    const netWorth = round(cash + bankBalance + stockValue + totalFuturesUnrealized - loanPrincipal, 6);
-    return { cash, bankBalance, loanPrincipal, stockValue: round(stockValue, 6), futuresUnrealizedPnl: round(totalFuturesUnrealized, 6), usedFuturesMargin: round(totalUsedMargin, 6), netWorth, maxBorrow: round(Math.max(0, netWorth * 0.6 - loanPrincipal), 6), bankInterestAccrued: round(account.bankInterestAccrued, 6), loanInterestAccrued: round(account.loanInterestAccrued, 6), stockPositions, futuresPositions, history: account.history.slice(0, 24) };
+    const cash = round(account.cash, 2);
+    const bankBalance = round(account.bankBalance, 2);
+    const loanPrincipal = round(account.loanPrincipal, 2);
+    const netWorth = round(cash + bankBalance + stockValue + totalFuturesUnrealized - loanPrincipal, 2);
+    return { cash, bankBalance, loanPrincipal, stockValue: round(stockValue, 2), futuresUnrealizedPnl: round(totalFuturesUnrealized, 2), usedFuturesMargin: round(totalUsedMargin, 2), netWorth, maxBorrow: round(Math.max(0, netWorth * 0.6 - loanPrincipal), 6), bankInterestAccrued: round(account.bankInterestAccrued, 2), loanInterestAccrued: round(account.loanInterestAccrued, 2), stockPositions, futuresPositions, history: account.history.slice(0, 24) };
   }
 }

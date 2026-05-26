@@ -3,7 +3,7 @@ export const formatNumber = (num: number | string, mode: 'short' | 'full' = 'sho
   if (isNaN(n)) return '0';
 
   if (mode === 'full') {
-    return n.toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 6 });
+    return n.toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 
   if (Math.abs(n) >= 1000000000000) {
@@ -17,7 +17,7 @@ export const formatNumber = (num: number | string, mode: 'short' | 'full' = 'sho
   }
 
   // Show up to 6 decimal places for values < 10000
-  return n.toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 6 });
+  return n.toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 };
 
 export const formatCurrency = (num: number | string): string => {
