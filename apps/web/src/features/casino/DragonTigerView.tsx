@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./DragonTiger.css";
@@ -31,6 +32,7 @@ interface OpenGateData {
 const SUIT = "♦";
 
 export const DragonTigerView: React.FC = () => {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const [betAmount, setBetAmount] = useState<string>("100");
   const [openGate, setOpenGate] = useState<OpenGateData | null>(null);
@@ -105,14 +107,14 @@ export const DragonTigerView: React.FC = () => {
     <div className="dragon-tiger-container">
       <div className="gate-area">
         <div className="gate-side left">
-          <h3>龍門左牌</h3>
+          <h3>{t('casino_game.dragon_gate_left')}</h3>
           {leftCard ? renderCard(leftCard) : <div className="card-slot">?</div>}
         </div>
         <div className="gate-multiplier">
           {openGate ? (
             <>
               <span className="text-yellow-400 font-bold">{openGate.multiplier}x</span>
-              <span className="text-xs text-gray-400 mt-1">範圍 {openGate.lo}~{openGate.hi}</span>
+              <span className="text-xs text-gray-400 mt-1">{t('casino_game.dragon_range', { lo: openGate.lo, hi: openGate.hi })}</span>
             </>
           ) : result ? (
             <span className="text-yellow-400 font-bold">2x</span>
@@ -121,20 +123,20 @@ export const DragonTigerView: React.FC = () => {
           )}
         </div>
         <div className="gate-side right">
-          <h3>龍門右牌</h3>
+          <h3>{t('casino_game.dragon_gate_right')}</h3>
           {rightCard ? renderCard(rightCard) : <div className="card-slot">?</div>}
         </div>
       </div>
 
       <div className="shot-area">
-        <h3>你的射牌</h3>
+        <h3>{t('casino_game.dragon_your_card')}</h3>
         {midCard ? renderCard(midCard) : <div className="card-slot highlight">?</div>}
       </div>
 
       <div className="controls">
         {!openGate && !result && (
           <button className="gate-btn" onClick={handleOpenGate} disabled={isOpening}>
-            {isOpening ? "開門中..." : "開門"}
+            {isOpening ? t('casino_game.dragon_opening') : t('casino_game.dragon_open')}
           </button>
         )}
 
@@ -145,20 +147,20 @@ export const DragonTigerView: React.FC = () => {
               value={betAmount}
               onChange={(e) => setBetAmount(e.target.value)}
               disabled={isPlaying}
-              placeholder="下注金額"
+              placeholder={t('casino_game.dragon_bet_amount')}
             />
             <button className="gate-btn" onClick={handlePlay} disabled={isPlaying}>
-              {isPlaying ? "結算中..." : "開射"}
+              {isPlaying ? t('casino_game.dragon_settling') : t('casino_game.dragon_shoot')}
             </button>
             <button className="text-sm text-gray-400 hover:text-white" onClick={() => setOpenGate(null)} disabled={isPlaying}>
-              重新開門
+              {t('casino_game.dragon_reopen')}
             </button>
           </>
         )}
       </div>
 
       {!openGate && !result && !error && (
-        <div className="text-center text-sm text-gray-300">點擊「開門」先翻開龍門牌，再決定下注金額。</div>
+        <div className="text-center text-sm text-gray-300">{t('casino_game.dragon_instruction')}</div>
       )}
 
       {error && <div className="result-banner lose"><h2>{error}</h2></div>}
@@ -166,11 +168,11 @@ export const DragonTigerView: React.FC = () => {
       {result && !error && (
         <>
           <div className={`result-banner ${result.result === "win" ? "win" : result.result === "draw" ? "pillar" : "lose"}`}>
-            <h2>{result.result === "win" ? "贏了！" : result.result === "draw" ? "平手" : "未中"}</h2>
+            <h2>{result.result === "win" ? t('casino_game.dragon_win') : result.result === "draw" ? t('casino_game.dragon_push') : t('casino_game.dragon_lose')}</h2>
           </div>
           <div className="text-center mt-4">
             <button className="gate-btn" onClick={() => { setResult(null); setOpenGate(null); }}>
-              再玩一次
+              {t('casino_game.dragon_play_again')}
             </button>
           </div>
         </>

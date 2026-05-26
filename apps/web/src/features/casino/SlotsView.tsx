@@ -7,6 +7,7 @@ import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 import { formatNumber } from '@repo/shared';
+import { useTranslation } from 'react-i18next';
 
 const REEL_CELLS = [[0, 3, 6], [1, 4, 7], [2, 5, 8]];
 const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣'];
@@ -15,6 +16,7 @@ const REEL_DELAY_MS = 80;
 const REEL_STOP_INTERVAL = 150;
 
 export const SlotsView: React.FC = () => {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const spinningRef = useRef(false);
@@ -32,7 +34,7 @@ export const SlotsView: React.FC = () => {
   });
   const maxBet = profile?.maxBet ?? 1_000_000;
   const [grid, setGrid] = useState<string[]>(['🍒', '🍋', '🍉', '⭐', '🔔', '💎', '7️⃣', '🍒', '🍋']);
-  const [status, setStatus] = useState('🎰 拉霸準備就緒，祝你好運！');
+  const [status, setStatus] = useState(t('casino_game.slots_ready'));
   const [winSymbols, setWinSymbols] = useState<number[]>([]);
   const [reelState, setReelState] = useState<('idle' | 'spinning' | 'stopped')[]>(['idle', 'idle', 'idle']);
 
@@ -77,7 +79,7 @@ export const SlotsView: React.FC = () => {
     return new Promise((resolve, reject) => {
       const intervalRefs: ReturnType<typeof setInterval>[] = [];
       setWinSymbols([]);
-      setStatus('🎰 旋轉中...');
+      setStatus(t('casino_game.slots_spinning'));
 
       startReelSpin(0, intervalRefs);
       const t1 = setTimeout(() => startReelSpin(1, intervalRefs), REEL_DELAY_MS);
@@ -99,10 +101,10 @@ export const SlotsView: React.FC = () => {
         setTimeout(() => {
           const won = result.multiplier > 0;
           if (won) {
-            setStatus(`🎉 中獎！倍率 ${result.multiplier}x，彩金 ${formatNumber(result.payout || 0)} ZXC`);
+            setStatus(t('casino_game.slots_win_result', { multiplier: result.multiplier, amount: formatNumber(result.payout || 0) }));
             setWinSymbols(result.winLines?.flat() || []);
           } else {
-            setStatus('😢 本局未中');
+            setStatus(t('casino_game.slots_lose'));
           }
           summaryRef.current.spins += 1;
           if (won) summaryRef.current.wins += result.payout || 0;
@@ -124,7 +126,7 @@ export const SlotsView: React.FC = () => {
     try {
       await doSingleSpin();
     } catch (err: any) {
-      setStatus(`❌ ${err?.message || '旋轉失敗'}`);
+      setStatus(t('casino_game.slots_spin_error', { message: err?.message || '' }));
     }
     spinningRef.current = false;
   };
@@ -142,7 +144,7 @@ export const SlotsView: React.FC = () => {
       try {
         await doSingleSpin();
       } catch (err: any) {
-        setStatus(`❌ ${err?.message || '自動旋轉停止'}`);
+        setStatus(t('casino_game.slots_spin_error', { message: err?.message || '' }));
         break;
       }
       // Small pause between spins
@@ -153,7 +155,7 @@ export const SlotsView: React.FC = () => {
     spinningRef.current = false;
     setAutoRemaining(0);
     const s = summaryRef.current;
-    setStatus(`🏁 自動旋轉結束！共 ${s.spins} 局，贏得 ${formatNumber(s.wins || 0)} ZXC`);
+    setStatus(t('casino_game.slots_auto_end', { spins: s.spins, wins: formatNumber(s.wins || 0) }));
   };
 
   const cancelAutoSpin = () => {
@@ -193,12 +195,12 @@ export const SlotsView: React.FC = () => {
       <div className="flex gap-2 mt-2">
         {autoSpinRef.current ? (
           <button className="btn-spin flex-1 bg-red-600 hover:bg-red-700" onClick={cancelAutoSpin}>
-            停止自動 (剩 {autoRemaining} 次)
+            {t('casino_game.slots_stop_auto', { count: autoRemaining })}
           </button>
         ) : (
           <>
             <button className="btn-spin flex-1" onClick={handleSpin} disabled={spinningRef.current}>
-              {spinningRef.current ? '旋轉中' : '開始旋轉'}
+              {spinningRef.current ? t('casino_game.slots_spinning_label') : t('casino_game.slots_start_spin')}
             </button>
             <div className="flex gap-1 items-center">
               {AUTO_OPTIONS.map((n) => (
@@ -208,7 +210,7 @@ export const SlotsView: React.FC = () => {
                 </button>
               ))}
               <button className="btn-spin px-4 text-sm" onClick={handleAutoSpin} disabled={spinningRef.current}>
-                自動 x{autoCount}
+                {t('casino_game.slots_auto_x', { count: autoCount })}
               </button>
             </div>
           </>

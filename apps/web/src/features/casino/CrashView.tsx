@@ -3,8 +3,10 @@ import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./Crash.css";
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
+import { useTranslation } from 'react-i18next';
 
 export const CrashView: React.FC = () => {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const [betAmount, setBetAmount] = useState<string>("100");
   const [status, setStatus] = useState<"idle" | "running" | "crashed" | "cashed_out">("idle");
@@ -133,8 +135,8 @@ export const CrashView: React.FC = () => {
         <h1 className={status === "crashed" ? "crashed-text" : ""}>
           {status === "idle" ? "1.00" : multiplier.toFixed(2)}x
         </h1>
-        {status === "crashed" && <div className="crash-msg">墜毀！</div>}
-        {status === "cashed_out" && <div className="win-msg">已停利！</div>}
+        {status === "crashed" && <div className="crash-msg">{t('casino_game.crash_crashed')}</div>}
+        {status === "cashed_out" && <div className="win-msg">{t('casino_game.crash_cashed_out')}</div>}
         {status === "running" && (
           <div className="text-xs text-emerald-400 absolute bottom-1.5">
             {((multiplier - 1) * Number(betAmount)).toFixed(2)} ZXC
@@ -160,20 +162,20 @@ export const CrashView: React.FC = () => {
         <input type="number" value={betAmount} onChange={(e) => setBetAmount(e.target.value)}
           disabled={status === "running"} />
         {status === "running" ? (
-          <button className="cashout-btn" onClick={cashOut}>🛸 停利</button>
+          <button className="cashout-btn" onClick={cashOut}>{t('casino_game.crash_cash_out')}</button>
         ) : (
-          <button className="bet-btn" onClick={startRace}>🚀 發射</button>
+          <button className="bet-btn" onClick={startRace}>{t('casino_game.crash_launch')}</button>
         )}
       </div>
 
-      {error && <div className="last-result">錯誤：{error}</div>}
+      {error && <div className="last-result">{t('casino_game.crash_error', { message: error })}</div>}
       {lastResult && (
         <div className="last-result">
-          上局：{lastResult.result === "win" ? "🏆 贏" : lastResult.result === "lose" ? "💥 輸" : "—"} ｜ 爆線點 {crashPoint.toFixed(2)}x
+          {t('casino_game.crash_last_round', { result: lastResult.result === "win" ? t('casino_game.crash_win_label') : lastResult.result === "lose" ? t('casino_game.crash_lose_label') : t('casino_game.crash_none'), point: crashPoint.toFixed(2) })}
         </div>
       )}
       {status === "running" && targetCrashPoint && (
-        <div className="last-result text-slate-500">倍率上升中… 隨時可停利</div>
+        <div className="last-result text-slate-500">{t('casino_game.crash_rising')}</div>
       )}
     </div>
   );

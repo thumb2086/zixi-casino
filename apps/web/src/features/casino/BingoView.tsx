@@ -5,10 +5,12 @@ import { api } from '../../store/api';
 import './Bingo.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
+import { useTranslation } from 'react-i18next';
 import { BetQuickActions } from './BetQuickActions';
 
 export const BingoView: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { session } = useAuth();
 
   const { data: profile } = useQuery({
@@ -22,7 +24,7 @@ export const BingoView: React.FC = () => {
   const maxBet = profile?.maxBet ?? 1_000_000;
   const [betAmount, setBetAmount] = useState('10');
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
-  const [status, setStatus] = useState('📋 請從 1~75 中選 8 個號碼');
+  const [status, setStatus] = useState(t('casino_game.bingo_instruction'));
   const [statusColor, setStatusColor] = useState('#ffd36a');
   const [result, setResult] = useState<any>(null);
   const [isRevealing, setIsRevealing] = useState(false);
@@ -61,11 +63,11 @@ export const BingoView: React.FC = () => {
     },
     onSuccess: (data) => {
       setIsRevealing(true);
-      setStatus('🎱 開球中...');
+      setStatus(t('casino_game.bingo_rolling'));
       setStatusColor('#ffd36a');
       window.setTimeout(() => {
         setResult(data);
-        setStatus(`🎉 第 ${roundNo} 局結算：派彩 ${data.payout}`);
+        setStatus(t('casino_game.bingo_win_result', { round: roundNo, amount: data.payout }));
         setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
         setRoundNo((prev) => prev + 1);
         setIsRevealing(false);
@@ -74,7 +76,7 @@ export const BingoView: React.FC = () => {
       }, 300);
     },
     onError: (err: Error) => {
-      setStatus(`❌ 下注失敗：${err.message}`);
+      setStatus(t('casino_game.bingo_bet_error', { message: err.message }));
       setStatusColor('#ff4d4d');
     },
   });
@@ -92,7 +94,7 @@ export const BingoView: React.FC = () => {
 
       {result && (
         <div className="text-xs text-slate-400 mb-2 text-center">
-          開獎號碼：{(result.winningNumbers || []).slice(0, 20).join(', ')}
+          {t('casino_game.bingo_drawn_numbers')}{(result.winningNumbers || []).slice(0, 20).join(', ')}
           {(result.winningNumbers || []).length > 20 && ' ...'}
         </div>
       )}
@@ -116,8 +118,8 @@ export const BingoView: React.FC = () => {
       </div>
 
       <div className="bingo-controls">
-        <button className="bg-slate-700 px-4 py-2 rounded disabled:opacity-50" onClick={randomPick} disabled={isRevealing || betMutation.isPending}>隨機選號</button>
-        <button className="bg-slate-700 px-4 py-2 rounded disabled:opacity-50" onClick={() => setSelectedNumbers([])} disabled={isRevealing || betMutation.isPending}>清空已選</button>
+        <button className="bg-slate-700 px-4 py-2 rounded disabled:opacity-50" onClick={randomPick} disabled={isRevealing || betMutation.isPending}>{t('casino_game.bingo_select_random')}</button>
+        <button className="bg-slate-700 px-4 py-2 rounded disabled:opacity-50" onClick={() => setSelectedNumbers([])} disabled={isRevealing || betMutation.isPending}>{t('casino_game.bingo_clear')}</button>
         <input
           type="number"
           value={betAmount}
@@ -131,7 +133,7 @@ export const BingoView: React.FC = () => {
           onClick={() => betMutation.mutate()}
           disabled={selectedNumbers.length === 0 || betMutation.isPending || isRevealing}
         >
-          {betMutation.isPending || isRevealing ? '開球中…' : '下注並開球'}
+          {betMutation.isPending || isRevealing ? t('casino_game.bingo_drawing') : t('casino_game.bingo_bet_and_draw')}
         </button>
       </div>
 
@@ -139,8 +141,8 @@ export const BingoView: React.FC = () => {
         {status}
         {result && (
           <div className="mt-2 text-sm text-slate-300">
-            命中 {(result.matches || []).length} 個號碼：{(result.matches || []).join(', ') || '無'}
-            {result.winningNumbers && <div className="text-xs text-slate-500 mt-1">開獎 {result.winningNumbers.length} 個號碼（綠色標記）</div>}
+            {t('casino_game.bingo_match_result', { count: result.matches?.length || 0, numbers: (result.matches || []).join(', ') || '無' })}
+            {result.winningNumbers && <div className="text-xs text-slate-500 mt-1">{t('casino_game.bingo_drawn_count', { count: result.winningNumbers.length })}</div>}
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
@@ -28,18 +29,6 @@ interface PlacedBet {
   amount: number;
 }
 
-const OUTSIDE_BETS: { type: PlacedBet['type']; value: string; label: string; color: string }[] = [
-  { type: 'color', value: 'red', label: '紅', color: 'bg-red-600' },
-  { type: 'color', value: 'black', label: '黑', color: 'bg-zinc-900' },
-  { type: 'parity', value: 'odd', label: '單', color: 'bg-slate-700' },
-  { type: 'parity', value: 'even', label: '雙', color: 'bg-slate-700' },
-  { type: 'range', value: 'low', label: '小 1-18', color: 'bg-slate-700' },
-  { type: 'range', value: 'high', label: '大 19-36', color: 'bg-slate-700' },
-  { type: 'dozen', value: '1', label: '1st 12', color: 'bg-slate-700' },
-  { type: 'dozen', value: '2', label: '2nd 12', color: 'bg-slate-700' },
-  { type: 'dozen', value: '3', label: '3rd 12', color: 'bg-slate-700' },
-];
-
 // Three rows of 12 numbers for the table display
 const TABLE_ROWS = [
   [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
@@ -48,8 +37,21 @@ const TABLE_ROWS = [
 ];
 
 export function RouletteView() {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+
+  const OUTSIDE_BETS: { type: PlacedBet['type']; value: string; label: string; color: string }[] = [
+    { type: 'color', value: 'red', label: t('casino_game.roulette_red'), color: 'bg-red-600' },
+    { type: 'color', value: 'black', label: t('casino_game.roulette_black'), color: 'bg-zinc-900' },
+    { type: 'parity', value: 'odd', label: t('casino_game.roulette_odd'), color: 'bg-slate-700' },
+    { type: 'parity', value: 'even', label: t('casino_game.roulette_even'), color: 'bg-slate-700' },
+    { type: 'range', value: 'low', label: t('casino_game.roulette_small_range'), color: 'bg-slate-700' },
+    { type: 'range', value: 'high', label: t('casino_game.roulette_big_range'), color: 'bg-slate-700' },
+    { type: 'dozen', value: '1', label: '1st 12', color: 'bg-slate-700' },
+    { type: 'dozen', value: '2', label: '2nd 12', color: 'bg-slate-700' },
+    { type: 'dozen', value: '3', label: '3rd 12', color: 'bg-slate-700' },
+  ];
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -92,7 +94,7 @@ export function RouletteView() {
   const betMutation = useMutation({
     mutationFn: async () => {
       if (!session) throw new Error('No session');
-      if (bets.length === 0) throw new Error('請至少下一個注');
+      if (bets.length === 0) throw new Error(t('casino_game.roulette_place_bet_hint'));
       const res = await api.post('/api/v1/games/roulette/play', {
         sessionId: session.id,
         betAmount: totalBet,
@@ -205,8 +207,8 @@ export function RouletteView() {
         {bets.length > 0 && (
           <div className="mb-4 p-3 rounded-lg bg-slate-900/80 border border-slate-700">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-bold text-yellow-400">目前下注 (總計: {totalBet})</span>
-              <button onClick={clearBets} className="text-xs text-red-400 hover:text-red-300">清除全部</button>
+              <span className="text-sm font-bold text-yellow-400">{t('casino_game.roulette_current_bets', { amount: totalBet })}</span>
+              <button onClick={clearBets} className="text-xs text-red-400 hover:text-red-300">{t('casino_game.roulette_clear_all')}</button>
             </div>
             <div className="flex flex-wrap gap-2">
               {bets.map((b, i) => (
@@ -229,10 +231,10 @@ export function RouletteView() {
             <BetQuickActions amount={betAmount} onChange={setBetAmount} disabled={betMutation.isPending || isSpinning} maxBet={maxBet} />
             <button className="bg-gold rounded px-8 py-2 font-bold text-black hover:opacity-90 disabled:opacity-50"
               onClick={() => betMutation.mutate()} disabled={betMutation.isPending || isSpinning || bets.length === 0}>
-              {betMutation.isPending ? '處理中...' : '旋轉開獎'}
+              {betMutation.isPending ? t('casino_game.processing') : t('casino_game.roulette_spin_label')}
             </button>
           </div>
-          <p className="text-xs text-slate-500">點擊數字或區域加入下注，點擊黃點可調整金額，點選注單可移除</p>
+          <p className="text-xs text-slate-500">{t('casino_game.roulette_hint')}</p>
         </div>
 
         {error && <div className="mt-4 p-3 rounded-lg bg-red-900/50 border border-red-700 text-red-300 text-sm">{error}</div>}
@@ -240,11 +242,11 @@ export function RouletteView() {
         {result && !isSpinning && (
           <div className="mt-4 p-4 rounded-lg bg-slate-900/80 border border-slate-700">
             <div className="text-center mb-2">
-              <p className="text-lg font-bold text-white">結果: <span className={`text-${result.color === 'red' ? 'red' : result.color === 'black' ? 'white' : 'emerald'}-400`}>{result.number} ({result.color})</span></p>
+              <p className="text-lg font-bold text-white">{t('casino_game.roulette_result_label')}<span className={`text-${result.color === 'red' ? 'red' : result.color === 'black' ? 'white' : 'emerald'}-400`}>{result.number} ({result.color})</span></p>
             </div>
             {lastBets.length > 0 && (
               <div className="text-xs text-slate-400 text-center">
-                你的下注: {lastBets.map(b => b.label).join('、')}
+                {t('casino_game.roulette_your_bets')}{lastBets.map(b => b.label).join('、')}
               </div>
             )}
           </div>

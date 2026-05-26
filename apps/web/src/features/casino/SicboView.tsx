@@ -5,10 +5,12 @@ import { api } from '../../store/api';
 import './Sicbo.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
+import { useTranslation } from 'react-i18next';
 import { BetQuickActions } from './BetQuickActions';
 
 export const SicboView: React.FC = () => {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const { session } = useAuth();
 
   const { data: profile } = useQuery({
@@ -23,7 +25,7 @@ export const SicboView: React.FC = () => {
   const [betAmount, setBetAmount] = useState('10');
   const [selectedBet, setSelectedBet] = useState<'big' | 'small'>('big');
   const [result, setResult] = useState<any>(null);
-  const [status, setStatus] = useState('🎲 請選擇大小並下注');
+  const [status, setStatus] = useState(t('casino_game.sicbo_instruction'));
   const [statusColor, setStatusColor] = useState('#ffd36a');
   const [dicePreview, setDicePreview] = useState([1, 1, 1]);
   const [isRevealing, setIsRevealing] = useState(false);
@@ -47,12 +49,12 @@ export const SicboView: React.FC = () => {
     },
     onSuccess: (data) => {
       setIsRevealing(true);
-      setStatus('🎲 開獎中...');
+      setStatus(t('casino_game.sicbo_rolling'));
       setStatusColor('#ffd36a');
       window.setTimeout(() => {
         setResult(data);
         setDicePreview(data.dice || [1, 1, 1]);
-        setStatus(`🎯 開獎總點 ${data.total}（${data.isBig ? '大' : '小'}）`);
+        setStatus(t('casino_game.sicbo_bet_result', { total: data.total, result: data.isBig ? t('casino_game.sicbo_big_label') : t('casino_game.sicbo_small_label') }));
         setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
         setIsRevealing(false);
         queryClient.invalidateQueries({ queryKey: ['user'] });
@@ -60,7 +62,7 @@ export const SicboView: React.FC = () => {
       }, 300);
     },
     onError: (err: Error) => {
-      setStatus(`❌ 下注失敗：${err.message}`);
+      setStatus(t('casino_game.sicbo_bet_error', { message: err.message }));
       setStatusColor('#ff4d4d');
     },
   });
@@ -87,11 +89,11 @@ export const SicboView: React.FC = () => {
 
       <div className="sicbo-betting-grid">
         <div className={`bet-option ${selectedBet === 'small' ? 'active' : ''}`} onClick={() => setSelectedBet('small')}>
-          <span className="bet-label">小 (4-10)</span>
+          <span className="bet-label">{t('casino_game.sicbo_small')}</span>
           <span className="bet-odds">x2.0</span>
         </div>
         <div className={`bet-option ${selectedBet === 'big' ? 'active' : ''}`} onClick={() => setSelectedBet('big')}>
-          <span className="bet-label">大 (11-17)</span>
+          <span className="bet-label">{t('casino_game.sicbo_big')}</span>
           <span className="bet-odds">x2.0</span>
         </div>
       </div>
@@ -110,7 +112,7 @@ export const SicboView: React.FC = () => {
           onClick={() => betMutation.mutate()}
           disabled={betMutation.isPending || isRevealing}
         >
-          {betMutation.isPending || isRevealing ? '開獎中…' : '下注並開獎'}
+          {betMutation.isPending || isRevealing ? t('casino_game.sicbo_opening') : t('casino_game.sicbo_bet_and_open')}
         </button>
       </div>
 

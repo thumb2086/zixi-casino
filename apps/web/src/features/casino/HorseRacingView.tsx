@@ -6,6 +6,7 @@ import './HorseRacing.css';
 import './CasinoCommon.css';
 import { BetQuickActions } from './BetQuickActions';
 import { formatNumber } from '@repo/shared';
+import { useTranslation } from 'react-i18next';
 
 interface Horse {
   id: number; name: string; multiplier: number; weight: number;
@@ -56,11 +57,12 @@ function saveLocalResult(result: { roundId: number; winnerId: number; winnerName
 }
 
 export const HorseRacingView: React.FC = () => {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [betAmount, setBetAmount] = useState('10');
   const [selectedHorseId, setSelectedHorseId] = useState(1);
-  const [statusMsg, setStatusMsg] = useState('請選擇馬匹並下注。');
+  const [statusMsg, setStatusMsg] = useState(t('casino_game.horse_bet_prompt'));
   const [statusColor, setStatusColor] = useState('#ffd36a');
   const [isRacing, setIsRacing] = useState(false);
   const [winner, setWinner] = useState<Horse | null>(null);
@@ -117,7 +119,7 @@ export const HorseRacingView: React.FC = () => {
           setProgress({});
           setWinner(null);
           setRaceBetRecords([]);
-          setStatusMsg('請選擇馬匹並下注。');
+          setStatusMsg(t('casino_game.horse_bet_prompt'));
           setStatusColor('#ffd36a');
         }
         setRoundClosed(!data.isBettingOpen);
@@ -148,13 +150,13 @@ export const HorseRacingView: React.FC = () => {
 
     const amount = Number(betAmount);
     if (amount > maxBet) {
-      setStatusMsg(`⚠️ 單注上限 ${formatNumber(maxBet)} ZXC`);
+      setStatusMsg(t('casino_game.horse_max_bet', { max: formatNumber(maxBet) }));
       setStatusColor('#ff8800');
       return;
     }
     setBetRecords((prev) => [...prev, { horseId: selectedHorseId, amount }]);
     const total = betRecords.reduce((s, r) => s + r.amount, 0) + amount;
-    setStatusMsg(`🐎 已下注 ${betRecords.length + 1} 筆，共 ${formatNumber(total)} ZXC`);
+    setStatusMsg(t('casino_game.horse_bet_summary', { count: betRecords.length + 1, total: formatNumber(total) }));
     setStatusColor('#ffd36a');
 
     api.post('/api/v1/games/horse/play', {
@@ -239,10 +241,10 @@ export const HorseRacingView: React.FC = () => {
     const winRecords = records.filter((r) => r.horseId === winner.id);
     const totalPayout = winRecords.reduce((s, r) => s + r.amount * winner.multiplier, 0);
     if (winRecords.length === 0) {
-      setStatusMsg(`🐎 ${winner.name} 獲勝！😢 未中獎（共下 ${records.length} 注 ${formatNumber(totalBet)} ZXC）`);
+      setStatusMsg(t('casino_game.horse_lose_result', { winner: winner.name, records: records.length, totalBet: formatNumber(totalBet) }));
       setStatusColor('#ff4d4d');
     } else {
-      setStatusMsg(`🐎 ${winner.name} 獲勝！🎉 贏得 ${formatNumber(totalPayout)} ZXC（${winRecords.length} 注中獎，下 ${formatNumber(totalBet)} ZXC）`);
+      setStatusMsg(t('casino_game.horse_win_result', { winner: winner.name, payout: formatNumber(totalPayout), winRecords: winRecords.length, totalBet: formatNumber(totalBet) }));
       setStatusColor('#00ff88');
     }
   }, [winner, isRacing, raceBetRecords]);
@@ -250,14 +252,14 @@ export const HorseRacingView: React.FC = () => {
   return (
     <div className="horse-racing-container">
       <div className="horse-header">
-        <h2>🏇 賽馬</h2>
+        <h2>{t('casino_game.horse_racing_icon')}</h2>
         <div className="horse-round-info">
-          <span className="round-badge">第 {roundId ?? '...'} 局</span>
+          <span className="round-badge">{t('casino_game.horse_round', { round: roundId ?? '...' })}</span>
           {countdown !== null && countdown > 0 && (
             <span className="countdown-badge">⏱ {countdown}s</span>
           )}
           {countdown !== null && countdown <= 0 && (
-            <span className="countdown-badge closed">🔒 開獎中</span>
+            <span className="countdown-badge closed">{t('casino_game.horse_draw_label')}</span>
           )}
         </div>
       </div>
@@ -318,7 +320,7 @@ export const HorseRacingView: React.FC = () => {
               <span className="horse-choice-name">{horse.name}</span>
               <span className="horse-choice-stats">
                 <span className="horse-choice-mult" style={{ color }}>{horse.multiplier}x</span>
-                <span className="horse-choice-odds">勝率 {pct}%</span>
+                <span className="horse-choice-odds">{t('casino_game.horse_win_rate', { rate: pct })}</span>
               </span>
               {isBetted && <span className="betted-badge">✓</span>}
             </button>
@@ -335,7 +337,7 @@ export const HorseRacingView: React.FC = () => {
         />
         <BetQuickActions amount={betAmount} onChange={setBetAmount} maxBet={maxBet} />
         <button className="btn-bet" onClick={handleBet} disabled={roundId === null || isRacing || roundClosed}>
-          {isRacing ? '比賽中...' : roundClosed ? '等待開獎' : betRecords.length > 0 ? `加注 (${betRecords.length})` : '立即下注'}
+          {isRacing ? t('casino_game.horse_racing_label') : roundClosed ? t('casino_game.horse_wait_label') : betRecords.length > 0 ? t('casino_game.horse_add_bet', { count: betRecords.length }) : t('casino_game.horse_bet_now')}
         </button>
       </div>
 
@@ -365,7 +367,7 @@ export const HorseRacingView: React.FC = () => {
         }).slice(0, 20);
         return (
         <div className="horse-history">
-          <h3>🏆 勝率統計</h3>
+          <h3>{t('casino_game.horse_win_stats')}</h3>
           <div className="stats-chart">{horses.map((horse) => {
             const wins = uniqueRaces.filter((r: any) => {
               const winnerId = r.winnerId ?? (r.meta ?? r.gameResult?.meta ?? {}).winnerId;
@@ -380,11 +382,11 @@ export const HorseRacingView: React.FC = () => {
                 <div className="stat-bar-track">
                   <div className="stat-bar-fill" style={{ width: `${barWidth}%`, background: color }} />
                 </div>
-                <span className="stat-nums">{wins} 勝 ({pct}%)</span>
+                <span className="stat-nums">{t('casino_game.horse_wins_count', { wins, pct })}</span>
               </div>
             );
           })}</div>
-          <h3 className="mt-3">📋 最近賽果</h3>
+          <h3 className="mt-3">{t('casino_game.horse_recent_results')}</h3>
           <div className="history-scroll">{recentChips.map((h: any, i: number) => {
             const winnerId = h.winnerId ?? (h.meta ?? h.gameResult?.meta ?? {}).winnerId;
             const wColor = HORSE_COLORS[winnerId as number] ?? '#888';
