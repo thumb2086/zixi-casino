@@ -16,7 +16,7 @@ export const formatNumber = (num: number | string, mode: 'short' | 'full' = 'sho
     return `${(n / 10000).toFixed(2)} 萬`;
   }
 
-  // Show up to 6 decimal places for values < 10000
+  // Max 2 decimal places for values < 10000
   return n.toLocaleString('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 };
 

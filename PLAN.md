@@ -15,7 +15,8 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.7** | Coinflip | Route 統一使用 GameManager 賠率 | ✅ |
 | **v1.0.8** | Slots（前端） | 補齊遺失常數 REEL_CELLS/SYMBOLS/reelDelay 等 | ✅ |
 | **v1.0.9** | Roulette + 每日任務 | Roulette 數字賠 35x 應為 36x；新增每日任務系統，午夜刷新 | ✅ |
-| **v1.0.10** | Horse Racing | RTP_SCALE=2.0 導致 -5.5% 玩家優勢，重新設計 | ⏳ |
+| **v1.0.10** | 賽馬系統 | RTP_SCALE=2.0 導致玩家優勢 → GameManager 統一邏輯、HE ~4%；統一開獎流程、多筆押注、勝率統計圖表、長期數據 localStorage、未下注也播動畫 | ✅ 開發完成 |
+| **v1.0.11** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
 | **v1.0.11** | Bingo | RTP ~0.74% 極端不友善，調整 payout 結構 | ⏳ |
 | **v1.0.12** | Dragon Tiger | `Math.random()`→FNV、賠率 redesign、HE 過高 | ⏳ |
 | **v1.0.13** | BluffDice | 固定預測 18 導致 -39% 玩家優勢 | ⏳ |
@@ -31,6 +32,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.23** | 全站快取 + 監控 | 管理頁面載入優化、伺服器運行時間、重新登入時間反饋圖表 | ⏳ |
 | **v1.0.24** | 公司系統 | `/upgrade-fab`、`/deposit`、招聘押金、export、測試 | ⏳ |
 | **v1.0.25** | 排版檢查 + 色彩設計語言 | 全站頁面 UI 排列、文字溢出、RWD 斷點、元件間距一致性檢查與修正；導入新色彩系統（會員漸層、暗色主題色票、CSS 變數） | ⏳ |
+| **v1.0.26** | 全站浮點修正 + 市場功能補強 | `round()` 預設 2dp、`formatNumber` 最大 2dp、全站 `.toFixed()` 統一為 2dp；市場新增 TP/SL 即時修改、一次還清貸款、全部賣出/全額買入、持倉點擊選股、浮動圖表放大 | ⏳ |
 | **v1.1.0** | 正式版 | 全部合併至 master，穩定化 | 🎯 |
 
 ---
@@ -53,8 +55,9 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 
 ### v1.0.10 — Horse Racing
 - **問題**: Route 自訂 HORSES 陣列 + RTP_SCALE=2.0 使 EV=1.055（玩家優勢）
-- **修正**: Route 改用 GameManager 的統一邏輯，設定合理 HE 3~5%
-- **檔案**: `apps/api/src/routes/v1/games/horse.ts`, `packages/domain/src/games/game-manager.ts`
+- **修正**: Route 改用 GameManager 統一邏輯（FNV 哈希 + 權重），HE 調整至 ~4%
+- **附加**: 統一開獎流程（下注→等封盤→開跑）、多筆押注/不同金額、勝率統計圖表（去重 roundId）、localStorage 長期數據、未下注也播動畫、UI 大改（🐎 emoji、配色、選擇器位置、方向修正）
+- **檔案**: `apps/api/src/routes/v1/games/horse.ts`, `packages/domain/src/games/game-manager.ts`, `apps/web/src/features/casino/HorseRacingView.tsx`
 
 ### v1.0.11 — Bingo
 - **問題**: 5/75 匹配率極低，RTP 僅 0.74%

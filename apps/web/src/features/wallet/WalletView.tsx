@@ -115,8 +115,8 @@ export default function WalletView() {
   const marketNetWorth = assets?.market?.overlayNetWorth || assets?.market?.netWorth || '0';
   const zxcNum = Number(zxcBalance || 0);
   const yjcNum = Number(yjcBalance || 0);
-  const walletOnlyTotal = (zxcNum + yjcNum * ZXC_PER_YJC).toFixed(4);
-  const totalBalance = (Number(walletOnlyTotal) + Number(marketNetWorth || 0)).toFixed(4);
+  const walletOnlyTotal = (zxcNum + yjcNum * ZXC_PER_YJC).toFixed(2);
+  const totalBalance = (Number(walletOnlyTotal) + Number(marketNetWorth || 0)).toFixed(2);
 
   const nextAirdropLabel = useMemo(() => {
     if (canClaimAirdrop) return t('vault.airdrop_now');
