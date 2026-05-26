@@ -53,7 +53,10 @@ const TX_TYPE_LABEL: Record<string, string> = {
   market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
   bank_deposit: '銀行存入', bank_withdraw: '銀行提領',
   loan_borrow: '貸款', loan_repay: '還款',
+  loan_repay_all: '全部還清',
   item_use: '代幣使用', mission_reward: '任務獎勵',
+  market_stock_buy: '股票買入', market_stock_sell: '股票賣出',
+  market_futures_modify_tp_sl: '修改止盈止損',
 };
 const TX_STATUS_LABEL: Record<string, string> = {
   pending: '等待中', broadcasted: '廣播中', confirmed: '已確認', failed: '失敗',

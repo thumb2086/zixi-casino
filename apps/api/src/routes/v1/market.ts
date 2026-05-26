@@ -74,12 +74,16 @@ export async function marketRoutes(fastify: FastifyInstance) {
 
       const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
       const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
-      const balance = client.formatUnits(
+      const onchainBalance = client.formatUnits(
         await client.getBalance(address, tokenRuntime.contractAddress),
         decimals
       );
-      await walletRepo.updateBalance(address, balance, "zhixi");
-      return balance;
+      // Never reduce balance below what's recorded in DB (preserves manual fixes)
+      const dbNum = Number(fallbackBalance);
+      const onchainNum = Number(onchainBalance);
+      if (onchainNum < dbNum) return fallbackBalance;
+      await walletRepo.updateBalance(address, onchainBalance, "zhixi");
+      return onchainBalance;
     } catch {
       return fallbackBalance;
     }
