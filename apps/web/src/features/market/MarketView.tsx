@@ -246,8 +246,16 @@ export default function MarketView() {
             <input type="range" min={1} max={20} value={futuresLeverage} onChange={(e) => setFuturesLeverage(Number(e.target.value))}
               className="w-full accent-[#fcc025]" />
           </div>
-          <input type="number" min={10} value={futuresMargin} onChange={(e) => setFuturesMargin(e.target.value)}
-            placeholder={t('market.margin')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          <div className="flex gap-2">
+            <input type="number" min={10} value={futuresMargin} onChange={(e) => setFuturesMargin(e.target.value)}
+              placeholder={t('market.margin')} className="flex-1 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+            {summary?.cash > 0 && (
+              <button type="button" onClick={() => setFuturesMargin(String(Math.floor(Number(summary.cash))))}
+                className="text-xs font-bold text-[#fcc025] px-3 py-1 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10 whitespace-nowrap">
+                {t('market.buy_all_in')}
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <input type="number" min={0} step={0.01} value={futuresTakeProfit} onChange={(e) => setFuturesTakeProfit(e.target.value)}
               placeholder={t('market.take_profit')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
