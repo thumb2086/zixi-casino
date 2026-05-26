@@ -22,7 +22,8 @@ type MarketActionParams =
   | { type: 'bank_deposit' | 'bank_withdraw' | 'loan_borrow' | 'loan_repay'; amount: string }
   | { type: 'futures_open'; symbol: string; side: string; amount: string; leverage: string; takeProfitPrice?: number; stopLossPrice?: number }
   | { type: 'futures_close'; positionId: string }
-  | { type: 'futures_modify_tp_sl'; positionId: string; takeProfitPrice?: number; stopLossPrice?: number };
+  | { type: 'futures_modify_tp_sl'; positionId: string; takeProfitPrice?: number; stopLossPrice?: number }
+  | { type: 'loan_repay_all' };
 
 function MiniChart({ data, color, height = 60, priceLines }: { data: number[]; color: string; height?: number; priceLines?: { price: number; color: string; label: string }[] }) {
   if (data.length < 2) return null;
@@ -282,13 +283,16 @@ export default function MarketView() {
           </div>
           <div className="border-t border-[#494847]/10 pt-3">
             <p className="text-[10px] font-bold text-[#adaaaa] mb-2">貸款</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button type="button" disabled={execute.isPending}
                 onClick={() => runAction({ type: 'loan_borrow', amount: cashMoveAmount }, '貸款成功')}
                 className="rounded-xl bg-violet-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-violet-500">借貸</button>
               <button type="button" disabled={execute.isPending}
                 onClick={() => runAction({ type: 'loan_repay', amount: cashMoveAmount }, '還款成功')}
                 className="rounded-xl bg-slate-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-slate-500">還款</button>
+              <button type="button" disabled={execute.isPending}
+                onClick={() => runAction({ type: 'loan_repay_all' }, '全部還清')}
+                className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">一次還清</button>
             </div>
             {summary && summary.loanPrincipal > 0 && (
               <p className="text-[10px] text-[#adaaaa] mt-2">當前貸款: {nf(summary.loanPrincipal)} ZXC</p>

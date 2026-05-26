@@ -124,7 +124,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        type: z.enum(["stock_buy", "stock_sell", "bank_deposit", "bank_withdraw", "loan_borrow", "loan_repay", "futures_open", "futures_close", "futures_modify_tp_sl"]),
+        type: z.enum(["stock_buy", "stock_sell", "bank_deposit", "bank_withdraw", "loan_borrow", "loan_repay", "loan_repay_all", "futures_open", "futures_close", "futures_modify_tp_sl"]),
         symbol: z.string().optional(),
         amount: z.string().optional(),
         quantity: z.string().optional(),
@@ -168,6 +168,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "bank_withdraw") result = marketManager.bankWithdraw(account, amount);
       else if (type === "loan_borrow") result = marketManager.borrowLoan(account, snapshot, amount);
       else if (type === "loan_repay") result = marketManager.repayLoan(account, amount);
+      else if (type === "loan_repay_all") result = marketManager.repayAllLoan(account);
       else if (type === "futures_open") result = marketManager.openFutures(account, snapshot, { symbol, side, margin: amount, leverage, takeProfitPrice, stopLossPrice });
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
       else if (type === "futures_modify_tp_sl" && positionId) result = marketManager.modifyFuturesTpSl(account, positionId, takeProfitPrice, stopLossPrice);
@@ -175,7 +176,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
 
       // On-chain settlement (update DB first, then fire async on-chain with logging)
       const walletAction = new WalletManager();
-      const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow"].includes(type);
+      const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow", "loan_repay_all"].includes(type);
       const walletAmount = isReturnAction
         ? (result?.refund || result?.total || result?.amount || 0)
         : (result?.total || result?.margin || result?.amount || 0);
