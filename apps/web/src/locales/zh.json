@@ -149,6 +149,7 @@
     "close": "關閉",
     "close_all": "全平",
     "close_order": "關閉下單",
+    "place_order": "下單",
     "close_position": "平倉",
     "position_closed": "倉位已平倉",
     "long_badge": "多",
