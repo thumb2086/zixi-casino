@@ -284,8 +284,26 @@ export default function MarketView() {
 
       {panelTab === 'bank' && (
         <div className="space-y-3">
-          <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
-            placeholder={t('market.amount')} className="w-full rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+          {summary && (
+            <div className="flex items-center justify-between rounded-xl bg-[#0e0e0e] border border-[#494847]/10 px-4 py-2.5 text-xs">
+              <span className="text-[#adaaaa]">可用現金</span>
+              <span className="font-black text-white">{nf(summary.cash)} ZXC</span>
+            </div>
+          )}
+          {summary && (
+            <div className="flex items-center justify-between rounded-xl bg-[#0e0e0e] border border-[#494847]/10 px-4 py-2.5 text-xs">
+              <span className="text-[#adaaaa]">銀行餘額</span>
+              <span className="font-black text-emerald-400">{nf(summary.bankBalance)} ZXC</span>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
+              placeholder={t('market.amount')} className="flex-1 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none" />
+            <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.cash || 0))))}
+              className="text-xs font-bold text-[#fcc025] px-3 py-1 rounded-lg border border-[#fcc025]/30 hover:bg-[#fcc025]/10">全部存入</button>
+            <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.bankBalance || 0))))}
+              className="text-xs font-bold text-emerald-400 px-3 py-1 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10">全部領出</button>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" disabled={execute.isPending}
               onClick={() => runAction({ type: 'bank_deposit', amount: cashMoveAmount }, t('market.deposit_success'))}
