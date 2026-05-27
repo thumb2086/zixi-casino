@@ -709,6 +709,13 @@ export default function MarketView() {
         </div>
       )}
 
+      {selectedQuote && stockHistory.length > 1 && !showFloatingChart && (
+        <button onClick={() => setShowFloatingChart(true)}
+          className="fixed z-40 bottom-28 right-4 w-12 h-12 rounded-full bg-[#fcc025] text-black shadow-xl flex items-center justify-center text-lg font-black hover:bg-[#e6ad03] active:scale-95 transition-all">
+          📈
+        </button>
+      )}
+
       <AppBottomNav current="market" />
     </div>
   );
