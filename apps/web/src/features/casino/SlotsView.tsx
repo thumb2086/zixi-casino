@@ -107,7 +107,20 @@ export const SlotsView: React.FC = () => {
     setReelState((prev) => { const n = [...prev]; n[reelIdx] = 'stopped'; return n; });
   }, []);
 
-  const doSingleSpin = (): Promise<{ won: boolean; payout: number }> => {
+  const doSingleSpin = async (): Promise<{ won: boolean; payout: number }> => {
+    if (autoSpinRef.current) {
+      const res = await api.post('/api/v1/games/slots/play', {
+        sessionId: session.id,
+        betAmount: Number(betAmount),
+      }).catch((err: any) => { throw err; });
+      const payload = res.data;
+      if (payload?.success === false) throw new Error(extractGameError(payload));
+      const result = unwrapGameEnvelope<any>(payload);
+      summaryRef.current.spins += 1;
+      if (result.multiplier > 0) summaryRef.current.wins += result.payout || 0;
+      return { won: result.multiplier > 0, payout: result.payout || 0 };
+    }
+
     return new Promise((resolve, reject) => {
       skipSpinRef.current = false;
       setSkipVisible(true);
@@ -169,6 +182,7 @@ export const SlotsView: React.FC = () => {
     autoSpinRef.current = true;
     summaryRef.current = { spins: 0, wins: 0 };
     setAutoRemaining(autoCount);
+    setStatus(t('casino_game.slots_spinning'));
 
     for (let i = 0; i < autoCount; i++) {
       if (!autoSpinRef.current) break;
@@ -179,15 +193,16 @@ export const SlotsView: React.FC = () => {
         setStatus(t('casino_game.slots_spin_error', { message: err?.message || '' }));
         break;
       }
-      // Small pause between spins
-      await new Promise((r) => setTimeout(r, 400));
     }
 
     autoSpinRef.current = false;
     spinningRef.current = false;
     setAutoRemaining(0);
+    setReelState(['idle', 'idle', 'idle']);
     const s = summaryRef.current;
     setStatus(t('casino_game.slots_auto_end', { spins: s.spins, wins: formatNumber(s.wins || 0) }));
+    queryClient.invalidateQueries({ queryKey: ['user'] });
+    queryClient.invalidateQueries({ queryKey: ['my-profile'] });
   };
 
   const cancelAutoSpin = () => {
