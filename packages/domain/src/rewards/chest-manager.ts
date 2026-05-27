@@ -49,7 +49,7 @@ export class ChestManager {
   ): Rarity {
     const config = CHEST_CONFIGS[chestType];
     const weights: Record<Rarity, number> = config.weights;
-    const ALL_RARITIES: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"];
+    const ALL_RARITIES: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle", "primordial", "transcendent"];
     
     // If pity threshold reached: re-roll among guaranteedRarity and above (weighted)
     if (forceGuaranteed && config.guaranteedRarity) {
@@ -69,7 +69,7 @@ export class ChestManager {
     const totalWeight = Object.values(weights).reduce((a, b) => (a as number) + (b as number), 0) as number;
     
     let random = hash % totalWeight;
-    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"];
+    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle", "primordial", "transcendent"];
     
     for (const rarity of rarities) {
       random -= weights[rarity];
@@ -225,7 +225,7 @@ export class ChestManager {
     const config = CHEST_CONFIGS[chestType];
     const totalWeight = Object.values(config.weights).reduce((a, b) => (a as number) + (b as number), 0) as number;
     
-    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle"];
+    const rarities: Rarity[] = ["common", "rare", "epic", "legendary", "mythic", "chaos", "abyss", "oracle", "primordial", "transcendent"];
     
     return rarities
       .filter(r => config.weights[r] > 0)
