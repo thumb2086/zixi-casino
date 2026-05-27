@@ -90,6 +90,70 @@
   font-weight: bold;
 }
 
+.bingo-ball-anim {
+  animation: ballPop 0.3s ease-out;
+}
+
+.bingo-ball.drawn {
+  background: #00ff88;
+  color: black;
+  border-color: #00ff88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.bingo-ball.hit {
+  background: #ff4d4d;
+  color: white;
+  border-color: #ff4d4d;
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.8);
+}
+
+@keyframes ballPop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.bingo-reveal-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.7);
+  border-radius: 12px;
+  z-index: 10;
+  gap: 12px;
+}
+
+.bingo-reveal-balls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 500px;
+}
+
+.bingo-reveal-ball {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffcc00;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+  animation: ballPop 0.3s ease-out;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.6);
+}
+
+.bingo-grid-wrapper {
+  position: relative;
+}
+
 @media (max-width: 640px) {
   .bingo-grid {
     grid-template-columns: repeat(5, 1fr);

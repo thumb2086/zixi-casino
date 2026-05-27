@@ -238,17 +238,22 @@ export class GameManager implements GameDomain {
     const hash = this._fnv1a32(seed);
     const winningNumbers: number[] = [];
     let currentHash = hash;
-    while (winningNumbers.length < 5) {
+    while (winningNumbers.length < 20) {
       const num = (currentHash % 75) + 1;
       if (!winningNumbers.includes(num)) winningNumbers.push(num);
       currentHash = Math.imul(currentHash, 0x5deece66d) + 0xb;
     }
 
     const matches = selectedNumbers.filter(n => winningNumbers.includes(n));
+    const matchCount = matches.length;
     let multiplier = 0;
-    if (matches.length === 5) multiplier = 100;
-    else if (matches.length === 4) multiplier = 20;
-    else if (matches.length === 3) multiplier = 5;
+    if (matchCount >= 8) multiplier = 5000;
+    else if (matchCount === 7) multiplier = 500;
+    else if (matchCount === 6) multiplier = 100;
+    else if (matchCount === 5) multiplier = 30;
+    else if (matchCount === 4) multiplier = 10;
+    else if (matchCount === 3) multiplier = 3;
+    else if (matchCount === 2) multiplier = 1;
 
     return { winningNumbers, matches, multiplier };
   }

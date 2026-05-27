@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
@@ -28,7 +28,10 @@ export const BingoView: React.FC = () => {
   const [statusColor, setStatusColor] = useState('#ffd36a');
   const [result, setResult] = useState<any>(null);
   const [isRevealing, setIsRevealing] = useState(false);
-  const [roundNo, setRoundNo] = useState(1);
+  const [revealingNumbers, setRevealingNumbers] = useState<number[]>([]);
+  const [animDone, setAnimDone] = useState(false);
+  const roundNoRef = useRef(1);
+  const animRef = useRef<ReturnType<typeof setInterval>>();
 
   const toggleNumber = (n: number) => {
     setSelectedNumbers((prev) => {
@@ -63,23 +66,40 @@ export const BingoView: React.FC = () => {
     },
     onSuccess: (data) => {
       setIsRevealing(true);
+      setResult(data);
+      setRevealingNumbers([]);
+      setAnimDone(false);
       setStatus(t('casino_game.bingo_rolling'));
       setStatusColor('#ffd36a');
-      window.setTimeout(() => {
-        setResult(data);
-        setStatus(t('casino_game.bingo_win_result', { round: roundNo, amount: data.payout }));
-        setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
-        setRoundNo((prev) => prev + 1);
-        setIsRevealing(false);
-        queryClient.invalidateQueries({ queryKey: ['user'] });
-        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
-      }, 300);
+
+      const allWinning = data.winningNumbers || [];
+      let idx = 0;
+      const speed = allWinning.length > 15 ? 120 : 180;
+      animRef.current = setInterval(() => {
+        if (idx < allWinning.length) {
+          setRevealingNumbers(prev => [...prev, allWinning[idx]]);
+          idx++;
+        } else {
+          clearInterval(animRef.current);
+          setAnimDone(true);
+          setStatus(t('casino_game.bingo_win_result', { round: roundNoRef.current, amount: data.payout }));
+          setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
+          roundNoRef.current += 1;
+          setIsRevealing(false);
+          queryClient.invalidateQueries({ queryKey: ['user'] });
+          queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+        }
+      }, speed);
     },
     onError: (err: Error) => {
       setStatus(t('casino_game.bingo_bet_error', { message: err.message }));
       setStatusColor('#ff4d4d');
     },
   });
+
+  useEffect(() => {
+    return () => { if (animRef.current) clearInterval(animRef.current); };
+  }, []);
 
   const winningNumbersSet = new Set(result?.winningNumbers || []);
   const hitNumbers = new Set(result?.matches || []);
@@ -88,18 +108,34 @@ export const BingoView: React.FC = () => {
     <div className="bingo-container">
       <div className="drawn-balls">
         {selectedNumbers.map((n) => (
-          <div key={n} className={`bingo-ball ${hitNumbers.has(n) ? 'bg-emerald-600' : ''}`}>{n}</div>
+          <div key={n} className={`bingo-ball bingo-ball-anim ${hitNumbers.has(n) ? 'hit' : ''}`}>{n}</div>
+        ))}
+        {isRevealing && revealingNumbers.map((n) => (
+          <div key={`r${n}`} className="bingo-ball drawn bingo-ball-anim">{n}</div>
+        ))}
+        {animDone && (result?.winningNumbers || []).map((n: number) => (
+          <div key={`w${n}`} className={`bingo-ball bingo-ball-anim ${hitNumbers.has(n) ? 'hit' : 'drawn'}`}>{n}</div>
         ))}
       </div>
 
-      {result && (
+      {result && animDone && (
         <div className="text-xs text-slate-400 mb-2 text-center">
-          {t('casino_game.bingo_drawn_numbers')}{(result.winningNumbers || []).slice(0, 20).join(', ')}
-          {(result.winningNumbers || []).length > 20 && ' ...'}
+          {t('casino_game.bingo_drawn_numbers')}{(result.winningNumbers || []).join(', ')}
         </div>
       )}
 
-      <div className="bingo-grid">
+      <div className="bingo-grid-wrapper">
+        {isRevealing && !animDone && (
+          <div className="bingo-reveal-overlay">
+            <div className="text-sm text-[#fcc025] font-bold">{t('casino_game.bingo_rolling')}</div>
+            <div className="bingo-reveal-balls">
+              {revealingNumbers.map(n => (
+                <div key={n} className="bingo-reveal-ball">{n}</div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="bingo-grid">
         {Array.from({ length: 75 }, (_, i) => i + 1).map((n) => {
           const isHit = hitNumbers.has(n);
           const isWinNum = winningNumbersSet.has(n) && !isHit;
@@ -115,6 +151,7 @@ export const BingoView: React.FC = () => {
             </div>
           );
         })}
+      </div>
       </div>
 
       <div className="bingo-controls">
@@ -139,7 +176,7 @@ export const BingoView: React.FC = () => {
 
       <div className="bingo-status" style={{ color: statusColor }}>
         {status}
-        {result && (
+        {result && animDone && (
           <div className="mt-2 text-sm text-slate-300">
             {t('casino_game.bingo_match_result', { count: result.matches?.length || 0, numbers: (result.matches || []).join(', ') || '無' })}
             {result.winningNumbers && <div className="text-xs text-slate-500 mt-1">{t('casino_game.bingo_drawn_count', { count: result.winningNumbers.length })}</div>}
