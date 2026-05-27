@@ -149,6 +149,7 @@
     "close": "Close",
     "close_all": "Close All",
     "close_order": "Close Order",
+    "place_order": "Place Order",
     "close_position": "Close Position",
     "position_closed": "Position closed",
     "long_badge": "Long",
