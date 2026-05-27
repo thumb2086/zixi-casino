@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/useAuthStore';
 import { api } from '../../store/api';
+import { useTranslation } from 'react-i18next';
 
 const API_BASE = '/api/v1/market';
 
 export const useMarket = () => {
+  const { t } = useTranslation();
   const { sessionId } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -29,8 +31,10 @@ export const useMarket = () => {
   const actionMutation = useMutation({
     mutationFn: async (params: any) => {
       const res = await api.post(`${API_BASE}/action`, { ...params, sessionId });
-      if (res.data.error) throw new Error(res.data.error.message);
-      return res.data.data;
+      const env = res.data;
+      if (env.data?.error) throw new Error(env.data.error.message || t('market.action_failed'));
+      if (env.error) throw new Error(env.error);
+      return env.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['market-me'] });

@@ -6,7 +6,7 @@ import { createApiEnvelope } from "@repo/shared";
 import { GameSessionManager } from "@repo/domain/games/game-session-manager.js";
 import { requireDb } from "@repo/infrastructure/db/index.js";
 import { GameManager } from "@repo/domain/games/game-manager.js";
-import { getRoundInfo, hashInt } from "@repo/domain/games/auto-round.js";
+import { getRoundInfo } from "@repo/domain/games/auto-round.js";
 import { gameSettlement } from "../../../utils/game-settlement.js";
 
 const BetSchema = z.object({
@@ -37,7 +37,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         bets: z.array(BetSchema),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
@@ -66,7 +66,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统一分局)
+    // Get auto-round info (统�??��?)
     const roundInfo = getRoundInfo('roulette');
     if (!roundInfo.isBettingOpen) {
       return createApiEnvelope(
@@ -78,7 +78,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
         },
         request.id,
         false,
-        "本局开奖中，请等待下一局"
+        "?��?开奖中，请等�?下�?局"
       );
     }
 
@@ -103,46 +103,12 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // 2. Resolve game using deterministic hash based on roundId
-      const winningNumber = hashInt(`roulette:${roundInfo.roundId}`) % 37; // 0-36
-      const isRed = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(winningNumber);
-      const isBlack = winningNumber !== 0 && !isRed;
-      const color = winningNumber === 0 ? 'green' : (isRed ? 'red' : 'black');
-      
-      // Calculate payout based on bets
-      let totalPayoutMultiplier = 0;
-      for (const bet of bets) {
-        if (bet.type === 'number' && bet.value === winningNumber) {
-          totalPayoutMultiplier += 36; // 35:1 payout + 1x original bet
-        } else if (bet.type === 'color' && bet.value === color) {
-          totalPayoutMultiplier += 2; // 1:1 payout
-        } else if (bet.type === 'parity') {
-          const isEven = winningNumber !== 0 && winningNumber % 2 === 0;
-          const isOdd = winningNumber !== 0 && winningNumber % 2 === 1;
-          if ((bet.value === 'even' && isEven) || (bet.value === 'odd' && isOdd)) {
-            totalPayoutMultiplier += 2; // 1:1 payout
-          }
-        } else if (bet.type === 'range') {
-          const isLow = winningNumber >= 1 && winningNumber <= 18;
-          const isHigh = winningNumber >= 19 && winningNumber <= 36;
-          if ((bet.value === 'low' && isLow) || (bet.value === 'high' && isHigh)) {
-            totalPayoutMultiplier += 2; // 1:1 payout
-          }
-        } else if (bet.type === 'dozen') {
-          const dozen =
-            winningNumber >= 1 && winningNumber <= 12
-              ? "1"
-              : winningNumber >= 13 && winningNumber <= 24
-                ? "2"
-                : winningNumber >= 25 && winningNumber <= 36
-                  ? "3"
-                  : null;
-          if (dozen && String(bet.value) === dozen) {
-            totalPayoutMultiplier += 3; // 2:1 payout + original bet
-          }
-        }
-      }
-      
+      // 2. Resolve game using GameManager with luck bias
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const gameResult = gameManager.resolveRoulette(bets, `roulette:${roundInfo.roundId}`, luckBias);
+      const winningNumber = gameResult.winningNumber;
+      const color = gameResult.color;
+      const totalPayoutMultiplier = gameResult.totalPayoutMultiplier;
       const isWin = totalPayoutMultiplier > 0;
       const payout = isWin ? betAmount * totalPayoutMultiplier : 0;
       const payoutStr = payout.toString();

@@ -30,7 +30,7 @@ export async function crashRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         elapsedSeconds: z.number().min(0).default(0),
         cashout: z.boolean().default(false),
         roundId: z.string().optional(),
@@ -70,7 +70,8 @@ export async function crashRoutes(fastify: FastifyInstance) {
     }
 
     const roundId = incomingRoundId || `crash_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const gameResult = gameManager.resolveCrash(elapsedSeconds, roundId);
+    const luckBias = await gameSettlement.getLuckBias(userId);
+    const gameResult = gameManager.resolveCrash(elapsedSeconds, roundId, luckBias);
     
     // Player wins if they cash out before crash
     const isWin = cashout && !gameResult.crashed;

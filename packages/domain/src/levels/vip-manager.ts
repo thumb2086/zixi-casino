@@ -121,12 +121,31 @@ export class VipManager {
     return LEVEL_TIERS[currentIndex + 1] ?? null;
   }
 
-  // Get VIP status for address
+  // Map XP level → LEVEL_TIERS (one level per tier, 50 tiers for 50 levels)
+  private getLevelByXpLevel(xpLevel: number): LevelTier {
+    const idx = Math.max(0, Math.min(xpLevel - 1, LEVEL_TIERS.length - 1));
+    return LEVEL_TIERS[idx];
+  }
+
+  // Get VIP status for address (merged: based on XP level)
   async getVipStatus(address: string): Promise<VipFullStatus | null> {
     const addr = address.toLowerCase();
     const db = await this.getDb();
 
-    // 1. Get total bets for 'all' period
+    // 1. Get XP level from user_profiles
+    const profileRows = await db
+      .select({ xp: schema.userProfiles.xp, level: schema.userProfiles.level })
+      .from(schema.userProfiles)
+      .where(eq(schema.userProfiles.address, addr))
+      .limit(1);
+    const xpLevel = Number(profileRows[0]?.level ?? 1);
+    const xpAmt = Number(profileRows[0]?.xp ?? 0);
+
+    // 2. Determine level from XP level (merged system)
+    const level = this.getLevelByXpLevel(xpLevel);
+    const nextLevel = this.getNextLevel(level);
+
+    // 3. Get total bets + YJC (for display/reference only)
     const betRow = await db
       .select({ amount: schema.totalBets.amount })
       .from(schema.totalBets)
@@ -138,28 +157,22 @@ export class VipManager {
         )
       )
       .limit(1);
-
     const totalBetAll = Number(betRow[0]?.amount ?? 0);
-
-    // 2. Get YJC token balance (prefer on-chain balance when available)
     const yjcBalance = await this.resolveYjcBalance(db, addr);
-
-    // 3. VIP score = weighted combination: 70% total_bets + 30% YJC holdings
     const score = Math.floor(totalBetAll * 0.7 + yjcBalance * 0.3);
 
-    // 4. Determine level (based on score/总投注)
-    const level = this.getVipTierByScore(score);
-    const nextLevel = this.getNextLevel(level);
-
-    // 5. Determine YJC VIP tier (based on purchased VIP pass buffs)
+    // 4. Determine YJC VIP tier (based on purchased VIP pass buffs)
     const yjcVipTier = await this.getYjcVipTier(addr);
 
-    // 6. Calculate progress to next level
+    // 5. Calculate progress to next level (based on XP)
     let progressPct = 100;
     if (nextLevel) {
-      const span = nextLevel.threshold - level.threshold;
-      const done = score - level.threshold;
-      progressPct = Math.min(100, Math.floor((done / span) * 100));
+      const { xpForLevel } = await import("../experience/experience-manager.js");
+      const nextLevelXp = xpForLevel(xpLevel + 1);
+      const currentLevelXp = xpForLevel(xpLevel);
+      const span = nextLevelXp - currentLevelXp;
+      const done = xpAmt - currentLevelXp;
+      progressPct = span > 0 ? Math.min(100, Math.floor((done / span) * 100)) : 100;
     }
 
     return {

@@ -139,3 +139,22 @@ Each game has its own route at `apps/api/src/routes/v1/games/<game>.ts`. Some ga
 - Master receives merges when stable
 - Version tags moved via `git tag -d && git tag && git push --force`
 - `git push origin master --force-with-lease` for master updates (shared branch — use with care)
+
+## 🔴 SECURITY: Database credentials — ABSOLUTELY NEVER hardcode
+
+**Database credentials (`DATABASE_URL`, `KV_REST_API_TOKEN`, `ADMIN_PRIVATE_KEY`, etc.) must NEVER be written into any file.**
+
+- ❌ **NEVER create temp/script files with hardcoded `DATABASE_URL` or any credential**
+- ❌ **NEVER `console.log()` or `console.error()` database connection strings**
+- ❌ **NEVER write credentials to disk for any reason**
+- ✅ Use environment variables exclusively: `process.env.DATABASE_URL`
+- ✅ One-liner queries via `node -e "..."` with env passed inline
+- ✅ Temp files must use `process.env.*` and must be in `.gitignore` before creation
+- ✅ If a temp file is needed, CREATE IT IN `C:\Users\CPXru\AppData\Local\Temp\opencode\` (not in the repo)
+- ✅ Delete temp files immediately after use
+
+**If this rule is violated, the agent must:**
+1. Immediately `git filter-branch --index-filter` to purge the file from ALL history
+2. Force push ALL branches
+3. Update `.gitignore` to prevent recurrence
+4. Report to the user immediately

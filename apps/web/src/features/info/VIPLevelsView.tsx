@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Crown, ChevronLeft, ChevronRight, Gift, Percent, MessageCircle, TrendingUp } from 'lucide-react';
 import { formatNumber, LEVEL_TIERS } from '@repo/shared';
@@ -6,6 +7,7 @@ import { usePreferencesStore } from '../../store/usePreferencesStore';
 import AppBottomNav from '../../components/AppBottomNav';
 
 export default function VIPLevelsView() {
+  const { t } = useTranslation();
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
@@ -22,7 +24,7 @@ export default function VIPLevelsView() {
             </Link>
             <Crown className="text-[#fcc025]" />
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
-              VIP 等級說明
+              {t('info.vip_levels_title')}
             </h1>
           </div>
         </div>
@@ -32,23 +34,23 @@ export default function VIPLevelsView() {
         {/* 等級總覽 */}
         <section className="mb-8 rounded-2xl border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
           <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-            等級系統總覽
+            {t('info.vip_system_overview')}
           </h2>
           <p className="mt-3 text-sm font-bold text-[#adaaaa] leading-relaxed">
-            共 {LEVEL_TIERS.length} 個等級，從普通會員到神諭十二階。等級依據您的總投注額計算，等級越高享有越多特權。
+            {t('info.vip_system_description', { count: LEVEL_TIERS.length })}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
                 <div className="flex items-center gap-2">
                   <Percent className="h-4 w-4 text-emerald-400" />
-                  <span className="text-xs font-bold text-[#adaaaa]">最高折扣</span>
+                   <span className="text-xs font-bold text-[#adaaaa]">{t('info.highest_discount')}</span>
                 </div>
                 <p className="mt-1 text-lg font-black text-emerald-400">{Math.round(Math.max(...LEVEL_TIERS.map(t => t.marketFeeDiscount || 0)) * 100)}%</p>
               </div>
               <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
                 <div className="flex items-center gap-2">
                   <Gift className="h-4 w-4 text-[#fcc025]" />
-                  <span className="text-xs font-bold text-[#adaaaa]">最高倍率</span>
+                   <span className="text-xs font-bold text-[#adaaaa]">{t('info.highest_multiplier')}</span>
                 </div>
                 <p className="mt-1 text-lg font-black text-[#fcc025]">{Math.max(...LEVEL_TIERS.map(t => t.dailyBonusMultiplier || 1)).toFixed(1)}x</p>
               </div>
@@ -58,7 +60,7 @@ export default function VIPLevelsView() {
         {/* 特權說明 */}
         <section className="mb-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
           <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-            VIP 特權說明
+            {t('info.vip_perks_title')}
           </h2>
           <div className="mt-4 space-y-4">
             <div className="flex items-start gap-3">
@@ -66,9 +68,9 @@ export default function VIPLevelsView() {
                 <Percent className="h-4 w-4 text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">遊戲手續費折扣</h3>
+                <h3 className="text-sm font-bold text-white">{t('info.fee_explanation')}</h3>
                 <p className="text-xs font-bold text-[#adaaaa]">
-                  依統一規則：普通/青銅 0%、白銀 10%、黃金 20%、鑽石 50%、創世以上 100%
+                  {t('info.vip_fee_detail')}
                 </p>
               </div>
             </div>
@@ -77,9 +79,9 @@ export default function VIPLevelsView() {
                 <Gift className="h-4 w-4 text-[#fcc025]" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">每日紅利倍率</h3>
+                <h3 className="text-sm font-bold text-white">{t('info.daily_bonus_multiplier')}</h3>
                 <p className="text-xs font-bold text-[#adaaaa]">
-                  每日登入紅利依等級倍率發放，最高可達 8 倍
+                  {t('info.vip_bonus_detail')}
                 </p>
               </div>
             </div>
@@ -88,9 +90,9 @@ export default function VIPLevelsView() {
                 <MessageCircle className="h-4 w-4 text-purple-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">彈幕特權</h3>
+                <h3 className="text-sm font-bold text-white">{t('info.danmaku_perks')}</h3>
                 <p className="text-xs font-bold text-[#adaaaa]">
-                  專屬彈幕顏色與優先顯示權，高等級會員發言更醒目
+                  {t('info.vip_danmaku_detail')}
                 </p>
               </div>
             </div>
@@ -99,9 +101,9 @@ export default function VIPLevelsView() {
                 <TrendingUp className="h-4 w-4 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">單注上限</h3>
+                <h3 className="text-sm font-bold text-white">{t('info.max_bet_limit')}</h3>
                 <p className="text-xs font-bold text-[#adaaaa]">
-                  等級越高單注上限越高，神諭十二階單注上限高達 10 千兆
+                  {t('info.vip_max_bet_detail')}
                 </p>
               </div>
             </div>
@@ -111,7 +113,7 @@ export default function VIPLevelsView() {
         {/* 等級列表 */}
         <section className="space-y-3">
           <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
-            完整等級列表
+            {t('info.full_level_list')}
           </h2>
           {LEVEL_TIERS.map((tier, index) => (
             <div
@@ -139,7 +141,7 @@ export default function VIPLevelsView() {
                   <div className="text-left">
                     <h3 className="font-bold text-white">{tier.label}</h3>
                     <p className="text-xs font-bold text-[#adaaaa]">
-                      門檻: {nf(tier.threshold)}
+                      {t('info.threshold')}: {nf(tier.threshold)}
                     </p>
                   </div>
                 </div>
@@ -154,21 +156,21 @@ export default function VIPLevelsView() {
                 <div className="mt-4 space-y-2 border-t border-[#494847]/10 pt-4">
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-xs font-bold text-[#adaaaa]">單注上限</p>
+                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.max_bet_limit')}</p>
                       <p className="text-sm font-black text-white">{nf(tier.maxBet)}</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-xs font-bold text-[#adaaaa]">手續費折扣</p>
+                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.fee_discount')}</p>
                       <p className="text-sm font-black text-emerald-400">{feeDiscountPct(tier)}%</p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-xs font-bold text-[#adaaaa]">紅利倍率</p>
+                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.bonus_multiplier')}</p>
                       <p className="text-sm font-black text-[#fcc025]">
                         {(tier.dailyBonusMultiplier || 1).toFixed(1)}x
                       </p>
                     </div>
                     <div className="rounded-lg bg-[#0e0e0e] p-2">
-                      <p className="text-xs font-bold text-[#adaaaa]">彈幕顏色</p>
+                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.danmaku_color')}</p>
                       <div className="flex items-center gap-2">
                         <div 
                           className="h-4 w-4 rounded"

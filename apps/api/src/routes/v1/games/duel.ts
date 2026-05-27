@@ -30,7 +30,7 @@ export async function duelRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         p1Selection: z.enum(["heads", "tails"]),
         p2Selection: z.enum(["heads", "tails"]),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),

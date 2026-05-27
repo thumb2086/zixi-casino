@@ -30,12 +30,7 @@ import { useWallet } from '../wallet/useWallet';
 import { resolvePreferredBalance } from '../../utils/balance';
 import { useLeaderboard } from '../../hooks/useLeaderboard';
 
-const TX_TYPE_LABEL: Record<string, string> = {
-  bet: '下注', payout: '派彩', deposit: '存入',
-  withdrawal: '提領', transfer: '轉帳',
-  chest_buy: '購買寶箱', airdrop: '空投',
-  mission_reward: '任務獎勵', market_buy: '市場買入', market_sell: '市場賣出',
-};
+
 
 function GlassCard({
   to,
@@ -140,7 +135,7 @@ export default function LobbyView() {
     walletBalance: summary.data?.summary?.balances?.YJC,
     fallbackBalance: '0',
   });
-  const liveBalance = (Number(liveZxc || 0) + Number(liveYjc || 0) * ZXC_PER_YJC).toFixed(4);
+  const liveBalance = (Number(liveZxc || 0) + Number(liveYjc || 0) * ZXC_PER_YJC).toFixed(2);
 
   const { data: inventoryData } = useQuery({
     queryKey: ['inventory-preview'],
@@ -328,7 +323,7 @@ export default function LobbyView() {
               ) : recentTxs.slice(0, 2).map((tx, i) => (
                 <div key={i} className="flex gap-2 truncate">
                   <span className="text-[#fcc025] shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="truncate">{TX_TYPE_LABEL[tx.type] || tx.type} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
+                  <span className="truncate">{t('txType.' + tx.type, tx.type)} · {nf(Number(tx.amount))} {tx.tokenSymbol || ''}</span>
                 </div>
               ))}
             </div>
@@ -381,7 +376,7 @@ export default function LobbyView() {
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.vip_levels')}</p>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
-                    {t('lobby.tier_active', { tier: 4 })}
+                    {t('lobby.tier_active', { tier: profileData?.vipLevel?.replace(/[^\d]/g, '') || 1 })}
                   </p>
                 </div>
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />

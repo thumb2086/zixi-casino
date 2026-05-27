@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useUserStore } from '../../store/useUserStore';
 import { api } from '../../store/api';
 import { RefreshCw, ShieldCheck, Globe, LogIn, Fingerprint, QrCode, Monitor, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 export default function LoginView() {
   const { setAuth } = useAuthStore();
+  const { setUsername: setGlobalUsername } = useUserStore();
   const { t, i18n } = useTranslation();
   const isZh = i18n.language.startsWith('zh');
   const [tab, setTab] = useState<'qr' | 'custody'>('qr');
@@ -80,6 +82,7 @@ export default function LoginView() {
             const payload = data?.data;
             if (data.success && payload?.status === 'authorized' && payload?.address) {
               setAuth(payload.address, sessionId, payload.publicKey || '0x');
+              if (payload.user?.displayName) setGlobalUsername(payload.user.displayName);
             } else {
               poll();
             }
@@ -117,6 +120,7 @@ export default function LoginView() {
           localStorage.setItem('custody_remember_me', 'false');
         }
         setAuth(payload.address, payload.sessionId, payload.publicKey || '0x');
+        setGlobalUsername(payload.user?.displayName || username);
       }
     } catch (err) {
       setError('NETWORK_ERROR');
@@ -150,6 +154,7 @@ export default function LoginView() {
           localStorage.setItem('custody_remember_me', 'true');
         }
         setAuth(payload.address, payload.sessionId, payload.publicKey || '0x');
+        setGlobalUsername(payload.user?.displayName || username);
       }
     } catch (err) {
       setError('NETWORK_ERROR');

@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./BluffDice.css";
+import { useTranslation } from 'react-i18next';
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
 
 interface GameResult {
@@ -13,6 +14,7 @@ interface GameResult {
 }
 
 export const BluffDiceView: React.FC = () => {
+  const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
 
@@ -90,10 +92,10 @@ export const BluffDiceView: React.FC = () => {
       <div className="bluff-stats">
         {result && status === "settled" && (
           <div className="total-stat">
-            <span className="label">總點數：</span>
+            <span className="label">{t('casino_game.bluff_total_points')}</span>
             <span className="value">{result.total}</span>
             <span className={`result-badge ${result.result === "win" ? "win" : "lose"}`}>
-              {result.result === "win" ? "命中" : "未中"}
+              {result.result === "win" ? t('casino_game.bluff_hit') : t('casino_game.bluff_miss')}
             </span>
           </div>
         )}
@@ -118,7 +120,7 @@ export const BluffDiceView: React.FC = () => {
           {maxBet.toLocaleString()}
         </button>
         <button className="roll-btn" onClick={handleRoll} disabled={status === "rolling"}>
-          {status === "rolling" ? "搖骰中…" : "搖骰開盅"}
+          {status === "rolling" ? t('casino_game.bluff_rolling') : t('casino_game.bluff_open')}
         </button>
       </div>
     </div>

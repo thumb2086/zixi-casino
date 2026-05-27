@@ -30,8 +30,8 @@ export async function bingoRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
-        numbers: z.array(z.number().min(1).max(75)).min(1).max(10),
+        betAmount: z.number().min(1),
+        numbers: z.array(z.number().min(1)).min(1),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
@@ -81,7 +81,8 @@ export async function bingoRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game
-      const gameResult = gameManager.resolveBingo(numbers, roundId);
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const gameResult = gameManager.resolveBingo(numbers, roundId, luckBias);
       const isWin = gameResult.multiplier > 0;
       const payout = isWin ? betAmount * gameResult.multiplier : 0;
       const payoutStr = payout.toString();
