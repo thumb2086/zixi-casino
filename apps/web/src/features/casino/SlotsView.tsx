@@ -44,14 +44,48 @@ export const SlotsView: React.FC = () => {
   const [autoRemaining, setAutoRemaining] = useState(0);
   const summaryRef = useRef({ spins: 0, wins: 0 });
 
+  // Skip animation
+  const skipSpinRef = useRef(false);
+  const spinIntervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
+  const spinResolveRef = useRef<((value: { won: boolean; payout: number }) => void) | null>(null);
+  const [skipVisible, setSkipVisible] = useState(false);
+
   // Cleanup timers on unmount
   useEffect(() => {
     return () => { timersRef.current.forEach(clearTimeout); };
   }, []);
 
+  const skipAnimation = useCallback(() => {
+    skipSpinRef.current = true;
+    setSkipVisible(false);
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    spinIntervalsRef.current.forEach(clearInterval);
+    spinIntervalsRef.current = [];
+    setReelState(['stopped', 'stopped', 'stopped']);
+  }, []);
+
+  const showResult = useCallback((result: any) => {
+    setGrid(result.symbols || []);
+    const won = result.multiplier > 0;
+    if (won) {
+      setStatus(t('casino_game.slots_win_result', { multiplier: result.multiplier, amount: formatNumber(result.payout || 0) }));
+      setWinSymbols(result.winLines?.flat() || []);
+    } else {
+      setStatus(t('casino_game.slots_lose'));
+    }
+    summaryRef.current.spins += 1;
+    if (won) summaryRef.current.wins += result.payout || 0;
+    queryClient.invalidateQueries({ queryKey: ['user'] });
+    queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+    if (spinResolveRef.current) {
+      spinResolveRef.current({ won, payout: result.payout || 0 });
+      spinResolveRef.current = null;
+    }
+  }, [t, queryClient]);
+
   const startReelSpin = useCallback((reelIdx: number, intervalRefs: ReturnType<typeof setInterval>[]) => {
     setReelState((prev) => { const n = [...prev]; n[reelIdx] = 'spinning'; return n; });
-    // Rapidly randomize cells in this reel
     const iv = setInterval(() => {
       setGrid((g) => {
         const next = [...g];
@@ -63,10 +97,8 @@ export const SlotsView: React.FC = () => {
   }, []);
 
   const stopReel = useCallback((reelIdx: number, finalSymbols: string[], intervalRefs: ReturnType<typeof setInterval>[]) => {
-    // Clear the interval for this reel
     const iv = intervalRefs[reelIdx];
     if (iv) clearInterval(iv);
-    // Set final symbols for this reel
     setGrid((g) => {
       const next = [...g];
       for (let i = 0; i < 3; i++) next[REEL_CELLS[reelIdx][i]] = finalSymbols[reelIdx * 3 + i];
@@ -77,7 +109,11 @@ export const SlotsView: React.FC = () => {
 
   const doSingleSpin = (): Promise<{ won: boolean; payout: number }> => {
     return new Promise((resolve, reject) => {
+      skipSpinRef.current = false;
+      setSkipVisible(true);
+      spinResolveRef.current = resolve;
       const intervalRefs: ReturnType<typeof setInterval>[] = [];
+      spinIntervalsRef.current = intervalRefs;
       setWinSymbols([]);
       setStatus(t('casino_game.slots_spinning'));
 
@@ -93,30 +129,26 @@ export const SlotsView: React.FC = () => {
         const payload = res.data;
         if (payload?.success === false) { reject(new Error(extractGameError(payload))); return; }
         const result = unwrapGameEnvelope<any>(payload);
+        if (skipSpinRef.current) {
+          showResult(result);
+          return;
+        }
         const stopDelay = REEL_STOP_INTERVAL;
         const t3 = setTimeout(() => stopReel(0, result.symbols, intervalRefs), stopDelay);
         const t4 = setTimeout(() => stopReel(1, result.symbols, intervalRefs), stopDelay + REEL_STOP_INTERVAL);
         const t5 = setTimeout(() => stopReel(2, result.symbols, intervalRefs), stopDelay + REEL_STOP_INTERVAL * 2);
         timersRef.current = [t3, t4, t5];
         setTimeout(() => {
-          const won = result.multiplier > 0;
-          if (won) {
-            setStatus(t('casino_game.slots_win_result', { multiplier: result.multiplier, amount: formatNumber(result.payout || 0) }));
-            setWinSymbols(result.winLines?.flat() || []);
-          } else {
-            setStatus(t('casino_game.slots_lose'));
-          }
-          summaryRef.current.spins += 1;
-          if (won) summaryRef.current.wins += result.payout || 0;
-          queryClient.invalidateQueries({ queryKey: ['user'] });
-          queryClient.invalidateQueries({ queryKey: ['my-profile'] });
-          resolve({ won, payout: result.payout || 0 });
+          showResult(result);
         }, stopDelay + REEL_STOP_INTERVAL * 3);
       }).catch((err: any) => {
         intervalRefs.forEach(clearInterval);
+        setSkipVisible(false);
         setReelState(['stopped', 'stopped', 'stopped']);
         reject(err);
       });
+    }).finally(() => {
+      setSkipVisible(false);
     });
   };
 
@@ -218,6 +250,15 @@ export const SlotsView: React.FC = () => {
       </div>
 
       <div className="slots-status">{status}</div>
+
+      {skipVisible && (
+        <button
+          className="fixed top-4 right-4 z-50 bg-[#fcc025] text-black font-black px-4 py-2 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:bg-[#e6ad03] active:scale-95 transition-all"
+          onClick={skipAnimation}
+        >
+          快速跳過 ⏭
+        </button>
+      )}
     </div>
   );
 };
