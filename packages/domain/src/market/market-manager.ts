@@ -205,6 +205,8 @@ function createSummary(entry: any): string {
     case "stock_sell": return `賣出 ${entry.symbol} ${entry.quantity} 股，成交 ${entry.price}，回收 ${net} 子熙幣`;
     case "futures_open": return `開啟 ${entry.symbol} ${entry.side === "short" ? "空單" : "多單"} ${entry.leverage}x，保證金 ${entry.margin} 子熙幣`;
     case "futures_close": return `平倉 ${entry.symbol}，損益 ${entry.pnl} 子熙幣`;
+    case "futures_tp": return `${entry.symbol} ${entry.side === "short" ? "空單" : "多單"} 止盈觸發，盈虧 ${entry.pnl} 子熙幣`;
+    case "futures_sl": return `${entry.symbol} ${entry.side === "short" ? "空單" : "多單"} 止損觸發，盈虧 ${entry.pnl} 子熙幣`;
     case "futures_liquidated": return `${entry.symbol} 爆倉，損失 ${entry.margin} 子熙幣`;
     case "bank_deposit": return `存入銀行 ${amount} 子熙幣`;
     case "bank_withdraw": return `自銀行提領 ${amount} 子熙幣`;
@@ -387,9 +389,10 @@ export class MarketManager {
         const hitTp = pos.side === "long" ? quote.price >= pos.takeProfitPrice : quote.price <= pos.takeProfitPrice;
         if (hitTp) {
           const closedPnl = positionPnl(pos, pos.takeProfitPrice);
-          account.cash = round(account.cash + pos.margin + closedPnl, 2);
-          events.push({ type: "take_profit", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.takeProfitPrice });
-          appendHistory(account, { type: "futures_tp", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 2), closePrice: pos.takeProfitPrice, pnl: closedPnl });
+          const fee = round(pos.notional * FUTURES_FEE_RATE, 2);
+          account.cash = round(account.cash + pos.margin + closedPnl - fee, 2);
+          events.push({ type: "take_profit", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.takeProfitPrice, fee });
+          appendHistory(account, { type: "futures_tp", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 2), closePrice: pos.takeProfitPrice, pnl: closedPnl, fee });
           continue;
         }
       }
@@ -399,9 +402,10 @@ export class MarketManager {
         const hitSl = pos.side === "long" ? quote.price <= pos.stopLossPrice : quote.price >= pos.stopLossPrice;
         if (hitSl) {
           const closedPnl = positionPnl(pos, pos.stopLossPrice);
-          account.cash = round(account.cash + pos.margin + closedPnl, 2);
-          events.push({ type: "stop_loss", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.stopLossPrice });
-          appendHistory(account, { type: "futures_sl", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 2), closePrice: pos.stopLossPrice, pnl: closedPnl });
+          const fee = round(pos.notional * FUTURES_FEE_RATE, 2);
+          account.cash = round(account.cash + pos.margin + closedPnl - fee, 2);
+          events.push({ type: "stop_loss", positionId: pos.id, symbol: pos.symbol, side: pos.side, pnl: closedPnl, closePrice: pos.stopLossPrice, fee });
+          appendHistory(account, { type: "futures_sl", symbol: pos.symbol, side: pos.side, margin: round(pos.margin, 2), closePrice: pos.stopLossPrice, pnl: closedPnl, fee });
           continue;
         }
       }
