@@ -36,6 +36,8 @@ const RARITY_COLORS: Record<string, string> = {
   chaos: '#aa00ff',
   abyss: '#00bcd4',
   oracle: '#ff0044',
+  primordial: '#ff8800',
+  transcendent: '#ff00ff',
 };
 
 const ALL_ITEMS_LOOKUP: Record<string, any> = {};

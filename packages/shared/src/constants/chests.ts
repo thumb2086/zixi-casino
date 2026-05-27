@@ -1,8 +1,8 @@
 // Chest and Item System Constants (Brawl Stars Style)
 
-export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic" | "chaos" | "abyss" | "oracle";
+export type Rarity = "common" | "rare" | "epic" | "legendary" | "mythic" | "chaos" | "abyss" | "oracle" | "primordial" | "transcendent";
 export type ItemType = "avatar" | "title" | "token" | "buff" | "collectible";
-export type ChestType = "common" | "rare" | "epic" | "legendary" | "mythic" | "chaos" | "abyss" | "oracle";
+export type ChestType = "common" | "rare" | "epic" | "legendary" | "mythic" | "chaos" | "abyss" | "oracle" | "primordial" | "transcendent";
 
 export interface ChestConfig {
   id: ChestType;
@@ -41,8 +41,8 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     nameEn: "Common Chest",
     price: 100,
     guaranteedRarity: "rare",
-    pityThreshold: 10,
-    dropCount: { min: 2, max: 4 },
+    pityThreshold: 1000,
+    dropCount: { min: 1, max: 3 },
     weights: {
       common: 700,
       rare: 200,
@@ -52,6 +52,8 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       chaos: 0,
       abyss: 0,
       oracle: 0,
+      primordial: 0,
+      transcendent: 0,
     },
   },
   rare: {
@@ -60,8 +62,8 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     nameEn: "Rare Chest",
     price: 500,
     guaranteedRarity: "epic",
-    pityThreshold: 10,
-    dropCount: { min: 3, max: 5 },
+    pityThreshold: 500,
+    dropCount: { min: 2, max: 4 },
     weights: {
       common: 100,
       rare: 400,
@@ -71,6 +73,8 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       chaos: 0,
       abyss: 0,
       oracle: 0,
+      primordial: 0,
+      transcendent: 0,
     },
   },
   epic: {
@@ -79,17 +83,19 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     nameEn: "Epic Chest",
     price: 2000,
     guaranteedRarity: "legendary",
-    pityThreshold: 5,
-    dropCount: { min: 4, max: 6 },
+    pityThreshold: 200,
+    dropCount: { min: 3, max: 5 },
     weights: {
       common: 0,
-      rare: 448,
-      epic: 50,
-      legendary: 500,
+      rare: 598,
+      epic: 350,
+      legendary: 50,
       mythic: 2,
       chaos: 0,
       abyss: 0,
       oracle: 0,
+      primordial: 0,
+      transcendent: 0,
     },
   },
   legendary: {
@@ -98,17 +104,19 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     nameEn: "Legendary Chest",
     price: 10000,
     guaranteedRarity: "mythic",
-    pityThreshold: 3,
-    dropCount: { min: 5, max: 8 },
+    pityThreshold: 100,
+    dropCount: { min: 4, max: 7 },
     weights: {
       common: 0,
       rare: 0,
-      epic: 50,
-      legendary: 700,
-      mythic: 250,
+      epic: 300,
+      legendary: 600,
+      mythic: 100,
       chaos: 0,
       abyss: 0,
       oracle: 0,
+      primordial: 0,
+      transcendent: 0,
     },
   },
   mythic: {
@@ -117,17 +125,19 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     nameEn: "Mythic Chest",
     price: 100000,
     guaranteedRarity: "mythic",
-    pityThreshold: 1,
-    dropCount: { min: 8, max: 12 },
+    pityThreshold: 50,
+    dropCount: { min: 5, max: 8 },
     weights: {
       common: 0,
       rare: 0,
       epic: 0,
-      legendary: 100,
-      mythic: 850,
+      legendary: 300,
+      mythic: 650,
       chaos: 50,
       abyss: 0,
       oracle: 0,
+      primordial: 0,
+      transcendent: 0,
     },
   },
   chaos: {
@@ -136,8 +146,8 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     nameEn: "Chaos Chest",
     price: 1_000_000,
     guaranteedRarity: "chaos",
-    pityThreshold: 1,
-    dropCount: { min: 8, max: 12 },
+    pityThreshold: 30,
+    dropCount: { min: 6, max: 10 },
     weights: {
       common: 0,
       rare: 0,
@@ -147,6 +157,8 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       chaos: 700,
       abyss: 100,
       oracle: 0,
+      primordial: 0,
+      transcendent: 0,
     },
   },
   abyss: {
@@ -155,8 +167,8 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
     nameEn: "Abyss Chest",
     price: 10_000_000,
     guaranteedRarity: "abyss",
-    pityThreshold: 1,
-    dropCount: { min: 8, max: 12 },
+    pityThreshold: 20,
+    dropCount: { min: 6, max: 10 },
     weights: {
       common: 0,
       rare: 0,
@@ -166,15 +178,17 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       chaos: 300,
       abyss: 600,
       oracle: 100,
+      primordial: 0,
+      transcendent: 0,
     },
   },
   oracle: {
     id: "oracle",
     name: "神諭寶箱",
     nameEn: "Oracle Chest",
-    price: 100_000_000,
+    price: 10_000_000_000,
     guaranteedRarity: "oracle",
-    pityThreshold: 1,
+    pityThreshold: 100,
     dropCount: { min: 8, max: 12 },
     weights: {
       common: 0,
@@ -185,6 +199,50 @@ export const CHEST_CONFIGS: Record<ChestType, ChestConfig> = {
       chaos: 100,
       abyss: 400,
       oracle: 500,
+      primordial: 0,
+      transcendent: 0,
+    },
+  },
+  primordial: {
+    id: "primordial",
+    name: "原始寶箱",
+    nameEn: "Primordial Chest",
+    price: 100_000_000_000,
+    guaranteedRarity: "primordial",
+    pityThreshold: 50,
+    dropCount: { min: 8, max: 12 },
+    weights: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 0,
+      mythic: 0,
+      chaos: 0,
+      abyss: 0,
+      oracle: 100,
+      primordial: 800,
+      transcendent: 100,
+    },
+  },
+  transcendent: {
+    id: "transcendent",
+    name: "超越寶箱",
+    nameEn: "Transcendent Chest",
+    price: 1_000_000_000_000,
+    guaranteedRarity: "transcendent",
+    pityThreshold: 20,
+    dropCount: { min: 8, max: 12 },
+    weights: {
+      common: 0,
+      rare: 0,
+      epic: 0,
+      legendary: 0,
+      mythic: 0,
+      chaos: 0,
+      abyss: 0,
+      oracle: 0,
+      primordial: 400,
+      transcendent: 600,
     },
   },
 };
@@ -402,6 +460,26 @@ export const ITEM_DROP_TABLES: Record<Rarity, ItemDefinition[]> = {
     { id: "yjc_massive", name: "YJC 巨量", nameEn: "YJC Massive", type: "token", rarity: "oracle", description: "0.1 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 0.1, currency: "yjc" } },
     { id: "yjc_giant", name: "YJC 無敵", nameEn: "YJC Giant", type: "token", rarity: "oracle", description: "0.5 YJC", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 0.5, currency: "yjc" } },
   ],
+  primordial: [
+    { id: "token_1000000000", name: "1,000,000,000 ZXC", nameEn: "1B ZXC", type: "token", rarity: "primordial", description: "十億子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 1000000000 } },
+    { id: "token_5000000000", name: "5,000,000,000 ZXC", nameEn: "5B ZXC", type: "token", rarity: "primordial", description: "五十億子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 5000000000 } },
+    { id: "yjc_massive2", name: "YJC 巨量 II", nameEn: "YJC Massive II", type: "token", rarity: "primordial", description: "1 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 1, currency: "yjc" } },
+    { id: "yjc_giant2", name: "YJC 無敵 II", nameEn: "YJC Giant II", type: "token", rarity: "primordial", description: "5 YJC", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 5, currency: "yjc" } },
+    { id: "avatar_primordial", name: "原始之靈", nameEn: "Primordial Spirit", type: "avatar", rarity: "primordial", description: "來自太初的原始之靈", icon: "🌀", tradable: false, consumable: false },
+    { id: "title_primordial", name: "原始天尊", nameEn: "Primordial Lord", type: "title", rarity: "primordial", description: "開天闢地的原始天尊", icon: "⚡", tradable: false, consumable: false },
+    { id: "collectible_bigbang", name: "宇宙奇點", nameEn: "Big Bang", type: "collectible", rarity: "primordial", description: "宇宙誕生的初始奇點", icon: "💥", tradable: false, consumable: false },
+    { id: "collectible_eternity", name: "永恆之石", nameEn: "Eternity Stone", type: "collectible", rarity: "primordial", description: "超越時間的永恆之石", icon: "💎", tradable: false, consumable: false },
+  ],
+  transcendent: [
+    { id: "token_50000000000", name: "50,000,000,000 ZXC", nameEn: "50B ZXC", type: "token", rarity: "transcendent", description: "五百億子熙幣", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 50000000000 } },
+    { id: "token_100000000000", name: "100,000,000,000 ZXC", nameEn: "100B ZXC", type: "token", rarity: "transcendent", description: "一千億子熙幣", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 100000000000 } },
+    { id: "yjc_titan", name: "YJC 泰坦", nameEn: "YJC Titan", type: "token", rarity: "transcendent", description: "50 YJC", icon: "💎", tradable: false, consumable: true, effect: { type: "currency", value: 50, currency: "yjc" } },
+    { id: "yjc_omega", name: "YJC 終極", nameEn: "YJC Omega", type: "token", rarity: "transcendent", description: "100 YJC", icon: "👑", tradable: false, consumable: true, effect: { type: "currency", value: 100, currency: "yjc" } },
+    { id: "avatar_transcendent", name: "超越者", nameEn: "Transcendent One", type: "avatar", rarity: "transcendent", description: "超越一切維度的存在", icon: "✨", tradable: false, consumable: false },
+    { id: "title_transcendent", name: "超越永恆", nameEn: "Beyond Eternity", type: "title", rarity: "transcendent", description: "已超越永恆的至高存在", icon: "∞", tradable: false, consumable: false },
+    { id: "collectible_unicorn", name: "全能宇宙", nameEn: "Omniverse", type: "collectible", rarity: "transcendent", description: "包含一切可能性的全能宇宙", icon: "🌌", tradable: false, consumable: false },
+    { id: "collectible_absolute", name: "絕對真理", nameEn: "Absolute Truth", type: "collectible", rarity: "transcendent", description: "宇宙最終的絕對真理", icon: "🔮", tradable: false, consumable: false },
+  ],
 };
 
 // Special items (shop-only, not in chest drops)
@@ -467,29 +545,35 @@ export const COLLECTIBLE_VALUE_BY_RARITY: Record<Rarity, number> = {
   chaos: 10000,
   abyss: 50000,
   oracle: 250000,
+  primordial: 1_000_000,
+  transcendent: 10_000_000,
 };
 
 // Item base values for bundle/shop display valuation (not pawn price)
 export const ITEM_BASE_VALUES: Record<Rarity, number> = {
-  common: 100,
-  rare: 500,
-  epic: 2_000,
+  common: 500,
+  rare: 2_500,
+  epic: 12_500,
+  legendary: 100_000,
+  mythic: 1_000_000,
+  chaos: 10_000_000,
+  abyss: 100_000_000,
+  oracle: 1_000_000_000,
+  primordial: 10_000_000_000,
+  transcendent: 100_000_000_000,
+};
+
+export const BUFF_PAWN_PRICES: Record<Rarity, number> = {
+  common: 50,
+  rare: 250,
+  epic: 1_250,
   legendary: 10_000,
   mythic: 100_000,
   chaos: 1_000_000,
   abyss: 10_000_000,
   oracle: 100_000_000,
-};
-
-export const BUFF_PAWN_PRICES: Record<Rarity, number> = {
-  common: 1,
-  rare: 3,
-  epic: 8,
-  legendary: 20,
-  mythic: 50,
-  chaos: 100,
-  abyss: 200,
-  oracle: 500,
+  primordial: 1_000_000_000,
+  transcendent: 10_000_000_000,
 };
 
 export function getItemPawnValue(item: ItemDefinition): number {
@@ -512,6 +596,8 @@ export const RARITY_NAMES: Record<Rarity, { name: string; nameEn: string; color:
   chaos: { name: "混沌", nameEn: "Chaos", color: "#aa00ff" },
   abyss: { name: "深淵", nameEn: "Abyss", color: "#00bcd4" },
   oracle: { name: "神諭", nameEn: "Oracle", color: "#ff0044" },
+  primordial: { name: "原始", nameEn: "Primordial", color: "#ff8800" },
+  transcendent: { name: "超越", nameEn: "Transcendent", color: "#ff00ff" },
 };
 
 // Chest Animation Duration (ms)
