@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronRight, X, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
 import { usePreferencesStore } from '../../store/usePreferencesStore';
 import AppBottomNav from '../../components/AppBottomNav';
@@ -93,30 +94,22 @@ const RARITY_COLORS: Record<string, string> = {
   oracle: '#ff0044',
 };
 
-const BUFF_TYPE_LABEL: Record<string, string> = {
-  prevent_loss: '免輸護符',
-  xp_boost: '經驗加成',
-  luck_boost: '幸運加成',
-  vip_tier: 'VIP 等級',
-  vip_trial: 'VIP 體驗',
-  buff: 'Buff',
-};
-
-function formatExpires(expiresAt?: string | null): string {
+function formatExpires(expiresAt: string | null | undefined, t: (key: string, opts?: any) => string): string {
   if (!expiresAt) return '';
   const ts = Date.parse(expiresAt);
   if (!Number.isFinite(ts)) return '';
   const diff = ts - Date.now();
-  if (diff <= 0) return '已過期';
+  if (diff <= 0) return t('chest.buff_expired');
   const mins = Math.ceil(diff / 60000);
-  if (mins < 60) return `剩餘 ${mins} 分鐘`;
+  if (mins < 60) return t('chest.buff_remaining_min', { count: mins });
   const hrs = Math.ceil(mins / 60);
-  return `剩餘 ${hrs} 小時`;
+  return t('chest.buff_remaining_hour', { count: hrs });
 }
 
 export default function ChestView() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const [chests, setChests] = useState<ChestConfig[]>([]);
@@ -338,7 +331,7 @@ export default function ChestView() {
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-wider text-[#adaaaa]">
-                      {BUFF_TYPE_LABEL[buff.type] || '加成'}
+                      {t(`chest.buff_type_${buff.type}`)}
                     </p>
                     <p className="text-xs font-black text-white">
                       {buff.type === 'prevent_loss' ? `x${buff.remaining}` : buff.type === 'vip_tier' ? `VIP ${buff.value}` : `+${buff.value * 100}%`}
@@ -346,7 +339,7 @@ export default function ChestView() {
                   </div>
                 </div>
                 <div className="mt-2 text-[10px] font-bold text-[#adaaaa] opacity-60">
-                  {buff.expiresAt ? formatExpires(buff.expiresAt) : '生效中'}
+                  {buff.expiresAt ? formatExpires(buff.expiresAt, t) : t('chest.buff_active')}
                 </div>
               </div>
             ))}

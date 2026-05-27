@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, FormEvent, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ShieldAlert,
   Activity,
@@ -75,35 +76,18 @@ interface CatalogItem {
 
 type TabId = 'dashboard' | 'maintenance' | 'usermgr' | 'catalog' | 'submissions' | 'campaigns' | 'tickets';
 
-const TABS: { id: TabId; label: string; icon: typeof ShieldAlert }[] = [
-  { id: 'dashboard', label: '儀表板', icon: Activity },
-  { id: 'maintenance', label: '維護', icon: AlertOctagon },
-  { id: 'usermgr', label: '使用者管理', icon: UserSearch },
-  { id: 'catalog', label: '獎勵目錄', icon: Package },
-  { id: 'submissions', label: '投稿審核', icon: Inbox },
-  { id: 'campaigns', label: '活動', icon: CalendarClock },
-  { id: 'tickets', label: '工單', icon: MessageCircle },
+const TABS: { id: TabId; icon: typeof ShieldAlert }[] = [
+  { id: 'dashboard', icon: Activity },
+  { id: 'maintenance', icon: AlertOctagon },
+  { id: 'usermgr', icon: UserSearch },
+  { id: 'catalog', icon: Package },
+  { id: 'submissions', icon: Inbox },
+  { id: 'campaigns', icon: CalendarClock },
+  { id: 'tickets', icon: MessageCircle },
 ];
 
-const RARITY_LABEL: Record<string, string> = {
-  common: '普通',
-  rare: '稀有',
-  epic: '史詩',
-  legendary: '傳說',
-  mythic: '神話',
-  vip: 'VIP',
-};
-
-const TYPE_LABEL: Record<string, string> = {
-  avatar: '頭像',
-  title: '稱號',
-  buff: '增益',
-  chest: '寶箱',
-  key: '鑰匙',
-  collectible: '收藏',
-};
-
 export default function AdminView() {
+  const { t } = useTranslation();
   const { sessionId, isAuthorized } = useAuthStore();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
@@ -177,11 +161,11 @@ export default function AdminView() {
   const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
 
   const CHEST_KEY_ITEMS = [
-    { id: 'chest_key_common', name: '普通寶箱鑰匙', icon: '🗝️', rarity: 'common', type: 'chest_key' },
-    { id: 'chest_key_rare', name: '稀有寶箱鑰匙', icon: '🗝️', rarity: 'rare', type: 'chest_key' },
-    { id: 'chest_key_epic', name: '史詩寶箱鑰匙', icon: '🗝️', rarity: 'epic', type: 'chest_key' },
-    { id: 'chest_key_legendary', name: '傳奇寶箱鑰匙', icon: '🗝️', rarity: 'legendary', type: 'chest_key' },
-    { id: 'chest_key_mythic', name: '神話寶箱鑰匙', icon: '🗝️', rarity: 'mythic', type: 'chest_key' },
+    { id: 'chest_key_common', name: t('admin.chest_key_common_name'), icon: '🗝️', rarity: 'common', type: 'chest_key' },
+    { id: 'chest_key_rare', name: t('admin.chest_key_rare_name'), icon: '🗝️', rarity: 'rare', type: 'chest_key' },
+    { id: 'chest_key_epic', name: t('admin.chest_key_epic_name'), icon: '🗝️', rarity: 'epic', type: 'chest_key' },
+    { id: 'chest_key_legendary', name: t('admin.chest_key_legendary_name'), icon: '🗝️', rarity: 'legendary', type: 'chest_key' },
+    { id: 'chest_key_mythic', name: t('admin.chest_key_mythic_name'), icon: '🗝️', rarity: 'mythic', type: 'chest_key' },
   ];
 
   useEffect(() => {
@@ -256,7 +240,7 @@ export default function AdminView() {
       const [healthRes, eventsRes, annRes, catRes, subsRes, campRes] = await Promise.all([
         api.get('/api/v1/admin/ops/health').catch((err) => {
           if (err?.response?.status === 401 || err?.response?.status === 403) {
-            setAuthErr('你不是管理員或未登入');
+            setAuthErr(t('admin.not_admin'));
           }
           return null;
         }),
@@ -282,7 +266,7 @@ export default function AdminView() {
         .find((e) => e && e.code);
       if (firstErr) {
         const reason = firstErr.message || firstErr.reason || firstErr.code;
-        setAuthErr(`管理員資料讀取失敗：${reason}`);
+        setAuthErr(t('admin.admin_data_failed_with_reason', { reason }));
       } else {
         setAuthErr(null);
       }
@@ -339,7 +323,7 @@ export default function AdminView() {
   }
 
   function errMsg(err: any) {
-    return err?.response?.data?.data?.error?.message || err?.message || '操作失敗';
+    return err?.response?.data?.data?.error?.message || err?.message || t('admin.operation_failed');
   }
 
   async function handleMaintenance(e: FormEvent) {
@@ -351,7 +335,7 @@ export default function AdminView() {
         message: maintenanceMessage || undefined,
       });
       setMaintenanceOn(!maintenanceOn);
-      show(!maintenanceOn ? '維護模式已啟用' : '維護模式已停用');
+      show(!maintenanceOn ? t('admin.maintenance_enabled') : t('admin.maintenance_disabled'));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -368,7 +352,7 @@ export default function AdminView() {
         reason: blacklistReason.trim() || undefined,
         action: 'add',
       });
-      show(`已加入黑名單：${blacklistAddress}`);
+      show(t('admin.blacklisted_with', { address: blacklistAddress }));
       setBlacklistAddress('');
       setBlacklistReason('');
       refresh();
@@ -389,7 +373,7 @@ export default function AdminView() {
         reason: adjustReason.trim() || 'admin_adjust',
       });
       const data = res.data?.data;
-      show(`餘額已調整，新餘額：${data?.newBalance ?? '?'} ${adjustToken.toUpperCase()}`);
+      show(t('admin.balance_adjusted_with', { balance: data?.newBalance ?? '?', token: adjustToken.toUpperCase() }));
       setAdjustAmount('');
       setAdjustReason('');
       refresh();
@@ -410,7 +394,7 @@ export default function AdminView() {
           content: announcementContent,
           type: announcementType,
         });
-        show(`公告已更新：${announcementTitle}`);
+        show(t('admin.announcement_updated', { title: announcementTitle }));
       } else {
         const res = await api.post('/api/v1/admin/announcements', {
           sessionId,
@@ -419,8 +403,8 @@ export default function AdminView() {
           type: announcementType,
           isPinned: announcementPinned,
         });
-        if (!res.data?.success) throw new Error(res.data?.error || '發布失敗');
-        show(`公告已發布：${announcementTitle} [${announcementType}]`);
+        if (!res.data?.success) throw new Error(res.data?.error || t('admin.publish_failed'));
+        show(t('admin.announcement_published_with', { title: announcementTitle, type: announcementType }));
       }
       setEditingAnnouncement(null);
       setAnnouncementTitle('');
@@ -429,7 +413,7 @@ export default function AdminView() {
       setAnnouncementType('info');
       refresh();
     } catch (err: any) {
-      show(err?.response?.data?.message || err?.message || '操作失敗');
+      show(err?.response?.data?.message || err?.message || t('admin.operation_failed'));
     }
   }
 
@@ -441,7 +425,7 @@ export default function AdminView() {
         sessionId,
         [field]: !ann[field],
       });
-      show(`已更新公告：${ann.title}`);
+      show(t('admin.announcement_updated', { title: ann.title }));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -451,10 +435,10 @@ export default function AdminView() {
   async function handleAnnouncementDelete(ann: Announcement) {
     const id = ann.announcementId || ann.id;
     if (!id) return;
-    if (!window.confirm(`確定刪除公告「${ann.title}」？`)) return;
+    if (!window.confirm(t('admin.confirm_delete_announcement', { title: ann.title }))) return;
     try {
       await api.delete(`/api/v1/admin/announcements/${encodeURIComponent(id)}`, { data: { sessionId } });
-      show('公告已刪除');
+      show(t('admin.announcement_deleted'));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -478,7 +462,7 @@ export default function AdminView() {
         icon: catalogIcon.trim() || undefined,
         isActive: true,
       });
-      show(`已新增 / 更新：${name}（${autoId}）`);
+      show(t('admin.catalog_item_saved', { name, id: autoId }));
       setCatalogItemId('');
       setCatalogName('');
       setCatalogIcon('');
@@ -495,7 +479,7 @@ export default function AdminView() {
         sessionId,
         isActive: !item.isActive,
       });
-      show(`已更新：${item.name}`);
+      show(t('admin.catalog_item_updated', { name: item.name }));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -503,10 +487,10 @@ export default function AdminView() {
   }
 
   async function handleCatalogDelete(item: CatalogItem) {
-    if (!window.confirm(`確定刪除「${item.name}」？`)) return;
+    if (!window.confirm(t('admin.confirm_delete_catalog', { name: item.name }))) return;
     try {
       await api.delete(`/api/v1/admin/reward-catalog/${encodeURIComponent(item.itemId)}`, { data: { sessionId } });
-      show('已刪除');
+      show(t('admin.deleted'));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -514,10 +498,10 @@ export default function AdminView() {
   }
 
   async function handleSubmissionApprove(sub: any) {
-    if (!window.confirm(`確定通過「${sub.name}」？通過後會加入到稱號頭像清單`)) return;
+    if (!window.confirm(t('admin.confirm_approve_submission', { name: sub.name }))) return;
     try {
       await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.id || sub.submissionId)}/approve`, { sessionId });
-      show('已通過');
+      show(t('admin.approved'));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -525,14 +509,14 @@ export default function AdminView() {
   }
 
   async function handleSubmissionReject(sub: any) {
-    const reason = window.prompt('拒絕原因（可留空）：') ?? '';
-    if (!window.confirm(`確定拒絕「${sub.name}」？`)) return;
+    const reason = window.prompt(t('admin.reject_reason_prompt')) ?? '';
+    if (!window.confirm(t('admin.confirm_reject_submission', { name: sub.name }))) return;
     try {
       await api.post(`/api/v1/admin/submissions/${encodeURIComponent(sub.id || sub.submissionId)}/reject`, {
         sessionId,
         reviewNote: reason,
       });
-      show('已拒絕');
+      show(t('admin.rejected'));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -544,14 +528,14 @@ export default function AdminView() {
     setUserInspect(null);
     const addr = userQueryAddress.trim();
     if (!addr) {
-      setUserInspectErr('請輸入地址');
+      setUserInspectErr(t('admin.enter_address'));
       return;
     }
     try {
       const res = await api.get(`/api/v1/admin/users/${encodeURIComponent(addr)}`);
       const data = res.data?.data;
       if (!data || !data.user) {
-        setUserInspectErr('查無使用者');
+        setUserInspectErr(t('admin.user_not_found'));
         return;
       }
       setUserInspect(data);
@@ -572,7 +556,7 @@ export default function AdminView() {
     } else {
       bias = Number(raw);
       if (!Number.isFinite(bias) || bias < 0 || bias > 1) {
-        show('勝率偏置必須介於 0 到 1 之間，留空則清除');
+        show(t('admin.win_bias_range_error'));
         return;
       }
     }
@@ -581,7 +565,7 @@ export default function AdminView() {
         `/api/v1/admin/users/${encodeURIComponent(userInspect.user.address)}/win-bias`,
         { sessionId, bias },
       );
-      show(bias === null ? '已清除勝率偏置' : `已設定勝率偏置 ${bias}`);
+      show(bias === null ? t('admin.win_bias_cleared') : t('admin.win_bias_set', { bias }));
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -596,7 +580,7 @@ export default function AdminView() {
         { data: { sessionId } },
       );
       setUserBiasInput('');
-      show('已清除勝率偏置');
+      show(t('admin.win_bias_cleared'));
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -610,7 +594,7 @@ export default function AdminView() {
         `/api/v1/admin/users/${encodeURIComponent(userInspect.user.address)}/vip`,
         { sessionId, level },
       );
-      show(`已設定 VIP 等級為 ${level}`);
+      show(t('admin.vip_level_set', { level }));
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -619,13 +603,13 @@ export default function AdminView() {
 
   async function handleResetTotalBet() {
     if (!userInspect?.user?.address) return;
-    if (!window.confirm('確定要把這位使用者的累積下注歸零嗎？')) return;
+    if (!window.confirm(t('admin.confirm_reset_total_bet'))) return;
     try {
       await api.post(
         `/api/v1/admin/users/${encodeURIComponent(userInspect.user.address)}/reset-total-bet`,
         { sessionId },
       );
-      show('累積下注已歸零');
+      show(t('admin.total_bet_reset'));
       handleUserInspect();
     } catch (err: any) {
       show(errMsg(err));
@@ -635,7 +619,7 @@ export default function AdminView() {
   async function handleCampaignSave() {
     const title = campaignTitle.trim();
     if (!title) {
-      show('請輸入活動名稱');
+      show(t('admin.enter_campaign_title'));
       return;
     }
     const rewards: any = {};
@@ -670,8 +654,8 @@ export default function AdminView() {
         rewards,
       });
       const data = res.data?.data;
-      if (data?.error) throw new Error(data.error.message || data.error.code || '儲存失敗');
-      show('活動已儲存');
+      if (data?.error) throw new Error(data.error.message || data.error.code || t('admin.save_failed'));
+      show(t('admin.campaign_saved'));
       setCampaignDraftId('');
       setCampaignTitle('');
       setCampaignDescription('');
@@ -712,10 +696,10 @@ export default function AdminView() {
   }
 
   async function handleCampaignDelete(campaignId: string) {
-    if (!confirm('確定刪除這個活動嗎？')) return;
+    if (!confirm(t('admin.confirm_delete_campaign'))) return;
     try {
       await api.delete(`/api/v1/admin/campaigns/${encodeURIComponent(campaignId)}`);
-      show('已刪除');
+      show(t('admin.deleted'));
       refresh();
     } catch (err: any) {
       show(errMsg(err));
@@ -725,7 +709,7 @@ export default function AdminView() {
   async function handleGrantSubmit() {
     const addr = grantAddress.trim();
     if (!addr) {
-      show('請輸入使用者地址');
+      show(t('admin.enter_address'));
       return;
     }
     const body: any = { sessionId, address: addr, note: grantNote.trim() || undefined };
@@ -746,14 +730,14 @@ export default function AdminView() {
     if (grantTitleId.trim()) body.titles = [grantTitleId.trim()];
 
     if (!body.zxc && !body.yjc && !body.items && !body.avatars && !body.titles) {
-      show('請至少填一個獎勵欄位');
+      show(t('admin.enter_at_least_one_reward'));
       return;
     }
     try {
       const res = await api.post('/api/v1/admin/grant', body);
       const data = res.data?.data;
-      if (data?.error) throw new Error(data.error.message || data.error.code || '贈送失敗');
-      show(`✅ 已送出獎勵給 ${addr}`);
+      if (data?.error) throw new Error(data.error.message || data.error.code || t('admin.grant_failed'));
+      show(t('admin.grant_sent_to', { addr }));
       setGrantZxc('');
       setGrantYjc('');
       setGrantItemId('');
@@ -768,12 +752,12 @@ export default function AdminView() {
 
   const healthCards = useMemo(
     () => [
-      { label: '待處理交易', value: health?.queuedTxIntents ?? '-' },
-      { label: '待結算數', value: health?.pendingSettlements ?? '-' },
-      { label: '未結工單', value: health?.openTickets ?? '-' },
-      { label: '維護狀態', value: maintenanceOn ? '啟用中' : '關閉' },
+      { label: t('admin.pending_tx'), value: health?.queuedTxIntents ?? '-' },
+      { label: t('admin.pending_settlements'), value: health?.pendingSettlements ?? '-' },
+      { label: t('admin.open_tickets_label'), value: health?.openTickets ?? '-' },
+      { label: t('admin.maintenance_status'), value: maintenanceOn ? t('admin.enabled') : t('admin.disabled') },
     ],
-    [health, maintenanceOn],
+    [health, maintenanceOn, t],
   );
 
   const avatarsAndTitles = useMemo(
@@ -787,9 +771,9 @@ export default function AdminView() {
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <ShieldAlert className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">管理中心</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">{t('admin.title')}</h1>
           </div>
-          <button onClick={refresh} className="p-2 rounded-lg border border-[#494847]/30 hover:bg-[#262626]" aria-label="重新整理">
+          <button onClick={refresh} className="p-2 rounded-lg border border-[#494847]/30 hover:bg-[#262626]" aria-label={t('admin.refresh')}>
             <RefreshCw size={16} className={loading ? 'animate-spin text-[#fcc025]' : 'text-[#adaaaa]'} />
           </button>
         </div>
@@ -798,7 +782,7 @@ export default function AdminView() {
       <main className="app-shell space-y-6 pt-24">
         {!isAuthorized && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
-            <p className="text-sm text-[#adaaaa]">請先登入以使用管理功能。</p>
+            <p className="text-sm text-[#adaaaa]">{t('admin.login_first')}</p>
           </section>
         )}
 
@@ -824,7 +808,7 @@ export default function AdminView() {
                 }`}
               >
                 <Icon size={14} />
-                {tab.label}
+                {t(`admin.tab_${tab.id}`)}
               </button>
             );
           })}
@@ -841,7 +825,7 @@ export default function AdminView() {
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
               <div className="flex items-center gap-2 mb-4">
                 <Activity size={18} className="text-[#fcc025]" />
-                <h3 className="text-sm font-black tracking-wide text-white">系統狀態</h3>
+                <h3 className="text-sm font-black tracking-wide text-white">{t('admin.system_status')}</h3>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {healthCards.map((s) => (
@@ -857,40 +841,40 @@ export default function AdminView() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <ScrollText size={18} className="text-[#fcc025]" />
-                  <h3 className="text-sm font-black tracking-wide text-white">事件紀錄（{events.length}）</h3>
+                  <h3 className="text-sm font-black tracking-wide text-white">{t('admin.event_log', { count: events.length })}</h3>
                 </div>
-                <button type="button" onClick={refresh} className="text-xs text-[#fcc025] hover:underline">重新整理</button>
+                <button type="button" onClick={refresh} className="text-xs text-[#fcc025] hover:underline">{t('admin.refresh')}</button>
               </div>
               {loading && events.length === 0 ? (
-                <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> 載入中...</div>
+                <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> {t('common.loading')}</div>
               ) : events.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">沒有事件</p>
+                <p className="text-xs text-[#adaaaa]">{t('admin.no_events')}</p>
               ) : (
                 <ul className="space-y-2 text-xs max-h-96 overflow-y-auto">
                   {events.map((evt, i) => (
                     <li key={evt.id || i} className="border-l-2 border-[#fcc025]/40 pl-3 py-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={`text-xs font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-[#fcc025]/10 text-[#fcc025]' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                          {({ error: '錯誤', warn: '警告', info: '資訊', important: '重要' } as Record<string, string>)[evt.severity] || evt.severity || '資訊'}
+                          {({ error: t('admin.severity_error'), warn: t('admin.severity_warn'), info: t('admin.severity_info'), important: t('admin.severity_important') } as Record<string, string>)[evt.severity] || evt.severity || t('admin.severity_info')}
                         </span>
                         <span className="text-xs font-bold text-[#adaaaa]">
                           {({
-                            'rewards/item_pawned': '道具典當',
-                            'rewards/chests_opened_bulk': '大量開箱',
-                            'rewards/chests_opened': '開箱',
-                            'wallet/airdrop_claimed': '空投領取',
-                            'wallet/zxc_to_yjc_confirmed': 'ZXC→YJC 兌換',
-                            'wallet/transfer': '轉帳',
-                            'game/play_completed': '遊戲結算',
-                            'admin/campaign_upsert': '活動異動',
-                            'admin/grant': '管理員贈送',
-                            'admin/maintenance': '維護模式變更',
-                            'admin/blacklist': '黑名單變更',
-                            'admin/announcement': '公告異動',
-                            'admin/reward_catalog': '獎勵目錄變更',
-                            'admin/submission': '投稿審核',
-                            'support/ticket_created': '工單建立',
-                            'support/ticket_updated': '工單更新',
+                            'rewards/item_pawned': t('admin.event_rewards_item_pawned'),
+                            'rewards/chests_opened_bulk': t('admin.event_rewards_chests_opened_bulk'),
+                            'rewards/chests_opened': t('admin.event_rewards_chests_opened'),
+                            'wallet/airdrop_claimed': t('admin.event_wallet_airdrop_claimed'),
+                            'wallet/zxc_to_yjc_confirmed': t('admin.event_wallet_zxc_to_yjc_confirmed'),
+                            'wallet/transfer': t('admin.event_wallet_transfer'),
+                            'game/play_completed': t('admin.event_game_play_completed'),
+                            'admin/campaign_upsert': t('admin.event_admin_campaign_upsert'),
+                            'admin/grant': t('admin.event_admin_grant'),
+                            'admin/maintenance': t('admin.event_admin_maintenance'),
+                            'admin/blacklist': t('admin.event_admin_blacklist'),
+                            'admin/announcement': t('admin.event_admin_announcement'),
+                            'admin/reward_catalog': t('admin.event_admin_reward_catalog'),
+                            'admin/submission': t('admin.event_admin_submission'),
+                            'support/ticket_created': t('admin.event_support_ticket_created'),
+                            'support/ticket_updated': t('admin.event_support_ticket_updated'),
                           })[`${evt.channel}/${evt.kind}`] || `${evt.channel}/${evt.kind}`}
                         </span>
                       </div>
@@ -899,22 +883,22 @@ export default function AdminView() {
                           const msgLabels: Record<string, (m: string) => string> = {
                             'rewards/chests_opened_bulk': (m) => {
                               const match = m.match(/Opened (\d+) x (\w+) chests/);
-                              return match ? `大量開箱 ${match[1]} x ${match[2]} 寶箱` : m;
+                              return match ? t('admin.msg_chests_opened_bulk', { count: match[1], chest: match[2] }) : m;
                             },
                             'rewards/chests_opened': (m) => {
                               const match = m.match(/Opened (\w+) chest/);
-                              return match ? `開啟 ${match[1]} 寶箱` : m;
+                              return match ? t('admin.msg_chests_opened', { chest: match[1] }) : m;
                             },
                             'rewards/item_pawned': (m) => {
                               const match = m.match(/Pawned (\d+)x (\w+) for ([\d.]+) ZXC/);
-                              return match ? `典當 ${match[2]} x${match[1]}，獲得 ${match[3]} ZXC` : m;
+                              return match ? t('admin.msg_item_pawned', { item: match[2], qty: match[1], amount: match[3] }) : m;
                             },
                             'game/play_completed': (m) => {
                               const match = m.match(/User played (\w+): bet ([\d.]+), payout ([\d.]+)/);
-                              return match ? `遊玩 ${match[1]}：下注 ${match[2]}，獲得 ${match[3]}` : m;
+                              return match ? t('admin.msg_game_play_completed', { game: match[1], bet: match[2], payout: match[3] }) : m;
                             },
-                            'wallet/transfer': (m) => m.replace('Transfer', '轉帳'),
-                            'wallet/airdrop_claimed': (m) => m.replace(/airdrop/g, '空投'),
+                            'wallet/transfer': (m) => m.replace('Transfer', t('admin.msg_transfer')),
+                            'wallet/airdrop_claimed': (m) => m.replace(/airdrop/g, t('admin.msg_airdrop_claimed')),
                           };
                           const key = `${evt.channel}/${evt.kind}`;
                           const fn = msgLabels[key];
@@ -933,36 +917,36 @@ export default function AdminView() {
         {activeTab === 'maintenance' && (
           <section className="space-y-6">
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><AlertOctagon size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">維護模式</h3></div>
-              <p className="text-xs text-[#adaaaa] mb-3">啟用後前台會顯示維護通知，阻擋進場。當前狀態：<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? '啟用中' : '關閉'}</span></p>
+              <div className="flex items-center gap-2 mb-4"><AlertOctagon size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{t('admin.maintenance_mode')}</h3></div>
+              <p className="text-xs text-[#adaaaa] mb-3">{t('admin.maintenance_desc')}<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? t('admin.enabled') : t('admin.disabled')}</span></p>
               <form onSubmit={handleMaintenance} className="space-y-3">
-                <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="維護訊息（可選）" maxLength={200} />
-                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-[#fcc025] text-[#0e0e0e]'}`}>{maintenanceOn ? '停用維護模式' : '啟用維護模式'}</button>
+                <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.maintenance_message_placeholder')} maxLength={200} />
+                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-[#fcc025] text-[#0e0e0e]'}`}>{maintenanceOn ? t('admin.disable_maintenance') : t('admin.enable_maintenance')}</button>
               </form>
             </div>
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{editingAnnouncement ? '編輯公告' : '發佈新公告'}</h3></div>
+              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{editingAnnouncement ? t('admin.edit_announcement') : t('admin.new_announcement')}</h3></div>
               <form onSubmit={handleAnnouncementCreate} className="space-y-3">
-                <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="標題" maxLength={100} />
-                <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder="內容" maxLength={2000} />
+                <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.announcement_title_placeholder')} maxLength={100} />
+                <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder={t('admin.announcement_content_placeholder')} maxLength={2000} />
                 <div className="flex gap-2">
                   {(['info', 'warning', 'urgent'] as const).map((t) => (
                     <button key={t} type="button" onClick={() => setAnnouncementType(t)}
                       className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${announcementType === t ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] border border-[#494847]/30'}`}>{t}</button>
                   ))}
                 </div>
-                <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />發佈時即釘選於最上方</label>
+                <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />{t('admin.pin_on_publish')}</label>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">{editingAnnouncement ? '更新公告' : '發佈公告'}</button>
+                  <button type="submit" className="flex-1 py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">{editingAnnouncement ? t('admin.update_announcement') : t('admin.publish_announcement')}</button>
                   {editingAnnouncement && (
-                    <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementTitle(''); setAnnouncementContent(''); setAnnouncementType('info'); setAnnouncementPinned(false); }} className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg text-xs font-black">取消</button>
+                    <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementTitle(''); setAnnouncementContent(''); setAnnouncementType('info'); setAnnouncementPinned(false); }} className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg text-xs font-black">{t('common.cancel')}</button>
                   )}
                 </div>
               </form>
             </div>
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <h3 className="text-sm font-black tracking-wide text-white mb-4">現有公告（{announcements.length}）</h3>
-              {announcements.length === 0 ? (<p className="text-xs text-[#adaaaa]">目前沒有公告</p>) : (
+              <h3 className="text-sm font-black tracking-wide text-white mb-4">{t('admin.existing_announcements', { count: announcements.length })}</h3>
+              {announcements.length === 0 ? (<p className="text-xs text-[#adaaaa]">{t('admin.no_announcements')}</p>) : (
                 <ul className="space-y-3">{announcements.map((ann) => {
                   const id = ann.announcementId || ann.id || ann.title;
                   return (<li key={id} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-3">
@@ -973,10 +957,10 @@ export default function AdminView() {
                         <p className="text-xs text-[#494847] mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
-                        <button onClick={() => { const a = ann as any; setEditingAnnouncement(ann); setAnnouncementTitle(a.title); setAnnouncementContent(a.content); setAnnouncementType(a.type || 'info'); setAnnouncementPinned(!!a.isPinned); }} className="p-1.5 rounded border border-[#fcc025]/30 hover:bg-[#fcc025]/10" title="編輯"><Edit2 size={14} className="text-[#fcc025]" /></button>
-                        <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? '取消釘選' : '置頂'}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
-                        <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isActive ? '隱藏' : '顯示'}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}</button>
-                        <button onClick={() => handleAnnouncementDelete(ann)} className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10" title="刪除"><Trash2 size={14} className="text-red-400" /></button>
+                        <button onClick={() => { const a = ann as any; setEditingAnnouncement(ann); setAnnouncementTitle(a.title); setAnnouncementContent(a.content); setAnnouncementType(a.type || 'info'); setAnnouncementPinned(!!a.isPinned); }} className="p-1.5 rounded border border-[#fcc025]/30 hover:bg-[#fcc025]/10" title={t('admin.edit_announcement')}><Edit2 size={14} className="text-[#fcc025]" /></button>
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? t('admin.unpin') : t('admin.pin')}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isActive ? t('admin.hide') : t('admin.show')}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}</button>
+                        <button onClick={() => handleAnnouncementDelete(ann)} className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10" title={t('admin.delete')}><Trash2 size={14} className="text-red-400" /></button>
                       </div>
                     </div>
                   </li>);
@@ -990,56 +974,56 @@ export default function AdminView() {
           <section className="space-y-6">
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-              <h3 className="text-sm font-black tracking-wide text-white">使用者查詢</h3>
+              <h3 className="text-sm font-black tracking-wide text-white">{t('admin.user_query')}</h3>
               <div className="flex gap-2">
-                <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder="輸入使用者地址 0x..." className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110">查詢</button>
+                <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder={t('admin.user_query_placeholder')} className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110">{t('admin.query')}</button>
               </div>
               {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
               {userInspect && (
                 <div className="space-y-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-4">
-                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">地址：</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
-                  {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">顯示名稱：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
+                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">{t('admin.address')}：</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
+                  {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">{t('admin.display_name')}：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
                   {userInspect.balances && (
                     <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
-                      <div><p className="text-xs text-[#494847]">ZXC 餘額</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">YJC 餘額</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">累積下注</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">{t('admin.zxc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">{t('admin.yjc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p></div>
+                      <div><p className="text-xs text-[#494847]">{t('admin.total_bet')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p></div>
                     </div>
                   )}
-                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">目前勝率偏置：</span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : '未設定（採系統預設）'}</span></div>
+                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">{t('admin.current_win_bias')}</span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : t('admin.win_bias_not_set')}</span></div>
                   <div className="flex gap-2">
-                    <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder="0.0 - 1.0（留空清除）" className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                    <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> 套用</button>
-                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300">清除</button>
+                    <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder={t('admin.win_bias_placeholder')} className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                    <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> {t('admin.apply')}</button>
+                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300">{t('admin.clear')}</button>
                   </div>
                   <div className="space-y-2 border-t border-[#494847]/20 pt-3">
-                    <p className="text-xs text-[#adaaaa]">VIP 等級：<span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
+                    <p className="text-xs text-[#adaaaa]">{t('admin.vip_level')}<span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
                     <div className="flex flex-wrap gap-1">{[0, 1, 2, 3, 4, 5].map((lv) => (
                       <button key={lv} type="button" onClick={() => handleSetVipLevel(lv)} className={`px-3 py-1 rounded text-xs font-bold ${(userInspect.vipLevel ?? -1) === lv ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] hover:bg-[#1a1919]'}`}>T{lv}</button>
                     ))}</div>
                   </div>
                   <div className="flex gap-2 pt-2 border-t border-[#494847]/20">
-                    <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10">重設下注統計</button>
+                    <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10">{t('admin.reset_total_bet')}</button>
                   </div>
                 </div>
               )}
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">黑名單</h3></div>
+              <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{t('admin.blacklist')}</h3></div>
               <form onSubmit={handleBlacklist} className="space-y-3">
-                <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="錢包地址 0x..." />
-                <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder="原因（可選）" maxLength={200} />
-                <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">加入黑名單</button>
+                <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_address_placeholder')} />
+                <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_reason_placeholder')} maxLength={200} />
+                <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">{t('admin.add_to_blacklist')}</button>
               </form>
               <div className="mt-6 pt-4 border-t border-[#494847]/30">
-                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">目前黑名單（{blacklist.length}）</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-[#fcc025] hover:underline">重新整理</button></div>
-                {blacklist.length === 0 ? <p className="text-xs text-[#adaaaa]">尚無黑名單紀錄。</p> : (
+                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-[#fcc025] hover:underline">{t('admin.refresh')}</button></div>
+                {blacklist.length === 0 ? <p className="text-xs text-[#adaaaa]">{t('admin.no_blacklist_records')}</p> : (
                   <ul className="space-y-2 max-h-64 overflow-y-auto">{blacklist.map((b: any, i: number) => (
                     <li key={b.address || b.key || i} className="flex items-center justify-between bg-[#0e0e0e] rounded-lg px-3 py-2 text-xs">
                       <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}…</div>{b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}</div>
-                      <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show('已移除黑名單'); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">移除</button>
+                      <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show(t('admin.removed_from_blacklist')); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">{t('admin.remove')}</button>
                     </li>
                   ))}</ul>
                 )}
@@ -1047,33 +1031,33 @@ export default function AdminView() {
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3><p className="text-xs text-[#adaaaa]">直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者</p></div>
+              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">{t('admin.grant_title')}</h3><p className="text-xs text-[#adaaaa]">{t('admin.grant_description')}</p></div>
               <div className="relative">
-                <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder="搜尋使用者名稱或地址..." className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder={t('admin.grant_address_placeholder')} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
                 {userResults.length > 0 && (
                   <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-[#494847]/30 bg-[#1a1919] shadow-xl">
-                    {userResults.map((u) => (<button key={u.address} type="button" onClick={() => { setGrantAddress(u.address); setUserSearch(''); setUserResults([]); }} className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"><span className="font-bold">{u.displayName || u.username || '未知'}</span><span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span></button>))}
+                    {userResults.map((u) => (<button key={u.address} type="button" onClick={() => { setGrantAddress(u.address); setUserSearch(''); setUserResults([]); }} className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"><span className="font-bold">{u.displayName || u.username || t('admin.unknown')}</span><span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span></button>))}
                   </div>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="number" value={grantZxc} onChange={(e) => setGrantZxc(e.target.value)} placeholder="ZXC 數量（可負）" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                <input type="number" value={grantYjc} onChange={(e) => setGrantYjc(e.target.value)} placeholder="YJC 數量（可負）" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" value={grantZxc} onChange={(e) => setGrantZxc(e.target.value)} placeholder={t('admin.grant_zxc_placeholder')} className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" value={grantYjc} onChange={(e) => setGrantYjc(e.target.value)} placeholder={t('admin.grant_yjc_placeholder')} className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <select value={grantItemId} onChange={(e) => setGrantItemId(e.target.value)} className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
-                  <option value="">— 道具 —</option>{allItemsList.filter((i) => i.type !== 'avatar' && i.type !== 'title').map((item) => (<option key={item.id} value={item.id}>{item.icon || ''} {item.name || item.id} [{item.rarity || ''}]</option>))}
+                  <option value="">{t('admin.grant_item_select')}</option>{allItemsList.filter((i) => i.type !== 'avatar' && i.type !== 'title').map((item) => (<option key={item.id} value={item.id}>{item.icon || ''} {item.name || item.id} [{item.rarity || ''}]</option>))}
                 </select>
-                <input type="number" min="1" value={grantItemQty} onChange={(e) => setGrantItemQty(e.target.value)} placeholder="數量" className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" min="1" value={grantItemQty} onChange={(e) => setGrantItemQty(e.target.value)} placeholder={t('admin.quantity')} className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
               </div>
               <select value={grantAvatarId} onChange={(e) => setGrantAvatarId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
-                <option value="">— 頭像 —</option>{allAvatars.map((av) => (<option key={av.id} value={av.id}>{av.icon || ''} {av.name || av.id}</option>))}
+                <option value="">{t('admin.grant_avatar_select')}</option>{allAvatars.map((av) => (<option key={av.id} value={av.id}>{av.icon || ''} {av.name || av.id}</option>))}
               </select>
               <select value={grantTitleId} onChange={(e) => setGrantTitleId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
-                <option value="">— 稱號 —</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.label || t.id}</option>))}
+                <option value="">{t('admin.grant_title_select')}</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.label || t.id}</option>))}
               </select>
-              <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder="備註（選填）" className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> 送出獎勵</button>
+              <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder={t('admin.grant_note_placeholder')} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> {t('admin.grant_submit')}</button>
             </div>
           </section>
         )}
@@ -1082,7 +1066,7 @@ export default function AdminView() {
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
             <div className="flex items-center gap-2 mb-4">
               <Ban size={18} className="text-[#fcc025]" />
-              <h3 className="text-sm font-black tracking-wide text-white">黑名單</h3>
+              <h3 className="text-sm font-black tracking-wide text-white">{t('admin.blacklist')}</h3>
             </div>
             <form onSubmit={handleBlacklist} className="space-y-3">
               <input
@@ -1090,34 +1074,34 @@ export default function AdminView() {
                 value={blacklistAddress}
                 onChange={(e) => setBlacklistAddress(e.target.value)}
                 className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                placeholder="錢包地址 0x..."
+                placeholder={t('admin.blacklist_address_placeholder')}
               />
               <input
                 type="text"
                 value={blacklistReason}
                 onChange={(e) => setBlacklistReason(e.target.value)}
                 className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                placeholder="原因（可選）"
+                placeholder={t('admin.blacklist_reason_placeholder')}
                 maxLength={200}
               />
               <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">
-                加入黑名單
+                {t('admin.add_to_blacklist')}
               </button>
             </form>
 
             <div className="mt-6 pt-4 border-t border-[#494847]/30">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-black tracking-wide text-white">目前黑名單（{blacklist.length}）</h4>
+                <h4 className="text-xs font-black tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4>
                 <button
                   type="button"
                   onClick={refreshBlacklist}
                   className="text-xs text-[#fcc025] hover:underline"
                 >
-                  重新整理
+                  {t('admin.refresh')}
                 </button>
               </div>
               {blacklist.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">尚無黑名單紀錄。</p>
+                <p className="text-xs text-[#adaaaa]">{t('admin.no_blacklist_records')}</p>
               ) : (
                 <ul className="space-y-2 max-h-64 overflow-y-auto">
                   {blacklist.map((b: any, i: number) => (
@@ -1140,7 +1124,7 @@ export default function AdminView() {
                               action: 'remove',
                               address: b.address,
                             });
-                            show('已移除黑名單');
+                            show(t('admin.removed_from_blacklist'));
                             refreshBlacklist();
                           } catch (err: any) {
                             show(errMsg(err));
@@ -1148,7 +1132,7 @@ export default function AdminView() {
                         }}
                         className="text-xs text-red-400 hover:text-red-300"
                       >
-                        移除
+                        {t('admin.remove')}
                       </button>
                     </li>
                   ))}
@@ -1160,16 +1144,16 @@ export default function AdminView() {
 
         {activeTab === 'users' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-            <h3 className="text-sm font-black tracking-wide text-white">使用者查詢與勝率偏置</h3>
+            <h3 className="text-sm font-black tracking-wide text-white">{t('admin.user_query')}</h3>
             <p className="text-xs text-[#adaaaa]">
-              查詢使用者資料並可調整勝率偏置（0 到 1 之間，越高代表越容易贏；留空送出則清除）
+              {t('admin.user_query_desc')}
             </p>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={userQueryAddress}
                 onChange={(e) => setUserQueryAddress(e.target.value)}
-                placeholder="輸入使用者地址 0x..."
+                placeholder={t('admin.user_query_placeholder')}
                 className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <button
@@ -1177,42 +1161,42 @@ export default function AdminView() {
                 onClick={handleUserInspect}
                 className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110"
               >
-                查詢
+                {t('admin.query')}
               </button>
             </div>
             {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
             {userInspect && (
               <div className="space-y-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-4">
                 <div className="text-xs text-[#adaaaa]">
-                  <span className="text-[#494847]">地址：</span>
+                  <span className="text-[#494847]">{t('admin.address')}：</span>
                   <span className="font-mono text-white break-all">{userInspect.user.address}</span>
                 </div>
                 {userInspect.user.displayName && (
                   <div className="text-xs text-[#adaaaa]">
-                    <span className="text-[#494847]">顯示名稱：</span>
+                    <span className="text-[#494847]">{t('admin.display_name')}：</span>
                     <span className="text-white">{userInspect.user.displayName}</span>
                   </div>
                 )}
                 {userInspect.balances && (
                   <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
                     <div>
-                      <p className="text-xs text-[#494847]">ZXC 餘額</p>
+                      <p className="text-xs text-[#494847]">{t('admin.zxc_balance')}</p>
                       <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#494847]">YJC 餘額</p>
+                      <p className="text-xs text-[#494847]">{t('admin.yjc_balance')}</p>
                       <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#494847]">累積下注</p>
+                      <p className="text-xs text-[#494847]">{t('admin.total_bet')}</p>
                       <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p>
                     </div>
                   </div>
                 )}
                 <div className="text-xs text-[#adaaaa]">
-                  <span className="text-[#494847]">目前勝率偏置：</span>
+                  <span className="text-[#494847]">{t('admin.current_win_bias')}</span>
                   <span className="text-[#fcc025] font-black">
-                    {userInspect.profile?.winBias != null ? userInspect.profile.winBias : '未設定（採系統預設）'}
+                    {userInspect.profile?.winBias != null ? userInspect.profile.winBias : t('admin.win_bias_not_set')}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -1220,7 +1204,7 @@ export default function AdminView() {
                     type="text"
                     value={userBiasInput}
                     onChange={(e) => setUserBiasInput(e.target.value)}
-                    placeholder="0.0 - 1.0（留空清除）"
+                    placeholder={t('admin.win_bias_placeholder')}
                     className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                   />
                   <button
@@ -1228,20 +1212,20 @@ export default function AdminView() {
                     onClick={handleSetWinBias}
                     className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"
                   >
-                    <Sliders size={12} /> 套用
+                    <Sliders size={12} /> {t('admin.apply')}
                   </button>
                   <button
                     type="button"
                     onClick={handleClearWinBias}
                     className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300"
                   >
-                    清除
+                    {t('admin.clear')}
                   </button>
                 </div>
 
                 <div className="space-y-2 border-t border-[#494847]/20 pt-3">
                   <p className="text-xs text-[#adaaaa]">
-                    VIP 等級：
+                    {t('admin.vip_level')}
                     <span className="ml-1 font-black text-[#fcc025]">
                       {typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}
                     </span>
@@ -1266,7 +1250,7 @@ export default function AdminView() {
                     onClick={handleResetTotalBet}
                     className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-black text-red-300 hover:bg-red-500/20"
                   >
-                    歸零累積下注
+                    {t('admin.reset_total_bet_btn')}
                   </button>
                 </div>
               </div>
@@ -1282,10 +1266,10 @@ export default function AdminView() {
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
               <div className="flex items-center gap-2 mb-4">
                 <Package size={18} className="text-[#fcc025]" />
-                <h3 className="text-sm font-black tracking-wide text-white">新增 / 編輯 稱號・頭像</h3>
+                <h3 className="text-sm font-black tracking-wide text-white">{t('admin.catalog_save_new')}</h3>
               </div>
               <p className="text-xs text-[#adaaaa] mb-3">
-                以 <code className="bg-[#0e0e0e] px-1 rounded">itemId</code> 為唯一鍵，同 id 會直接覆蓋既有項目。新增的項目會在「說明中心 → 物品圖鑑」出現。
+                {t('admin.catalog_description')}
               </p>
               <form onSubmit={handleCatalogCreate} className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
@@ -1294,19 +1278,19 @@ export default function AdminView() {
                     value={catalogItemId}
                     onChange={(e) => setCatalogItemId(e.target.value)}
                     className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                    placeholder="itemId（留空自動產生）"
+                    placeholder={t('admin.item_id_auto')}
                   />
                   <select
                     value={catalogType}
                     onChange={(e) => setCatalogType(e.target.value as any)}
                     className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="avatar">頭像</option>
-                    <option value="title">稱號</option>
-                    <option value="buff">增益</option>
-                    <option value="chest">寶箱</option>
-                    <option value="key">鑰匙</option>
-                    <option value="collectible">收藏</option>
+                    <option value="avatar">{t('admin.type_avatar')}</option>
+                    <option value="title">{t('admin.type_title')}</option>
+                    <option value="buff">{t('admin.type_buff')}</option>
+                    <option value="chest">{t('admin.type_chest')}</option>
+                    <option value="key">{t('admin.type_key')}</option>
+                    <option value="collectible">{t('admin.type_collectible')}</option>
                   </select>
                 </div>
                 <input
@@ -1314,7 +1298,7 @@ export default function AdminView() {
                   value={catalogName}
                   onChange={(e) => setCatalogName(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                  placeholder="顯示名稱（中文 ok）"
+                  placeholder={t('admin.item_name_placeholder')}
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <select
@@ -1322,9 +1306,9 @@ export default function AdminView() {
                     onChange={(e) => setCatalogRarity(e.target.value as any)}
                     className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
                   >
-                    {Object.entries(RARITY_LABEL).map(([key, label]) => (
+                    {['common', 'rare', 'epic', 'legendary', 'mythic', 'vip'].map((key) => (
                       <option key={key} value={key}>
-                        {label}
+                        {t(`admin.rarity_${key}`)}
                       </option>
                     ))}
                   </select>
@@ -1333,28 +1317,28 @@ export default function AdminView() {
                     value={catalogIcon}
                     onChange={(e) => setCatalogIcon(e.target.value)}
                     className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
-                    placeholder="Emoji / 圖示（可選）"
+                    placeholder={t('admin.item_icon_placeholder')}
                   />
                 </div>
                 <textarea
                   value={catalogDescription}
                   onChange={(e) => setCatalogDescription(e.target.value)}
                   className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-16"
-                  placeholder="說明（可選）"
+                  placeholder={t('admin.item_desc_placeholder')}
                   maxLength={500}
                 />
                 <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">
-                  儲存項目
+                  {t('admin.save_item')}
                 </button>
               </form>
             </div>
 
             <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
               <h3 className="text-sm font-black tracking-wide text-white mb-4">
-                已登錄的自訂稱號 / 頭像（{avatarsAndTitles.length}）
+                {t('admin.custom_items_count', { count: avatarsAndTitles.length })}
               </h3>
               {avatarsAndTitles.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">目前沒有自訂項目</p>
+                <p className="text-xs text-[#adaaaa]">{t('admin.no_custom_items')}</p>
               ) : (
                 <ul className="space-y-2">
                   {avatarsAndTitles.map((item) => (
@@ -1367,7 +1351,7 @@ export default function AdminView() {
                               {item.name}
                             </p>
                             <span className="text-xs font-black tracking-widest uppercase text-[#fcc025]">
-                              {TYPE_LABEL[item.type] || item.type} · {RARITY_LABEL[item.rarity] || item.rarity}
+                              {t(`admin.type_${item.type}`) || item.type} · {t(`admin.rarity_${item.rarity}`) || item.rarity}
                             </span>
                           </div>
                           <p className="text-xs text-[#494847] mt-1">id: {item.itemId}</p>
@@ -1379,14 +1363,14 @@ export default function AdminView() {
                           <button
                             onClick={() => handleCatalogToggle(item)}
                             className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]"
-                            title={item.isActive ? '停用' : '啟用'}
+                            title={item.isActive ? t('admin.hide') : t('admin.show')}
                           >
                             {item.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}
                           </button>
                           <button
                             onClick={() => handleCatalogDelete(item)}
                             className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10"
-                            title="刪除"
+                            title={t('admin.delete')}
                           >
                             <Trash2 size={14} className="text-red-400" />
                           </button>
@@ -1402,9 +1386,9 @@ export default function AdminView() {
 
         {activeTab === 'submissions' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-            <h3 className="text-sm font-black tracking-wide text-white mb-4">使用者投稿（{submissions.length}）</h3>
+            <h3 className="text-sm font-black tracking-wide text-white mb-4">{t('admin.submission_count', { count: submissions.length })}</h3>
             {submissions.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">目前沒有投稿</p>
+              <p className="text-xs text-[#adaaaa]">{t('admin.no_submissions')}</p>
             ) : (
               <ul className="space-y-3">
                 {submissions.map((sub) => (
@@ -1421,7 +1405,7 @@ export default function AdminView() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-black text-white">{sub.name}</span>
                             <span className="text-xs font-bold uppercase text-[#fcc025]">
-                              {sub.type === 'avatar' ? '頭像' : '稱號'}
+                              {sub.type === 'avatar' ? t('admin.submission_type_avatar') : t('admin.submission_type_title')}
                             </span>
                             <span className={`text-xs font-bold uppercase ${
                               sub.status === 'pending'
@@ -1430,20 +1414,20 @@ export default function AdminView() {
                                 ? 'text-emerald-400'
                                 : 'text-red-400'
                             }`}>
-                              {sub.status === 'pending' ? '待審核' : sub.status === 'approved' ? '已通過' : '已拒絕'}
+                              {sub.status === 'pending' ? t('admin.status_pending') : sub.status === 'approved' ? t('admin.status_approved') : t('admin.status_rejected')}
                             </span>
                             <span className="text-xs font-bold uppercase text-[#adaaaa]">
-                              {RARITY_LABEL[sub.rarity] || sub.rarity}
+                              {t(`admin.rarity_${sub.rarity}`) || sub.rarity}
                             </span>
                           </div>
                           {sub.description && (
                             <p className="mt-1 text-xs text-[#adaaaa] break-words">{sub.description}</p>
                           )}
                           <p className="mt-1 text-xs text-[#494847] break-all">
-                            投稿者：{sub.address?.slice(0, 10)}...{sub.address?.slice(-6)}
+                            {t('admin.submitted_by', { address: `${sub.address?.slice(0, 10)}...${sub.address?.slice(-6)}` })}
                           </p>
                           {sub.reviewNote && (
-                            <p className="mt-1 text-xs text-[#adaaaa]">審核備註：{sub.reviewNote}</p>
+                            <p className="mt-1 text-xs text-[#adaaaa]">{t('admin.review_note', { note: sub.reviewNote })}</p>
                           )}
                         </div>
                       </div>
@@ -1453,7 +1437,7 @@ export default function AdminView() {
                             type="button"
                             onClick={() => handleSubmissionApprove(sub)}
                             className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20"
-                            title="通過"
+                            title={t('admin.approved')}
                           >
                             <Check size={14} className="text-emerald-400" />
                           </button>
@@ -1461,7 +1445,7 @@ export default function AdminView() {
                             type="button"
                             onClick={() => handleSubmissionReject(sub)}
                             className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 hover:bg-red-500/20"
-                            title="拒絕"
+                            title={t('admin.rejected')}
                           >
                             <X size={14} className="text-red-400" />
                           </button>
@@ -1478,32 +1462,32 @@ export default function AdminView() {
         {activeTab === 'campaigns' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-6">
             <div>
-              <h3 className="text-sm font-black tracking-wide text-white mb-1">活動管理</h3>
+              <h3 className="text-sm font-black tracking-wide text-white mb-1">{t('admin.campaign_management')}</h3>
               <p className="text-xs text-[#adaaaa]">
-                建立活動讓使用者到獎勵頁領取（ZXC / YJC / 稱號 / 頭像 / 道具）
+                {t('admin.campaign_management_desc')}
               </p>
             </div>
 
             <div className="rounded-lg border border-[#494847]/20 bg-[#262626] p-4 space-y-3">
-              <div className="text-xs font-black text-[#fcc025]">新增／編輯活動</div>
+              <div className="text-xs font-black text-[#fcc025]">{t('admin.add_edit_campaign')}</div>
               <input
                 type="text"
                 value={campaignDraftId}
                 onChange={(e) => setCampaignDraftId(e.target.value)}
-                placeholder="活動 ID（留空自動產生）"
+                placeholder={t('admin.campaign_id_placeholder')}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <input
                 type="text"
                 value={campaignTitle}
                 onChange={(e) => setCampaignTitle(e.target.value)}
-                placeholder="活動名稱"
+                placeholder={t('admin.campaign_title_placeholder')}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <textarea
                 value={campaignDescription}
                 onChange={(e) => setCampaignDescription(e.target.value)}
-                placeholder="活動說明"
+                placeholder={t('admin.campaign_desc_placeholder')}
                 rows={4}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
@@ -1527,21 +1511,21 @@ export default function AdminView() {
                   min="1"
                   value={campaignClaimLimit}
                   onChange={(e) => setCampaignClaimLimit(e.target.value)}
-                  placeholder="每人次數"
+                  placeholder={t('admin.claims_per_user')}
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
                 <input
                   type="number"
                   value={campaignRewardZxc}
                   onChange={(e) => setCampaignRewardZxc(e.target.value)}
-                  placeholder="ZXC 獎勵"
+                  placeholder={t('admin.reward_zxc')}
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
                 <input
                   type="number"
                   value={campaignRewardYjc}
                   onChange={(e) => setCampaignRewardYjc(e.target.value)}
-                  placeholder="YJC 獎勵"
+                  placeholder={t('admin.reward_yjc')}
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
               </div>
@@ -1551,7 +1535,7 @@ export default function AdminView() {
                   onChange={(e) => setCampaignRewardItemId(e.target.value)}
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 >
-                  <option value="">— 道具獎勵 —</option>
+                  <option value="">{t('admin.reward_item_select')}</option>
                   {allItemsList
                     .filter((i) => i.type !== 'avatar' && i.type !== 'title')
                     .map((item) => (
@@ -1565,7 +1549,7 @@ export default function AdminView() {
                   min="1"
                   value={campaignRewardItemQty}
                   onChange={(e) => setCampaignRewardItemQty(e.target.value)}
-                  placeholder="數量"
+                  placeholder={t('admin.reward_qty')}
                   className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
                 />
               </div>
@@ -1574,7 +1558,7 @@ export default function AdminView() {
                 onChange={(e) => setCampaignRewardAvatarId(e.target.value)}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               >
-                <option value="">— 頭像獎勵 —</option>
+                <option value="">{t('admin.reward_avatar_select')}</option>
                 {allAvatars.map((av) => (
                   <option key={av.id} value={av.id}>
                     {av.icon || ''} {av.name || av.id}
@@ -1586,7 +1570,7 @@ export default function AdminView() {
                 onChange={(e) => setCampaignRewardTitleId(e.target.value)}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               >
-                <option value="">— 稱號獎勵 —</option>
+                <option value="">{t('admin.reward_title_select')}</option>
                 {allTitles.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.icon || ''} {t.name || t.id}
@@ -1599,21 +1583,21 @@ export default function AdminView() {
                   checked={campaignIsActive}
                   onChange={(e) => setCampaignIsActive(e.target.checked)}
                 />
-                建立後即啟用
+                {t('admin.activate_on_create')}
               </label>
               <button
                 type="button"
                 onClick={handleCampaignSave}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-3 py-2 text-xs font-black text-black hover:brightness-110"
               >
-                <CalendarClock size={12} /> 儲存活動
+                <CalendarClock size={12} /> {t('admin.save_campaign')}
               </button>
             </div>
 
             <div>
-              <h4 className="mb-2 text-xs font-black text-white">目前活動（{campaigns.length}）</h4>
+              <h4 className="mb-2 text-xs font-black text-white">{t('admin.current_campaigns', { count: campaigns.length })}</h4>
               {campaigns.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">尚未建立任何活動</p>
+                <p className="text-xs text-[#adaaaa]">{t('admin.no_campaigns')}</p>
               ) : (
                 <ul className="space-y-2">
                   {campaigns.map((c) => (
@@ -1632,7 +1616,7 @@ export default function AdminView() {
                                   : 'bg-[#494847]/30 text-[#adaaaa]'
                               }`}
                             >
-                              {c.isActive ? '啟用' : '停用'}
+                              {c.isActive ? t('admin.campaign_active') : t('admin.campaign_inactive')}
                             </span>
                           </div>
                           <p className="mt-1 text-xs text-[#adaaaa] break-words">
@@ -1665,7 +1649,7 @@ export default function AdminView() {
                               setCampaignRewardTitleId((r.titles || [])[0] || '');
                             }}
                             className="rounded-lg bg-[#1a1919] p-2 hover:bg-[#fcc025]/10"
-                            title="編輯"
+                            title={t('admin.edit_announcement')}
                           >
                             <Edit2 size={12} />
                           </button>
@@ -1673,7 +1657,7 @@ export default function AdminView() {
                             type="button"
                             onClick={() => handleCampaignToggle(c)}
                             className="rounded-lg bg-[#1a1919] p-2 hover:bg-[#fcc025]/10"
-                            title={c.isActive ? '停用' : '啟用'}
+                            title={c.isActive ? t('admin.hide') : t('admin.show')}
                           >
                             {c.isActive ? <EyeOff size={12} /> : <Eye size={12} />}
                           </button>
@@ -1697,9 +1681,9 @@ export default function AdminView() {
         {activeTab === 'grant' && (
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
             <div>
-              <h3 className="text-sm font-black tracking-wide text-white mb-1">贈送獎勵</h3>
+              <h3 className="text-sm font-black tracking-wide text-white mb-1">{t('admin.grant_title')}</h3>
               <p className="text-xs text-[#adaaaa]">
-                直接送 ZXC / YJC / 道具 / 稱號 / 頭像給指定使用者
+                {t('admin.grant_description')}
               </p>
             </div>
             <div className="relative">
@@ -1710,7 +1694,7 @@ export default function AdminView() {
                   setGrantAddress(e.target.value);
                   setUserSearch(e.target.value);
                 }}
-                placeholder="搜尋使用者名稱或地址..."
+                placeholder={t('admin.grant_address_placeholder')}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               {showUserDropdown && (
@@ -1726,7 +1710,7 @@ export default function AdminView() {
                       }}
                       className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"
                     >
-                      <span className="font-bold">{u.displayName || u.username || '未知'}</span>
+                      <span className="font-bold">{u.displayName || u.username || t('admin.unknown')}</span>
                       <span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span>
                     </button>
                   ))}
@@ -1738,14 +1722,14 @@ export default function AdminView() {
                 type="number"
                 value={grantZxc}
                 onChange={(e) => setGrantZxc(e.target.value)}
-                placeholder="ZXC 數量（可負）"
+                placeholder={t('admin.grant_zxc_placeholder')}
                 className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
               <input
                 type="number"
                 value={grantYjc}
                 onChange={(e) => setGrantYjc(e.target.value)}
-                placeholder="YJC 數量（可負）"
+                placeholder={t('admin.grant_yjc_placeholder')}
                 className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
             </div>
@@ -1755,7 +1739,7 @@ export default function AdminView() {
                 onChange={(e) => setGrantItemId(e.target.value)}
                 className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               >
-                <option value="">— 道具 —</option>
+                <option value="">{t('admin.grant_item_select')}</option>
                 {allItemsList
                   .filter((i) => i.type !== 'avatar' && i.type !== 'title')
                   .map((item) => (
@@ -1769,7 +1753,7 @@ export default function AdminView() {
                 min="1"
                 value={grantItemQty}
                 onChange={(e) => setGrantItemQty(e.target.value)}
-                placeholder="數量"
+                placeholder={t('admin.quantity')}
                 className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
               />
             </div>
@@ -1778,7 +1762,7 @@ export default function AdminView() {
               onChange={(e) => setGrantAvatarId(e.target.value)}
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
             >
-              <option value="">— 頭像 —</option>
+              <option value="">{t('admin.grant_avatar_select')}</option>
               {allAvatars.map((av) => (
                 <option key={av.id} value={av.id}>
                   {av.icon || ''} {av.name || av.id}
@@ -1790,7 +1774,7 @@ export default function AdminView() {
               onChange={(e) => setGrantTitleId(e.target.value)}
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
             >
-              <option value="">— 稱號 —</option>
+              <option value="">{t('admin.grant_title_select')}</option>
               {allTitles.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.icon || ''} {t.name || t.id}
@@ -1801,7 +1785,7 @@ export default function AdminView() {
               type="text"
               value={grantNote}
               onChange={(e) => setGrantNote(e.target.value)}
-              placeholder="備註（選填）"
+              placeholder={t('admin.grant_note_placeholder')}
               className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
             />
             <button
@@ -1809,7 +1793,7 @@ export default function AdminView() {
               onClick={handleGrantSubmit}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"
             >
-              <Send size={12} /> 送出獎勵
+              <Send size={12} /> {t('admin.grant_submit')}
             </button>
           </section>
         )}
@@ -1818,7 +1802,7 @@ export default function AdminView() {
           <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
             <div className="flex items-center gap-2">
               <MessageCircle size={18} className="text-[#fcc025]" />
-              <h3 className="text-sm font-black tracking-wide text-white">客服工單（{tickets.length}）</h3>
+              <h3 className="text-sm font-black tracking-wide text-white">{t('admin.ticket_title', { count: tickets.length })}</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               <select
@@ -1826,17 +1810,17 @@ export default function AdminView() {
                 onChange={(e) => setTicketStatusFilter(e.target.value)}
                 className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white"
               >
-                <option value="">所有狀態</option>
-                <option value="open">待處理</option>
-                <option value="in_progress">處理中</option>
-                <option value="resolved">已解決</option>
-                <option value="closed">已關閉</option>
+                <option value="">{t('admin.all_statuses')}</option>
+                <option value="open">{t('admin.status_open')}</option>
+                <option value="in_progress">{t('admin.status_in_progress')}</option>
+                <option value="resolved">{t('admin.status_resolved')}</option>
+                <option value="closed">{t('admin.status_closed')}</option>
               </select>
               <input
                 type="text"
                 value={ticketKeyword}
                 onChange={(e) => setTicketKeyword(e.target.value)}
-                placeholder="關鍵字搜尋..."
+                placeholder={t('admin.keyword_search')}
                 className="flex-1 min-w-[160px] bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white"
               />
               <button
@@ -1844,20 +1828,20 @@ export default function AdminView() {
                 onClick={refreshTickets}
                 className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110"
               >
-                查詢
+                {t('admin.query')}
               </button>
             </div>
             {tickets.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">目前沒有符合條件的工單。</p>
+              <p className="text-xs text-[#adaaaa]">{t('admin.no_tickets')}</p>
             ) : (
               <ul className="space-y-3 max-h-[60vh] overflow-y-auto">
                 {tickets.map((t: any) => (
                   <li key={t.reportId} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
-                        <p className="text-sm font-black text-white">{t.title || '（無標題）'}</p>
+                        <p className="text-sm font-black text-white">{t.title || t('admin.no_title')}</p>
                         <p className="text-xs text-[#adaaaa]">
-                          {t.category || '其他'} · {t.address ? `${String(t.address).slice(0, 10)}…` : '匿名'}
+                          {t.category || t('admin.other')} · {t.address ? `${String(t.address).slice(0, 10)}…` : t('admin.anonymous')}
                           {t.createdAt && ` · ${new Date(t.createdAt).toLocaleString()}`}
                         </p>
                       </div>
@@ -1873,27 +1857,27 @@ export default function AdminView() {
                         }`}
                       >
                         {t.status === 'open'
-                          ? '待處理'
+                          ? t('admin.status_open')
                           : t.status === 'in_progress'
-                          ? '處理中'
+                          ? t('admin.status_in_progress')
                           : t.status === 'resolved'
-                          ? '已解決'
+                          ? t('admin.status_resolved')
                           : t.status === 'closed'
-                          ? '已關閉'
+                          ? t('admin.status_closed')
                           : t.status}
                       </span>
                     </div>
                     {t.message && <p className="text-xs text-white whitespace-pre-wrap break-words">{t.message}</p>}
                     {t.adminUpdate && (
                       <div className="rounded bg-[#fcc025]/10 border border-[#fcc025]/30 p-2">
-                        <p className="text-xs font-black text-[#fcc025] mb-1">管理員回覆</p>
+                        <p className="text-xs font-black text-[#fcc025] mb-1">{t('admin.admin_reply')}</p>
                         <p className="text-xs text-white whitespace-pre-wrap break-words">{t.adminUpdate}</p>
                       </div>
                     )}
                     <textarea
                       value={ticketReplyDraft[t.reportId] ?? ''}
                       onChange={(e) => setTicketReplyDraft((prev) => ({ ...prev, [t.reportId]: e.target.value }))}
-                      placeholder="輸入回覆內容..."
+                      placeholder={t('admin.reply_placeholder')}
                       className="w-full bg-[#1a1919] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white resize-y"
                       rows={2}
                     />
@@ -1909,7 +1893,7 @@ export default function AdminView() {
                                 status: s,
                                 adminUpdate: ticketReplyDraft[t.reportId] || t.adminUpdate || undefined,
                               });
-                              show('工單已更新');
+                              show(t('admin.ticket_updated'));
                               setTicketReplyDraft((prev) => ({ ...prev, [t.reportId]: '' }));
                               refreshTickets();
                             } catch (err: any) {
@@ -1922,7 +1906,7 @@ export default function AdminView() {
                               : 'border-[#494847]/40 text-[#adaaaa] hover:border-[#fcc025]/60 hover:text-[#fcc025]'
                           }`}
                         >
-                          {s === 'open' ? '待處理' : s === 'in_progress' ? '處理中' : s === 'resolved' ? '已解決' : '已關閉'}
+                          {s === 'open' ? t('admin.status_open') : s === 'in_progress' ? t('admin.status_in_progress') : s === 'resolved' ? t('admin.status_resolved') : t('admin.status_closed')}
                         </button>
                       ))}
                     </div>
@@ -1941,6 +1925,7 @@ export default function AdminView() {
 }
 
 export function AnnouncementManager() {
+  const { t } = useTranslation();
   const { sessionId } = useAuthStore();
   const [anns, setAnns] = useState<any[]>([]);
   const [editing, setEditing] = useState<any | null>(null);
@@ -1969,7 +1954,7 @@ export function AnnouncementManager() {
       setForm({ title: '', content: '', type: 'info', active: true });
       fetchAnns();
     } catch (err: any) {
-      alert(err?.response?.data?.message || '操作失敗');
+      alert(err?.response?.data?.message || t('admin.operation_failed'));
     } finally {
       setLoading(false);
     }
@@ -1978,18 +1963,18 @@ export function AnnouncementManager() {
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="bg-[#1a1919] p-4 rounded-xl border border-[#494847]/30 space-y-3">
-        <h3 className="text-sm font-black text-[#fcc025]">{editing ? '編輯公告' : '新增公告'}</h3>
+        <h3 className="text-sm font-black text-[#fcc025]">{editing ? t('admin.edit_announcement') : t('admin.new_announcement_title')}</h3>
         <input
           value={form.title}
           onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
-          placeholder="標題"
+          placeholder={t('admin.announcement_title_placeholder')}
           className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
           required
         />
         <textarea
           value={form.content}
           onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))}
-          placeholder="內容"
+          placeholder={t('admin.announcement_content_placeholder')}
           className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white min-h-[100px]"
           required
         />
@@ -1999,9 +1984,9 @@ export function AnnouncementManager() {
             onChange={e => setForm(prev => ({ ...prev, type: e.target.value }))}
             className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
           >
-            <option value="info">一般</option>
-            <option value="warning">維護</option>
-            <option value="urgent">緊急</option>
+            <option value="info">{t('admin.type_normal')}</option>
+            <option value="warning">{t('admin.type_maintenance')}</option>
+            <option value="urgent">{t('admin.type_urgent')}</option>
           </select>
           <label className="flex items-center gap-2 text-sm text-[#adaaaa]">
             <input
@@ -2009,12 +1994,12 @@ export function AnnouncementManager() {
               checked={form.active}
               onChange={e => setForm(prev => ({ ...prev, active: e.target.checked }))}
             />
-            啟用
+            {t('admin.enabled')}
           </label>
         </div>
         <div className="flex gap-2">
           <button type="submit" disabled={loading} className="flex-1 bg-[#fcc025] text-black font-black py-2 rounded-lg">
-            {loading ? '處理中...' : '儲存公告'}
+            {loading ? t('admin.processing') : t('admin.save_announcement')}
           </button>
           {editing && (
             <button
@@ -2022,7 +2007,7 @@ export function AnnouncementManager() {
               onClick={() => { setEditing(null); setForm({ title: '', content: '', type: 'info', active: true }); }}
               className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg"
             >
-              取消
+              {t('common.cancel')}
             </button>
           )}
         </div>
@@ -2033,7 +2018,7 @@ export function AnnouncementManager() {
           <div key={ann.id} className="bg-[#1a1919] p-3 rounded-xl border border-[#494847]/20 flex justify-between items-center">
             <div>
               <p className="text-sm font-bold text-white">{ann.title}</p>
-              <p className="text-xs text-[#adaaaa]">{ann.type} · {ann.active ? '已啟用' : '已停用'}</p>
+              <p className="text-xs text-[#adaaaa]">{ann.type} · {ann.active ? t('admin.enabled') : t('admin.disabled')}</p>
             </div>
             <button
               onClick={() => {
@@ -2042,7 +2027,7 @@ export function AnnouncementManager() {
               }}
               className="text-[#fcc025] text-xs font-bold border border-[#fcc025]/30 px-2 py-1 rounded"
             >
-              編輯
+              {t('admin.edit_announcement')}
             </button>
           </div>
         ))}
