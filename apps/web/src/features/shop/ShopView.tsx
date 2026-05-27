@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
-import { formatNumber, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, getItemPawnValue } from '@repo/shared';
+import { formatNumber, ITEM_DROP_TABLES, SPECIAL_ITEMS, RARITY_NAMES, ITEM_BASE_VALUES, getItemPawnValue } from '@repo/shared';
 import { usePreferencesStore } from '../../store/usePreferencesStore';
 
 const ITEM_MAP: Record<string, { name: string; icon: string; rarity: string; color: string }> = {};
@@ -43,6 +43,9 @@ for (const rarity of Object.keys(ITEM_DROP_TABLES) as (keyof typeof ITEM_DROP_TA
   for (const item of ITEM_DROP_TABLES[rarity]) {
     ALL_ITEMS_LOOKUP[item.id] = item;
   }
+}
+for (const item of SPECIAL_ITEMS) {
+  ALL_ITEMS_LOOKUP[item.id] = item;
 }
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
@@ -609,12 +612,23 @@ export default function ShopView() {
                         {bundle.map((sub: any, i: number) => {
                             const info = ITEM_MAP[sub.id];
                             const subValue = sub.value || meta?.subItemValues?.[sub.id];
+                            let computedValue: number | null = null;
+                            if (subValue != null) {
+                              computedValue = subValue;
+                            } else {
+                              const def = ALL_ITEMS_LOOKUP[sub.id];
+                              if (def?.effect?.type === 'currency') {
+                                computedValue = def.effect.value;
+                              } else if (info?.rarity && ITEM_BASE_VALUES[info.rarity as keyof typeof ITEM_BASE_VALUES] != null) {
+                                computedValue = ITEM_BASE_VALUES[info.rarity as keyof typeof ITEM_BASE_VALUES];
+                              }
+                            }
                             return (
                               <div key={i} className="flex items-center gap-1.5 text-sm">
                                 <span className="shrink-0">{info?.icon || '•'}</span>
                                 <span className="text-white font-medium">{info?.name || sub.id}</span>
                                 {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
-                                {subValue ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{formatNumber(subValue, numberMode)} ZXC</span>
+                                {computedValue != null ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{formatNumber(computedValue, numberMode)} ZXC</span>
                                   : hasDiscount && totalValue > 0 && bundle.length > 1 && (
                                     <span className="text-sm text-[#adaaaa] ml-auto">~{formatNumber(Math.round(totalValue / bundle.length), numberMode)} ZXC</span>
                                   )}

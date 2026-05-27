@@ -17,7 +17,8 @@
     "hours_ago": "{{count}} 小時前",
     "yesterday": "昨天",
     "days_ago": "{{count}} 天前",
-    "network_error": "網路錯誤，請稍後再試"
+    "network_error": "網路錯誤，請稍後再試",
+    "login_required": "請先登入"
   },
   "nav": {
     "dashboard": "主控台",
@@ -359,7 +360,8 @@
     "horse_bet_now": "立即下注",
     "horse_win_stats": "🏆 勝率統計",
     "horse_wins_count": "{{wins}} 勝（{{pct}}%）",
-    "horse_recent_results": "📋 最近賽果"
+    "horse_recent_results": "📋 最近賽果",
+    "bet_failed": "下注失敗"
   },
   "leaderboard": {
     "title": "精英排行榜",
@@ -1278,6 +1280,12 @@
   },
   "wallet": {
     "yjc_with_zxc": "YJC（≈ {{amount}} ZXC）"
+  },
+  "rewardName": {
+    "reward": "獎勵",
+    "item": "道具",
+    "avatar": "頭像",
+    "title": "稱號"
   },
   "txType": {
     "bet": "下注",

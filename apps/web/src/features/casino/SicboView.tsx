@@ -32,7 +32,7 @@ export const SicboView: React.FC = () => {
 
   const betMutation = useMutation({
     mutationFn: async () => {
-      if (!session) throw new Error('未登入');
+      if (!session) throw new Error(t('common.login_required', 'Please login'));
 
       const res = await api.post('/api/v1/games/sicbo/play', {
         sessionId: session.id,

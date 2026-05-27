@@ -54,14 +54,14 @@ export const CoinflipView: React.FC = () => {
 
   const betMutation = useMutation({
     mutationFn: async () => {
-      if (!session) throw new Error('未登入');
+      if (!session) throw new Error(t('common.login_required', 'Please login'));
       const res = await api.post('/api/v1/games/coinflip/play', {
         sessionId: session.id,
         betAmount: parseFloat(betAmount),
         selection
       });
       const data = res.data;
-      if (!data.success) throw new Error(data.error || '下注失敗');
+      if (!data.success) throw new Error(data.error || t('casino_game.bet_failed', 'Bet failed'));
       return data.data;
     },
     onMutate: () => {

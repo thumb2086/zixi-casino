@@ -11,7 +11,7 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
     { key: 'home' as const, to: '/app', icon: Home, label: t('nav.dashboard') },
     { key: 'casino' as const, to: '/app/casino/lobby', icon: LayoutGrid, label: t('nav.casino') },
     { key: 'market' as const, to: '/app/market', icon: TrendingUp, label: t('nav.market') },
-    { key: 'shop' as const, to: '/app/shop', icon: ShoppingBag, label: '商店' },
+    { key: 'shop' as const, to: '/app/shop', icon: ShoppingBag, label: t('nav.shop') },
     { key: 'wallet' as const, to: '/app/wallet', icon: Wallet, label: t('nav.vault') },
     { key: 'settings' as const, to: '/app/settings', icon: Settings, label: t('nav.settings') },
   ];
