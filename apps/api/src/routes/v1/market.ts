@@ -127,8 +127,29 @@ export async function marketRoutes(fastify: FastifyInstance) {
     const nowTs = Date.now();
     const snapshot = marketManager.buildSnapshot(nowTs);
     const normalized = await hydrateAccount(ctx.session.address, ctx.user.id, nowTs);
+    const cashBefore = normalized.cash;
     const liqEvents = marketManager.settleLiquidations(normalized, snapshot);
     if (liqEvents.length > 0) {
+      const cashDelta = Number((normalized.cash - cashBefore).toFixed(2));
+      if (Math.abs(cashDelta) > 0) {
+        const userId = ctx.user.id;
+        const address = ctx.session.address;
+        const currentBalance = Number(await gameSettlement.getBalance(address, "zhixi"));
+        const newBalance = Number(Math.max(0, currentBalance + cashDelta).toFixed(2));
+        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+        await walletRepo.saveLedgerEntry({
+          id: randomUUID(),
+          userId,
+          address,
+          token: "zhixi",
+          type: "market_settlement",
+          amount: cashDelta.toString(),
+          balanceBefore: currentBalance.toString(),
+          balanceAfter: newBalance.toString(),
+          meta: { events: liqEvents.map(e => ({ type: e.type, symbol: e.symbol, side: e.side, pnl: e.pnl ?? e.estimatedPnl, margin: e.margin ?? e.marginLost, fee: e.fee, closePrice: e.closePrice ?? e.markPrice })) },
+          createdAt: new Date(),
+        });
+      }
       await marketRepo.saveAccount(ctx.session.address, ctx.user.id, normalized);
     }
     return createApiEnvelope({ account: marketManager.buildAccountSummary(normalized, snapshot) }, request.id);
