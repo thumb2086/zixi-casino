@@ -312,6 +312,10 @@ export default function MarketView() {
               onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
               className="rounded-xl bg-amber-600 py-3 text-xs font-black uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
+          <div className="rounded-xl bg-[#0e0e0e] border border-[#494847]/10 px-4 py-2.5 text-[10px] text-[#adaaaa] leading-relaxed">
+            <p>🏦 銀行年利率 <span className="text-emerald-400 font-bold">2% APY</span>（按實際持有時間複利）</p>
+            <p>💰 貸款年利率 <span className="text-amber-400 font-bold">4% APR</span>（按實際借款時間計息）</p>
+          </div>
           <div className="border-t border-[#494847]/10 pt-3">
             <p className="text-xs font-bold text-[#adaaaa] mb-2">貸款</p>
             <div className="grid grid-cols-3 gap-2">
