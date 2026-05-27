@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BarChart3, ChevronDown,
@@ -152,6 +152,44 @@ export default function MarketView() {
   const [showIndexChart, setShowIndexChart] = useState(true);
   const [showActivity, setShowActivity] = useState(false);
   const [showFloatingChart, setShowFloatingChart] = useState(true);
+  const [chartPos, setChartPos] = useState({ x: 0, y: 0 });
+  const chartDragRef = useRef<{ startX: number; startY: number; origX: number; origY: number; dragging: boolean }>({ startX: 0, startY: 0, origX: 0, origY: 0, dragging: false });
+  const chartElRef = useRef<HTMLDivElement>(null);
+
+  const onChartMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const drag = chartDragRef.current;
+    drag.startX = e.clientX;
+    drag.startY = e.clientY;
+    drag.origX = chartPos.x;
+    drag.origY = chartPos.y;
+    drag.dragging = true;
+    const onMove = (ev: MouseEvent) => {
+      if (!drag.dragging) return;
+      setChartPos({ x: drag.origX + ev.clientX - drag.startX, y: drag.origY + ev.clientY - drag.startY });
+    };
+    const onUp = () => { drag.dragging = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [chartPos]);
+
+  const onChartTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const drag = chartDragRef.current;
+    drag.startX = touch.clientX;
+    drag.startY = touch.clientY;
+    drag.origX = chartPos.x;
+    drag.origY = chartPos.y;
+    drag.dragging = true;
+    const onMove = (ev: TouchEvent) => {
+      if (!drag.dragging) return;
+      const t = ev.touches[0];
+      setChartPos({ x: drag.origX + t.clientX - drag.startX, y: drag.origY + t.clientY - drag.startY });
+    };
+    const onEnd = () => { drag.dragging = false; document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onEnd); };
+    document.addEventListener('touchmove', onMove, { passive: true });
+    document.addEventListener('touchend', onEnd);
+  }, [chartPos]);
 
   useEffect(() => {
     if (actionNotice) { const t = setTimeout(() => setActionNotice(null), 3000); return () => clearTimeout(t); }
@@ -637,8 +675,11 @@ export default function MarketView() {
 
       {/* Draggable floating stock chart */}
       {selectedQuote && stockHistory.length > 1 && showFloatingChart && (
-        <div className="fixed z-40 w-80 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-96"
-          style={{ right: 16, bottom: 96 }}>
+        <div ref={chartElRef}
+          className="fixed z-40 w-80 rounded-xl border border-[#494847]/15 bg-[#1a1919]/95 backdrop-blur-xl shadow-2xl lg:w-96 cursor-grab active:cursor-grabbing select-none touch-none"
+          style={{ right: 16, bottom: 96, transform: `translate(${chartPos.x}px, ${chartPos.y}px)` }}
+          onMouseDown={onChartMouseDown}
+          onTouchStart={onChartTouchStart}>
           <div className="flex items-center justify-between p-3 pb-0">
             <p className="text-xs font-black text-white">{selectedQuote.symbol}</p>
             <p className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
