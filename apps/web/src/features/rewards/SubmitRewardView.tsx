@@ -1,6 +1,7 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { Loader2, Send, Check, X, Clock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../store/api';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -16,16 +17,17 @@ interface Submission {
   createdAt?: string;
 }
 
-const STATUS_LABEL: Record<string, { text: string; cls: string; Icon: typeof Clock }> = {
-  pending: { text: '待審核', cls: 'text-[#fcc025]', Icon: Clock },
-  approved: { text: '已通過', cls: 'text-emerald-400', Icon: Check },
-  rejected: { text: '已拒絕', cls: 'text-red-400', Icon: X },
+const STATUS_CONFIG: Record<string, { cls: string; Icon: typeof Clock }> = {
+  pending: { cls: 'text-[#fcc025]', Icon: Clock },
+  approved: { cls: 'text-emerald-400', Icon: Check },
+  rejected: { cls: 'text-red-400', Icon: X },
 };
 
 const EMOJI_SUGGESTIONS = ['🎱', '🎲', '🃏', '🎰', '💎', '🌟', '⚡', '🔥', '🎯', '🪄', '👑', '🛡️', '🗡️', '🏆', '🎖️', '🎩', '🦾', '🐉', '🦁', '🐺'];
 
 export default function SubmitRewardView() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { sessionId } = useAuthStore();
 
   const [type, setType] = useState<'avatar' | 'title'>('avatar');
@@ -62,15 +64,15 @@ export default function SubmitRewardView() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!sessionId) {
-      setResultMsg('請先登入');
+      setResultMsg(t('submitReward.login_first'));
       return;
     }
     if (!name.trim()) {
-      setResultMsg('請輸入名稱');
+      setResultMsg(t('submitReward.name_required'));
       return;
     }
     if (type === 'avatar' && !icon.trim()) {
-      setResultMsg('頭像必須填一個表情符號');
+      setResultMsg(t('submitReward.avatar_emoji_required'));
       return;
     }
     setSubmitting(true);
@@ -86,10 +88,10 @@ export default function SubmitRewardView() {
       });
       const payload = res?.data?.data;
       if (payload?.error) {
-        setResultMsg(payload.error.message || payload.error.code || '送出失敗');
+        setResultMsg(payload.error.message || payload.error.code || t('submitReward.submit_failed'));
         return;
       }
-      setResultMsg('已送出，請等待管理員審核');
+      setResultMsg(t('submitReward.submit_success'));
       setName('');
       setIcon('');
       setDescription('');
@@ -100,7 +102,7 @@ export default function SubmitRewardView() {
         err?.response?.data?.data?.error?.message ||
           err?.response?.data?.error?.message ||
           err?.message ||
-          '送出失敗',
+          t('submitReward.submit_failed'),
       );
     } finally {
       setSubmitting(false);
@@ -118,20 +120,20 @@ export default function SubmitRewardView() {
           >
             <ArrowLeft size={16} />
           </button>
-          <h1 className="text-lg font-black tracking-wide">投稿稱號／頭像</h1>
+          <h1 className="text-lg font-black tracking-wide">{t('submitReward.title')}</h1>
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
         <section className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-6">
-          <h2 className="mb-3 text-sm font-black">新增投稿</h2>
+          <h2 className="mb-3 text-sm font-black">{t('submitReward.new_submission')}</h2>
           <p className="mb-4 text-xs text-[#adaaaa]">
-            把你想要的頭像（表情符號）或稱號填下面送出，管理員會審核，通過後會加到全站的稱號頭像清單裡讓大家使用。
+            {t('submitReward.description')}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">類型</label>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">{t('submitReward.type_label')}</label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -142,7 +144,7 @@ export default function SubmitRewardView() {
                       : 'border-[#494847]/30 bg-[#262626] text-[#adaaaa]'
                   }`}
                 >
-                  頭像
+                   {t('submitReward.type_avatar')}
                 </button>
                 <button
                   type="button"
@@ -153,21 +155,21 @@ export default function SubmitRewardView() {
                       : 'border-[#494847]/30 bg-[#262626] text-[#adaaaa]'
                   }`}
                 >
-                  稱號
+                  {t('submitReward.type_title')}
                 </button>
               </div>
             </div>
 
             <div>
               <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
-                名稱（最多 32 字）
+                {t('submitReward.name_label')}
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={32}
-                placeholder={type === 'avatar' ? '例如：火焰戰士' : '例如：百戰百勝'}
+                placeholder={type === 'avatar' ? t('submitReward.name_placeholder_avatar') : t('submitReward.name_placeholder_title')}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-sm text-white placeholder:text-[#494847] focus:border-[#fcc025] focus:outline-none"
               />
             </div>
@@ -175,7 +177,7 @@ export default function SubmitRewardView() {
             {type === 'avatar' && (
               <div>
                 <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
-                  表情符號（僅接受一個 emoji，不開放圖片上傳）
+                  {t('submitReward.emoji_label')}
                 </label>
                 <input
                   type="text"
@@ -202,32 +204,32 @@ export default function SubmitRewardView() {
 
             <div>
               <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
-                說明（選填，最多 240 字）
+                {t('submitReward.description_label')}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 maxLength={240}
                 rows={3}
-                placeholder="描述這個頭像或稱號的故事"
+                placeholder={t('submitReward.description_placeholder')}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-sm text-white placeholder:text-[#494847] focus:border-[#fcc025] focus:outline-none"
               />
             </div>
 
             <div>
               <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
-                建議稀有度（管理員可調整）
+                {t('submitReward.rarity_label')}
               </label>
               <select
                 value={rarity}
                 onChange={(e) => setRarity(e.target.value as any)}
                 className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-sm text-white focus:border-[#fcc025] focus:outline-none"
               >
-                <option value="common">普通</option>
-                <option value="rare">稀有</option>
-                <option value="epic">史詩</option>
-                <option value="legendary">傳說</option>
-                <option value="mythic">神話</option>
+                <option value="common">{t('submitReward.rarity_common')}</option>
+                <option value="rare">{t('submitReward.rarity_rare')}</option>
+                <option value="epic">{t('submitReward.rarity_epic')}</option>
+                <option value="legendary">{t('submitReward.rarity_legendary')}</option>
+                <option value="mythic">{t('submitReward.rarity_mythic')}</option>
               </select>
             </div>
 
@@ -237,7 +239,7 @@ export default function SubmitRewardView() {
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-sm font-black text-black hover:brightness-110 disabled:opacity-50"
             >
               {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              送出投稿
+              {t('submitReward.submit_btn')}
             </button>
 
             {resultMsg && (
@@ -249,18 +251,18 @@ export default function SubmitRewardView() {
         </section>
 
         <section className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-6">
-          <h2 className="mb-3 text-sm font-black">我的投稿紀錄</h2>
+          <h2 className="mb-3 text-sm font-black">{t('submitReward.my_submissions')}</h2>
           {loadingList ? (
             <div className="flex items-center gap-2 text-xs text-[#adaaaa]">
-              <Loader2 size={12} className="animate-spin" /> 載入中...
+              <Loader2 size={12} className="animate-spin" /> {t('submitReward.loading')}
             </div>
           ) : mySubmissions.length === 0 ? (
-            <p className="text-xs text-[#adaaaa]">你還沒有任何投稿</p>
+            <p className="text-xs text-[#adaaaa]">{t('submitReward.no_submissions')}</p>
           ) : (
             <ul className="space-y-3">
               {mySubmissions.map((sub) => {
-                const status = STATUS_LABEL[sub.status] || STATUS_LABEL.pending;
-                const StatusIcon = status.Icon;
+                const st = STATUS_CONFIG[sub.status] || STATUS_CONFIG.pending;
+                const StatusIcon = st.Icon;
                 return (
                   <li
                     key={sub.submissionId}
@@ -274,18 +276,18 @@ export default function SubmitRewardView() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-black">{sub.name}</span>
                           <span className="text-xs font-bold uppercase text-[#adaaaa]">
-                            {sub.type === 'avatar' ? '頭像' : '稱號'}
+                            {sub.type === 'avatar' ? t('submitReward.type_avatar') : t('submitReward.type_title')}
                           </span>
-                          <span className={`flex items-center gap-1 text-xs font-bold uppercase ${status.cls}`}>
+                          <span className={`flex items-center gap-1 text-xs font-bold uppercase ${st.cls}`}>
                             <StatusIcon size={10} />
-                            {status.text}
+                            {t(`submitReward.status_${sub.status}`)}
                           </span>
                         </div>
                         {sub.description && (
                           <p className="mt-1 text-xs text-[#adaaaa] break-words">{sub.description}</p>
                         )}
                         {sub.reviewNote && (
-                          <p className="mt-1 text-xs text-[#adaaaa]">管理員備註：{sub.reviewNote}</p>
+                          <p className="mt-1 text-xs text-[#adaaaa]">{t('submitReward.review_note', { note: sub.reviewNote })}</p>
                         )}
                       </div>
                     </div>

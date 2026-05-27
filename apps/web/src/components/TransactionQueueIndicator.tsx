@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Loader2, X, Check, AlertCircle, RefreshCw, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTransactionQueue, type TxEntry } from '../store/useTransactionQueue';
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
@@ -9,21 +10,15 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
   failed: <AlertCircle size={12} className="text-red-400" />,
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  bet: '下注',
-  chest_open: '開寶箱',
-  transfer: '轉帳',
-  item_use: '使用物品',
-  convert: '兌換',
-  buy: '購買',
-};
+
 
 function TxItem({ entry, onRetry, onRemove }: { entry: TxEntry; onRetry: (id: string) => void; onRemove: (id: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2 py-1.5 text-xs">
       {STATUS_ICONS[entry.status]}
       <span className="flex-1 truncate text-white">
-        {TYPE_LABELS[entry.type] || entry.type}
+        {t(`txType.${entry.type}`, entry.type)}
         {entry.label ? `: ${entry.label}` : ''}
       </span>
       {entry.status === 'failed' && (
@@ -41,6 +36,7 @@ function TxItem({ entry, onRetry, onRemove }: { entry: TxEntry; onRetry: (id: st
 }
 
 export default function TransactionQueueIndicator() {
+  const { t } = useTranslation();
   const queue = useTransactionQueue((s) => s.queue);
   const processNext = useTransactionQueue((s) => s.processNext);
   const retry = useTransactionQueue((s) => s.retry);
@@ -69,18 +65,18 @@ export default function TransactionQueueIndicator() {
         }`}
       >
         {pending > 0 ? <Loader2 size={10} className="animate-spin" /> : failed > 0 ? <AlertCircle size={10} /> : <Check size={10} />}
-        {pending > 0 ? `${pending} 處理中` : failed > 0 ? `${failed} 失敗` : '全部完成'}
+        {pending > 0 ? t('transactionQueue.processing', { count: pending }) : failed > 0 ? t('transactionQueue.failed', { count: failed }) : t('transactionQueue.all_complete')}
       </button>
 
       {open && (
         <div className="absolute bottom-full right-0 mb-2 w-72 rounded-xl bg-[#1a1919] border border-[#494847]/20 shadow-2xl p-3">
           <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#494847]/20">
-            <span className="text-xs font-black uppercase tracking-widest text-white">交易佇列</span>
+            <span className="text-xs font-black uppercase tracking-widest text-white">{t('transactionQueue.title')}</span>
             <button
               onClick={clearCompleted}
               className="text-xs text-[#adaaaa] hover:text-white"
             >
-              清除已完成
+              {t('transactionQueue.clear_completed')}
             </button>
           </div>
           <div className="max-h-48 overflow-y-auto space-y-0.5">

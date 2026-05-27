@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Archive } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 
@@ -17,6 +18,7 @@ const RARITY_ORDER: Record<string, number> = {
 };
 
 export default function CollectionView() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +40,7 @@ export default function CollectionView() {
             <ChevronLeft size={24} />
           </Link>
           <Archive className="text-[#fcc025]" />
-          <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">收藏櫃</h1>
+          <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">{t('collection.title')}</h1>
         </div>
       </header>
 
@@ -50,8 +52,8 @@ export default function CollectionView() {
         ) : isEmpty ? (
           <div className="rounded-xl border border-[#494847]/20 bg-[#1a1919] p-12 text-center mt-8">
             <Archive className="w-12 h-12 mx-auto text-[#494847] mb-4" />
-            <p className="text-sm text-[#adaaaa]">尚未收藏任何物品</p>
-            <p className="text-xs text-[#494847] mt-1">開啟寶箱有機會獲得稀有收藏品</p>
+            <p className="text-sm text-[#adaaaa]">{t('collection.empty')}</p>
+            <p className="text-xs text-[#494847] mt-1">{t('collection.hint')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
