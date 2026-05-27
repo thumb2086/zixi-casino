@@ -57,6 +57,14 @@ export async function marketRoutes(fastify: FastifyInstance) {
       await walletRepo.updateBalance(address, fallbackBalance, "zhixi");
     }
 
+    // If there are pending admin intents, skip on-chain sync so manually adjusted
+    // balances (e.g. compensation for bugs) are not overwritten by old on-chain data.
+    try {
+      const intents = await walletRepo.listTxIntents({ address, limit: 10 });
+      const hasPendingAdmin = intents.some((i: any) => i.status === "pending" && (i.type === "admin_credit" || i.type === "admin_debit"));
+      if (hasPendingAdmin) return fallbackBalance;
+    } catch {}
+
     try {
       const runtime = onchainManager.getRuntimeConfig();
       const tokenRuntime = runtime.tokens.zhixi;
@@ -66,12 +74,16 @@ export async function marketRoutes(fastify: FastifyInstance) {
 
       const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
       const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
-      const balance = client.formatUnits(
+      const onchainBalance = client.formatUnits(
         await client.getBalance(address, tokenRuntime.contractAddress),
         decimals
       );
-      await walletRepo.updateBalance(address, balance, "zhixi");
-      return balance;
+      // Never reduce balance below what's recorded in DB (preserves manual fixes)
+      const dbNum = Number(fallbackBalance);
+      const onchainNum = Number(onchainBalance);
+      if (onchainNum < dbNum) return fallbackBalance;
+      await walletRepo.updateBalance(address, onchainBalance, "zhixi");
+      return onchainBalance;
     } catch {
       return fallbackBalance;
     }
@@ -115,8 +127,10 @@ export async function marketRoutes(fastify: FastifyInstance) {
     const nowTs = Date.now();
     const snapshot = marketManager.buildSnapshot(nowTs);
     const normalized = await hydrateAccount(ctx.session.address, ctx.user.id, nowTs);
-    marketManager.settleLiquidations(normalized, snapshot);
-    await marketRepo.saveAccount(ctx.session.address, ctx.user.id, normalized);
+    const liqEvents = marketManager.settleLiquidations(normalized, snapshot);
+    if (liqEvents.length > 0) {
+      await marketRepo.saveAccount(ctx.session.address, ctx.user.id, normalized);
+    }
     return createApiEnvelope({ account: marketManager.buildAccountSummary(normalized, snapshot) }, request.id);
   });
 
@@ -124,7 +138,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        type: z.enum(["stock_buy", "stock_sell", "bank_deposit", "bank_withdraw", "loan_borrow", "loan_repay", "futures_open", "futures_close"]),
+        type: z.enum(["stock_buy", "stock_sell", "bank_deposit", "bank_withdraw", "loan_borrow", "loan_repay", "loan_repay_all", "futures_open", "futures_close", "futures_modify_tp_sl"]),
         symbol: z.string().optional(),
         amount: z.string().optional(),
         quantity: z.string().optional(),
@@ -153,7 +167,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
     };
 
     // Pre-check available cash for cost actions (account.cash already deducts locked margin)
-    const isCostAction = ["stock_buy", "bank_deposit", "futures_open", "loan_repay"].includes(type);
+    const isCostAction = ["stock_buy", "bank_deposit", "futures_open", "loan_repay", "loan_repay_all"].includes(type);
     if (isCostAction && account.cash < (type === "stock_buy"
         ? resolveAmt(quantity) * (snapshot.symbols?.[symbol || ""]?.price || 0) * (1 + 0.001)
         : resolveAmt(amount))) {
@@ -168,15 +182,17 @@ export async function marketRoutes(fastify: FastifyInstance) {
       else if (type === "bank_withdraw") result = marketManager.bankWithdraw(account, amount);
       else if (type === "loan_borrow") result = marketManager.borrowLoan(account, snapshot, amount);
       else if (type === "loan_repay") result = marketManager.repayLoan(account, amount);
+      else if (type === "loan_repay_all") result = marketManager.repayAllLoan(account);
       else if (type === "futures_open") result = marketManager.openFutures(account, snapshot, { symbol, side, margin: amount, leverage, takeProfitPrice, stopLossPrice });
       else if (type === "futures_close" && positionId) result = marketManager.closeFutures(account, snapshot, positionId);
+      else if (type === "futures_modify_tp_sl" && positionId) result = marketManager.modifyFuturesTpSl(account, positionId, takeProfitPrice, stopLossPrice);
       else throw new Error("Unsupported market action payload");
 
       // On-chain settlement (update DB first, then fire async on-chain with logging)
       const walletAction = new WalletManager();
-      const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow"].includes(type);
+      const isReturnAction = ["stock_sell", "bank_withdraw", "futures_close", "loan_borrow", "loan_repay_all"].includes(type);
       const walletAmount = isReturnAction
-        ? (result?.refund || result?.total || result?.amount || 0)
+        ? (result?.refund || result?.net || result?.total || result?.amount || 0)
         : (result?.total || result?.margin || result?.amount || 0);
       const walletAbs = Math.abs(Number(walletAmount));
       if (walletAbs > 0) {

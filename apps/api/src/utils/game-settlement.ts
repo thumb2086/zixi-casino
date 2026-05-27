@@ -221,12 +221,30 @@ export class GameSettlementWrapper {
       }
     }
 
-    // Prevent-loss buff: refund losing bets if the user has an active buff.
-    // Only runs on first settlement attempt (after idempotency check) so buff
-    // is not consumed twice for the same round.
-    let preventLossApplied = false;
     const betValue = parseFloat(ctx.betAmount);
     const payoutValue = parseFloat(ctx.payoutAmount);
+    let preventLossApplied = false;
+
+    // Profit boost: increase payout if user has active profit_boost buffs
+    if (ctx.userId && payoutValue > 0) {
+      try {
+        const { loadInventoryState } = await import("./inventory.js");
+        const state = await loadInventoryState(ctx.userId);
+        const now = Date.now();
+        let profitBoostTotal = 0;
+        for (const buff of state.activeBuffs) {
+          if (buff.type !== "profit_boost") continue;
+          if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
+          profitBoostTotal += Number(buff.value || 0);
+        }
+        if (profitBoostTotal > 0) {
+          const boosted = Math.floor(payoutValue * (1 + profitBoostTotal));
+          ctx = { ...ctx, payoutAmount: String(boosted) };
+        }
+      } catch {}
+    }
+
+    // Prevent-loss buff: refund losing bets if the user has an active buff.
     if (Number.isFinite(betValue) && Number.isFinite(payoutValue) && payoutValue < betValue && ctx.userId) {
       try {
         const buff = await consumePreventLossBuff(ctx.userId);
@@ -698,18 +716,28 @@ export class GameSettlementWrapper {
     }
   }
 
+  async getLuckBias(userId: string): Promise<number> {
+    try {
+      const { loadInventoryState } = await import("./inventory.js");
+      const state = await loadInventoryState(userId);
+      const now = Date.now();
+      let total = 0;
+      for (const buff of state.activeBuffs) {
+        if (buff.type !== "luck_boost") continue;
+        if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
+        total += Number(buff.value || 0);
+      }
+      return total;
+    } catch { return 0; }
+  }
+
   private async grantGameXp(userId: string, betAmount: number, address?: string): Promise<void> {
     const { requireDb } = await import("@repo/infrastructure/db/index.js");
     const db = await requireDb();
-    const { grantXp } = await import("@repo/domain");
+    const { grantXp, levelForXp } = await import("@repo/domain");
     const { loadInventoryState } = await import("./inventory.js");
 
     const state = await loadInventoryState(userId);
-    const [profile] = await db.execute(sql`
-      SELECT COALESCE(xp, 0) as xp, COALESCE(level, 1) as level FROM user_profiles WHERE user_id = ${userId}
-    `);
-    const currentXp = Number(profile?.xp || 0);
-    const currentLevel = Number(profile?.level || 1);
 
     let vipDailyBonusMult = 1;
     if (address) {
@@ -723,18 +751,29 @@ export class GameSettlementWrapper {
     const eventMult = Number(await kv.get<string>('xp_event_multiplier') || '0');
     const eventBonus = Math.max(0, eventMult - 1);
 
-    const result = grantXp(currentXp, currentLevel, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
+    const { xpGained } = grantXp(0, 1, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
 
-    await db.execute(sql`
-      UPDATE user_profiles SET xp = ${result.totalXp}, level = ${result.newLevel}, updated_at = NOW() WHERE user_id = ${userId}
+    const [result] = await db.execute(sql`
+      INSERT INTO user_profiles (user_id, xp, level, updated_at)
+      VALUES (${userId}, ${xpGained}, 1, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET xp = user_profiles.xp + ${xpGained}, updated_at = NOW()
+      RETURNING xp
     `);
+    const newTotalXp = Number(result?.xp || 0);
+    const newLevel = levelForXp(newTotalXp);
+    const [prev] = await db.execute(sql`SELECT level FROM user_profiles WHERE user_id = ${userId}`);
+    const prevLevel = Number(prev?.[0]?.level || 1);
+    if (newLevel > prevLevel) {
+      await db.execute(sql`UPDATE user_profiles SET level = ${newLevel} WHERE user_id = ${userId}`);
+      if (address) await this.checkAndUnlockTitles(userId, address, newLevel);
+    }
   }
 
   async updateTotalWin(address: string, winAmount: number): Promise<void> {
     await this.updateTotalBet(address, 0, winAmount);
   }
 
-  async checkAndUnlockTitles(userId: string, address: string): Promise<void> {
+  async checkAndUnlockTitles(userId: string, address: string, xpLevel?: number): Promise<void> {
     try {
       const db = await (await import("@repo/infrastructure/db/index.js")).requireDb();
       const addr = address.toLowerCase();
@@ -747,7 +786,7 @@ export class GameSettlementWrapper {
         totalWin: Number(row?.totalWin || row?.total_win || 0),
       };
       const rewardManager = new RewardManager();
-      const unlocked = rewardManager.checkTitleUnlock(userId, stats);
+      const unlocked = rewardManager.checkTitleUnlock(userId, stats, xpLevel);
       if (unlocked.length === 0) return;
 
       const state = await loadInventoryState(userId);

@@ -97,6 +97,7 @@ const BUFF_TYPE_LABEL: Record<string, string> = {
   prevent_loss: '免輸護符',
   xp_boost: '經驗加成',
   luck_boost: '幸運加成',
+  vip_tier: 'VIP 等級',
   vip_trial: 'VIP 體驗',
   buff: 'Buff',
 };
@@ -340,7 +341,7 @@ export default function ChestView() {
                       {BUFF_TYPE_LABEL[buff.type] || '加成'}
                     </p>
                     <p className="text-xs font-black text-white">
-                      {buff.type === 'prevent_loss' ? `x${buff.remaining}` : `+${buff.value * 100}%`}
+                      {buff.type === 'prevent_loss' ? `x${buff.remaining}` : buff.type === 'vip_tier' ? `VIP ${buff.value}` : `+${buff.value * 100}%`}
                     </p>
                   </div>
                 </div>
@@ -661,7 +662,7 @@ export default function ChestView() {
                     </div>
                     <div className="text-left">
                       <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>
-                      <p className="text-lg font-black italic text-[#fcc025]">+{openCompensation} ZXC</p>
+                      <p className="text-lg font-black italic text-[#fcc025]">+{nf(openCompensation)} ZXC</p>
                     </div>
                   </div>
                 </div>

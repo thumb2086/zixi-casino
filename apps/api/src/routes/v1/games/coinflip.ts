@@ -30,7 +30,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         selection: z.enum(["heads", "tails"]).default("heads"),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
@@ -58,7 +58,8 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game
-      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundId}`);
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const result = gameManager.resolveCoinflip(selection, `coinflip:${roundId}`, luckBias);
       const isWin = result.winner === selection;
       const payout = isWin ? betAmount * 1.96 : 0;
       const fee = isWin ? Math.min(payout * 0.01, payout * 0.1) : 0; // simplified fee

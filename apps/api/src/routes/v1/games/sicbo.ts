@@ -35,7 +35,7 @@ export async function sicboRoutes(fastify: FastifyInstance) {
     schema: {
       body: z.object({
         sessionId: z.string(),
-        betAmount: z.number().min(1).max(1_000_000),
+        betAmount: z.number().min(1),
         bets: z.array(BetSchema),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
@@ -86,7 +86,8 @@ export async function sicboRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game
-      const gameResult = gameManager.resolveSicbo(bets, roundId);
+      const luckBias = await gameSettlement.getLuckBias(userId);
+      const gameResult = gameManager.resolveSicbo(bets, roundId, luckBias);
       const isWin = gameResult.totalPayoutMultiplier > 0;
       const payout = isWin ? betAmount * gameResult.totalPayoutMultiplier : 0;
       const payoutStr = payout.toString();

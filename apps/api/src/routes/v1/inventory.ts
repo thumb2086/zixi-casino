@@ -135,6 +135,14 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       .filter(([itemId, qty]) => qty > 0 && itemId.startsWith('combo_'))
       .map(([itemId]) => itemId);
 
+    // VIP passes: hide in shop if user already has permanent buff
+    if ((state.activeBuffs || []).some((b: any) => b.type === 'vip_tier' && b.value === 1)) {
+      purchasedBundles.push('vip_pass');
+    }
+    if ((state.activeBuffs || []).some((b: any) => b.type === 'vip_tier' && b.value === 2)) {
+      purchasedBundles.push('vip2_pass');
+    }
+
     return createApiEnvelope(
       {
         items,
@@ -414,12 +422,12 @@ export async function inventoryRoutes(fastify: FastifyInstance) {
       // ── Purchase limit: one per user for bundles / unique items / VIP passes ──
       const state = await loadInventoryState(ctx.userId);
       if (itemId === 'vip_pass') {
-        if ((state.activeBuffs || []).some((b: any) => b.id === 'vip_1_permanent')) {
+        if ((state.activeBuffs || []).some((b: any) => b.type === 'vip_tier' && b.value === 1)) {
           return createApiEnvelope({ success: false }, request.id, false, "你已擁有 VIP 1 通行證");
         }
       }
       if (itemId === 'vip2_pass') {
-        if ((state.activeBuffs || []).some((b: any) => b.id === 'vip_2_permanent')) {
+        if ((state.activeBuffs || []).some((b: any) => b.type === 'vip_tier' && b.value === 2)) {
           return createApiEnvelope({ success: false }, request.id, false, "你已擁有 VIP 2 通行證");
         }
       }

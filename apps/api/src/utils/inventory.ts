@@ -402,12 +402,17 @@ export async function useItem(
         expiresAt,
         source: def.id,
       };
-      nextState.activeBuffs.push(buffActivated);
-      effectSummary = duration
-        ? `${def.name} 已啟用，將於 ${duration} 小時後失效`
-        : remaining !== undefined
-        ? `${def.name} 已啟用，剩餘 ${remaining} 次`
-        : `${def.name} 已啟用`;
+      const isDuplicate = effectType === 'vip_tier' && nextState.activeBuffs.some((b: ActiveBuff) => b.type === 'vip_tier' && b.value === Number(def.effect?.value || 0));
+      if (isDuplicate) {
+        effectSummary = `${def.name} 已是生效中，無需重複使用`;
+      } else {
+        nextState.activeBuffs.push(buffActivated);
+        effectSummary = duration
+          ? `${def.name} 已啟用，將於 ${duration} 小時後失效`
+          : remaining !== undefined
+          ? `${def.name} 已啟用，剩餘 ${remaining} 次`
+          : `${def.name} 已啟用`;
+      }
       break;
     }
     case "avatar":

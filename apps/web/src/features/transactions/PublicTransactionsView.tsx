@@ -33,41 +33,7 @@ type LedgerEntry = {
   createdAt: string;
 };
 
-const TX_TYPE_LABEL: Record<string, string> = {
-  bet: '下注',
-  payout: '派彩',
-  deposit: '存入',
-  withdrawal: '提領',
-  transfer: '轉帳',
-  chest_buy: '購買寶箱',
-  chest_compensation: '寶箱補償',
-  airdrop: '空投',
-  admin_credit: '系統發放',
-  admin_debit: '系統扣回',
-  convert: 'YJC兌換',
-  stock_buy: '買入股票',
-  stock_sell: '賣出股票',
-  futures_open: '開合約',
-  futures_close: '平合約',
-  futures_liquidated: '合約爆倉',
-  bank_deposit: '銀行存入',
-  bank_withdraw: '銀行提領',
-  loan_borrow: '貸款',
-  loan_repay: '還款',
-  item_use: '代幣使用',
-  mission_reward: '任務獎勵',
-  market_buy: '市場買入',
-  market_sell: '市場賣出',
-  futures_pnl: '合約損益',
-  market_futures_open: '期貨開倉', market_futures_close: '期貨平倉',
-};
 
-const TX_STATUS_LABEL: Record<string, string> = {
-  pending: '等待中',
-  broadcasted: '廣播中',
-  confirmed: '已確認',
-  failed: '失敗',
-};
 
 export default function PublicTransactionsView() {
   const { t } = useTranslation();
@@ -253,14 +219,14 @@ export default function PublicTransactionsView() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-black tracking-[0.14em] text-white">
-                      {`${TX_TYPE_LABEL[item.type] || item.type} • ${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
+                      {`${t('txType.' + item.type, item.type)} • ${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
                     </p>
                     <p className="mt-1 text-xs font-bold tracking-[0.12em] text-[#adaaaa]">
                       {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'…' : String(item.roundId)}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-[#fcc025]">{TX_STATUS_LABEL[item.status] || item.status}</p>
+                    <p className="text-xs font-bold text-[#fcc025]">{t('txStatus.' + item.status, item.status)}</p>
                     <p className="mt-1 text-xs font-bold text-[#adaaaa]">{new Date(item.createdAt).toLocaleString('zh-TW')}</p>
                   </div>
                 </div>

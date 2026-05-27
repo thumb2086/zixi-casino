@@ -105,13 +105,13 @@ export function getXpTierLabel(level: number): string {
 
 function getItemXpBonus(activeBuffs: ActiveBuff[]): number {
   const now = Date.now();
-  let maxMult = 1;
+  let total = 0;
   for (const buff of activeBuffs) {
     if (buff.type !== "xp_boost") continue;
     if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
-    maxMult = Math.max(maxMult, buff.value);
+    total += Math.max(0, buff.value - 1);
   }
-  return maxMult - 1;
+  return total;
 }
 
 export function getVipXpBonus(dailyBonusMultiplier: number): number {

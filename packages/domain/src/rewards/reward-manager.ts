@@ -16,6 +16,12 @@ const MEMBER_RARITY: Record<number, string> = {
   4: "epic", 5: "epic", 6: "epic",
   7: "legendary", 8: "legendary", 9: "legendary", 10: "legendary",
   11: "legendary", 12: "legendary", 13: "legendary", 14: "legendary", 15: "legendary", 16: "legendary",
+  17: "mythic", 18: "mythic", 19: "mythic", 20: "mythic", 21: "mythic", 22: "mythic",
+  23: "mythic", 24: "mythic", 25: "mythic", 26: "mythic", 27: "mythic", 28: "mythic",
+  29: "mythic", 30: "mythic", 31: "mythic", 32: "mythic", 33: "mythic", 34: "mythic",
+  35: "chaos", 36: "chaos", 37: "chaos", 38: "chaos", 39: "chaos", 40: "chaos",
+  41: "chaos", 42: "chaos", 43: "chaos", 44: "chaos", 45: "chaos", 46: "chaos",
+  47: "chaos", 48: "chaos", 49: "chaos", 50: "oracle",
 };
 
 export const TITLES: RewardTitle[] = [
@@ -45,19 +51,18 @@ export class RewardManager {
     return TITLES;
   }
 
-  checkTitleUnlock(userId: string, stats: any): string[] {
+  checkTitleUnlock(userId: string, stats: any, xpLevel?: number): string[] {
     const unlocked: string[] = [];
     if (stats.totalBet > 1000000) unlocked.push("title_highroller");
     if (stats.totalWin > 100000000) unlocked.push("title_god");
 
-    // Member tier titles: if totalBet >= threshold, unlock corresponding title
+    // Member tier titles: one per XP level (LEVEL_TIERS is now 1:1 with XP levels)
+    const maxIdx = xpLevel ? Math.max(0, Math.min(xpLevel - 1, LEVEL_TIERS.length - 1)) : -1;
     for (let i = 0; i < LEVEL_TIERS.length; i++) {
-      const tier = LEVEL_TIERS[i];
-      if (stats.totalBet >= tier.threshold) {
+      if (stats.totalBet >= LEVEL_TIERS[i].threshold || (maxIdx >= 0 && i <= maxIdx)) {
         unlocked.push(`title_member_${i + 1}`);
       }
     }
-
     return unlocked;
   }
 
