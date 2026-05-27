@@ -239,9 +239,9 @@ export class GameManager implements GameDomain {
     const winningNumbers: number[] = [];
     let currentHash = hash;
     while (winningNumbers.length < 20) {
-      const num = (currentHash % 75) + 1;
+      const num = ((currentHash >>> 0) % 75) + 1;
       if (!winningNumbers.includes(num)) winningNumbers.push(num);
-      currentHash = Math.imul(currentHash, 0x5deece66d) + 0xb;
+      currentHash = (Math.imul(currentHash, 0x5deece66d) + 0xb) >>> 0;
     }
 
     const matches = selectedNumbers.filter(n => winningNumbers.includes(n));
