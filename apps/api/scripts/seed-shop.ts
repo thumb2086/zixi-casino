@@ -82,6 +82,30 @@ const SHOP_ITEMS = [
       totalValue: 22000,
     },
   },
+  {
+    type: 'bundle',
+    itemId: 'combo_celebration_v1_0_10',
+    name: '至尊慶典組合包',
+    nameEn: 'Supreme Celebration Pack',
+    description: 'V1.0.10 慶典限定！至尊皇冠頭像 + 開國元老稱號 + 1億 ZXC + 2500萬 ZXC + 經驗加倍24h + 強運加持2h + 星塵瓶 + 免輸護符10次',
+    rarity: 'mythic',
+    source: 'shop',
+    price: 1_280_000_000,
+    isActive: true,
+    meta: {
+      bundle: [
+        { id: 'avatar_crown_supreme', qty: 1 },
+        { id: 'title_founding_elder', qty: 1 },
+        { id: 'token_100000000', qty: 1 },
+        { id: 'token_25000000', qty: 1 },
+        { id: 'buff_xp_24h', qty: 1 },
+        { id: 'buff_luck_2h', qty: 1 },
+        { id: 'collectible_star', qty: 1 },
+        { id: 'buff_prevent_loss_10', qty: 1 },
+      ],
+      totalValue: 130_012_500,
+    },
+  },
 ];
 
 async function main() {

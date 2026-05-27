@@ -67,22 +67,22 @@ function resolveRewardName(id: string): string {
   return REWARD_NAMES[id] || id;
 }
 
-function formatRewardSummary(r: any): string {
-  if (!r || typeof r !== 'object') return '獎勵';
+function formatRewardSummary(r: any, t: (k: string, d?: string) => string): string {
+  if (!r || typeof r !== 'object') return t('rewardName.reward', '獎勵');
   const parts: string[] = [];
   if (typeof r.zxc === 'number' && r.zxc > 0) parts.push(`${formatNumber(r.zxc)} ZXC`);
   if (typeof r.yjc === 'number' && r.yjc > 0) parts.push(`${formatNumber(r.yjc)} YJC`);
   if (Array.isArray(r.items) && r.items.length > 0) {
     const labels = r.items.map((it: any) => {
-      const name = it.name || resolveRewardName(it.id || '') || it.id || '道具';
+      const name = it.name || resolveRewardName(it.id || '') || it.id || t('rewardName.item', '道具');
       const qty = it.qty || 1;
-      return qty > 1 ? `${name} ×${qty}` : name;
+      return qty > 1 ? `${name} x${qty}` : name;
     });
-    parts.push(labels.join('、'));
+    parts.push(labels.join(', '));
   }
-  if (Array.isArray(r.avatars) && r.avatars.length) parts.push(`頭像：${r.avatars.map((a: string) => resolveRewardName(a)).join('、')}`);
-  if (Array.isArray(r.titles) && r.titles.length) parts.push(`稱號：${r.titles.map((t: string) => resolveRewardName(t)).join('、')}`);
-  return parts.length ? parts.join(' + ') : '獎勵';
+  if (Array.isArray(r.avatars) && r.avatars.length) parts.push(`${t('rewardName.avatar', '頭像')}: ${r.avatars.map((a: string) => resolveRewardName(a)).join(', ')}`);
+  if (Array.isArray(r.titles) && r.titles.length) parts.push(`${t('rewardName.title', '稱號')}: ${r.titles.map((tl: string) => resolveRewardName(tl)).join(', ')}`);
+  return parts.length ? parts.join(' + ') : t('rewardName.reward', '獎勵');
 }
 
 
@@ -459,7 +459,7 @@ export default function AnnouncementCenter() {
                     <Gift size={18} className="shrink-0 text-[#fcc025]" />
                   </div>
                   <div className="mt-3 rounded-lg bg-[#262626] px-3 py-2 text-sm text-[#fcc025]">
-                    {formatRewardSummary(c.rewards)}
+                    {formatRewardSummary(c.rewards, t)}
                   </div>
                   {(c.startAt || c.endAt) && (
                     <p className="mt-2 text-sm text-[#adaaaa]">

@@ -17,7 +17,8 @@
     "hours_ago": "{{count}} HOURS AGO",
     "yesterday": "YESTERDAY",
     "days_ago": "{{count}} DAYS AGO",
-    "network_error": "Network error, please try again later"
+    "network_error": "Network error, please try again later",
+    "login_required": "Please login first"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -359,7 +360,8 @@
     "horse_bet_now": "Bet Now",
     "horse_win_stats": "🏆 Win Stats",
     "horse_wins_count": "{{wins}} wins ({{pct}}%)",
-    "horse_recent_results": "📋 Recent Results"
+    "horse_recent_results": "📋 Recent Results",
+    "bet_failed": "Bet failed"
   },
   "leaderboard": {
     "title": "Elite Leaderboard",
@@ -1278,6 +1280,12 @@
   },
   "wallet": {
     "yjc_with_zxc": "YJC (≈ {{amount}} ZXC)"
+  },
+  "rewardName": {
+    "reward": "Reward",
+    "item": "Item",
+    "avatar": "Avatar",
+    "title": "Title"
   },
   "txType": {
     "bet": "Bet",
