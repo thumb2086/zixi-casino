@@ -29,6 +29,7 @@ export const BluffDiceView: React.FC = () => {
   const maxBet = profile?.maxBet ?? 1_000_000;
 
   const [betAmount, setBetAmount] = useState<string>("100");
+  const [predictedTotal, setPredictedTotal] = useState(18);
   const [status, setStatus] = useState<"idle" | "rolling" | "settled">("idle");
   const [result, setResult] = useState<GameResult | null>(null);
   const [error, setError] = useState("");
@@ -44,7 +45,8 @@ export const BluffDiceView: React.FC = () => {
       const res = await api.post("/api/v1/games/bluffdice/play", {
         sessionId: session.id,
         betAmount: Number(betAmount),
-        action: "roll",
+        action: "bet",
+        predictedTotal,
         token: "yjc",
       });
       const payload = res.data;
@@ -103,6 +105,19 @@ export const BluffDiceView: React.FC = () => {
       </div>
 
       <div className="bluff-controls">
+        <div className="flex items-center gap-2 w-full mb-2">
+          <span className="text-xs text-[#adaaaa]">{t('casino_game.bluff_predict')}</span>
+          <input
+            type="range"
+            min={5}
+            max={30}
+            value={predictedTotal}
+            onChange={(e) => setPredictedTotal(Number(e.target.value))}
+            disabled={status === "rolling"}
+            className="flex-1"
+          />
+          <span className="text-sm font-bold text-white w-6 text-right">{predictedTotal}</span>
+        </div>
         <input
           type="number"
           min={1}

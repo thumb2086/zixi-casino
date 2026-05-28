@@ -34,14 +34,16 @@ export async function bluffdiceRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         betAmount: z.number().min(1),
         action: z.string().default("roll"),
+        predictedTotal: z.number().min(5).max(30).optional(),
         token: z.enum(["zhixi", "yjc"]).optional().default("yjc"),
       }),
     },
   }, async (request) => {
-    const { betAmount, action, token } = request.body as { 
+    const { betAmount, action, predictedTotal, token } = request.body as { 
       sessionId: string; 
       betAmount: number; 
       action: string;
+      predictedTotal?: number;
       token: "zhixi" | "yjc";
     };
     const amountStr = betAmount.toString();
@@ -98,7 +100,7 @@ export async function bluffdiceRoutes(fastify: FastifyInstance) {
 
     try {
       // 2. Resolve game
-      const gameResult = gameManager.resolveBluffdice(action as 'bet' | 'call', { predictedTotal: action === 'bet' ? 18 : undefined }, roundId, betAmount);
+      const gameResult = gameManager.resolveBluffdice(action as 'bet' | 'call', { predictedTotal: predictedTotal || 18 }, roundId, betAmount);
       const isWin = gameResult.isWin;
       const payout = gameResult.payout;
       const payoutStr = payout.toString();

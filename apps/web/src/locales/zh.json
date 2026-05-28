@@ -334,6 +334,7 @@
     "crash_lose_label": "💥 輸",
     "crash_none": "—",
     "crash_rising": "倍率上升中… 隨時可停利",
+    "bluff_predict": "預測總點：",
     "bluff_total_points": "總點數：",
     "bluff_hit": "命中",
     "bluff_miss": "未中",
@@ -1156,8 +1157,8 @@
       "poker_probability": "牌型機率依 5 張牌組合而定（高倍牌型機率極低）。",
       "poker_fairness": "5 張牌皆由同 seed 分 index 抽出，結果可驗證。",
       "bluffdice_name": "吹牛骰",
-      "bluffdice_desc": "目前預設以目標總點 18 計算 5 顆骰總和差距。",
-      "bluffdice_payout": "差 0 點 5x；差 1~2 點 2x；差 3~4 點 1x；其餘 0x。",
+      "bluffdice_desc": "預測 5 顆骰總點（5~30），系統開骰後比對差距。",
+      "bluffdice_payout": "差 0 點 5x；差 1~2 點 1x（保本）；其餘 0x。",
       "bluffdice_probability": "5 顆骰總和分布近似鐘形，18 附近機率最高。",
       "bluffdice_fairness": "5 顆骰由 seed + action 一次生成，派彩公式固定。"
     },

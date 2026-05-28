@@ -488,7 +488,7 @@ export class GameManager implements GameDomain {
   }
 
   resolveBluffdice(action: 'bet' | 'call', state: any, seed: string, betAmount: number = 100): { dice: number[]; total: number; isWin: boolean; multiplier: number; payout: number } {
-    const hash = this._fnv1a32(seed + action);
+    const hash = this._fnv1a32(seed + action) >>> 0;
     const dice = [
         (hash % 6) + 1,
         (Math.floor(hash / 6) % 6) + 1,
@@ -498,13 +498,12 @@ export class GameManager implements GameDomain {
     ];
     const total = dice.reduce((a, b) => a + b, 0);
     
-    // Bluffdice payout: exact match = 5x, within 2 = 2x, within 4 = 1x, else 0
+    // Bluffdice payout: exact match = 5x, within 2 = 1x (push), else 0x
     let multiplier = 0;
     if (action === 'bet' && state?.predictedTotal) {
         const diff = Math.abs(total - state.predictedTotal);
         if (diff === 0) multiplier = 5;
-        else if (diff <= 2) multiplier = 2;
-        else if (diff <= 4) multiplier = 1;
+        else if (diff <= 2) multiplier = 1;
     }
     
     return {
