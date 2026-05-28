@@ -179,6 +179,19 @@ export function processTicks(data: CompanyData, companyType: "ai" | "chip"): { t
     // Reputation drift toward 50
     if (data.reputation > 55) data.reputation -= 0.1;
     else if (data.reputation < 45) data.reputation += 0.1;
+
+    // Bankruptcy check
+    if (data.cash < -5000) {
+      const empCount = data.employees.length;
+      data.employees = [];
+      data.products = {};
+      data.unlockedProducts = [];
+      data.research = 0;
+      data.level = 1;
+      data.cash = 0;
+      appendHistory(data, "bankruptcy", `破產！已遣散 ${empCount} 名員工，等級重置`);
+      break;
+    }
   }
 
   data.lastTickAt += maxTicks * COMPANY_TICK_MS;

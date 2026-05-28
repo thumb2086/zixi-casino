@@ -7,7 +7,7 @@ import { sql } from "drizzle-orm";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { WalletManager } from "@repo/domain";
 import { rollEmployee, createDefaultCompany, processTicks, computeSummary, checkUnlocks,
-  upgradeLevelCost, upgradeFabCost, researchCost, EQUIPMENT_COST, STARTUP_FEE } from "@repo/domain/company/company-manager.js";
+  upgradeLevelCost, upgradeFabCost, researchCost, EQUIPMENT_COST, STARTUP_FEE, appendHistory } from "@repo/domain/company/company-manager.js";
 
 export async function companyRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -94,12 +94,16 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
     const candidate = data.pendingHire;
     if (!candidate || candidate.id !== employeeId) return createApiEnvelope({ error: { code: "NOT_FOUND", message: "employee not found or expired" } }, request.id);
+    const deposit = candidate.salary * 10;
+    if ((data.cash || 0) < deposit) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS", message: `需要 ${deposit} ZXC 招聘押金` } }, request.id);
+    data.cash -= deposit;
     candidate.hiredAt = Date.now();
     data.employees = data.employees || [];
     data.employees.push(candidate);
     delete data.pendingHire;
+    appendHistory(data, "hire", `僱用 ${candidate.name}（${candidate.role}），押金 ${deposit} ZXC`);
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
-    return createApiEnvelope({ success: true, employee: candidate }, request.id);
+    return createApiEnvelope({ success: true, employee: candidate, deposit }, request.id);
   });
 
   typedFastify.post("/fire", {
@@ -144,6 +148,46 @@ export async function companyRoutes(fastify: FastifyInstance) {
     data.cash -= cost; data.level++;
     await pgQuery`UPDATE company_accounts SET level = ${data.level}, data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
     return createApiEnvelope({ success: true, level: data.level }, request.id);
+  });
+
+  typedFastify.post("/upgrade-fab", async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    if (row.company_type !== "chip") return createApiEnvelope({ error: { code: "CHIP_ONLY" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const cost = upgradeFabCost(data.fabLevel || 1);
+    if ((data.cash || 0) < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
+    data.cash -= cost;
+    data.fabLevel = (data.fabLevel || 1) + 1;
+    checkUnlocks(data, "chip");
+    appendHistory(data, "upgrade_fab", `Fab 升級至 Lv.${data.fabLevel}，花費 ${cost} ZXC`);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, fabLevel: data.fabLevel, cash: data.cash }, request.id);
+  });
+
+  typedFastify.post("/deposit", {
+    schema: { body: z.object({ sessionId: z.string(), amount: z.number().min(1) }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { amount } = request.body;
+    const balance = parseFloat(await gameSettlement.getBalance(ctx.session.address, "zhixi"));
+    if (balance < amount) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    await gameSettlement.setBalance(ctx.session.address, "zhixi", (balance - amount).toString());
+    const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", amount.toString());
+    intent.address = ctx.session.address; intent.meta = { source: "company_deposit" };
+    await walletRepo.saveTxIntent(intent);
+    data.cash = (data.cash || 0) + amount;
+    appendHistory(data, "deposit", `存入 ${amount} ZXC 至公司營運資金`);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, cash: data.cash }, request.id);
   });
 
   typedFastify.post("/research", async (request) => {
