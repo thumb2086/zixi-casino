@@ -275,6 +275,7 @@
     "coinflip_max_bet": "Max Bet",
     "coinflip_error": "❌ Error: {{message}}",
     "bingo_win_result": "🎉 Round {{round}} settled: payout {{amount}}",
+    "bingo_lose_result": "😢 Round {{round}} no win",
     "bingo_bet_error": "❌ Bet failed: {{message}}",
     "bingo_drawn_numbers": "Drawn numbers:",
     "bingo_bet_and_draw": "Bet & Draw",

@@ -31,7 +31,7 @@ export async function bingoRoutes(fastify: FastifyInstance) {
       body: z.object({
         sessionId: z.string(),
         betAmount: z.number().min(1),
-        numbers: z.array(z.number().min(1)).min(1),
+        numbers: z.array(z.number().min(1).max(75)).min(1).max(8).refine((arr) => new Set(arr).size === arr.length, { message: "numbers must be unique" }),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },

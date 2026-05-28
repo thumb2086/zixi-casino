@@ -43,8 +43,11 @@ export const BingoView: React.FC = () => {
 
   const randomPick = () => {
     const pool = Array.from({ length: 75 }, (_, i) => i + 1);
-    const shuffled = pool.sort(() => 0.5 - Math.random());
-    setSelectedNumbers(shuffled.slice(0, 8).sort((a, b) => a - b));
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    setSelectedNumbers(pool.slice(0, 8).sort((a, b) => a - b));
   };
 
   const betMutation = useMutation({
@@ -82,7 +85,11 @@ export const BingoView: React.FC = () => {
         } else {
           clearInterval(animRef.current);
           setAnimDone(true);
-          setStatus(t('casino_game.bingo_win_result', { round: roundNoRef.current, amount: data.payout }));
+          if (Number(data.payout) > 0) {
+            setStatus(t('casino_game.bingo_win_result', { round: roundNoRef.current, amount: data.payout }));
+          } else {
+            setStatus(t('casino_game.bingo_lose_result', { round: roundNoRef.current }));
+          }
           setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
           roundNoRef.current += 1;
           setIsRevealing(false);
