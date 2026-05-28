@@ -1127,7 +1127,7 @@
       "horse_fairness": "FNV hash + fixed weights, each round seed = roundId.",
       "shoot_dragon_gate_name": "Shoot Dragon Gate",
       "shoot_dragon_gate_desc": "Open left and right gates first, then the middle card. Win if middle card falls between the gates.",
-      "shoot_dragon_gate_payout": "Middle in range 2x; Out of range 0x; Same as gate 1x (push).",
+      "shoot_dragon_gate_payout": "Middle in range 2-11x (inverse of range width); Pillar push; Out of range 0x.",
       "shoot_dragon_gate_probability": "Determined by the relationship of 3 card values (fixed 3 draws per round).",
       "shoot_dragon_gate_fairness": "Left/right gates and middle card independently drawn from the same round's random process.",
       "blackjack_name": "Blackjack",

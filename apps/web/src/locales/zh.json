@@ -1127,7 +1127,7 @@
       "horse_fairness": "開獎使用 FNV 哈希 + 固定權重，每局 seed = roundId。",
       "shoot_dragon_gate_name": "射龍門",
       "shoot_dragon_gate_desc": "先開左右門牌，再開中間牌。中間牌落在兩門之間即贏。",
-      "shoot_dragon_gate_payout": "中間牌落在區間內 2x；柱倒/區間外 0x；同門牌退回本金 1x。",
+      "shoot_dragon_gate_payout": "中間牌落在區間內 2~11x（依區間寬度遞減）；柱倒退回本金；區間外 0x。",
       "shoot_dragon_gate_probability": "依三張牌點數關係決定（每局固定三次抽牌）。",
       "shoot_dragon_gate_fairness": "左右門與中牌皆由同局隨機流程獨立抽出。",
       "blackjack_name": "21 點",
