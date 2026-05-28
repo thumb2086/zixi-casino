@@ -170,16 +170,44 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 
 ## 公司系統（v1.0.24）
 
+### 已完成
+| 項目 | 說明 | 狀態 |
+|------|------|:----:|
+| `/upgrade-fab` 路由 | Chip 公司 Fab Level 升級，支援 `checkUnlocks` 解鎖 memory_chip | ✅ |
+| `/deposit` 路由 | 錢包 ZXC → 公司營運資金，含 TxIntent | ✅ |
+| 招聘押金 | `/hire` 扣 `salary × 10` 押金，現金不足拒僱 | ✅ |
+| 破產系統 | `cash < -5000` 時自動遣散全員 + 重置等級 | ✅ |
+| Fab 升級前端 | 互動按鈕（扣除成本後升級） | ✅ |
+
+### 剩餘項目
 | 項目 | 優先級 | 說明 |
 |------|--------|------|
-| `/upgrade-fab` 路由 | **高** | Chip 公司無法升級 Fab Level，被鎖在 Memory Chip 產品外 |
-| 招聘押金實作 | **高** | UI 說要 10× deposit 但 API 沒扣任何費用 |
-| `/deposit` 路由 | **高** | 公司可提款到錢包，但無法從錢包存入資金 |
-| Domain barrel export | **高** | company-manager 加入 `packages/domain/src/index.ts` |
-| 單元測試 | **中** | 團隊加成/營收/研究等核心邏輯 |
-| Fab 升級前端按鈕 | **中** | 目前僅文字標籤，無互動 |
+| 前端存入/提領 UI | **高** | CompanyView 加入存款按鈕（錢包→公司） |
 | 公司事件歷史顯示 | **低** | `data.history` 有累積但前端沒展示 |
-| 破產機制 | **低** | 現金可無限負值 |
+
+### 公司規則完整設計
+
+#### 二種公司類型
+| 類型 | AI 公司 | Chip 公司 |
+|------|---------|----------|
+| 起始產品 | ChatBot API（營收 10/tick） | 處理器晶片（營收 15/tick） |
+| 員工角色 | data_scientist / engineer / researcher | chip_designer / process_engineer / materials_scientist |
+| 設備 | GPU（5,000 ZXC）+ 超級電腦（50,000 ZXC） | Fab Level（升級費 = level × 10,000 ZXC） |
+| 產品解鎖 | 2 engineer → 圖片生成器；3 researcher + 1 專利 → 企業 AI 套件 | fabLevel≥3 → 記憶體晶片；2 專利 → 客製化 ASIC |
+
+#### 經濟運作（每 tick = 30 秒）
+1. **薪資支出**: 每 tick 扣除所有員工 `salary` 總和
+2. **產品營收**: `baseRevenue × level × qualityMult × researchMult × priceMult × demand`
+3. **研究進度**: 每 tick + `engineerCount × 0.1 × teamMult × equipMult`（累積 100 → 1 專利）
+4. **聲譽漂移**: 每 tick 向 50 收斂 ±0.1
+
+#### 員工系統
+- **招聘流程**: 抽卡 → 預覽 → 確認（扣 `salary × 10` 押金）
+- **解僱**: 直接移除（不返還押金）
+- **團隊加成**: 協同（同角色加分）+ 領導力（管理職加分）- 衝突（異角色減分）
+
+#### 破產
+- 當 `cash < -5000`：自動遣散所有員工，重置等級/產品/研究，歸零現金
 
 ---
 

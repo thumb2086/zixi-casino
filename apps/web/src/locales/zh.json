@@ -1278,7 +1278,9 @@
     "invest_btn": "投資",
     "no_investable": "尚無其他公司可投資",
     "company_info": "{{type}} · Lv.{{level}} · 資金 {{cash}} ZXC",
-    "level_label": "Lv.{{level}}"
+    "level_label": "Lv.{{level}}",
+    "deposit_label": "存入",
+    "withdraw_label": "提領"
   },
   "wallet": {
     "yjc_with_zxc": "YJC（≈ {{amount}} ZXC）"

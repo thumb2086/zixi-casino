@@ -16,6 +16,7 @@ export default function CompanyView() {
   const [createMode, setCreateMode] = useState(false);
   const [companyType, setCompanyType] = useState<"ai" | "chip">("ai");
   const [companyName, setCompanyName] = useState("");
+  const [depositAmount, setDepositAmount] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["company"],
@@ -65,6 +66,21 @@ export default function CompanyView() {
   const buyEquipment = useMutation({
     mutationFn: (equipmentType: string) => api.post("/api/v1/company/buy-equipment", { sessionId, equipmentType }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
+  });
+
+  const upgradeFab = useMutation({
+    mutationFn: () => api.post("/api/v1/company/upgrade-fab", { sessionId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
+  });
+
+  const deposit = useMutation({
+    mutationFn: (amount: number) => api.post("/api/v1/company/deposit", { sessionId, amount }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
+  });
+
+  const withdraw = useMutation({
+    mutationFn: (amount: number) => api.post("/api/v1/company/withdraw", { sessionId, amount }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
   });
 
   const company = data?.company;
@@ -241,8 +257,26 @@ export default function CompanyView() {
             </div>
 
             {company?.companyType === "chip" && (
-              <p className="text-xs text-[#adaaaa] text-center">{t("fab_level", { level: sum?.fabLevel, cost: (sum?.fabLevel || 1) * 10000 })}</p>
+              <button onClick={() => upgradeFab.mutate()} disabled={upgradeFab.isPending || (sum?.cash || 0) < (sum?.fabLevel || 1) * 10000}
+                className="w-full bg-amber-600/20 text-amber-400 border border-amber-600/30 py-3 rounded-xl text-xs font-black">
+                {t("fab_level", { level: sum?.fabLevel, cost: (sum?.fabLevel || 1) * 10000 })}
+              </button>
             )}
+
+            {/* Deposit / Withdraw */}
+            <div className="rounded-2xl bg-[#1a1919] p-4 border border-[#494847]/10">
+              <p className="text-xs font-bold text-[#adaaaa] mb-2">{t("operating_cash")} {sum?.cash?.toLocaleString()} ZXC</p>
+              <div className="flex gap-2">
+                <input type="number" min={1} value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="ZXC" className="flex-1 rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-2 text-sm" />
+                <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) deposit.mutate(a); setDepositAmount(""); }}
+                  disabled={deposit.isPending || !depositAmount}
+                  className="bg-emerald-600 text-white font-black px-3 py-2 rounded-xl text-xs">{t("deposit_label")}</button>
+                <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) withdraw.mutate(a); setDepositAmount(""); }}
+                  disabled={withdraw.isPending || !depositAmount}
+                  className="bg-red-600 text-white font-black px-3 py-2 rounded-xl text-xs">{t("withdraw_label")}</button>
+              </div>
+            </div>
           </div>
         )}
 
