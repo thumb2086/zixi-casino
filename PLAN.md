@@ -17,8 +17,8 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.9** | Roulette + 每日任務 | Roulette 數字賠 35x 應為 36x；新增每日任務系統，午夜刷新 | ✅ |
 | **v1.0.10** | 賽馬系統 | RTP_SCALE=2.0 導致玩家優勢 → GameManager 統一邏輯、HE ~4%；統一開獎流程、多筆押注、勝率統計圖表、長期數據 localStorage、未下注也播動畫 | ✅ 開發完成 |
 | **v1.0.11** | Bingo | RTP 修正：20 開獎號 + 新賠率表 + 逐顆開獎動畫 + hash 負數修復 | ✅ |
-| **v1.0.12** | Dragon Tiger | `Math.random()`→FNV、賠率 redesign、HE 過高 | 🏗️ |
-| **v1.0.13** | BluffDice | 固定預測 18 導致 -39% 玩家優勢 | ⏳ |
+| **v1.0.12** | Dragon Tiger | FNV hash 負數修復、動態賠率 2~12x（route 改用 domain multiplier） | ✅ |
+| **v1.0.13** | BluffDice | 固定預測 18 導致 -39% 玩家優勢 | 🏗️ |
 | **v1.0.14** | Sicbo | 賠率調整、HE 檢查 | ⏳ |
 | **v1.0.15** | Duel | 賠率 1.96x 與實際 HE 對齊檢查 | ⏳ |
 | **v1.0.16** | Crash | 賠率/機率微調 | ⏳ |
