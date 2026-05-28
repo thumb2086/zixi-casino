@@ -192,15 +192,8 @@ export class GameManager implements GameDomain {
 
     for (const [a, b, c] of lines) {
       if (symbols[a] === symbols[b] && symbols[b] === symbols[c]) {
-        // Triple: high payout
         const baseMult = symbols[a] === "7️⃣" ? 50 : symbols[a] === "💎" ? 10 : 3;
         multiplier = Math.max(multiplier, baseMult);
-        winLines.push([a, b, c]);
-      } else if (symbols[a] === symbols[b] || symbols[b] === symbols[c] || symbols[a] === symbols[c]) {
-        // Pair: small payout
-        const paired = symbols[a] === symbols[b] ? symbols[a] : symbols[c];
-        const pairMult = paired === "7️⃣" ? 5 : paired === "💎" ? 3 : 1.5;
-        multiplier = Math.max(multiplier, pairMult);
         winLines.push([a, b, c]);
       }
     }
@@ -213,25 +206,32 @@ export class GameManager implements GameDomain {
     };
   }
 
-  resolveSicbo(bets: any[], seed: string, bias: number = 0): { dice: number[]; total: number; isBig: boolean; totalPayoutMultiplier: number } {
-    const hash = this._fnv1a32(seed);
+  resolveSicbo(bets: any[], seed: string, bias: number = 0): { dice: number[]; total: number; isBig: boolean; isAllTriple: boolean; totalPayoutMultiplier: number } {
+    const hash = this._fnv1a32(seed) >>> 0;
     const dice = [
       (hash % 6) + 1,
       (Math.floor(hash / 6) % 6) + 1,
       (Math.floor(hash / 36) % 6) + 1
     ];
     const total = dice.reduce((a, b) => a + b, 0);
-    const isBig = total >= 11 && total <= 17;
-    const isSmall = total >= 4 && total <= 10;
+    const isAllTriple = dice[0] === dice[1] && dice[1] === dice[2];
+    const isBig = !isAllTriple && total >= 11 && total <= 17;
+    const isSmall = !isAllTriple && total >= 4 && total <= 10;
+
+    // Total payout multipliers based on Sicbo probability (fair value = 216 / ways)
+    const TOTAL_PAYOUTS: Record<number, number> = {
+      4: 60, 5: 30, 6: 18, 7: 12, 8: 8, 9: 7, 10: 6,
+      11: 6, 12: 8, 13: 12, 14: 18, 15: 30, 16: 60, 17: 60,
+    };
 
     let totalPayoutMultiplier = 0;
     for (const bet of bets) {
       if (bet.type === "big" && isBig) totalPayoutMultiplier += 2;
       if (bet.type === "small" && isSmall) totalPayoutMultiplier += 2;
-      if (bet.type === "total" && bet.value === total) totalPayoutMultiplier += 6;
+      if (bet.type === "total" && bet.value === total) totalPayoutMultiplier += TOTAL_PAYOUTS[total] || 6;
     }
 
-    return { dice, total, isBig, totalPayoutMultiplier };
+    return { dice, total, isBig, isAllTriple, totalPayoutMultiplier };
   }
 
   resolveBingo(selectedNumbers: number[], seed: string, bias: number = 0): { winningNumbers: number[]; matches: number[]; multiplier: number } {
@@ -246,14 +246,19 @@ export class GameManager implements GameDomain {
 
     const matches = selectedNumbers.filter(n => winningNumbers.includes(n));
     const matchCount = matches.length;
-    let multiplier = 0;
-    if (matchCount >= 8) multiplier = 5000;
-    else if (matchCount === 7) multiplier = 500;
-    else if (matchCount === 6) multiplier = 100;
-    else if (matchCount === 5) multiplier = 30;
-    else if (matchCount === 4) multiplier = 10;
-    else if (matchCount === 3) multiplier = 3;
-    else if (matchCount === 2) multiplier = 1;
+    const pickCount = selectedNumbers.length;
+
+    // Dynamic multiplier tables by pick count (5-10)
+    const MULTI_TABLE: Record<number, number[]> = {
+      5:  [0, 0, 3, 10, 50, 500],
+      6:  [0, 0, 2, 6,  20, 100, 500],
+      7:  [0, 0, 1, 4,  15, 50,  200, 1000],
+      8:  [0, 0, 1, 3,  10, 30,  100, 500, 5000],
+      9:  [0, 0, 1, 2,  5,  15,  50,  200, 1000, 5000],
+      10: [0, 0, 1, 2,  5,  10,  30,  100, 500, 2000, 5000],
+    };
+    const table = MULTI_TABLE[pickCount] || MULTI_TABLE[8];
+    const multiplier = matchCount < table.length ? table[matchCount] : table[table.length - 1];
 
     return { winningNumbers, matches, multiplier };
   }

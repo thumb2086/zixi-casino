@@ -31,7 +31,7 @@ export async function bingoRoutes(fastify: FastifyInstance) {
       body: z.object({
         sessionId: z.string(),
         betAmount: z.number().min(1),
-        numbers: z.array(z.number().min(1).max(75)).min(1).max(8).refine((arr) => new Set(arr).size === arr.length, { message: "numbers must be unique" }),
+        numbers: z.array(z.number().min(1).max(75)).min(5, "最少選擇 5 個號碼").max(10, "最多選擇 10 個號碼").refine((arr) => new Set(arr).size === arr.length, { message: "numbers must be unique" }),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
