@@ -1278,7 +1278,9 @@
     "invest_btn": "Invest",
     "no_investable": "No other companies to invest in",
     "company_info": "{{type}} · Lv.{{level}} · Cash {{cash}} ZXC",
-    "level_label": "Lv.{{level}}"
+    "level_label": "Lv.{{level}}",
+    "deposit_label": "Deposit",
+    "withdraw_label": "Withdraw"
   },
   "wallet": {
     "yjc_with_zxc": "YJC (≈ {{amount}} ZXC)"
