@@ -275,6 +275,7 @@
     "coinflip_max_bet": "最高下注",
     "coinflip_error": "❌ 錯誤：{{message}}",
     "bingo_win_result": "🎉 第 {{round}} 局結算：派彩 {{amount}}",
+    "bingo_lose_result": "😢 第 {{round}} 局未中獎",
     "bingo_bet_error": "❌ 下注失敗：{{message}}",
     "bingo_drawn_numbers": "開獎號碼：",
     "bingo_bet_and_draw": "下注並開球",
