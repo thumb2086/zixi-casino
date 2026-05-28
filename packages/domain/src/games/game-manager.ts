@@ -354,8 +354,8 @@ export class GameManager implements GameDomain {
     const drawCard = (index: number) => {
         const hash = this._fnv1a32(`${seed}:${index}`);
         return {
-            rank: ranks[hash % ranks.length],
-            suit: suits[Math.floor(hash / ranks.length) % suits.length]
+            rank: ranks[(hash >>> 0) % ranks.length],
+            suit: suits[((hash >>> 0) / ranks.length) % suits.length]
         };
     };
 
@@ -367,7 +367,7 @@ export class GameManager implements GameDomain {
         const range = Math.abs(lVal - rVal);
         return {
             gate: { left, right },
-            multiplier: range === 0 ? 0 : parseFloat((12 / range).toFixed(2)),
+            multiplier: range === 0 ? 0 : Math.max(2, Math.floor(12 / range)),
             requiresSideGuess: range === 0
         };
     }
@@ -385,7 +385,7 @@ export class GameManager implements GameDomain {
         else if (sVal === min || sVal === max) resultType = 'pillar';
 
         if (bias > 0 && resultType !== 'win') {
-            if ((this._fnv1a32(`${seed}:bias`) % 100) < bias * 100) {
+            if (((this._fnv1a32(`${seed}:bias`) >>> 0) % 100) < bias * 100) {
                 resultType = 'win';
             }
         }

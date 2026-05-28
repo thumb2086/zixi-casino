@@ -32,6 +32,7 @@ export async function playShootDragonGateRound(params: {
 
   try {
     let left: DragonGateCard, right: DragonGateCard;
+    let winMultiplier = 2;
     if (openCards) {
       left = openCards.left;
       right = openCards.right;
@@ -39,6 +40,7 @@ export async function playShootDragonGateRound(params: {
       const gateResult = gameManager.resolveDragonTiger('gate', {}, roundId, bias || 0);
       left = gateResult.gate.left.rank as DragonGateCard;
       right = gateResult.gate.right.rank as DragonGateCard;
+      winMultiplier = Math.max(1, gateResult.multiplier);
     }
     const rankIndex = (r: string) => ["A","2","3","4","5","6","7","8","9","10","J","Q","K"].indexOf(r);
     const lv = rankIndex(left) + 1;
@@ -58,7 +60,7 @@ export async function playShootDragonGateRound(params: {
       payout = betAmount;
     } else if (mv > lo && mv < hi) {
       result = "win";
-      payout = betAmount * 2;
+      payout = betAmount * winMultiplier;
     } else {
       result = "lose";
       payout = 0;
@@ -95,7 +97,7 @@ export async function playShootDragonGateRound(params: {
     await gameSettlement.logGameEvent({
       game: "shoot_dragon_gate", userId, address, amount: amountStr,
       payout: settlement.finalPayout.toString(), fee: settlement.feeAmount.toString(),
-      isWin: result === "win", multiplier: 2,
+      isWin: result === "win", multiplier: winMultiplier,
       betTxHash: settlement.betTxHash, payoutTxHash: settlement.payoutTxHash, roundId,
     });
 
