@@ -264,7 +264,7 @@ export class GameManager implements GameDomain {
   }
 
   resolveDuel(p1Selection: string, p2Selection: string, seed: string): { winner: 1 | 2 | 0 } {
-    const hash = this._fnv1a32(seed);
+    const hash = this._fnv1a32(seed) >>> 0;
     const result = hash % 2 === 0 ? "heads" : "tails";
     if (p1Selection === result && p2Selection !== result) return { winner: 1 };
     if (p2Selection === result && p1Selection !== result) return { winner: 2 };

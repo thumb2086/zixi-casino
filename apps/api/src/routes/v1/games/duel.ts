@@ -32,18 +32,19 @@ export async function duelRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         betAmount: z.number().min(1),
         p1Selection: z.enum(["heads", "tails"]),
-        p2Selection: z.enum(["heads", "tails"]),
+        p2Selection: z.enum(["heads", "tails"]).optional(),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
   }, async (request) => {
-    const { betAmount, p1Selection, p2Selection, token } = request.body as { 
+    const { betAmount, p1Selection, token } = request.body as { 
       sessionId: string; 
       betAmount: number; 
       p1Selection: "heads" | "tails";
-      p2Selection: "heads" | "tails";
       token: "zhixi" | "yjc";
     };
+    // Server determines opponent's choice (always opposite to prevent draw abuse)
+    const p2Selection = p1Selection === "heads" ? "tails" : "heads";
     const amountStr = betAmount.toString();
 
     const ctx = await getContext(request);
