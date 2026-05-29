@@ -32,7 +32,8 @@
     "inventory": "Inventory",
     "leaderboard": "Leaderboard",
     "announcements": "Announcements",
-    "support": "Support"
+    "support": "Support",
+    "shop": "Shop"
   },
   "auth": {
     "login": "Login",
