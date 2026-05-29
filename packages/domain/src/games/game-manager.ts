@@ -102,7 +102,7 @@ export class GameManager implements GameDomain {
         // Adjust hash so that it favors 'selection'
         const isHeadsSelected = selection === 'heads';
         const rawWinner = hash % 2 === 0 ? 'heads' : 'tails';
-        if (rawWinner !== selection && (this._fnv1a32(seed + ':bias') % 100 < bias * 100)) {
+        if (rawWinner !== selection && ((this._fnv1a32(seed + ':bias') >>> 0) % 100 < bias * 100)) {
             hash = isHeadsSelected ? 0 : 1; // Force win
         }
     }
@@ -150,7 +150,7 @@ export class GameManager implements GameDomain {
 
     // Apply bias: adjust random value to favor selected horse
     if (bias > 0 && HORSES[winnerIndex].id !== horseId) {
-        if ((this._fnv1a32(seed + ':bias') % 100) < bias * 100) {
+        if (((this._fnv1a32(seed + ':bias') >>> 0) % 100) < bias * 100) {
             winnerIndex = HORSES.findIndex(h => h.id === horseId);
         }
     }
@@ -276,8 +276,7 @@ export class GameManager implements GameDomain {
     const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
     const drawCard = (index: number) => {
-        let hash = this._fnv1a32(`${seed}:${index}`);
-        // Optional bias here
+        const hash = this._fnv1a32(`${seed}:${index}`) >>> 0;
         return {
             rank: ranks[hash % ranks.length],
             suit: suits[Math.floor(hash / ranks.length) % suits.length]
@@ -405,7 +404,7 @@ export class GameManager implements GameDomain {
   }
 
   resolveCrash(elapsedSeconds: number, seed: string, bias: number = 0) {
-    const hash = this._fnv1a32(seed);
+    const hash = this._fnv1a32(seed) >>> 0;
     const ratio = (hash % 1000000) / 1000000;
     const crashPoint = Math.min(100, Math.max(1.08, 0.99 / (1 - ratio) ** 0.35));
     const currentMultiplier = Math.pow(Math.E, 0.08 * elapsedSeconds);
@@ -421,7 +420,7 @@ export class GameManager implements GameDomain {
     const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
     
     const drawCard = (index: number) => {
-        const hash = this._fnv1a32(`${seed}:${index}`);
+        const hash = this._fnv1a32(`${seed}:${index}`) >>> 0;
         return {
             rank: ranks[hash % ranks.length],
             suit: suits[Math.floor(hash / ranks.length) % suits.length]
