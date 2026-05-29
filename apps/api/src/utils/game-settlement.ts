@@ -25,6 +25,7 @@ import { getOnChainConfig, SettlementServiceImpl, ViemRepository, VipBetLevelSer
 import type { Game, TokenSymbol } from "@repo/shared";
 import type { TxIntent } from "@repo/shared";
 import { sql } from "drizzle-orm";
+import { requireDb } from "@repo/infrastructure/db/index.js";
 
 export interface SettlementContext {
   userId: string;
@@ -174,11 +175,18 @@ export class GameSettlementWrapper {
       }
     }
 
-    // Balance Check
-    const balanceBefore = await this.getBalance(address, token);
-    const currentBalance = parseFloat(balanceBefore);
-
-    if (currentBalance < amountNum) {
+    // Atomic balance deduction (FOR UPDATE equivalent: single UPDATE with WHERE + RETURNING)
+    const db = await requireDb();
+    const rows = await db.execute(sql`
+      UPDATE wallet_accounts
+      SET balance = (CAST(balance AS NUMERIC) - ${amountNum})::text, updated_at = NOW()
+      WHERE address = ${address.toLowerCase()} AND token = ${token}
+        AND CAST(balance AS NUMERIC) >= ${amountNum}
+      RETURNING balance
+    `);
+    const row = rows[0] as { balance?: string } | undefined;
+    if (!row || row.balance === undefined) {
+      const balanceBefore = await this.getBalance(address, token);
       return {
         success: false,
         balanceBefore,
@@ -186,12 +194,7 @@ export class GameSettlementWrapper {
         error: { code: "INSUFFICIENT_BALANCE", message: "Insufficient balance" }
       };
     }
-
-    // Deduct Bet
-    const balanceAfter = (currentBalance - amountNum).toString();
-    await this.setBalance(address, token, balanceAfter);
-
-    return { success: true, balanceBefore, balanceAfter };
+    return { success: true, balanceBefore: (parseFloat(row.balance) + amountNum).toString(), balanceAfter: row.balance };
   }
 
   /**

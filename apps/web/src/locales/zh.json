@@ -32,7 +32,8 @@
     "inventory": "背包",
     "leaderboard": "排行榜",
     "announcements": "公告中心",
-    "support": "支援中心"
+    "support": "支援中心",
+    "shop": "商店"
   },
   "auth": {
     "login": "登入",

@@ -186,8 +186,21 @@ async function main() {
       let cleared = 0;
       let unchanged = 0;
 
+      // Skip addresses with pending TxIntents (don't overwrite before on-chain settles)
+      const pendingIntents = await db.query.txIntents.findMany({
+        where: (ti: any, { eq, inArray }: any) =>
+          inArray(ti.status, ["pending", "broadcasted"]),
+        columns: { address: true },
+      });
+      const pendingAddrs = new Set(pendingIntents.map((p: any) => p.address?.toLowerCase()));
+
       // 3a: Update addresses with on-chain balance > 0
       for (const [addr, chainBalance] of onchainBalances) {
+        if (pendingAddrs.has(addr)) {
+          console.log(`    SKIP ${addr.slice(0, 10)}... (pending TxIntent exists)`);
+          unchanged++;
+          continue;
+        }
         const existing = dbBalances.get(addr);
         if (existing === chainBalance) {
           unchanged++;
@@ -243,6 +256,10 @@ async function main() {
       // 3b: Clear DB balances for addresses that have 0 on-chain
       for (const [addr, dbBal] of dbBalances) {
         if (!onchainBalances.has(addr) && Number(dbBal) > 0) {
+          if (pendingAddrs.has(addr)) {
+            console.log(`    SKIP clear ${addr.slice(0, 10)}... (pending TxIntent exists)`);
+            continue;
+          }
           await db.update(schema.walletAccounts).set({
             balance: "0",
             updatedAt: new Date(),
