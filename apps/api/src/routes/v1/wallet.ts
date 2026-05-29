@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { ethers } from "ethers";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -36,6 +37,20 @@ function parseAmountText(rawAmount: unknown): string {
   if (!/^\d+(\.\d+)?$/.test(amount)) throw new Error("Invalid amount");
   if (Number(amount) <= 0) throw new Error("Amount must be greater than 0");
   return amount;
+}
+
+/**
+ * Verify that a signature matches the session's address.
+ * The App signs a message like "transfer:0xto:100" using ethers.js wallet.signMessage().
+ * Backend recovers the signer address and checks it matches the session address.
+ */
+function verifySignature(address: string, message: string, signature: string): boolean {
+  try {
+    const recovered = ethers.verifyMessage(message, signature);
+    return recovered.toLowerCase() === address.toLowerCase();
+  } catch {
+    return false;
+  }
 }
 
 export async function walletRoutes(fastify: FastifyInstance) {
@@ -419,6 +434,7 @@ export async function walletRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         to: z.string(),
         amount: z.string(),
+        signature: z.string().optional(),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
@@ -427,7 +443,15 @@ export async function walletRoutes(fastify: FastifyInstance) {
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED", message: "Invalid session" } }, request.id);
 
     try {
-      const { to, token } = request.body;
+      const { to, token, signature } = request.body;
+
+      // Signature verification
+      if (signature) {
+        const msg = `transfer:${to}:${request.body.amount}`;
+        if (!verifySignature(ctx.session.address, msg, signature)) {
+          return createApiEnvelope({ error: { code: "SIGNATURE_MISMATCH", message: "Signature does not match session address" } }, request.id);
+        }
+      }
       const amount = parseAmountText(request.body.amount);
       const fromAddress = ctx.session.address;
       const toAddress = identityManager.tryNormalizeAddress(to);
@@ -679,11 +703,20 @@ export async function walletRoutes(fastify: FastifyInstance) {
       body: z.object({
         sessionId: z.string(),
         zxcAmount: z.string(),
+        signature: z.string().optional(),
       }),
     },
   }, async (request) => {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED", message: "Invalid session" } }, request.id);
+
+    // Signature verification
+    if (request.body.signature) {
+      const msg = `convert:${request.body.zxcAmount}`;
+      if (!verifySignature(ctx.session.address, msg, request.body.signature)) {
+        return createApiEnvelope({ error: { code: "SIGNATURE_MISMATCH", message: "Signature does not match session address" } }, request.id);
+      }
+    }
 
     const conversionId = randomUUID();
     let debitIntent: any = null;
