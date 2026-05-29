@@ -780,6 +780,28 @@ export class WalletRepository implements IWalletRepository {
     });
   }
 
+  async adjustBalanceAtomic(address: string, delta: string, token: string = "zhixi"): Promise<string | null> {
+    const db = await requireDb();
+    const deltaNum = parseFloat(delta);
+    if (isNaN(deltaNum)) return null;
+    const addr = address.toLowerCase();
+    const absDelta = Math.abs(deltaNum);
+    if (deltaNum >= 0) {
+      const result = await db.execute(
+        drizzleSql`UPDATE wallet_accounts SET balance = (CAST(balance AS numeric) + ${String(deltaNum)}), updated_at = NOW()
+            WHERE address = ${addr} AND token = ${token} RETURNING balance`
+      );
+      return result?.rows?.[0]?.balance || null;
+    } else {
+      const result = await db.execute(
+        drizzleSql`UPDATE wallet_accounts SET balance = (CAST(balance AS numeric) - ${String(absDelta)}), updated_at = NOW()
+            WHERE address = ${addr} AND token = ${token} AND CAST(balance AS numeric) >= ${String(absDelta)}
+            RETURNING balance`
+      );
+      return result?.rows?.[0]?.balance || null;
+    }
+  }
+
   async saveTxIntent(intent: any) {
     const conn = await requireDb();
     try {
