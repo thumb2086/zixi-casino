@@ -25,7 +25,6 @@ import { getOnChainConfig, SettlementServiceImpl, ViemRepository, VipBetLevelSer
 import type { Game, TokenSymbol } from "@repo/shared";
 import type { TxIntent } from "@repo/shared";
 import { sql } from "drizzle-orm";
-import { requireDb } from "@repo/infrastructure/db/index.js";
 
 export interface SettlementContext {
   userId: string;
@@ -175,17 +174,9 @@ export class GameSettlementWrapper {
       }
     }
 
-    // Atomic balance deduction (FOR UPDATE equivalent: single UPDATE with WHERE + RETURNING)
-    const db = await requireDb();
-    const rows = await db.execute(sql`
-      UPDATE wallet_accounts
-      SET balance = (CAST(balance AS NUMERIC) - ${amountNum})::text, updated_at = NOW()
-      WHERE address = ${address.toLowerCase()} AND token = ${token}
-        AND CAST(balance AS NUMERIC) >= ${amountNum}
-      RETURNING balance
-    `);
-    const row = rows[0] as { balance?: string } | undefined;
-    if (!row || row.balance === undefined) {
+    // Atomic balance deduction (prevents race conditions)
+    const newBalance = await this.walletRepo.adjustBalanceAtomic(address, `-${betAmount}`, token);
+    if (newBalance === null) {
       const balanceBefore = await this.getBalance(address, token);
       return {
         success: false,
@@ -194,7 +185,9 @@ export class GameSettlementWrapper {
         error: { code: "INSUFFICIENT_BALANCE", message: "Insufficient balance" }
       };
     }
-    return { success: true, balanceBefore: (parseFloat(row.balance) + amountNum).toString(), balanceAfter: row.balance };
+
+    const balanceBefore = (parseFloat(newBalance) + amountNum).toString();
+    return { success: true, balanceBefore, balanceAfter: newBalance };
   }
 
   /**
@@ -608,8 +601,8 @@ export class GameSettlementWrapper {
     userId?: string,
     betAmount?: number
   ): Promise<string> {
-    const finalBalance = (parseFloat(currentBalance) + payout).toString();
-    await this.setBalance(address, token, finalBalance);
+    const newBalance = await this.walletRepo.adjustBalanceAtomic(address, `+${payout}`, token);
+    const finalBalance = newBalance || (parseFloat(currentBalance) + payout).toString();
 
     // Save ledger entry for bet (debit)
     if (userId && betAmount && betAmount > 0) {

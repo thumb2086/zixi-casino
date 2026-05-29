@@ -14,6 +14,7 @@ export interface ISessionRepository {
 export interface IWalletRepository {
   getBalance(address: string, token?: string): Promise<string>;
   updateBalance(address: string, amount: string, token?: string): Promise<void>;
+  adjustBalanceAtomic(address: string, delta: string, token?: string): Promise<string | null>;
   saveTxIntent(intent: any): Promise<void>;
   getPendingIntents(): Promise<any[]>;
   getFailedIntents(): Promise<any[]>;

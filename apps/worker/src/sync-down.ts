@@ -184,24 +184,30 @@ async function main() {
       let updated = 0;
       let inserted = 0;
       let cleared = 0;
+      let skipped = 0;
       let unchanged = 0;
-
-      // Skip addresses with pending TxIntents (don't overwrite before on-chain settles)
-      const pendingIntents = await db.query.txIntents.findMany({
-        where: (ti: any, { eq, inArray }: any) =>
-          inArray(ti.status, ["pending", "broadcasted"]),
-        columns: { address: true },
-      });
-      const pendingAddrs = new Set(pendingIntents.map((p: any) => p.address?.toLowerCase()));
 
       // 3a: Update addresses with on-chain balance > 0
       for (const [addr, chainBalance] of onchainBalances) {
-        if (pendingAddrs.has(addr)) {
-          console.log(`    SKIP ${addr.slice(0, 10)}... (pending TxIntent exists)`);
-          unchanged++;
+        const existing = dbBalances.get(addr);
+
+        // Skip if there are pending admin_credit TxIntents (unconfirmed credits)
+        const pendingIntents = await db.query.txIntents.findMany({
+          where: (ti: any, { and, eq, inArray }: any) => and(
+            eq(ti.address, addr),
+            eq(ti.type, "admin_credit"),
+            inArray(ti.status, ["pending", "broadcasted"]),
+          ),
+          limit: 1,
+        });
+        if (pendingIntents.length > 0) {
+          skipped++;
+          if (skipped <= 5) {
+            console.log(`    SKIP ${addr.slice(0, 10)}... (${pendingIntents.length} pending admin_credit)`);
+          }
           continue;
         }
-        const existing = dbBalances.get(addr);
+
         if (existing === chainBalance) {
           unchanged++;
           continue;
@@ -229,37 +235,37 @@ async function main() {
           userId = existingUser.id;
         }
 
+        // Use higher of chain vs DB balance (DB may have unconfirmed credits)
+        const dbBalance = dbBalances.get(addr) || "0";
+        const finalBalance = Number(chainBalance) > Number(dbBalance) ? chainBalance : dbBalance;
+
         // Update wallet_accounts
         await db.insert(schema.walletAccounts).values({
           id: randomUUID(),
           userId,
           address: addr,
           token: token.key,
-          balance: chainBalance,
+          balance: finalBalance,
           lockedBalance: "0",
           updatedAt: new Date(),
         }).onConflictDoUpdate({
           target: [schema.walletAccounts.address, schema.walletAccounts.token],
-          set: { balance: chainBalance, updatedAt: new Date() },
+          set: { balance: finalBalance, updatedAt: new Date() },
         });
 
         // Update KV balance
         const kvKey = token.key === "yjc" ? `balance_yjc:${addr}` : `balance:${addr}`;
-        await kv.set(kvKey, chainBalance);
+        await kv.set(kvKey, finalBalance);
 
         updated++;
         if (updated <= 5 || updated % 20 === 0) {
-          console.log(`    ${updated}. ${addr.slice(0, 10)}... → ${Number(chainBalance).toFixed(4)} ${token.symbol}`);
+          console.log(`    ${updated}. ${addr.slice(0, 10)}... → ${Number(finalBalance).toFixed(4)} ${token.symbol}`);
         }
       }
 
       // 3b: Clear DB balances for addresses that have 0 on-chain
       for (const [addr, dbBal] of dbBalances) {
         if (!onchainBalances.has(addr) && Number(dbBal) > 0) {
-          if (pendingAddrs.has(addr)) {
-            console.log(`    SKIP clear ${addr.slice(0, 10)}... (pending TxIntent exists)`);
-            continue;
-          }
           await db.update(schema.walletAccounts).set({
             balance: "0",
             updatedAt: new Date(),
@@ -277,6 +283,7 @@ async function main() {
       console.log(`    Updated: ${updated}`);
       console.log(`    New users created: ${inserted}`);
       console.log(`    Cleared (chain=0, DB>0): ${cleared}`);
+      console.log(`    Skipped (pending TxIntent): ${skipped}`);
       console.log(`    Unchanged: ${unchanged}`);
     }
 
