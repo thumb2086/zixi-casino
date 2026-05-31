@@ -439,8 +439,8 @@ export default function ShopView() {
       </header>
 
       <main className="pt-28 app-shell">
-        <div className="content-grid">
-        <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between">
+        {/* Balance — full width at top */}
+        <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#fcc025]" />
             <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
@@ -448,6 +448,7 @@ export default function ShopView() {
             <span className="text-lg font-black italic text-[#fcc025]">{formatBalance(balance, numberMode)}</span>
         </section>
 
+        <div className="content-grid">
         {/* YJC Exchange */}
         <section className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
           <div className="flex items-center gap-2 mb-3">
