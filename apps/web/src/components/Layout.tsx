@@ -23,8 +23,8 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0e0e0e] font-manrope-emoji text-white">
-      <main className="app-shell flex flex-1 pt-20 pb-6 lg:pt-24 lg:pb-10">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-bg)' }}>
+      <main className="app-shell flex flex-1 pt-20 pb-24 lg:pt-24 lg:pb-10">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}

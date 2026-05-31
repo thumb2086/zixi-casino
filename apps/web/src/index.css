@@ -4,7 +4,29 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --base-font-size: 18px; }
+:root {
+  --base-font-size: 18px;
+  /* Color system */
+  --color-bg: #0a0a0f;
+  --color-bg-card: #14141f;
+  --color-bg-elevated: #1a1925;
+  --color-bg-surface: #0e0e0e;
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #888899;
+  --color-text-muted: #494847;
+  --color-accent: #fcc025;
+  --color-accent-dim: rgba(252, 192, 37, 0.15);
+  --color-success: #00e676;
+  --color-danger: #ff5252;
+  --color-warning: #ffab40;
+  --color-info: #40c4ff;
+  --color-border: #2a2a3a;
+  --color-border-light: rgba(73, 72, 71, 0.15);
+  /* VIP gradients */
+  --gradient-diamond: linear-gradient(90deg, #ff4fff, #fcc025);
+  --gradient-gold: linear-gradient(90deg, #ffd700, #fcc025);
+  --gradient-bronze: linear-gradient(90deg, #cd7f32, #fcc025);
+}
 html { font-size: var(--base-font-size); }
 html[data-font-size="small"]  { --base-font-size: 16px; }
 html[data-font-size="medium"] { --base-font-size: 18px; }
@@ -14,8 +36,8 @@ html[data-font-size="large"]  { --base-font-size: 20px; }
 body {
   margin: 0;
   font-family: 'Manrope', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
-  background-color: #0e0e0e;
-  color: #ffffff;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -45,6 +67,17 @@ body {
 @layer components {
   .app-shell {
     @apply mx-auto w-full max-w-[1760px] px-4 sm:px-6 lg:px-8 xl:px-10;
+  }
+  /* Responsive content grid — 1 col mobile, 2 col tablet, 3 col desktop */
+  .content-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6;
+  }
+  /* Main + sidebar layout for dashboard-style pages */
+  .layout-sidebar {
+    @apply grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6;
+  }
+  .layout-main-wide {
+    @apply grid grid-cols-1 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_1fr_320px] gap-6;
   }
 }
 
