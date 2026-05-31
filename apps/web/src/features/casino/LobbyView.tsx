@@ -248,7 +248,7 @@ export default function LobbyView() {
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">經驗等級</p>
-                  <span className="rounded-lg bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-400">{vipLevel}</span>
+                  <span className="rounded-lg px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white" style={{ background: 'var(--gradient-diamond)' }}>{vipLevel}</span>
                 </div>
                 <p className="text-3xl font-black italic text-[#fcc025] mt-1">
                   Lv.{profileData.level}{' '}
@@ -371,8 +371,8 @@ export default function LobbyView() {
               {t('lobby.info_center')}
             </h4>
             <div className="mt-4 space-y-3">
-              <Link to="/app/info?tab=vip" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-[#fcc025]/40">
-                <Crown className="h-5 w-5 text-[#fcc025]" />
+              <Link to="/app/info?tab=vip" className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-accent/40" style={{ background: 'linear-gradient(135deg, rgba(255,79,255,0.08), rgba(252,192,37,0.08))' }}>
+                <Crown className="h-5 w-5 text-accent" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.vip_levels')}</p>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
@@ -382,8 +382,8 @@ export default function LobbyView() {
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
               </Link>
               
-              <Link to="/app/info?tab=odds" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-emerald-400/40">
-                <Dice5 className="h-5 w-5 text-emerald-400" />
+              <Link to="/app/info?tab=odds" className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-success/40">
+                <Dice5 className="h-5 w-5 text-success" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.game_odds')}</p>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
@@ -393,8 +393,8 @@ export default function LobbyView() {
                 <ChevronRight className="h-4 w-4 text-[#adaaaa]" />
               </Link>
               
-              <Link to="/app/info?tab=items" className="flex items-center gap-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-3 transition-colors hover:border-purple-400/40">
-                <Package className="h-5 w-5 text-purple-400" />
+              <Link to="/app/info?tab=items" className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-info/40">
+                <Package className="h-5 w-5 text-info" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.items_catalog')}</p>
                   <p className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">

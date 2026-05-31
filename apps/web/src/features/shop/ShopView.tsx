@@ -405,7 +405,7 @@ export default function ShopView() {
   }), [items, ownedAvatars, ownedTitles, invItems, purchasedBundles]);
 
   return (
-    <div className="min-h-screen text-white font-manrope-emoji pb-32" style={{ backgroundColor: 'var(--color-bg)' }}>
+    <div className="min-h-screen text-white font-manrope-emoji pb-32 bg-surface">
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-3">
@@ -440,7 +440,7 @@ export default function ShopView() {
 
       <main className="pt-28 app-shell">
         {/* Balance — full width at top */}
-        <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between mb-6">
+        <section className="bg-card rounded-2xl p-4 border border-border flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#fcc025]" />
             <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
