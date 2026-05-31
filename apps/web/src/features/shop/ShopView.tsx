@@ -438,7 +438,8 @@ export default function ShopView() {
         </div>
       </header>
 
-      <main className="pt-28 app-shell space-y-6">
+      <main className="pt-28 app-shell">
+        <div className="content-grid">
         <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#fcc025]" />
@@ -934,6 +935,7 @@ export default function ShopView() {
         </section>
         )}
 
+        </div>
       </main>
 
       {msg && (
