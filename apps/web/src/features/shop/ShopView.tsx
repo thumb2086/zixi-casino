@@ -406,32 +406,32 @@ export default function ShopView() {
 
   return (
     <div className="min-h-screen text-white font-manrope-emoji pb-32 bg-surface">
-      <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-3">
-            <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+            <Link to="/app" className="text-secondary transition-colors hover:text-accent">
               <ChevronLeft size={24} />
             </Link>
-            <ShoppingBag className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">商店</h1>
+            <ShoppingBag className="text-accent" />
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">商店</h1>
           </div>
         </div>
         <div className="flex app-shell gap-4">
           <button
             onClick={() => setTab('shop')}
-            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
+            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
             商城
           </button>
           <button
             onClick={() => setTab('pawn')}
-            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
+            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
             當舖
           </button>
           <button
             onClick={() => setTab('market')}
-            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'market' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
+            className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'market' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
             交易市場
           </button>
@@ -442,35 +442,35 @@ export default function ShopView() {
         {/* Balance — full width at top */}
         <section className="bg-card rounded-2xl p-4 border border-border flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Coins size={18} className="text-[#fcc025]" />
-            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">ZXC 餘額</span>
+            <Coins size={18} className="text-accent" />
+            <span className="text-sm font-black uppercase tracking-widest text-secondary">ZXC 餘額</span>
           </div>
-            <span className="text-lg font-black italic text-[#fcc025]">{formatBalance(balance, numberMode)}</span>
+            <span className="text-lg font-black italic text-accent">{formatBalance(balance, numberMode)}</span>
         </section>
 
         <div className="content-grid">
         {/* YJC Exchange */}
-        <section className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+        <section className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">💎</span>
-            <span className="text-sm font-black uppercase tracking-widest text-[#adaaaa]">佑戩幣 YJC</span>
+            <span className="text-sm font-black uppercase tracking-widest text-secondary">佑戩幣 YJC</span>
           </div>
-          <div className="bg-[#0e0e0e] rounded-xl p-4 mb-4">
+          <div className="bg-surface rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-bold text-[#adaaaa]">可用 YJC</span>
-              <span className="text-sm font-black text-[#4fc3f7]">{formatBalance(yjcBalance, numberMode)}</span>
+              <span className="text-xs font-bold text-secondary">可用 YJC</span>
+              <span className="text-sm font-black text-info">{formatBalance(yjcBalance, numberMode)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#adaaaa]">可用 ZXC</span>
-              <span className="text-sm font-black text-[#fcc025]">{formatBalance(balance, numberMode)}</span>
+              <span className="text-xs font-bold text-secondary">可用 ZXC</span>
+              <span className="text-sm font-black text-accent">{formatBalance(balance, numberMode)}</span>
             </div>
           </div>
-          <div className="text-center text-[10px] font-bold text-[#adaaaa] mb-4 tracking-wider">
+          <div className="text-center text-[10px] font-bold text-secondary mb-4 tracking-wider">
             1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXC（固定匯率）
           </div>
 
           {/* ZXC → YJC */}
-          <div className="rounded-xl bg-[#0e0e0e] p-4 mb-3">
+          <div className="rounded-xl bg-surface p-4 mb-3">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-black uppercase tracking-widest text-white">用 ZXC 購買 YJC</span>
             </div>
@@ -480,9 +480,9 @@ export default function ShopView() {
                 placeholder="輸入 YJC 數量"
                 value={convertZxc}
                 onChange={e => setConvertZxc(e.target.value)}
-                className="flex-1 bg-[#1a1919] text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-[#494847]/30 outline-none focus:border-[#4fc3f7] placeholder:text-[#494847] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="flex-1 bg-card text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-border/30 outline-none focus:border-[#4fc3f7] placeholder:text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="shrink-0 text-xs font-bold text-[#4fc3f7] whitespace-nowrap">
+              <span className="shrink-0 text-xs font-bold text-info whitespace-nowrap">
                 ≈ {formatNumber(parseFloat(convertZxc || '0') * CONVERSION_RATE, numberMode)} ZXC
               </span>
             </div>
@@ -496,7 +496,7 @@ export default function ShopView() {
           </div>
 
           {/* YJC → ZXC */}
-          <div className="rounded-xl bg-[#0e0e0e] p-4">
+          <div className="rounded-xl bg-surface p-4">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-black uppercase tracking-widest text-white">用 YJC 換回 ZXC</span>
             </div>
@@ -506,16 +506,16 @@ export default function ShopView() {
                 placeholder="YJC 數量"
                 value={convertYjc}
                 onChange={e => setConvertYjc(e.target.value)}
-                className="flex-1 bg-[#1a1919] text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-[#494847]/30 outline-none focus:border-[#fcc025] placeholder:text-[#494847] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="flex-1 bg-card text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-border/30 outline-none focus:border-accent placeholder:text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="shrink-0 text-xs font-bold text-[#fcc025] whitespace-nowrap">
+              <span className="shrink-0 text-xs font-bold text-accent whitespace-nowrap">
                 ≈ {formatNumber(parseFloat(convertYjc || '0') * CONVERSION_RATE, numberMode)} ZXC
               </span>
             </div>
             <button
               onClick={handleConvertZxcFromYjc}
               disabled={converting || !convertYjc || !sessionId}
-              className="mt-2 w-full rounded-xl bg-[#fcc025] py-2.5 text-xs font-black uppercase tracking-widest text-black transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
+              className="mt-2 w-full rounded-xl bg-accent py-2.5 text-xs font-black uppercase tracking-widest text-black transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
             >
               {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : '確認換回 ZXC'}
             </button>
@@ -524,9 +524,9 @@ export default function ShopView() {
 
         {tab === 'shop' && (
           <>
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
+          <section className="bg-card rounded-2xl p-6 border border-accent/20">
           <div className="flex items-center gap-2 mb-4">
-            <Gift size={16} className="text-[#fcc025]" />
+            <Gift size={16} className="text-accent" />
             <h2 className="text-sm font-black uppercase tracking-widest text-white">寶箱</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -536,11 +536,11 @@ export default function ShopView() {
               const discount = qty >= 10 ? 0.10 : qty >= 5 ? 0.05 : 0;
               const unitPrice = Math.round(chest.price * (1 - discount));
               return (
-                <div key={chest.id} className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20 flex flex-col">
-                  <Gift className="w-8 h-8 mx-auto mb-2 text-[#fcc025]" />
+                <div key={chest.id} className="bg-surface rounded-xl p-4 border border-border/20 flex flex-col">
+                  <Gift className="w-8 h-8 mx-auto mb-2 text-accent" />
                   <p className="text-sm font-bold text-white text-center truncate">{chest.name}</p>
                   <div className="flex items-center justify-center gap-2 mt-2">
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String(Math.max(1, (parseInt(p[chest.id] || '1', 10) || 1) - 1)) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">−</button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String(Math.max(1, (parseInt(p[chest.id] || '1', 10) || 1) - 1)) }))} className="text-accent font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-card">−</button>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -550,18 +550,18 @@ export default function ShopView() {
                         const v = parseInt(e.target.value, 10);
                         if (!v || v < 1) setChestQty(p => ({ ...p, [chest.id]: '1' }));
                       }}
-                      className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded text-center text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]"
+                      className="w-12 bg-surface border border-border/40 rounded text-center text-white text-xs font-bold focus:outline-none focus:border-accent"
                     />
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String((parseInt(p[chest.id] || '1', 10) || 1) + 1) }))} className="text-[#fcc025] font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-[#1a1919]">+</button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String((parseInt(p[chest.id] || '1', 10) || 1) + 1) }))} className="text-accent font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-card">+</button>
                   </div>
-                  <p className="text-center text-xs text-[#adaaaa] mt-2">
+                  <p className="text-center text-xs text-secondary mt-2">
                     {formatNumber(qty * unitPrice, numberMode)} ZXC
                     {discount > 0 && <span className="text-emerald-400 ml-1">-{discount * 100}%</span>}
                   </p>
                   <button
                     onClick={() => handleBuyChest(chest.id, qty)}
                     disabled={boughtHere}
-                    className="mt-2 w-full bg-[#fcc025] text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
+                    className="mt-2 w-full bg-accent text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
                   >
                     {boughtHere ? '購買中...' : '購買'}
                   </button>
@@ -571,22 +571,22 @@ export default function ShopView() {
           </div>
         </section>
 
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+        <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-black uppercase tracking-widest text-white">商城商品</h2>
-            <button onClick={fetchItems} className="text-[#adaaaa] hover:text-white transition-colors">
+            <button onClick={fetchItems} className="text-secondary hover:text-white transition-colors">
               <RefreshCw size={14} />
             </button>
           </div>
 
           {loading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 size={20} className="animate-spin text-[#fcc025]" />
+              <Loader2 size={20} className="animate-spin text-accent" />
             </div>
           )}
 
           {!loading && visibleItems.length === 0 && (
-            <p className="text-sm text-[#adaaaa] text-center py-8">目前暫無商品</p>
+            <p className="text-sm text-secondary text-center py-8">目前暫無商品</p>
           )}
 
           <div className="space-y-3">
@@ -598,11 +598,11 @@ export default function ShopView() {
               const hasDiscount = bundle && totalValue > 0 && price < totalValue;
 
               return (
-                <div key={item.itemId} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                <div key={item.itemId} className="flex items-center gap-4 bg-surface rounded-xl p-4 border border-border/20">
                   <div className="text-2xl shrink-0">{item.icon || '📦'}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{item.name}</p>
-                    <p className="text-sm text-[#adaaaa] truncate">{item.description || ''}</p>
+                    <p className="text-sm text-secondary truncate">{item.description || ''}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-sm font-bold uppercase" style={{ color: RARITY_COLORS[item.rarity] || '#b0b0b0' }}>
                         {item.rarity}
@@ -631,10 +631,10 @@ export default function ShopView() {
                               <div key={i} className="flex items-center gap-1.5 text-sm">
                                 <span className="shrink-0">{info?.icon || '•'}</span>
                                 <span className="text-white font-medium">{info?.name || sub.id}</span>
-                                {(sub.qty || 1) > 1 && <span className="text-[#adaaaa]">×{sub.qty}</span>}
+                                {(sub.qty || 1) > 1 && <span className="text-secondary">×{sub.qty}</span>}
                                 {computedValue != null ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{formatNumber(computedValue, numberMode)} ZXC</span>
                                   : hasDiscount && totalValue > 0 && bundle.length > 1 && (
-                                    <span className="text-sm text-[#adaaaa] ml-auto">~{formatNumber(Math.round(totalValue / bundle.length), numberMode)} ZXC</span>
+                                    <span className="text-sm text-secondary ml-auto">~{formatNumber(Math.round(totalValue / bundle.length), numberMode)} ZXC</span>
                                   )}
                               </div>
                             );
@@ -643,7 +643,7 @@ export default function ShopView() {
                     )}
                     {hasDiscount && (
                       <div className="mt-2 flex items-center gap-2">
-                        <span className="text-sm text-[#adaaaa] line-through">{formatNumber(totalValue, numberMode)} ZXC</span>
+                        <span className="text-sm text-secondary line-through">{formatNumber(totalValue, numberMode)} ZXC</span>
                         <span className="text-sm font-black text-emerald-400">{formatNumber(price, numberMode)} ZXC</span>
                         <span className="text-sm font-black bg-emerald-400/20 text-emerald-400 px-1.5 py-0.5 rounded">
                           -{Math.round((1 - price / totalValue) * 100)}%
@@ -652,13 +652,13 @@ export default function ShopView() {
                     )}
                   </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-sm font-black text-[#fcc025]">
+                    <span className="text-sm font-black text-accent">
                       {formatNumber(price, numberMode)} {item.meta?.token === 'yjc' ? 'YJC' : 'ZXC'}
                     </span>
                     <button
                       onClick={() => handleBuy(item.itemId)}
                       disabled={buyingId === item.itemId || !sessionId}
-                      className="text-sm font-black uppercase tracking-widest bg-[#fcc025] text-[#0e0e0e] px-3 py-1.5 rounded-lg disabled:opacity-50"
+                      className="text-sm font-black uppercase tracking-widest bg-accent text-[#0e0e0e] px-3 py-1.5 rounded-lg disabled:opacity-50"
                     >
                       {buyingId === item.itemId ? <Loader2 size={10} className="animate-spin" /> : '購買'}
                     </button>
@@ -673,21 +673,21 @@ export default function ShopView() {
         )}
 
         {tab === 'pawn' && (
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+        <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
-            <Trash2 size={16} className="text-[#fcc025]" />
+            <Trash2 size={16} className="text-accent" />
             <h2 className="text-sm font-black uppercase tracking-widest text-white">當舖</h2>
           </div>
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setPawnTab('items')}
-              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'items' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'items' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}
             >
               道具
             </button>
             <button
               onClick={() => setPawnTab('stocks')}
-              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'stocks' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'stocks' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}
             >
               股票
             </button>
@@ -695,25 +695,25 @@ export default function ShopView() {
 
           {pawnTab === 'items' && (
           <>
-          <p className="text-sm text-[#adaaaa] mb-4">將不需要的道具典當換取 ZXC</p>
+          <p className="text-sm text-secondary mb-4">將不需要的道具典當換取 ZXC</p>
           {invItems.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">暫無可典當的道具</p>
+            <p className="text-sm text-secondary text-center py-8">暫無可典當的道具</p>
           ) : (
             <div className="space-y-3">
               {invItems.map((item: any) => {
                 const def = ALL_ITEMS_LOOKUP[item.id];
                 const price = def ? getItemPawnValue(def) : 0;
                 return (
-                  <div key={item.id} className="flex items-center gap-4 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                  <div key={item.id} className="flex items-center gap-4 bg-surface rounded-xl p-4 border border-border/20">
                     <div className="text-2xl shrink-0">{item.icon || '📦'}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white truncate">{item.name}</p>
-                      <p className="text-sm text-[#adaaaa] truncate">{item.description || ''}</p>
+                      <p className="text-sm text-secondary truncate">{item.description || ''}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-sm font-bold uppercase" style={{ color: RARITY_COLORS[item.rarity] || '#b0b0b0' }}>
                           {item.rarity}
                         </span>
-                        <span className="text-sm text-[#adaaaa]">×{item.quantity}</span>
+                        <span className="text-sm text-secondary">×{item.quantity}</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -736,14 +736,14 @@ export default function ShopView() {
 
           {pawnTab === 'stocks' && (
           <>
-          <p className="text-sm text-[#adaaaa] mb-4">以市價 70% 出售股票，立即變現 ZXC</p>
+          <p className="text-sm text-secondary mb-4">以市價 70% 出售股票，立即變現 ZXC</p>
           {stockHoldings.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">暫無持股</p>
+            <p className="text-sm text-secondary text-center py-8">暫無持股</p>
           ) : (
             <>
             {/* ── Portfolio Summary ── */}
-            <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20 mb-4">
-              <div className="text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-2">持倉總覽</div>
+            <div className="bg-surface rounded-xl p-4 border border-border/20 mb-4">
+              <div className="text-xs font-black uppercase tracking-widest text-secondary mb-2">持倉總覽</div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {(() => {
                   const totalValue = stockHoldings.reduce((s, st) => s + (st.price || 0) * st.qty, 0);
@@ -753,22 +753,22 @@ export default function ShopView() {
                   return (
                     <>
                       <div>
-                        <span className="text-[#adaaaa]">市值</span>
+                        <span className="text-secondary">市值</span>
                         <p className="font-black text-white">{formatNumber(totalValue, numberMode)} ZXC</p>
                       </div>
                       <div>
-                        <span className="text-[#adaaaa]">即時變現</span>
+                        <span className="text-secondary">即時變現</span>
                         <p className="font-black text-emerald-400">{formatNumber(totalPayout, numberMode)} ZXC</p>
                       </div>
                       <div>
-                        <span className="text-[#adaaaa]">損益</span>
+                        <span className="text-secondary">損益</span>
                         <p className={`font-black ${totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {totalPnl >= 0 ? '+' : ''}{formatNumber(totalPnl, numberMode)} ZXC
                         </p>
                       </div>
                       <div>
-                        <span className="text-[#adaaaa]">成本</span>
-                        <p className="font-black text-[#adaaaa]">{formatNumber(totalCost, numberMode)} ZXC</p>
+                        <span className="text-secondary">成本</span>
+                        <p className="font-black text-secondary">{formatNumber(totalCost, numberMode)} ZXC</p>
                       </div>
                     </>
                   );
@@ -786,15 +786,15 @@ export default function ShopView() {
                 const isUp = dayChange >= 0;
                 const history = stockHistory[stock.symbol] || [];
                 return (
-                  <div key={stock.symbol} className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                  <div key={stock.symbol} className="bg-surface rounded-xl p-4 border border-border/20">
                     <div className="flex items-center gap-3">
                       <div className="text-2xl shrink-0">📈</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-white">{stock.symbol}</p>
-                          {stock.name && <span className="text-[10px] text-[#adaaaa] truncate">{stock.name}</span>}
+                          {stock.name && <span className="text-[10px] text-secondary truncate">{stock.name}</span>}
                           {stock.sector && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#adaaaa] bg-[#494847]/20 px-1.5 py-0.5 rounded">{stock.sector}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-[#494847]/20 px-1.5 py-0.5 rounded">{stock.sector}</span>
                           )}
                         </div>
                         <div className="flex items-center gap-3 mt-1">
@@ -802,18 +802,18 @@ export default function ShopView() {
                           <span className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
                             {isUp ? '▲' : '▼'} {Math.abs(dayChange).toFixed(2)}%
                           </span>
-                          <span className="text-xs text-[#adaaaa]">{stock.qty} 股</span>
+                          <span className="text-xs text-secondary">{stock.qty} 股</span>
                         </div>
                         <div className="flex items-center gap-3 mt-0.5">
                           <span className={`text-xs font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             {pnl >= 0 ? '+' : ''}{formatNumber(pnl, numberMode)} ZXC ({pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%)
                           </span>
-                          <span className="text-xs text-[#adaaaa]">均價 {formatNumber(Number(stock.avgPrice || 0), numberMode)}</span>
+                          <span className="text-xs text-secondary">均價 {formatNumber(Number(stock.avgPrice || 0), numberMode)}</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <span className="text-sm font-black text-emerald-400">+{formatNumber(totalPayout, numberMode)} ZXC</span>
-                        <span className="text-[10px] text-[#adaaaa]">(70% 變現)</span>
+                        <span className="text-[10px] text-secondary">(70% 變現)</span>
                         <button
                           onClick={() => handleStockSell(stock.symbol, stock.qty)}
                           disabled={sellingStock === stock.symbol || !sessionId}
@@ -841,16 +841,16 @@ export default function ShopView() {
 
         {/* ── Trading Market Tab ──────────────────────────────────────────────── */}
         {tab === 'market' && (
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+        <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-lg">🏪</span>
             <h2 className="text-sm font-black uppercase tracking-widest text-white">交易市場</h2>
           </div>
           <div className="flex gap-2 mb-4">
             <button onClick={() => { setMarketTab('browse'); fetchListings(); }}
-              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'browse' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}>瀏覽</button>
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'browse' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}>瀏覽</button>
             <button onClick={() => { setMarketTab('mine'); fetchMyListings(); }}
-              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'mine' ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/30 text-[#adaaaa]'}`}>我的掛賣</button>
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'mine' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}>我的掛賣</button>
           </div>
 
           {marketTab === 'browse' && (
@@ -861,9 +861,9 @@ export default function ShopView() {
           </button>
 
           {showSellForm && (
-            <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20 mb-4 space-y-3">
+            <div className="bg-surface rounded-xl p-4 border border-border/20 mb-4 space-y-3">
               <select value={sellItemId} onChange={e => setSellItemId(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]">
+                className="w-full bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent">
                 <option value="">選擇道具</option>
                 {invItems.map((item: any) => (
                   <option key={item.id} value={item.id}>{item.name} (x{item.quantity})</option>
@@ -871,33 +871,33 @@ export default function ShopView() {
               </select>
               <div className="flex gap-2">
                 <input type="number" min={1} placeholder="數量" value={sellQty} onChange={e => setSellQty(parseInt(e.target.value) || 1)}
-                  className="w-20 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]" />
+                  className="w-20 bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent" />
                 <input type="number" min={1} placeholder="價格 (ZXC)" value={sellPrice} onChange={e => setSellPrice(e.target.value)}
-                  className="flex-1 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-[#fcc025]" />
+                  className="flex-1 bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent" />
               </div>
               <button onClick={handleCreateListing} disabled={!sellItemId || !sellPrice}
-                className="w-full bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg disabled:opacity-50">掛賣</button>
+                className="w-full bg-accent text-black font-black text-sm py-2 rounded-lg disabled:opacity-50">掛賣</button>
               {marketMsg && <p className="text-xs font-bold text-emerald-400">{marketMsg}</p>}
             </div>
           )}
 
           {marketLoading ? (
-            <Loader2 size={16} className="animate-spin mx-auto text-[#fcc025]" />
+            <Loader2 size={16} className="animate-spin mx-auto text-accent" />
           ) : listings.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">目前無人在賣</p>
+            <p className="text-sm text-secondary text-center py-8">目前無人在賣</p>
           ) : (
             <div className="space-y-3">
               {listings.map((l: any) => (
-                <div key={l.id} className="flex items-center gap-3 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                <div key={l.id} className="flex items-center gap-3 bg-surface rounded-xl p-4 border border-border/20">
                   <span className="text-2xl shrink-0">{l.itemIcon || '📦'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{l.itemName || l.itemId}</p>
-                    <p className="text-xs text-[#adaaaa]">{l.quantity} 個 · {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
+                    <p className="text-xs text-secondary">{l.quantity} 個 · {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-sm font-black text-[#fcc025]">{formatNumber(Number(l.price), numberMode)} ZXC</span>
+                    <span className="text-sm font-black text-accent">{formatNumber(Number(l.price), numberMode)} ZXC</span>
                     <button onClick={() => handleBuyListing(l.id)} disabled={buyingListing === l.id}
-                      className="text-xs font-black uppercase tracking-widest bg-[#fcc025] text-black px-3 py-1.5 rounded-lg disabled:opacity-50">
+                      className="text-xs font-black uppercase tracking-widest bg-accent text-black px-3 py-1.5 rounded-lg disabled:opacity-50">
                       {buyingListing === l.id ? <Loader2 size={10} className="animate-spin" /> : '購買'}
                     </button>
                   </div>
@@ -910,18 +910,18 @@ export default function ShopView() {
 
           {marketTab === 'mine' && (
           <>
-          <p className="text-sm text-[#adaaaa] mb-4">你可以在這裡管理你的掛賣物品</p>
+          <p className="text-sm text-secondary mb-4">你可以在這裡管理你的掛賣物品</p>
           {myListings.length === 0 ? (
-            <p className="text-sm text-[#adaaaa] text-center py-8">尚無掛賣</p>
+            <p className="text-sm text-secondary text-center py-8">尚無掛賣</p>
           ) : (
             <div className="space-y-3">
               {myListings.map((l: any) => (
-                <div key={l.id} className="flex items-center gap-3 bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+                <div key={l.id} className="flex items-center gap-3 bg-surface rounded-xl p-4 border border-border/20">
                   <span className="text-2xl shrink-0">📦</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white">{l.itemId}</p>
-                    <p className="text-xs text-[#adaaaa]">{l.quantity} 個 · {formatNumber(Number(l.price), numberMode)} ZXC</p>
-                    <span className={`text-[10px] font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-[#adaaaa]'}`}>{l.status}</span>
+                    <p className="text-xs text-secondary">{l.quantity} 個 · {formatNumber(Number(l.price), numberMode)} ZXC</p>
+                    <span className={`text-[10px] font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-secondary'}`}>{l.status}</span>
                   </div>
                   {l.status === 'active' && (
                     <button onClick={() => handleCancelListing(l.id)}
@@ -940,7 +940,7 @@ export default function ShopView() {
       </main>
 
       {msg && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
           {msg}
         </div>
       )}

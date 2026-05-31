@@ -52,23 +52,23 @@ function SwapPanel({
   const toBalance = direction === 'zxc_to_yjc' ? yjcBalance : zxcBalance;
 
   return (
-    <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
+    <section className="bg-card rounded-2xl p-6 border border-accent/20">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('swap.title')}</h2>
-        <p className="text-xs font-black uppercase tracking-widest text-[#fcc025]">
+        <p className="text-xs font-black uppercase tracking-widest text-accent">
           {t('swap.fixed_rate', { rate: ZXC_PER_YJC.toLocaleString() })}
         </p>
       </div>
 
       {!isAuthorized && (
-        <p className="text-sm text-[#adaaaa] mb-4">{t('swap.login_first')}</p>
+        <p className="text-sm text-secondary mb-4">{t('swap.login_first')}</p>
       )}
 
       <form onSubmit={handleSwap} className="space-y-4">
-        <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+        <div className="bg-surface rounded-xl p-4 border border-border/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.pay')}</span>
-            <span className="text-xs text-[#adaaaa]">{t('swap.balance', { amount: formatBalance(fromBalance), symbol: fromSymbol })}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.pay')}</span>
+            <span className="text-xs text-secondary">{t('swap.balance', { amount: formatBalance(fromBalance), symbol: fromSymbol })}</span>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -79,7 +79,7 @@ function SwapPanel({
               className="flex-1 bg-transparent text-2xl font-black italic text-white focus:outline-none"
               placeholder="0"
             />
-            <span className="text-sm font-black text-[#fcc025]">{fromSymbol}</span>
+            <span className="text-sm font-black text-accent">{fromSymbol}</span>
           </div>
         </div>
 
@@ -87,43 +87,43 @@ function SwapPanel({
           <button
             type="button"
             onClick={toggle}
-            className="w-10 h-10 rounded-full bg-[#fcc025] text-[#0e0e0e] flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-accent text-[#0e0e0e] flex items-center justify-center"
             aria-label={t('swap.toggle_direction')}
           >
             <ArrowDownUp size={16} />
           </button>
         </div>
 
-        <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
+        <div className="bg-surface rounded-xl p-4 border border-border/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.receive')}</span>
-            <span className="text-xs text-[#adaaaa]">{t('swap.balance', { amount: formatBalance(toBalance), symbol: toSymbol })}</span>
+            <span className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.receive')}</span>
+            <span className="text-xs text-secondary">{t('swap.balance', { amount: formatBalance(toBalance), symbol: toSymbol })}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="flex-1 text-2xl font-black italic text-[#fcc025]">
+            <span className="flex-1 text-2xl font-black italic text-accent">
               {previewAmount > 0 ? previewAmount.toLocaleString() : '0'}
             </span>
-            <span className="text-sm font-black text-[#fcc025]">{toSymbol}</span>
+            <span className="text-sm font-black text-accent">{toSymbol}</span>
           </div>
         </div>
 
         <button
           type="submit"
           disabled={submitting || !isAuthorized || inputNumeric <= 0 || previewAmount <= 0}
-          className="w-full bg-[#fcc025] text-[#0e0e0e] font-black uppercase tracking-widest text-xs py-3 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full bg-accent text-[#0e0e0e] font-black uppercase tracking-widest text-xs py-3 rounded-xl disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
           {t('swap.confirm')}
         </button>
 
         {result && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
             {result}
           </div>
         )}
       </form>
 
-      <div className="mt-4 text-xs text-[#adaaaa] space-y-1">
+      <div className="mt-4 text-xs text-secondary space-y-1">
         <p>{t('swap.bullet_fixed_rate', { rate: ZXC_PER_YJC.toLocaleString() })}</p>
         <p>{t('swap.bullet_zero_fee')}</p>
         <p>{t('swap.bullet_bidirectional')}</p>
@@ -205,30 +205,30 @@ export default function SwapView() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
+    <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-4">
-            <ArrowDownUp className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">{t('swap.heading')}</h1>
+            <ArrowDownUp className="text-accent" />
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">{t('swap.heading')}</h1>
           </div>
         </div>
       </header>
 
       <main className="pt-12 px-6 max-w-2xl mx-auto space-y-6">
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 mt-16">
+        <section className="bg-card rounded-2xl p-6 border border-border/20 mt-16">
           <div className="flex items-center gap-2 mb-4">
-            <Coins size={18} className="text-[#fcc025]" />
+            <Coins size={18} className="text-accent" />
             <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('swap.balance_title')}</h2>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.zxc_label')}</p>
-              <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(zxcBalance)}</p>
+            <div className="bg-surface rounded-xl p-4 border border-border/20">
+              <p className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.zxc_label')}</p>
+              <p className="text-xl font-black italic mt-2 text-accent">{formatBalance(zxcBalance)}</p>
             </div>
-            <div className="bg-[#0e0e0e] rounded-xl p-4 border border-[#494847]/20">
-              <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{t('swap.yjc_label')}</p>
-              <p className="text-xl font-black italic mt-2 text-[#fcc025]">{formatBalance(yjcBalance)}</p>
+            <div className="bg-surface rounded-xl p-4 border border-border/20">
+              <p className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.yjc_label')}</p>
+              <p className="text-xl font-black italic mt-2 text-accent">{formatBalance(yjcBalance)}</p>
             </div>
           </div>
         </section>

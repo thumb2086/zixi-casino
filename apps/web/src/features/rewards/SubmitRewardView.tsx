@@ -18,7 +18,7 @@ interface Submission {
 }
 
 const STATUS_CONFIG: Record<string, { cls: string; Icon: typeof Clock }> = {
-  pending: { cls: 'text-[#fcc025]', Icon: Clock },
+  pending: { cls: 'text-accent', Icon: Clock },
   approved: { cls: 'text-emerald-400', Icon: Check },
   rejected: { cls: 'text-red-400', Icon: X },
 };
@@ -111,12 +111,12 @@ export default function SubmitRewardView() {
 
   return (
     <div className="min-h-screen bg-[#0f0e0e] pb-20 text-white">
-      <header className="sticky top-0 z-10 border-b border-[#494847]/20 bg-[#0f0e0e]/90 backdrop-blur-sm">
+      <header className="sticky top-0 z-10 border-b border-border/20 bg-[#0f0e0e]/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1a1919] hover:bg-[#262626]"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-card hover:bg-elevated"
           >
             <ArrowLeft size={16} />
           </button>
@@ -125,23 +125,23 @@ export default function SubmitRewardView() {
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
-        <section className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-6">
+        <section className="rounded-2xl border border-border/20 bg-card p-6">
           <h2 className="mb-3 text-sm font-black">{t('submitReward.new_submission')}</h2>
-          <p className="mb-4 text-xs text-[#adaaaa]">
+          <p className="mb-4 text-xs text-secondary">
             {t('submitReward.description')}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">{t('submitReward.type_label')}</label>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-secondary">{t('submitReward.type_label')}</label>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setType('avatar')}
                   className={`flex-1 rounded-lg border px-3 py-2 text-xs font-black transition-all ${
                     type === 'avatar'
-                      ? 'border-[#fcc025] bg-[#fcc025]/10 text-[#fcc025]'
-                      : 'border-[#494847]/30 bg-[#262626] text-[#adaaaa]'
+                      ? 'border-accent bg-accent/10 text-accent'
+                      : 'border-border/30 bg-elevated text-secondary'
                   }`}
                 >
                    {t('submitReward.type_avatar')}
@@ -151,8 +151,8 @@ export default function SubmitRewardView() {
                   onClick={() => setType('title')}
                   className={`flex-1 rounded-lg border px-3 py-2 text-xs font-black transition-all ${
                     type === 'title'
-                      ? 'border-[#fcc025] bg-[#fcc025]/10 text-[#fcc025]'
-                      : 'border-[#494847]/30 bg-[#262626] text-[#adaaaa]'
+                      ? 'border-accent bg-accent/10 text-accent'
+                      : 'border-border/30 bg-elevated text-secondary'
                   }`}
                 >
                   {t('submitReward.type_title')}
@@ -161,7 +161,7 @@ export default function SubmitRewardView() {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-secondary">
                 {t('submitReward.name_label')}
               </label>
               <input
@@ -170,13 +170,13 @@ export default function SubmitRewardView() {
                 onChange={(e) => setName(e.target.value)}
                 maxLength={32}
                 placeholder={type === 'avatar' ? t('submitReward.name_placeholder_avatar') : t('submitReward.name_placeholder_title')}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-sm text-white placeholder:text-[#494847] focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-sm text-white placeholder:text-muted focus:border-accent focus:outline-none"
               />
             </div>
 
             {type === 'avatar' && (
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+                <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-secondary">
                   {t('submitReward.emoji_label')}
                 </label>
                 <input
@@ -185,7 +185,7 @@ export default function SubmitRewardView() {
                   onChange={(e) => setIcon(e.target.value)}
                   maxLength={8}
                   placeholder="🔥"
-                  className="mb-2 w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-2xl text-white placeholder:text-[#494847] focus:border-[#fcc025] focus:outline-none"
+                  className="mb-2 w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-2xl text-white placeholder:text-muted focus:border-accent focus:outline-none"
                 />
                 <div className="flex flex-wrap gap-1">
                   {EMOJI_SUGGESTIONS.map((e) => (
@@ -193,7 +193,7 @@ export default function SubmitRewardView() {
                       key={e}
                       type="button"
                       onClick={() => setIcon(e)}
-                      className="flex h-8 w-8 items-center justify-center rounded-md bg-[#262626] text-lg hover:bg-[#fcc025]/20"
+                      className="flex h-8 w-8 items-center justify-center rounded-md bg-elevated text-lg hover:bg-accent/20"
                     >
                       {e}
                     </button>
@@ -203,7 +203,7 @@ export default function SubmitRewardView() {
             )}
 
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-secondary">
                 {t('submitReward.description_label')}
               </label>
               <textarea
@@ -212,18 +212,18 @@ export default function SubmitRewardView() {
                 maxLength={240}
                 rows={3}
                 placeholder={t('submitReward.description_placeholder')}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-sm text-white placeholder:text-[#494847] focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-sm text-white placeholder:text-muted focus:border-accent focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+              <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-secondary">
                 {t('submitReward.rarity_label')}
               </label>
               <select
                 value={rarity}
                 onChange={(e) => setRarity(e.target.value as any)}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-sm text-white focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-sm text-white focus:border-accent focus:outline-none"
               >
                 <option value="common">{t('submitReward.rarity_common')}</option>
                 <option value="rare">{t('submitReward.rarity_rare')}</option>
@@ -236,28 +236,28 @@ export default function SubmitRewardView() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-sm font-black text-black hover:brightness-110 disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-sm font-black text-black hover:brightness-110 disabled:opacity-50"
             >
               {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
               {t('submitReward.submit_btn')}
             </button>
 
             {resultMsg && (
-              <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
+              <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
                 {resultMsg}
               </div>
             )}
           </form>
         </section>
 
-        <section className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-6">
+        <section className="rounded-2xl border border-border/20 bg-card p-6">
           <h2 className="mb-3 text-sm font-black">{t('submitReward.my_submissions')}</h2>
           {loadingList ? (
-            <div className="flex items-center gap-2 text-xs text-[#adaaaa]">
+            <div className="flex items-center gap-2 text-xs text-secondary">
               <Loader2 size={12} className="animate-spin" /> {t('submitReward.loading')}
             </div>
           ) : mySubmissions.length === 0 ? (
-            <p className="text-xs text-[#adaaaa]">{t('submitReward.no_submissions')}</p>
+            <p className="text-xs text-secondary">{t('submitReward.no_submissions')}</p>
           ) : (
             <ul className="space-y-3">
               {mySubmissions.map((sub) => {
@@ -266,16 +266,16 @@ export default function SubmitRewardView() {
                 return (
                   <li
                     key={sub.submissionId}
-                    className="rounded-lg border border-[#494847]/20 bg-[#262626] p-4"
+                    className="rounded-lg border border-border/20 bg-elevated p-4"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#1a1919] text-2xl">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card text-2xl">
                         {sub.icon || (sub.type === 'avatar' ? '👤' : '🏷')}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-black">{sub.name}</span>
-                          <span className="text-xs font-bold uppercase text-[#adaaaa]">
+                          <span className="text-xs font-bold uppercase text-secondary">
                             {sub.type === 'avatar' ? t('submitReward.type_avatar') : t('submitReward.type_title')}
                           </span>
                           <span className={`flex items-center gap-1 text-xs font-bold uppercase ${st.cls}`}>
@@ -284,10 +284,10 @@ export default function SubmitRewardView() {
                           </span>
                         </div>
                         {sub.description && (
-                          <p className="mt-1 text-xs text-[#adaaaa] break-words">{sub.description}</p>
+                          <p className="mt-1 text-xs text-secondary break-words">{sub.description}</p>
                         )}
                         {sub.reviewNote && (
-                          <p className="mt-1 text-xs text-[#adaaaa]">{t('submitReward.review_note', { note: sub.reviewNote })}</p>
+                          <p className="mt-1 text-xs text-secondary">{t('submitReward.review_note', { note: sub.reviewNote })}</p>
                         )}
                       </div>
                     </div>

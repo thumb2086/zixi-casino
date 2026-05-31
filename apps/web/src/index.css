@@ -91,6 +91,37 @@ body {
   .layout-main-wide {
     @apply grid grid-cols-1 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_1fr_320px] gap-6;
   }
+  /* Section heading with left accent bar */
+  .section-title {
+    @apply flex items-center gap-3 mb-4;
+  }
+  .section-title::before {
+    content: '';
+    @apply block w-1 h-5 rounded-full bg-accent shrink-0;
+  }
+  .section-title-text {
+    @apply text-xs font-black uppercase tracking-widest text-accent;
+  }
+  /* VIP gradient text */
+  .text-gradient-diamond {
+    background: var(--gradient-diamond);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-gold {
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  /* PnL glow */
+  .text-glow-success {
+    text-shadow: 0 0 12px rgba(var(--color-success-rgb), 0.4);
+  }
+  .text-glow-danger {
+    text-shadow: 0 0 12px rgba(var(--color-danger-rgb), 0.4);
+  }
 }
 
 .glass-card {

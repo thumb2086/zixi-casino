@@ -33,39 +33,39 @@ export default function CollectionView() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
+    <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
         <div className="flex items-center gap-3 px-6 py-4 max-w-2xl mx-auto">
-          <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+          <Link to="/app" className="text-secondary transition-colors hover:text-accent">
             <ChevronLeft size={24} />
           </Link>
-          <Archive className="text-[#fcc025]" />
-          <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">{t('collection.title')}</h1>
+          <Archive className="text-accent" />
+          <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">{t('collection.title')}</h1>
         </div>
       </header>
 
       <main className="pt-20 px-6 max-w-2xl mx-auto">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[#fcc025] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
           </div>
         ) : isEmpty ? (
-          <div className="rounded-xl border border-[#494847]/20 bg-[#1a1919] p-12 text-center mt-8">
-            <Archive className="w-12 h-12 mx-auto text-[#494847] mb-4" />
-            <p className="text-sm text-[#adaaaa]">{t('collection.empty')}</p>
-            <p className="text-xs text-[#494847] mt-1">{t('collection.hint')}</p>
+          <div className="rounded-xl border border-border/20 bg-card p-12 text-center mt-8">
+            <Archive className="w-12 h-12 mx-auto text-muted mb-4" />
+            <p className="text-sm text-secondary">{t('collection.empty')}</p>
+            <p className="text-xs text-muted mt-1">{t('collection.hint')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
             {items!.map((item: any) => (
               <div
                 key={item.id}
-                className="rounded-2xl border-2 bg-[#1a1919] p-6 text-center transition-transform hover:scale-[1.02]"
+                className="rounded-2xl border-2 bg-card p-6 text-center transition-transform hover:scale-[1.02]"
                 style={{ borderColor: RARITY_COLORS[item.rarity] || '#494847' }}
               >
                 <div className="text-5xl mb-3">{item.icon || '📦'}</div>
                 <h3 className="font-bold text-sm mb-1">{item.name}</h3>
-                <p className="text-xs text-[#adaaaa]">{item.description || ''}</p>
+                <p className="text-xs text-secondary">{item.description || ''}</p>
                 <span
                   className="inline-block mt-2 text-xs font-bold px-2 py-1 rounded-full"
                   style={{

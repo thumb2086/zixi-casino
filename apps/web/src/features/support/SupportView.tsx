@@ -143,67 +143,67 @@ export default function SupportView() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
+    <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-4">
-            <LifeBuoy className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">{t('support.title')}</h1>
+            <LifeBuoy className="text-accent" />
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">{t('support.title')}</h1>
           </div>
         </div>
       </header>
 
       <main className="pt-24 px-6 max-w-2xl mx-auto space-y-8">
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+        <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
-            <Megaphone size={18} className="text-[#fcc025]" />
+            <Megaphone size={18} className="text-accent" />
             <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('support.announcements_title')}</h2>
           </div>
           {announcementsLoading ? (
-            <div className="flex items-center gap-2 text-[#adaaaa] text-sm"><Loader2 size={14} className="animate-spin" /> {t('support.loading')}</div>
+            <div className="flex items-center gap-2 text-secondary text-sm"><Loader2 size={14} className="animate-spin" /> {t('support.loading')}</div>
           ) : announcements.length === 0 ? (
-            <p className="text-sm text-[#adaaaa]">{t('support.no_announcements')}</p>
+            <p className="text-sm text-secondary">{t('support.no_announcements')}</p>
           ) : (
             <ul className="space-y-3">
               {announcements.slice(0, 3).map((a) => (
-                <li key={a.id} className="border-l-2 border-[#fcc025]/50 pl-3">
+                <li key={a.id} className="border-l-2 border-accent/50 pl-3">
                   <div className="flex items-center gap-2">
-                    {a.isPinned && <span className="text-xs font-black uppercase text-[#fcc025]">{t('support.pinned')}</span>}
+                    {a.isPinned && <span className="text-xs font-black uppercase text-accent">{t('support.pinned')}</span>}
                     <h3 className="text-sm font-bold text-white">{a.title}</h3>
                   </div>
-                  <p className="text-xs text-[#adaaaa] mt-1 whitespace-pre-wrap">{a.content}</p>
+                  <p className="text-xs text-secondary mt-1 whitespace-pre-wrap">{a.content}</p>
                 </li>
               ))}
             </ul>
           )}
         </section>
 
-        <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+        <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
-            <Send size={18} className="text-[#fcc025]" />
+            <Send size={18} className="text-accent" />
             <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('support.submit_ticket_title')}</h2>
           </div>
           {!isAuthorized ? (
-            <p className="text-sm text-[#adaaaa]">{t('support.login_first')}</p>
+            <p className="text-sm text-secondary">{t('support.login_first')}</p>
           ) : (
             <form onSubmit={handleSubmitTicket} className="space-y-3">
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.title_label')}</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.title_label')}</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none"
                   placeholder={t('support.title_placeholder')}
                   maxLength={100}
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.category_label')}</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.category_label')}</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none"
                 >
                   {CATEGORIES(t).map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
@@ -211,22 +211,22 @@ export default function SupportView() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.content_label')}</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.content_label')}</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none min-h-24"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none min-h-24"
                   placeholder={t('support.content_placeholder')}
                   maxLength={2000}
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-[#adaaaa] mb-1">{t('support.contact_label')}</label>
+                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.contact_label')}</label>
                 <input
                   type="text"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm focus:border-[#fcc025]/50 focus:outline-none"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none"
                   placeholder={t('support.contact_placeholder')}
                   maxLength={200}
                 />
@@ -234,13 +234,13 @@ export default function SupportView() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-[#fcc025] text-[#0e0e0e] font-black uppercase tracking-widest text-xs py-3 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full bg-accent text-[#0e0e0e] font-black uppercase tracking-widest text-xs py-3 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                 {t('support.submit_btn')}
               </button>
               {ticketResult && (
-                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
+                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
                   {ticketResult}
                 </div>
               )}

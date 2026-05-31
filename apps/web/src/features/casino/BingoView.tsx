@@ -134,7 +134,7 @@ export const BingoView: React.FC = () => {
       <div className="bingo-grid-wrapper">
         {isRevealing && !animDone && (
           <div className="bingo-reveal-overlay">
-            <div className="text-sm text-[#fcc025] font-bold">{t('casino_game.bingo_rolling')}</div>
+            <div className="text-sm text-accent font-bold">{t('casino_game.bingo_rolling')}</div>
             <div className="bingo-reveal-balls">
               {revealingNumbers.map(n => (
                 <div key={n} className="bingo-reveal-ball">{n}</div>

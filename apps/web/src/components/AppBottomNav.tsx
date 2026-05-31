@@ -17,7 +17,7 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-[90] h-[calc(5rem+env(safe-area-inset-bottom))] border-t border-[#494847]/15 bg-[#0e0e0e]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
+    <nav className="fixed inset-x-0 bottom-0 z-[90] h-[calc(5rem+env(safe-area-inset-bottom))] border-t border-border/15 bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
       <div className="app-shell flex h-20 items-center justify-around">
         {items.map((item) => {
           const Icon = item.icon;
@@ -28,7 +28,7 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
               key={item.key}
               to={item.to}
               className={`flex min-w-0 flex-1 flex-col items-center justify-center px-1 transition-all ${
-                active ? 'text-[#fcc025] drop-shadow-[0_0_8px_rgba(252,192,37,0.4)]' : 'text-[#adaaaa] hover:text-white'
+                active ? 'text-accent drop-shadow-[0_0_8px_rgba(252,192,37,0.4)]' : 'text-secondary hover:text-white'
               }`}
             >
               <Icon size={24} className="mb-1" />

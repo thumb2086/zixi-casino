@@ -193,78 +193,78 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
 
   return (
     <>
-      <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 flex items-center gap-6">
+      <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6">
         <div className="flex-1 min-w-0">
           <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
-          <p className="text-xs font-bold text-[#adaaaa] truncate mt-1">{displayAddress || ''}</p>
+          <p className="text-xs font-bold text-secondary truncate mt-1">{displayAddress || ''}</p>
         </div>
         <div className="text-right">
-          <p className="text-xl font-black italic text-[#fcc025]">{nf(balance || 0)} ZXC</p>
+          <p className="text-xl font-black italic text-accent">{nf(balance || 0)} ZXC</p>
         </div>
       </section>
 
-      <div className="flex items-center gap-3 bg-[#1a1919] rounded-2xl px-5 py-3 border border-[#494847]/10">
-        <Clock size={14} className="text-[#fcc025]" />
-        <span className="text-[10px] font-bold text-[#adaaaa] uppercase tracking-wider">
+      <div className="flex items-center gap-3 bg-card rounded-2xl px-5 py-3 border border-border/10">
+        <Clock size={14} className="text-accent" />
+        <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
           伺服器運行
         </span>
         <span className="text-xs font-black text-emerald-400 ml-auto">
           {serviceStats?.serverUptimeLabel || '...'}
         </span>
-        <span className="text-[10px] font-bold text-[#adaaaa]">
+        <span className="text-[10px] font-bold text-secondary">
           {serviceStats?.uptime ? `可用 ${serviceStats.uptime}` : ''}
         </span>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+        <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
-            <Coins size={14} className="text-[#fcc025]" />
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">總交易</span>
+            <Coins size={14} className="text-accent" />
+            <span className="text-xs font-black uppercase tracking-widest text-secondary">總交易</span>
           </div>
-          <p className="text-xl font-black italic text-[#fcc025]">{nf(summary?.total ?? 0)}</p>
+          <p className="text-xl font-black italic text-accent">{nf(summary?.total ?? 0)}</p>
         </div>
-        <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+        <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={14} className="text-emerald-400" />
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功</span>
+            <span className="text-xs font-black uppercase tracking-widest text-secondary">成功</span>
           </div>
           <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
         </div>
-        <div className="bg-[#1a1919] rounded-2xl p-5 border border-[#494847]/20">
+        <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
-            <HeartPulse size={14} className="text-[#fcc025]" />
-            <span className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">成功率</span>
+            <HeartPulse size={14} className="text-accent" />
+            <span className="text-xs font-black uppercase tracking-widest text-secondary">成功率</span>
           </div>
-          <p className="text-xl font-black italic text-[#fcc025]">{summary?.total ? `${successRatePct}%` : '0%'}</p>
+          <p className="text-xl font-black italic text-accent">{summary?.total ? `${successRatePct}%` : '0%'}</p>
         </div>
       </div>
 
-      <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+      <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
           最新市場與錢包動態
         </p>
         <div className="mt-4 space-y-3">
-          {isLoading && <div className="text-sm text-[#adaaaa]">{t('common.loading')}</div>}
+          {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}
           {!isLoading && items.length === 0 && (
-            <div className="rounded-xl border border-dashed border-[#494847]/20 p-4 text-sm text-[#adaaaa]">
+            <div className="rounded-xl border border-dashed border-border/20 p-4 text-sm text-secondary">
               {t('transactions.empty')}
             </div>
           )}
           {items.map((item: DashboardTx) => (
-            <div key={item.id} className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
+            <div key={item.id} className="rounded-xl border border-border/10 bg-surface p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-black tracking-[0.14em] text-white">
                     {`${t('txType.' + item.type, item.type)} • ${nf(Number(item.amount))} ${item.tokenSymbol || 'ZXC'}`}
                   </p>
-                  <p className="mt-1 text-xs font-bold tracking-[0.12em] text-[#adaaaa]">
+                  <p className="mt-1 text-xs font-bold tracking-[0.12em] text-secondary">
                     {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'…' : String(item.roundId)}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs font-bold text-[#fcc025]">{t('txStatus.' + item.status, item.status)}</p>
-                  <p className="mt-1 text-xs font-bold text-[#adaaaa]">{new Date(item.createdAt).toLocaleString('zh-TW')}</p>
+                  <p className="text-xs font-bold text-accent">{t('txStatus.' + item.status, item.status)}</p>
+                  <p className="mt-1 text-xs font-bold text-secondary">{new Date(item.createdAt).toLocaleString('zh-TW')}</p>
                 </div>
               </div>
             </div>
@@ -315,7 +315,7 @@ export default function AnnouncementCenter() {
   const getBadgeStyle = (type: AnnouncementItem['type']) => {
     switch (type) {
       case 'urgent': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'warning': return 'bg-[#fcc025]/10 text-[#fcc025] border-[#fcc025]/20';
+      case 'warning': return 'bg-accent/10 text-accent border-accent/20';
       default: return 'bg-white/10 text-white border-white/20';
     }
   };
@@ -343,22 +343,22 @@ export default function AnnouncementCenter() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
+    <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-4">
-            <Megaphone className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">公告與活動</h1>
+            <Megaphone className="text-accent" />
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">公告與活動</h1>
           </div>
         </div>
       </header>
 
       <main className="pt-24 px-6 max-w-2xl mx-auto space-y-8">
         {/* Tabs */}
-        <div className="flex bg-[#1a1919] p-1.5 rounded-xl border border-[#494847]/20">
+        <div className="flex bg-card p-1.5 rounded-xl border border-border/20">
           {(['ANNOUNCEMENT', 'EVENTS', 'TRANSACTIONS'] as const).map((entry) => (
             <button key={entry} type="button" onClick={() => setFilter(entry)}
-              className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === entry ? 'bg-[#fcc025] text-black shadow-lg' : 'text-[#adaaaa] hover:text-white'}`}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === entry ? 'bg-accent text-black shadow-lg' : 'text-secondary hover:text-white'}`}
             >
               {entry === 'ANNOUNCEMENT' ? '公告' : entry === 'EVENTS' ? '活動' : '動態'}
             </button>
@@ -379,7 +379,7 @@ export default function AnnouncementCenter() {
               <h2 className="text-2xl font-black italic tracking-tighter uppercase mb-2">
                 {featured?.title || t('announcement.no_active')}
               </h2>
-              <p className="text-xs text-[#adaaaa] font-bold uppercase leading-relaxed mb-6">
+              <p className="text-xs text-secondary font-bold uppercase leading-relaxed mb-6">
                 {featured?.content || t('announcement.feed_online')}
               </p>
               <div className="text-xs font-black uppercase tracking-widest text-white/70">
@@ -388,18 +388,18 @@ export default function AnnouncementCenter() {
             </section>
 
             <div className="flex items-center gap-2 px-2">
-              <div className="w-1 h-3 bg-[#fcc025] rounded-full" />
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">{t('announcement.system_alerts')}</h3>
+              <div className="w-1 h-3 bg-accent rounded-full" />
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">{t('announcement.system_alerts')}</h3>
             </div>
 
             <section className="space-y-4">
               {loading && (
-                <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+                <div className="bg-card rounded-xl p-5 border border-border/10 text-xs font-bold uppercase tracking-widest text-secondary">
                   {t('announcement.loading')}
                 </div>
               )}
               {!loading && items.length === 0 && (
-                <div className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+                <div className="bg-card rounded-xl p-5 border border-border/10 text-xs font-bold uppercase tracking-widest text-secondary">
                   {t('announcement.no_category')}
                 </div>
               )}
@@ -407,7 +407,7 @@ export default function AnnouncementCenter() {
                 const isExpanded = expandedId === item.id;
                 return (
                   <div key={item.id} onClick={() => setExpandedId(isExpanded ? null : item.id)}
-                    className="bg-[#1a1919] rounded-xl p-5 border border-[#494847]/10 group hover:bg-[#201f1f] transition-all cursor-pointer"
+                    className="bg-card rounded-xl p-5 border border-border/10 group hover:bg-[#201f1f] transition-all cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex flex-col gap-3 flex-1 min-w-0">
@@ -415,14 +415,14 @@ export default function AnnouncementCenter() {
                           <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm border ${getBadgeStyle(item.type)}`}>
                             {typeLabel(item.type)}
                           </span>
-                          <span className="text-xs font-bold text-[#494847] uppercase tracking-widest">{formatRelativeTime(item.createdAt, t)}</span>
+                          <span className="text-xs font-bold text-muted uppercase tracking-widest">{formatRelativeTime(item.createdAt, t)}</span>
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-[#fcc025] transition-colors">{item.title}</h4>
-                          <p className={`text-xs text-[#adaaaa] font-bold mt-1 ${isExpanded ? '' : 'line-clamp-2'}`}>{item.content}</p>
+                          <h4 className="text-sm font-bold uppercase tracking-tight text-white group-hover:text-accent transition-colors">{item.title}</h4>
+                          <p className={`text-xs text-secondary font-bold mt-1 ${isExpanded ? '' : 'line-clamp-2'}`}>{item.content}</p>
                         </div>
                       </div>
-                      <ChevronDown size={16} className={`shrink-0 text-[#494847] group-hover:text-[#fcc025] transition-all duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
+                      <ChevronDown size={16} className={`shrink-0 text-muted group-hover:text-accent transition-all duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
                     </div>
                   </div>
                 );
@@ -438,37 +438,37 @@ export default function AnnouncementCenter() {
         {filter === 'EVENTS' && (
           <section className="space-y-4">
             {claimMsg && (
-              <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white whitespace-nowrap">
+              <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white whitespace-nowrap">
                 {claimMsg}
               </div>
             )}
             {campaignsLoading ? (
-              <div className="flex items-center justify-center py-12"><Loader2 className="animate-spin text-[#fcc025]" size={24} /></div>
+              <div className="flex items-center justify-center py-12"><Loader2 className="animate-spin text-accent" size={24} /></div>
             ) : campaigns.length === 0 ? (
-              <div className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] px-4 py-8 text-center text-sm text-[#adaaaa]">
+              <div className="rounded-2xl border border-border/20 bg-card px-4 py-8 text-center text-sm text-secondary">
                 目前沒有進行中的活動
               </div>
             ) : (
               campaigns.map((c) => (
-                <section key={c.campaignId} className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-4">
+                <section key={c.campaignId} className="rounded-2xl border border-border/20 bg-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h2 className="text-base font-black text-white">{c.title}</h2>
-                      {c.description && <p className="mt-1 text-sm text-[#adaaaa] break-words">{c.description}</p>}
+                      {c.description && <p className="mt-1 text-sm text-secondary break-words">{c.description}</p>}
                     </div>
-                    <Gift size={18} className="shrink-0 text-[#fcc025]" />
+                    <Gift size={18} className="shrink-0 text-accent" />
                   </div>
-                  <div className="mt-3 rounded-lg bg-[#262626] px-3 py-2 text-sm text-[#fcc025]">
+                  <div className="mt-3 rounded-lg bg-elevated px-3 py-2 text-sm text-accent">
                     {formatRewardSummary(c.rewards, t)}
                   </div>
                   {(c.startAt || c.endAt) && (
-                    <p className="mt-2 text-sm text-[#adaaaa]">
+                    <p className="mt-2 text-sm text-secondary">
                       {c.startAt ? new Date(c.startAt).toLocaleString() : '即刻'} ~ {c.endAt ? new Date(c.endAt).toLocaleString() : '無期限'}
                     </p>
                   )}
                   <button type="button" disabled={Boolean(c.claimed) || !sessionId}
                     onClick={() => claim(c.campaignId)}
-                    className="mt-3 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-110"
+                    className="mt-3 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-110"
                   >
                     {c.claimed ? '已領取' : !sessionId ? '請先登入' : '領取獎勵'}
                   </button>
@@ -481,9 +481,9 @@ export default function AnnouncementCenter() {
 
       {successBundle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={() => setSuccessBundle(null)}>
-          <div className="w-full max-w-sm rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm rounded-2xl border border-border/20 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-[#fcc025]">🎉 領取成功</h3>
+              <h3 className="text-base font-black text-accent">🎉 領取成功</h3>
               <button type="button" onClick={() => setSuccessBundle(null)} className="rounded-lg p-1 hover:bg-white/10"><X size={16} /></button>
             </div>
             <div className="mt-4 space-y-2 text-sm text-white">
@@ -499,7 +499,7 @@ export default function AnnouncementCenter() {
                 <p key={i}>稱號：{t.name || resolveRewardName(t.id || t) || t.id || t}</p>
               ))}
             </div>
-            <button type="button" onClick={() => setSuccessBundle(null)} className="mt-4 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-sm font-black text-black">確定</button>
+            <button type="button" onClick={() => setSuccessBundle(null)} className="mt-4 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black">確定</button>
           </div>
         </div>
       )}

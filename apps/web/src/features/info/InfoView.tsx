@@ -43,17 +43,17 @@ export default function InfoView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+            <Link to="/app" className="text-secondary transition-colors hover:text-accent">
               <ChevronLeft size={24} />
             </Link>
-            <Sparkles className="text-[#fcc025]" />
+            <Sparkles className="text-accent" />
             <div>
-              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">說明中心</h1>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">{activeLabel}</p>
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">說明中心</h1>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">{activeLabel}</p>
             </div>
           </div>
         </div>
@@ -69,8 +69,8 @@ export default function InfoView() {
                 onClick={() => handleTabChange(tab.id)}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 transition-all ${
                   activeTab === tab.id
-                    ? 'bg-[#fcc025] text-black'
-                    : 'border border-[#494847]/20 bg-[#1a1919] text-[#adaaaa]'
+                    ? 'bg-accent text-black'
+                    : 'border border-border/20 bg-card text-secondary'
                 }`}
               >
                 <Icon size={18} />

@@ -106,7 +106,7 @@ export const BluffDiceView: React.FC = () => {
 
       <div className="bluff-controls">
         <div className="flex items-center gap-2 w-full mb-2">
-          <span className="text-xs text-[#adaaaa]">{t('casino_game.bluff_predict')}</span>
+          <span className="text-xs text-secondary">{t('casino_game.bluff_predict')}</span>
           <input
             type="range"
             min={5}
