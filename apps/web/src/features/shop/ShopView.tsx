@@ -405,7 +405,7 @@ export default function ShopView() {
   }), [items, ownedAvatars, ownedTitles, invItems, purchasedBundles]);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
+    <div className="min-h-screen text-white font-manrope-emoji pb-32" style={{ backgroundColor: 'var(--color-bg)' }}>
       <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
         <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
           <div className="flex items-center gap-3">
@@ -416,7 +416,7 @@ export default function ShopView() {
             <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">商店</h1>
           </div>
         </div>
-        <div className="flex max-w-2xl mx-auto px-6 gap-4">
+        <div className="flex app-shell gap-4">
           <button
             onClick={() => setTab('shop')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-[#fcc025] border-b-2 border-[#fcc025]' : 'text-[#adaaaa]'}`}
@@ -438,7 +438,7 @@ export default function ShopView() {
         </div>
       </header>
 
-      <main className="pt-28 px-6 max-w-2xl mx-auto space-y-6">
+      <main className="pt-28 app-shell space-y-6">
         <section className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#fcc025]" />
