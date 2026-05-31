@@ -88,6 +88,7 @@ export default function ChatRoom() {
               <div className={`max-w-[80%] rounded-xl px-3 py-2 ${isOwn ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 rounded-bl-sm'}`}>
                 {!isOwn && <p className="text-xs font-bold text-yellow-500 mb-0.5">{m.displayName}</p>}
                 <p className="text-xs leading-relaxed">{m.text}</p>
+                {m.createdAt && <p className="text-[9px] text-slate-500 mt-0.5 text-right">{new Date(m.createdAt).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}</p>}
               </div>
             </div>
           );
