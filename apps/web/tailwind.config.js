@@ -9,6 +9,17 @@ export default {
       colors: {
         primary: '#fcc025',
         background: '#0e0e0e',
+        surface: 'rgba(var(--color-bg-surface-rgb), <alpha-value>)',
+        card: 'rgba(var(--color-bg-card-rgb), <alpha-value>)',
+        elevated: 'rgba(var(--color-bg-elevated-rgb), <alpha-value>)',
+        accent: 'rgba(var(--color-accent-rgb), <alpha-value>)',
+        secondary: 'rgba(var(--color-text-secondary-rgb), <alpha-value>)',
+        muted: 'rgba(var(--color-text-muted-rgb), <alpha-value>)',
+        success: 'rgba(var(--color-success-rgb), <alpha-value>)',
+        danger: 'rgba(var(--color-danger-rgb), <alpha-value>)',
+        warning: 'rgba(var(--color-warning-rgb), <alpha-value>)',
+        info: 'rgba(var(--color-info-rgb), <alpha-value>)',
+        border: 'rgba(var(--color-border-rgb), <alpha-value>)',
       },
       fontFamily: {
         sans: ['Manrope', 'sans-serif'],

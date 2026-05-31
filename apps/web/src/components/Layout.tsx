@@ -23,7 +23,7 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-bg)' }}>
+    <div className="min-h-screen flex flex-col bg-surface">
       <main className="app-shell flex flex-1 pt-20 pb-24 lg:pt-24 lg:pb-10">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -46,12 +46,12 @@ export default function Layout() {
                 }`}
               >
                 <div className="w-96 shrink-0 flex flex-col gap-3">
-                  <button
-                    onClick={() => setChatOpen(!chatOpen)}
-                    className="flex items-center gap-2 rounded-xl border border-[#494847]/20 bg-[#1a1919] px-4 py-2.5 text-left hover:bg-[#1a1919]/80 transition-colors"
-                  >
-                    <MessageCircle size={16} className="text-blue-400 shrink-0" />
-                    <span className="text-xs font-black uppercase tracking-widest text-blue-400">{t('layout.global_chat')}</span>
+                    <button
+                      onClick={() => setChatOpen(!chatOpen)}
+                      className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-left hover:bg-elevated transition-colors"
+                    >
+                      <MessageCircle size={16} className="text-info shrink-0" />
+                      <span className="text-xs font-black uppercase tracking-widest text-info">{t('layout.global_chat')}</span>
                   </button>
                   <ChatRoom />
                   <footer className="py-4 text-center">

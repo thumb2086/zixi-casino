@@ -6,26 +6,38 @@
 
 :root {
   --base-font-size: 18px;
-  /* Color system */
-  --color-bg: #0a0a0f;
-  --color-bg-card: #14141f;
-  --color-bg-elevated: #1a1925;
-  --color-bg-surface: #0e0e0e;
+  /* Color system — rgb triplets for Tailwind opacity support */
+  --color-bg-rgb: 10, 10, 15;
+  --color-bg: rgb(var(--color-bg-rgb));
+  --color-bg-card-rgb: 20, 20, 31;
+  --color-bg-card: rgb(var(--color-bg-card-rgb));
+  --color-bg-elevated-rgb: 26, 25, 37;
+  --color-bg-elevated: rgb(var(--color-bg-elevated-rgb));
+  --color-bg-surface-rgb: 14, 14, 14;
+  --color-bg-surface: rgb(var(--color-bg-surface-rgb));
   --color-text-primary: #f0f0f0;
-  --color-text-secondary: #888899;
-  --color-text-muted: #494847;
-  --color-accent: #fcc025;
+  --color-text-secondary-rgb: 136, 136, 153;
+  --color-text-secondary: rgb(var(--color-text-secondary-rgb));
+  --color-text-muted-rgb: 73, 72, 71;
+  --color-text-muted: rgb(var(--color-text-muted-rgb));
+  --color-accent-rgb: 252, 192, 37;
+  --color-accent: rgb(var(--color-accent-rgb));
   --color-accent-dim: rgba(252, 192, 37, 0.15);
-  --color-success: #00e676;
-  --color-danger: #ff5252;
-  --color-warning: #ffab40;
-  --color-info: #40c4ff;
-  --color-border: #2a2a3a;
+  --color-success-rgb: 0, 230, 118;
+  --color-success: rgb(var(--color-success-rgb));
+  --color-danger-rgb: 255, 82, 82;
+  --color-danger: rgb(var(--color-danger-rgb));
+  --color-warning-rgb: 255, 171, 64;
+  --color-warning: rgb(var(--color-warning-rgb));
+  --color-info-rgb: 64, 196, 255;
+  --color-info: rgb(var(--color-info-rgb));
+  --color-border-rgb: 42, 42, 58;
+  --color-border: rgb(var(--color-border-rgb));
   --color-border-light: rgba(73, 72, 71, 0.15);
   /* VIP gradients */
-  --gradient-diamond: linear-gradient(90deg, #ff4fff, #fcc025);
-  --gradient-gold: linear-gradient(90deg, #ffd700, #fcc025);
-  --gradient-bronze: linear-gradient(90deg, #cd7f32, #fcc025);
+  --gradient-diamond: linear-gradient(90deg, #ff4fff, var(--color-accent));
+  --gradient-gold: linear-gradient(90deg, #ffd700, var(--color-accent));
+  --gradient-bronze: linear-gradient(90deg, #cd7f32, var(--color-accent));
 }
 html { font-size: var(--base-font-size); }
 html[data-font-size="small"]  { --base-font-size: 16px; }
