@@ -252,7 +252,7 @@ export const SlotsView: React.FC = () => {
             <div className="flex gap-1 items-center">
               {AUTO_OPTIONS.map((n) => (
                 <button key={n} onClick={() => setAutoCount(n)}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${autoCount === n ? 'bg-[#fcc025] text-black' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
+                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${autoCount === n ? 'bg-accent text-black' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
                   {n}
                 </button>
               ))}
@@ -268,7 +268,7 @@ export const SlotsView: React.FC = () => {
 
       {skipVisible && (
         <button
-          className="fixed top-4 right-4 z-50 bg-[#fcc025] text-black font-black px-4 py-2 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:bg-[#e6ad03] active:scale-95 transition-all"
+          className="fixed top-4 right-4 z-50 bg-accent text-black font-black px-4 py-2 rounded-xl text-sm uppercase tracking-wider shadow-lg hover:bg-[#e6ad03] active:scale-95 transition-all"
           onClick={skipAnimation}
         >
           快速跳過 ⏭

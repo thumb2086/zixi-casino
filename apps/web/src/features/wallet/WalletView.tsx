@@ -32,10 +32,10 @@ function AssetCard({
   token: string;
 }) {
   return (
-    <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-5 shadow-xl">
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">{label}</p>
+    <div className="rounded-2xl border border-border/10 bg-card p-5 shadow-xl">
+      <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">{label}</p>
       <div className="mt-3 flex items-end justify-between">
-        <p className="text-3xl font-black italic tracking-tight text-[#fcc025]">{value}</p>
+        <p className="text-3xl font-black italic tracking-tight text-accent">{value}</p>
         <span className="text-xs font-bold uppercase tracking-widest text-white">{token}</span>
       </div>
     </div>
@@ -113,21 +113,21 @@ export default function WalletView() {
   }, [canClaimAirdrop, t]);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-40 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-surface pb-40 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <WalletIcon className="text-[#fcc025]" />
-            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">{t('vault.title')}</h1>
+            <WalletIcon className="text-accent" />
+            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">{t('vault.title')}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/app/shop" className="text-xs font-black uppercase tracking-[0.18em] text-[#fcc025]">
+            <Link to="/app/shop" className="text-xs font-black uppercase tracking-[0.18em] text-accent">
               {t('nav.inventory')}
             </Link>
-            <Link to="/app/swap" className="text-xs font-black uppercase tracking-[0.18em] text-[#fcc025]">
+            <Link to="/app/swap" className="text-xs font-black uppercase tracking-[0.18em] text-accent">
               {t('swap.title')}
             </Link>
-            <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+            <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
               {t('nav.feed')}
             </Link>
           </div>
@@ -135,12 +135,12 @@ export default function WalletView() {
       </header>
 
       <main className="app-shell flex flex-col gap-6 pt-24">
-        <section className="rounded-[2rem] border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-8 shadow-[0_0_50px_rgba(252,192,37,0.08)]">
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-[#adaaaa]">{t('vault.total_assets')}</p>
-          <p className="mt-4 text-5xl font-black italic tracking-tighter text-[#fcc025]">
+        <section className="rounded-[2rem] border border-border/10 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-8 shadow-[0_0_50px_rgba(252,192,37,0.08)]">
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-secondary">{t('vault.total_assets')}</p>
+          <p className="mt-4 text-5xl font-black italic tracking-tighter text-accent">
             {formatNumber(totalBalance, numberMode)}
           </p>
-          <div className="mt-4 flex flex-wrap gap-4 text-xs font-bold uppercase tracking-[0.16em] text-[#adaaaa]">
+          <div className="mt-4 flex flex-wrap gap-4 text-xs font-bold uppercase tracking-[0.16em] text-secondary">
             <span>{t('vault.wallet')} {formatNumber(walletOnlyTotal, numberMode)}</span>
             <span>{t('market.title')} {formatNumber(marketNetWorth, numberMode)}</span>
           </div>
@@ -152,21 +152,21 @@ export default function WalletView() {
 
         {/* XP Section */}
         {profileData?.level ? (
-          <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+          <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">經驗等級</p>
-                <p className="text-3xl font-black italic text-[#fcc025] mt-1">Lv.{profileData.level} <span className="text-sm font-bold text-[#adaaaa]">{profileData.xpTierLabel || ''}</span></p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">經驗等級</p>
+                <p className="text-3xl font-black italic text-accent mt-1">Lv.{profileData.level} <span className="text-sm font-bold text-secondary">{profileData.xpTierLabel || ''}</span></p>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{(profileData.xp || 0).toLocaleString()} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-[10px] text-[#adaaaa] mt-0.5">下一級 {Number(profileData.xpNextLevel).toLocaleString()} XP</p>
+                  <p className="text-[10px] text-secondary mt-0.5">下一級 {Number(profileData.xpNextLevel).toLocaleString()} XP</p>
                 )}
               </div>
             </div>
             {profileData.xpProgress !== undefined && (
-              <div className="w-full h-2 bg-[#0e0e0e] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-surface rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-[#fcc025] to-amber-400 rounded-full transition-all" style={{ width: `${Math.min(100, profileData.xpProgress)}%` }} />
               </div>
             )}
@@ -174,19 +174,19 @@ export default function WalletView() {
         ) : null}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+          <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-3">
-              <Gift className="text-[#fcc025]" size={18} />
+              <Gift className="text-accent" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
             </div>
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex flex-col items-center bg-[#0e0e0e] rounded-xl px-4 py-2">
-                <span className="text-2xl font-black italic text-[#fcc025]">{checkinStreak}</span>
-                <span className="text-[10px] font-bold text-[#adaaaa]">連續天數</span>
+              <div className="flex flex-col items-center bg-surface rounded-xl px-4 py-2">
+                <span className="text-2xl font-black italic text-accent">{checkinStreak}</span>
+                <span className="text-[10px] font-bold text-secondary">連續天數</span>
               </div>
               <div className="flex-1">
-                <p className="text-xs font-bold text-[#adaaaa]">{t('vault.next_available')}{nextAirdropLabel}</p>
-                <p className="text-xs font-bold text-[#fcc025] mt-1">獎勵倍率 ×{(1 + checkinStreak * 0.05).toFixed(2)}</p>
+                <p className="text-xs font-bold text-secondary">{t('vault.next_available')}{nextAirdropLabel}</p>
+                <p className="text-xs font-bold text-accent mt-1">獎勵倍率 ×{(1 + checkinStreak * 0.05).toFixed(2)}</p>
               </div>
             </div>
             {/* Calendar grid: last 30 days */}
@@ -200,7 +200,7 @@ export default function WalletView() {
                   <div key={i} className={`aspect-square rounded flex items-center justify-center text-[9px] font-bold ${
                     isToday ? 'ring-1 ring-[#fcc025]' : ''
                   } ${
-                    checked ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#494847]'
+                    checked ? 'bg-accent text-black' : 'bg-surface text-muted'
                   }`}>
                     {d.getDate()}
                   </div>
@@ -211,41 +211,41 @@ export default function WalletView() {
               type="button"
               disabled={!canClaimAirdrop || airdrop.isPending}
               onClick={() => airdrop.mutate()}
-              className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ArrowDownCircle size={16} />
               {airdrop.isPending ? t('vault.claiming') : t('vault.claim_airdrop')}
             </button>
             {airdrop.error?.message && (
-              <p className="mt-2 text-xs font-bold text-[#ff7351]">{airdrop.error.message}</p>
+              <p className="mt-2 text-xs font-bold text-danger">{airdrop.error.message}</p>
             )}
           </div>
 
-          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl md:col-span-2 lg:col-span-1">
+          <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl md:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <History size={18} className="text-[#fcc025]" />
+                <History size={18} className="text-accent" />
                 <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">交易紀錄</h2>
               </div>
-              <Link to="/app/transactions" className="text-[10px] font-bold text-[#fcc025] hover:underline">查看全部</Link>
+              <Link to="/app/transactions" className="text-[10px] font-bold text-accent hover:underline">查看全部</Link>
             </div>
             <div className="space-y-2">
-              {summary.isLoading && <div className="text-xs text-[#adaaaa]">載入中...</div>}
-              {!summary.isLoading && (!walletSummary?.recentTransactions || walletSummary.recentTransactions.length === 0) && <div className="text-xs text-[#adaaaa]">暫無交易</div>}
+              {summary.isLoading && <div className="text-xs text-secondary">載入中...</div>}
+              {!summary.isLoading && (!walletSummary?.recentTransactions || walletSummary.recentTransactions.length === 0) && <div className="text-xs text-secondary">暫無交易</div>}
               {(walletSummary?.recentTransactions || []).slice(0, 10).map((tx: any) => {
                 const amt = Number(tx.amount);
                 const isCredit = amt >= 0;
                 return (
-                  <div key={tx.id} className="flex items-center justify-between rounded-xl border border-[#494847]/10 bg-[#0e0e0e] px-4 py-3">
+                  <div key={tx.id} className="flex items-center justify-between rounded-xl border border-border/10 bg-surface px-4 py-3">
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-white truncate">{t('txType.' + tx.type, tx.type)}</p>
-                      <p className="text-[10px] text-[#adaaaa] mt-0.5">{new Date(tx.createdAt).toLocaleString('zh-TW')}</p>
+                      <p className="text-[10px] text-secondary mt-0.5">{new Date(tx.createdAt).toLocaleString('zh-TW')}</p>
                     </div>
                     <div className="text-right shrink-0 ml-3">
-                      <p className={`text-xs font-black ${isCredit ? 'text-emerald-400' : 'text-[#ff7351]'}`}>
+                      <p className={`text-xs font-black ${isCredit ? 'text-emerald-400' : 'text-danger'}`}>
                         {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {(tx.token === 'zhixi' ? 'ZXC' : tx.token === 'yjc' ? 'YJC' : tx.token || tx.tokenSymbol || 'ZXC')}
                       </p>
-                      <p className="text-[10px] text-[#adaaaa]">{t('txStatus.' + tx.status, tx.status)}</p>
+                      <p className="text-[10px] text-secondary">{t('txStatus.' + tx.status, tx.status)}</p>
                     </div>
                   </div>
                 );
@@ -253,9 +253,9 @@ export default function WalletView() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+          <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-3">
-              <Repeat2 className="text-[#fcc025]" size={18} />
+              <Repeat2 className="text-accent" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.transfer')}</h2>
             </div>
             <div className="grid gap-3">
@@ -263,19 +263,19 @@ export default function WalletView() {
                 value={transferTo}
                 onChange={(event) => setTransferTo(event.target.value)}
                 placeholder={t('vault.recipient_placeholder')}
-                className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
+                className="rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none focus:border-accent/40"
               />
               <div className="grid grid-cols-[1fr_100px] gap-2">
                 <input
                   value={transferAmount}
                   onChange={(event) => setTransferAmount(event.target.value)}
                   placeholder={t('market.amount')}
-                  className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
+                  className="rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none focus:border-accent/40"
                 />
                 <select
                   value={transferToken}
                   onChange={(event) => setTransferToken(event.target.value as 'zhixi' | 'yjc')}
-                  className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none"
+                  className="rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none"
                 >
                   <option value="zhixi">ZXC</option>
                   <option value="yjc">YJC</option>
@@ -295,9 +295,9 @@ export default function WalletView() {
         </div>
 
         {myAddress && (
-          <div className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+          <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
-              <QrCode className="text-[#fcc025]" size={18} />
+              <QrCode className="text-accent" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">
                 {t('vault.receive_funds')}
               </h2>
@@ -307,23 +307,23 @@ export default function WalletView() {
                 <QRCodeSVG value={myAddress} size={140} level="M" includeMargin={false} />
               </div>
               <div className="flex flex-1 flex-col gap-3">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
                   {t('vault.receive_address')}
                 </p>
-                <p className="break-all rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold text-white">
+                <p className="break-all rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold text-white">
                   {myAddress}
                 </p>
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={handleCopyAddress}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#fcc025] px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-xs font-black uppercase tracking-[0.15em] text-black"
                   >
                     {copied ? <Check size={16} /> : <Copy size={16} />}
                     {copied ? t('common.copied') : t('vault.copy_address')}
                   </button>
                 </div>
-                <p className="text-xs text-[#adaaaa]">
+                <p className="text-xs text-secondary">
                   {t('vault.receive_instruction')}
                 </p>
               </div>

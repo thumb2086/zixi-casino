@@ -15,15 +15,15 @@ export default function VIPLevelsView() {
   const feeDiscountPct = (tier: typeof LEVEL_TIERS[number]) => Math.round((tier.marketFeeDiscount || 0) * 100);
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+            <Link to="/app" className="text-secondary transition-colors hover:text-accent">
               <ChevronLeft size={24} />
             </Link>
-            <Crown className="text-[#fcc025]" />
-            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
+            <Crown className="text-accent" />
+            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
               {t('info.vip_levels_title')}
             </h1>
           </div>
@@ -32,34 +32,34 @@ export default function VIPLevelsView() {
 
       <main className="mx-auto max-w-2xl px-6 pt-24">
         {/* 等級總覽 */}
-        <section className="mb-8 rounded-2xl border border-[#494847]/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+        <section className="mb-8 rounded-2xl border border-border/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
             {t('info.vip_system_overview')}
           </h2>
-          <p className="mt-3 text-sm font-bold text-[#adaaaa] leading-relaxed">
+          <p className="mt-3 text-sm font-bold text-secondary leading-relaxed">
             {t('info.vip_system_description', { count: LEVEL_TIERS.length })}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+              <div className="rounded-xl border border-border/10 bg-surface p-3">
                 <div className="flex items-center gap-2">
                   <Percent className="h-4 w-4 text-emerald-400" />
-                   <span className="text-xs font-bold text-[#adaaaa]">{t('info.highest_discount')}</span>
+                   <span className="text-xs font-bold text-secondary">{t('info.highest_discount')}</span>
                 </div>
                 <p className="mt-1 text-lg font-black text-emerald-400">{Math.round(Math.max(...LEVEL_TIERS.map(t => t.marketFeeDiscount || 0)) * 100)}%</p>
               </div>
-              <div className="rounded-xl border border-[#494847]/10 bg-[#0e0e0e] p-3">
+              <div className="rounded-xl border border-border/10 bg-surface p-3">
                 <div className="flex items-center gap-2">
-                  <Gift className="h-4 w-4 text-[#fcc025]" />
-                   <span className="text-xs font-bold text-[#adaaaa]">{t('info.highest_multiplier')}</span>
+                  <Gift className="h-4 w-4 text-accent" />
+                   <span className="text-xs font-bold text-secondary">{t('info.highest_multiplier')}</span>
                 </div>
-                <p className="mt-1 text-lg font-black text-[#fcc025]">{Math.max(...LEVEL_TIERS.map(t => t.dailyBonusMultiplier || 1)).toFixed(1)}x</p>
+                <p className="mt-1 text-lg font-black text-accent">{Math.max(...LEVEL_TIERS.map(t => t.dailyBonusMultiplier || 1)).toFixed(1)}x</p>
               </div>
           </div>
         </section>
 
         {/* 特權說明 */}
-        <section className="mb-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+        <section className="mb-6 rounded-2xl border border-border/10 bg-card p-6">
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
             {t('info.vip_perks_title')}
           </h2>
           <div className="mt-4 space-y-4">
@@ -69,18 +69,18 @@ export default function VIPLevelsView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">{t('info.fee_explanation')}</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">
+                <p className="text-xs font-bold text-secondary">
                   {t('info.vip_fee_detail')}
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#fcc025]/10">
-                <Gift className="h-4 w-4 text-[#fcc025]" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                <Gift className="h-4 w-4 text-accent" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">{t('info.daily_bonus_multiplier')}</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">
+                <p className="text-xs font-bold text-secondary">
                   {t('info.vip_bonus_detail')}
                 </p>
               </div>
@@ -91,7 +91,7 @@ export default function VIPLevelsView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">{t('info.danmaku_perks')}</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">
+                <p className="text-xs font-bold text-secondary">
                   {t('info.vip_danmaku_detail')}
                 </p>
               </div>
@@ -102,7 +102,7 @@ export default function VIPLevelsView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">{t('info.max_bet_limit')}</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">
+                <p className="text-xs font-bold text-secondary">
                   {t('info.vip_max_bet_detail')}
                 </p>
               </div>
@@ -112,7 +112,7 @@ export default function VIPLevelsView() {
 
         {/* 等級列表 */}
         <section className="space-y-3">
-          <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-secondary">
             {t('info.full_level_list')}
           </h2>
           {LEVEL_TIERS.map((tier, index) => (
@@ -120,8 +120,8 @@ export default function VIPLevelsView() {
               key={tier.label}
               className={`rounded-xl border p-4 transition-all ${
                 index <= 5 
-                  ? 'border-[#fcc025]/30 bg-gradient-to-r from-[#fcc025]/5 to-transparent' 
-                  : 'border-[#494847]/10 bg-[#1a1919]'
+                  ? 'border-accent/30 bg-gradient-to-r from-[#fcc025]/5 to-transparent' 
+                  : 'border-border/10 bg-card'
               }`}
             >
               <button
@@ -140,37 +140,37 @@ export default function VIPLevelsView() {
                   </div>
                   <div className="text-left">
                     <h3 className="font-bold text-white">{tier.label}</h3>
-                    <p className="text-xs font-bold text-[#adaaaa]">
+                    <p className="text-xs font-bold text-secondary">
                       {t('info.threshold')}: {nf(tier.threshold)}
                     </p>
                   </div>
                 </div>
                 <ChevronRight 
-                  className={`h-5 w-5 text-[#494847] transition-transform ${
+                  className={`h-5 w-5 text-muted transition-transform ${
                     expandedTier === tier.label ? 'rotate-90' : ''
                   }`} 
                 />
               </button>
               
               {expandedTier === tier.label && (
-                <div className="mt-4 space-y-2 border-t border-[#494847]/10 pt-4">
+                <div className="mt-4 space-y-2 border-t border-border/10 pt-4">
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-lg bg-[#0e0e0e] p-2">
-                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.max_bet_limit')}</p>
+                    <div className="rounded-lg bg-surface p-2">
+                       <p className="text-xs font-bold text-secondary">{t('info.max_bet_limit')}</p>
                       <p className="text-sm font-black text-white">{nf(tier.maxBet)}</p>
                     </div>
-                    <div className="rounded-lg bg-[#0e0e0e] p-2">
-                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.fee_discount')}</p>
+                    <div className="rounded-lg bg-surface p-2">
+                       <p className="text-xs font-bold text-secondary">{t('info.fee_discount')}</p>
                       <p className="text-sm font-black text-emerald-400">{feeDiscountPct(tier)}%</p>
                     </div>
-                    <div className="rounded-lg bg-[#0e0e0e] p-2">
-                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.bonus_multiplier')}</p>
-                      <p className="text-sm font-black text-[#fcc025]">
+                    <div className="rounded-lg bg-surface p-2">
+                       <p className="text-xs font-bold text-secondary">{t('info.bonus_multiplier')}</p>
+                      <p className="text-sm font-black text-accent">
                         {(tier.dailyBonusMultiplier || 1).toFixed(1)}x
                       </p>
                     </div>
-                    <div className="rounded-lg bg-[#0e0e0e] p-2">
-                       <p className="text-xs font-bold text-[#adaaaa]">{t('info.danmaku_color')}</p>
+                    <div className="rounded-lg bg-surface p-2">
+                       <p className="text-xs font-bold text-secondary">{t('info.danmaku_color')}</p>
                       <div className="flex items-center gap-2">
                         <div 
                           className="h-4 w-4 rounded"

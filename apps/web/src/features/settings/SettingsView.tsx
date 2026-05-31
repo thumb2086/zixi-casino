@@ -27,12 +27,12 @@ const Toggle = ({ enabled, onClick }: { enabled: boolean; onClick: () => void })
     type="button"
     onClick={onClick}
     className={`relative inline-flex h-6 w-12 items-center rounded-full transition-all ${
-      enabled ? 'bg-[#fcc025] shadow-[0_0_15px_rgba(252,192,37,0.35)]' : 'bg-[#494847]/30'
+      enabled ? 'bg-accent shadow-[0_0_15px_rgba(252,192,37,0.35)]' : 'bg-[#494847]/30'
     }`}
   >
     <span
       className={`inline-block h-4 w-4 rounded-full transition-transform ${
-        enabled ? 'translate-x-7 bg-black' : 'translate-x-1 bg-[#fcc025]'
+        enabled ? 'translate-x-7 bg-black' : 'translate-x-1 bg-accent'
       }`}
     />
   </button>
@@ -49,9 +49,9 @@ function SliderRow({
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-[#adaaaa]">
+      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-secondary">
         <span>{label}</span>
-        <span className="font-mono text-[#fcc025]">{Math.round(value * 100)}%</span>
+        <span className="font-mono text-accent">{Math.round(value * 100)}%</span>
       </div>
       <input
         type="range"
@@ -182,23 +182,23 @@ export default function SettingsView() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0e0e0e]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#fcc025] border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-accent border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen overflow-x-hidden bg-surface pb-32 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <SettingsIcon className="text-[#fcc025]" />
-            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
+            <SettingsIcon className="text-accent" />
+            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
               {t('settings.title')}
             </h1>
           </div>
-          <div className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+          <div className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
             {saving ? t('settings.syncing') : `v${APP_VERSION}`}
           </div>
         </div>
@@ -206,14 +206,14 @@ export default function SettingsView() {
 
       <main className="app-shell pt-24">
         <div className="content-grid">
-        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-start gap-4">
-              <div className="rounded-2xl bg-[#262626] p-3">
-                <User className="text-[#fcc025]" />
+              <div className="rounded-2xl bg-elevated p-3">
+                <User className="text-accent" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
                   {t('settings.profile')}
                 </p>
                 <p className="mt-1 text-xs font-bold text-[#6f6f6f]">{t('settings.name_hint')}</p>
@@ -223,13 +223,13 @@ export default function SettingsView() {
                       value={displayNameDraft}
                       maxLength={20}
                       onChange={(event) => setDisplayNameDraft(event.target.value)}
-                      className="rounded-xl border border-[#494847]/20 bg-[#0e0e0e] px-4 py-3 text-sm font-bold outline-none focus:border-[#fcc025]/40"
+                      className="rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none focus:border-accent/40"
                     />
                     <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={saveDisplayName}
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#fcc025] px-4 py-2 text-xs font-black uppercase tracking-widest text-black"
+                        className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-xs font-black uppercase tracking-widest text-black"
                       >
                         <Check size={14} />
                         {t('common.save')}
@@ -240,7 +240,7 @@ export default function SettingsView() {
                           setDisplayNameDraft(username || '');
                           setIsEditingName(false);
                         }}
-                        className="rounded-xl border border-[#494847]/20 bg-[#262626] px-4 py-2 text-xs font-black uppercase tracking-widest text-white"
+                        className="rounded-xl border border-border/20 bg-elevated px-4 py-2 text-xs font-black uppercase tracking-widest text-white"
                       >
                         {t('common.cancel')}
                       </button>
@@ -251,13 +251,13 @@ export default function SettingsView() {
                     <h2 className="mt-1 truncate text-2xl font-black uppercase italic tracking-tight">
                       {username || 'OPERATOR'}
                     </h2>
-                    <p className="mt-1 truncate text-xs font-bold uppercase tracking-[0.18em] text-[#adaaaa]">
+                    <p className="mt-1 truncate text-xs font-bold uppercase tracking-[0.18em] text-secondary">
                       {address || t('settings.no_address')}
                     </p>
                     <button
                       type="button"
                       onClick={() => setIsEditingName(true)}
-                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-[#fcc025]/40 bg-[#262626] px-3 py-2 text-xs font-black uppercase tracking-widest text-[#fcc025] hover:bg-[#313131]"
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-elevated px-3 py-2 text-xs font-black uppercase tracking-widest text-accent hover:bg-[#313131]"
                     >
                       <Edit2 size={12} />
                       {t('settings.edit_name')}
@@ -270,24 +270,24 @@ export default function SettingsView() {
               <button
                 type="button"
                 onClick={() => setIsEditingName(true)}
-                className="hidden h-10 w-10 items-center justify-center rounded-full bg-[#262626] text-[#fcc025] sm:flex"
+                className="hidden h-10 w-10 items-center justify-center rounded-full bg-elevated text-accent sm:flex"
               >
                 <Edit2 size={16} />
               </button>
             )}
           </div>
 
-          <div className="mt-5 rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#adaaaa]">
+          <div className="mt-5 rounded-2xl border border-border/10 bg-surface p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
               {t('settings.balance_preview')}
             </p>
-            <p className="mt-2 text-3xl font-black italic tracking-tight text-[#fcc025]">{previewBalance}</p>
+            <p className="mt-2 text-3xl font-black italic tracking-tight text-accent">{previewBalance}</p>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center gap-3">
-            <Volume2 className="text-[#fcc025]" size={18} />
+            <Volume2 className="text-accent" size={18} />
             <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
               {t('settings.display_audio')}
             </h3>
@@ -304,7 +304,7 @@ export default function SettingsView() {
                     type="button"
                     onClick={() => persistPrefs({ amountDisplay: 'compact' })}
                     className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider ${
-                      amountDisplay === 'compact' ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
+                      amountDisplay === 'compact' ? 'bg-accent text-black' : 'bg-elevated text-white'
                     }`}
                   >
                     {t('settings.compact')}
@@ -313,7 +313,7 @@ export default function SettingsView() {
                     type="button"
                     onClick={() => persistPrefs({ amountDisplay: 'full' })}
                     className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider ${
-                      amountDisplay === 'full' ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
+                      amountDisplay === 'full' ? 'bg-accent text-black' : 'bg-elevated text-white'
                     }`}
                   >
                     {t('settings.full')}
@@ -327,19 +327,19 @@ export default function SettingsView() {
             <SliderRow label={t('settings.sfx_volume')} value={sfxVolume} onChange={(value) => persistPrefs({ sfxVolume: value })} />
 
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
+              <div className="rounded-2xl border border-border/10 bg-surface p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider">{t('settings.bgm')}</span>
                   <Toggle enabled={bgmEnabled} onClick={() => persistPrefs({ bgmEnabled: !bgmEnabled })} />
                 </div>
               </div>
-              <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
+              <div className="rounded-2xl border border-border/10 bg-surface p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider">{t('settings.sfx')}</span>
                   <Toggle enabled={sfxEnabled} onClick={() => persistPrefs({ sfxEnabled: !sfxEnabled })} />
                 </div>
               </div>
-              <div className="rounded-2xl border border-[#494847]/10 bg-[#0e0e0e] p-4 min-h-[74px]">
+              <div className="rounded-2xl border border-border/10 bg-surface p-4 min-h-[74px]">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase tracking-wider">{t('settings.danmaku')}</span>
                   <Toggle enabled={danmuEnabled} onClick={() => persistPrefs({ danmuEnabled: !danmuEnabled })} />
@@ -349,9 +349,9 @@ export default function SettingsView() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center gap-3">
-            <Type className="text-[#fcc025]" size={18} />
+            <Type className="text-accent" size={18} />
             <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
                {t('settings.font_size')}
              </h3>
@@ -363,7 +363,7 @@ export default function SettingsView() {
                 type="button"
                 onClick={() => setFontSize(level)}
                 className={`flex-1 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-wider ${
-                  fontSize === level ? 'bg-[#fcc025] text-black' : 'bg-[#262626] text-white'
+                  fontSize === level ? 'bg-accent text-black' : 'bg-elevated text-white'
                 }`}
               >
                 {level === 'small' ? t('settings.size_small') : level === 'medium' ? t('settings.size_medium') : t('settings.size_large')}
@@ -372,15 +372,15 @@ export default function SettingsView() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
+        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Globe className="text-[#fcc025]" size={18} />
+              <Globe className="text-accent" size={18} />
               <div>
                 <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
                   {t('settings.language')}
                 </h3>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#adaaaa]">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-secondary">
                   {isZh ? t('common.chinese') : t('common.english')}
                 </p>
               </div>
@@ -388,35 +388,35 @@ export default function SettingsView() {
             <button
               type="button"
               onClick={() => i18n.changeLanguage(isZh ? 'en' : 'zh')}
-              className="rounded-xl border border-[#fcc025]/20 bg-[#262626] px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#fcc025]"
+              className="rounded-xl border border-accent/20 bg-elevated px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-accent"
             >
               {t('settings.switch_label')}
             </button>
           </div>
 
-          <div className="mt-6 divide-y divide-[#494847]/10 overflow-hidden rounded-2xl border border-[#494847]/10 bg-[#0e0e0e]">
-            <Link to="/app/support" className="flex items-center justify-between p-4 transition-colors hover:bg-[#1a1919]">
+          <div className="mt-6 divide-y divide-[#494847]/10 overflow-hidden rounded-2xl border border-border/10 bg-surface">
+            <Link to="/app/support" className="flex items-center justify-between p-4 transition-colors hover:bg-card">
               <span className="text-xs font-bold uppercase tracking-[0.12em]">
                 {t('nav.support')}
               </span>
-              <ChevronRight size={16} className="text-[#adaaaa]" />
+              <ChevronRight size={16} className="text-secondary" />
             </Link>
             <a
               href="https://github.com/thumb2086/zixi-casino"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center justify-between p-4 transition-colors hover:bg-[#1a1919]"
+              className="flex items-center justify-between p-4 transition-colors hover:bg-card"
             >
               <span className="text-xs font-bold uppercase tracking-[0.12em]">
                 {t('settings.github_repo')}
               </span>
-              <ChevronRight size={16} className="text-[#adaaaa]" />
+              <ChevronRight size={16} className="text-secondary" />
             </a>
           </div>
         </section>
 
         <section className="space-y-3 pb-4">
-          <p className="min-h-[18px] text-center text-xs font-bold uppercase tracking-[0.12em] text-[#fcc025]">
+          <p className="min-h-[18px] text-center text-xs font-bold uppercase tracking-[0.12em] text-accent">
             {statusText ?? ''}
           </p>
           <button
@@ -435,7 +435,7 @@ export default function SettingsView() {
       </main>
 
       <AppBottomNav current="settings" />
-      <footer className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer', { version: APP_VERSION })}</footer>
+      <footer className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-muted">{t('settings.footer', { version: APP_VERSION })}</footer>
     </div>
   );
 }

@@ -24,7 +24,7 @@ const RARITY_COLORS: Record<string, { bg: string; text: string; border: string; 
   chaos: { bg: 'bg-fuchsia-500/20', text: 'text-fuchsia-400', border: 'border-fuchsia-500/30', label: '混沌' },
   abyss: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30', label: '深淵' },
   oracle: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', label: '神諭' },
-  vip: { bg: 'bg-[#fcc025]/20', text: 'text-[#fcc025]', border: 'border-[#fcc025]/30', label: 'VIP' },
+  vip: { bg: 'bg-accent/20', text: 'text-accent', border: 'border-accent/30', label: 'VIP' },
 };
 
 const TYPE_ICONS = {
@@ -74,15 +74,15 @@ export default function ItemsCatalogView() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+            <Link to="/app" className="text-secondary transition-colors hover:text-accent">
               <ChevronLeft size={24} />
             </Link>
-            <Package className="text-[#fcc025]" />
-            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
+            <Package className="text-accent" />
+            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
               物品圖鑑
             </h1>
           </div>
@@ -93,13 +93,13 @@ export default function ItemsCatalogView() {
         {/* 搜尋和篩選 */}
         <section className="mb-6 space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#494847]" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="搜尋物品名稱..."
-              className="w-full rounded-xl border border-[#494847]/20 bg-[#1a1919] py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-[#494847] focus:outline-none focus:border-[#fcc025]/50"
+              className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:outline-none focus:border-accent/50"
             />
           </div>
           
@@ -110,8 +110,8 @@ export default function ItemsCatalogView() {
                 onClick={() => setFilter(type)}
                 className={`flex-1 rounded-lg py-2 text-xs font-black uppercase tracking-widest transition-all ${
                   filter === type
-                    ? 'bg-[#fcc025] text-black'
-                    : 'bg-[#1a1919] text-[#adaaaa] border border-[#494847]/20'
+                    ? 'bg-accent text-black'
+                    : 'bg-card text-secondary border border-border/20'
                 }`}
               >
                 {type === 'all' ? '全部' : 
@@ -123,8 +123,8 @@ export default function ItemsCatalogView() {
         </section>
 
         {/* 稀有度說明 */}
-        <section className="mb-6 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-4">
-          <h2 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+        <section className="mb-6 rounded-2xl border border-border/10 bg-card p-4">
+          <h2 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-secondary">
             稀有度說明
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -143,16 +143,16 @@ export default function ItemsCatalogView() {
         {/* 物品列表 */}
         <section className="space-y-3">
           {loading && (
-            <div className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-8 text-center">
-              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[#494847] border-t-[#fcc025]" />
-              <p className="text-sm font-bold text-[#adaaaa]">載入物品目錄...</p>
+            <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
+              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-border border-t-[#fcc025]" />
+              <p className="text-sm font-bold text-secondary">載入物品目錄...</p>
             </div>
           )}
 
           {!loading && filteredItems.length === 0 && (
-            <div className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-8 text-center">
-              <Package className="mx-auto mb-3 h-12 w-12 text-[#494847]" />
-              <p className="text-sm font-bold text-[#adaaaa]">暫無符合條件的物品</p>
+            <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
+              <Package className="mx-auto mb-3 h-12 w-12 text-muted" />
+              <p className="text-sm font-bold text-secondary">暫無符合條件的物品</p>
             </div>
           )}
 
@@ -166,7 +166,7 @@ export default function ItemsCatalogView() {
                 className={`rounded-xl border p-4 transition-all ${rarity.border} ${rarity.bg}`}
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0e0e0e]">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface">
                     <span className="text-2xl">{item.icon}</span>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -176,17 +176,17 @@ export default function ItemsCatalogView() {
                         {rarity.label}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs font-bold text-[#adaaaa] line-clamp-2">
+                    <p className="mt-1 text-xs font-bold text-secondary line-clamp-2">
                       {item.description}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="flex items-center gap-1 rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#adaaaa]">
+                      <span className="flex items-center gap-1 rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                         <TypeIcon className="h-3 w-3" />
                         {item.type === 'avatar' ? '頭像' : 
                          item.type === 'title' ? '稱號' : 
                          item.type === 'buff' ? '增益' : '道具'}
                       </span>
-                      <span className="rounded bg-[#0e0e0e] px-2 py-1 text-xs font-bold text-[#fcc025]">
+                      <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-accent">
                         {item.howToGet}
                       </span>
                     </div>
@@ -198,18 +198,18 @@ export default function ItemsCatalogView() {
         </section>
 
         {/* 獲取方式總覽 */}
-        <section className="mt-8 rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-          <h2 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">
+        <section className="mt-8 rounded-2xl border border-border/10 bg-card p-6">
+          <h2 className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-secondary">
             物品獲取方式
           </h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#fcc025]/10">
-                <Gift className="h-4 w-4 text-[#fcc025]" />
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
+                <Gift className="h-4 w-4 text-accent" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">商店購買</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">使用子熙幣在獎勵商店購買限定頭像與稱號</p>
+                <p className="text-xs font-bold text-secondary">使用子熙幣在獎勵商店購買限定頭像與稱號</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -218,7 +218,7 @@ export default function ItemsCatalogView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">管理員授予</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">特殊活動或貢獻獲得的限定物品</p>
+                <p className="text-xs font-bold text-secondary">特殊活動或貢獻獲得的限定物品</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -227,7 +227,7 @@ export default function ItemsCatalogView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">寶箱開啟</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">遊戲內獲得的寶箱有機率開出稀有物品</p>
+                <p className="text-xs font-bold text-secondary">遊戲內獲得的寶箱有機率開出稀有物品</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -236,7 +236,7 @@ export default function ItemsCatalogView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">活動獲得</h3>
-                <p className="text-xs font-bold text-[#adaaaa]">參與限時活動完成任務獲得專屬獎勵</p>
+                <p className="text-xs font-bold text-secondary">參與限時活動完成任務獲得專屬獎勵</p>
               </div>
             </div>
           </div>

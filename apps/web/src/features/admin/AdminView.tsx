@@ -766,28 +766,28 @@ export default function AdminView() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-[#0e0e0e]/90 backdrop-blur-xl border-b border-[#494847]/15">
+    <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <ShieldAlert className="text-[#fcc025]" />
-            <h1 className="font-extrabold tracking-tight text-xl text-[#fcc025] uppercase italic">{t('admin.title')}</h1>
+            <ShieldAlert className="text-accent" />
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">{t('admin.title')}</h1>
           </div>
-          <button onClick={refresh} className="p-2 rounded-lg border border-[#494847]/30 hover:bg-[#262626]" aria-label={t('admin.refresh')}>
-            <RefreshCw size={16} className={loading ? 'animate-spin text-[#fcc025]' : 'text-[#adaaaa]'} />
+          <button onClick={refresh} className="p-2 rounded-lg border border-border/30 hover:bg-elevated" aria-label={t('admin.refresh')}>
+            <RefreshCw size={16} className={loading ? 'animate-spin text-accent' : 'text-secondary'} />
           </button>
         </div>
       </header>
 
       <main className="app-shell space-y-6 pt-24">
         {!isAuthorized && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#fcc025]/20">
-            <p className="text-sm text-[#adaaaa]">{t('admin.login_first')}</p>
+          <section className="bg-card rounded-2xl p-6 border border-accent/20">
+            <p className="text-sm text-secondary">{t('admin.login_first')}</p>
           </section>
         )}
 
         {authErr && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-red-500/20">
+          <section className="bg-card rounded-2xl p-6 border border-red-500/20">
             <p className="text-sm text-red-400">{authErr}</p>
           </section>
         )}
@@ -803,8 +803,8 @@ export default function AdminView() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-black tracking-wide transition-all ${
                   active
-                    ? 'bg-[#fcc025] text-black'
-                    : 'border border-[#494847]/30 bg-[#1a1919] text-[#adaaaa]'
+                    ? 'bg-accent text-black'
+                    : 'border border-border/30 bg-card text-secondary'
                 }`}
               >
                 <Icon size={14} />
@@ -815,49 +815,49 @@ export default function AdminView() {
         </nav>
 
         {actionResult && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
             {actionResult}
           </div>
         )}
 
         {activeTab === 'dashboard' && (
           <section className="space-y-6">
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
               <div className="flex items-center gap-2 mb-4">
-                <Activity size={18} className="text-[#fcc025]" />
+                <Activity size={18} className="text-accent" />
                 <h3 className="text-sm font-black tracking-wide text-white">{t('admin.system_status')}</h3>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {healthCards.map((s) => (
-                  <div key={s.label} className="bg-[#1a1919] rounded-2xl p-4 border border-[#494847]/20">
-                    <p className="text-xs font-black tracking-wide text-[#adaaaa]">{s.label}</p>
-                    <p className="text-2xl font-black italic tracking-tighter text-[#fcc025] mt-2">{s.value}</p>
+                  <div key={s.label} className="bg-card rounded-2xl p-4 border border-border/20">
+                    <p className="text-xs font-black tracking-wide text-secondary">{s.label}</p>
+                    <p className="text-2xl font-black italic tracking-tighter text-accent mt-2">{s.value}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <ScrollText size={18} className="text-[#fcc025]" />
+                  <ScrollText size={18} className="text-accent" />
                   <h3 className="text-sm font-black tracking-wide text-white">{t('admin.event_log', { count: events.length })}</h3>
                 </div>
-                <button type="button" onClick={refresh} className="text-xs text-[#fcc025] hover:underline">{t('admin.refresh')}</button>
+                <button type="button" onClick={refresh} className="text-xs text-accent hover:underline">{t('admin.refresh')}</button>
               </div>
               {loading && events.length === 0 ? (
-                <div className="flex items-center gap-2 text-[#adaaaa] text-xs"><Loader2 size={12} className="animate-spin" /> {t('common.loading')}</div>
+                <div className="flex items-center gap-2 text-secondary text-xs"><Loader2 size={12} className="animate-spin" /> {t('common.loading')}</div>
               ) : events.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">{t('admin.no_events')}</p>
+                <p className="text-xs text-secondary">{t('admin.no_events')}</p>
               ) : (
                 <ul className="space-y-2 text-xs max-h-96 overflow-y-auto">
                   {events.map((evt, i) => (
-                    <li key={evt.id || i} className="border-l-2 border-[#fcc025]/40 pl-3 py-1">
+                    <li key={evt.id || i} className="border-l-2 border-accent/40 pl-3 py-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-[#fcc025]/10 text-[#fcc025]' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                        <span className={`text-xs font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-accent/10 text-accent' : 'bg-emerald-500/10 text-emerald-400'}`}>
                           {({ error: t('admin.severity_error'), warn: t('admin.severity_warn'), info: t('admin.severity_info'), important: t('admin.severity_important') } as Record<string, string>)[evt.severity] || evt.severity || t('admin.severity_info')}
                         </span>
-                        <span className="text-xs font-bold text-[#adaaaa]">
+                        <span className="text-xs font-bold text-secondary">
                           {({
                             'rewards/item_pawned': t('admin.event_rewards_item_pawned'),
                             'rewards/chests_opened_bulk': t('admin.event_rewards_chests_opened_bulk'),
@@ -905,7 +905,7 @@ export default function AdminView() {
                           return fn ? fn(evt.message) : evt.message;
                         })()}
                       </p>
-                      <p className="text-xs text-[#adaaaa] mt-0.5">{evt.createdAt ? new Date(evt.createdAt).toLocaleString() : ''}</p>
+                      <p className="text-xs text-secondary mt-0.5">{evt.createdAt ? new Date(evt.createdAt).toLocaleString() : ''}</p>
                     </li>
                   ))}
                 </ul>
@@ -916,50 +916,50 @@ export default function AdminView() {
 
         {activeTab === 'maintenance' && (
           <section className="space-y-6">
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><AlertOctagon size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{t('admin.maintenance_mode')}</h3></div>
-              <p className="text-xs text-[#adaaaa] mb-3">{t('admin.maintenance_desc')}<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? t('admin.enabled') : t('admin.disabled')}</span></p>
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
+              <div className="flex items-center gap-2 mb-4"><AlertOctagon size={18} className="text-accent" /><h3 className="text-sm font-black tracking-wide text-white">{t('admin.maintenance_mode')}</h3></div>
+              <p className="text-xs text-secondary mb-3">{t('admin.maintenance_desc')}<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? t('admin.enabled') : t('admin.disabled')}</span></p>
               <form onSubmit={handleMaintenance} className="space-y-3">
-                <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.maintenance_message_placeholder')} maxLength={200} />
-                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-[#fcc025] text-[#0e0e0e]'}`}>{maintenanceOn ? t('admin.disable_maintenance') : t('admin.enable_maintenance')}</button>
+                <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.maintenance_message_placeholder')} maxLength={200} />
+                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-accent text-[#0e0e0e]'}`}>{maintenanceOn ? t('admin.disable_maintenance') : t('admin.enable_maintenance')}</button>
               </form>
             </div>
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{editingAnnouncement ? t('admin.edit_announcement') : t('admin.new_announcement')}</h3></div>
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
+              <div className="flex items-center gap-2 mb-4"><Megaphone size={18} className="text-accent" /><h3 className="text-sm font-black tracking-wide text-white">{editingAnnouncement ? t('admin.edit_announcement') : t('admin.new_announcement')}</h3></div>
               <form onSubmit={handleAnnouncementCreate} className="space-y-3">
-                <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.announcement_title_placeholder')} maxLength={100} />
-                <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder={t('admin.announcement_content_placeholder')} maxLength={2000} />
+                <input type="text" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.announcement_title_placeholder')} maxLength={100} />
+                <textarea value={announcementContent} onChange={(e) => setAnnouncementContent(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm min-h-24" placeholder={t('admin.announcement_content_placeholder')} maxLength={2000} />
                 <div className="flex gap-2">
                   {(['info', 'warning', 'urgent'] as const).map((t) => (
                     <button key={t} type="button" onClick={() => setAnnouncementType(t)}
-                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${announcementType === t ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] border border-[#494847]/30'}`}>{t}</button>
+                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${announcementType === t ? 'bg-accent text-black' : 'bg-surface text-secondary border border-border/30'}`}>{t}</button>
                   ))}
                 </div>
-                <label className="flex items-center gap-2 text-xs text-[#adaaaa]"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />{t('admin.pin_on_publish')}</label>
+                <label className="flex items-center gap-2 text-xs text-secondary"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />{t('admin.pin_on_publish')}</label>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">{editingAnnouncement ? t('admin.update_announcement') : t('admin.publish_announcement')}</button>
+                  <button type="submit" className="flex-1 py-2 bg-accent text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">{editingAnnouncement ? t('admin.update_announcement') : t('admin.publish_announcement')}</button>
                   {editingAnnouncement && (
-                    <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementTitle(''); setAnnouncementContent(''); setAnnouncementType('info'); setAnnouncementPinned(false); }} className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg text-xs font-black">{t('common.cancel')}</button>
+                    <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementTitle(''); setAnnouncementContent(''); setAnnouncementType('info'); setAnnouncementPinned(false); }} className="px-4 border border-border/30 text-secondary rounded-lg text-xs font-black">{t('common.cancel')}</button>
                   )}
                 </div>
               </form>
             </div>
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
               <h3 className="text-sm font-black tracking-wide text-white mb-4">{t('admin.existing_announcements', { count: announcements.length })}</h3>
-              {announcements.length === 0 ? (<p className="text-xs text-[#adaaaa]">{t('admin.no_announcements')}</p>) : (
+              {announcements.length === 0 ? (<p className="text-xs text-secondary">{t('admin.no_announcements')}</p>) : (
                 <ul className="space-y-3">{announcements.map((ann) => {
                   const id = ann.announcementId || ann.id || ann.title;
-                  return (<li key={id} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-3">
+                  return (<li key={id} className="rounded-lg border border-border/30 bg-surface p-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">{ann.isPinned && <Pin size={12} className="text-[#fcc025]" />}<p className={`text-sm font-bold ${ann.isActive ? 'text-white' : 'text-[#494847] line-through'}`}>{ann.title}</p></div>
-                        <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2 whitespace-pre-wrap">{ann.content}</p>
-                        <p className="text-xs text-[#494847] mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
+                        <div className="flex items-center gap-2">{ann.isPinned && <Pin size={12} className="text-accent" />}<p className={`text-sm font-bold ${ann.isActive ? 'text-white' : 'text-muted line-through'}`}>{ann.title}</p></div>
+                        <p className="text-xs text-secondary mt-1 line-clamp-2 whitespace-pre-wrap">{ann.content}</p>
+                        <p className="text-xs text-muted mt-1">{ann.publishedAt || ann.createdAt ? new Date(ann.publishedAt || ann.createdAt!).toLocaleString() : ''}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1">
-                        <button onClick={() => { const a = ann as any; setEditingAnnouncement(ann); setAnnouncementTitle(a.title); setAnnouncementContent(a.content); setAnnouncementType(a.type || 'info'); setAnnouncementPinned(!!a.isPinned); }} className="p-1.5 rounded border border-[#fcc025]/30 hover:bg-[#fcc025]/10" title={t('admin.edit_announcement')}><Edit2 size={14} className="text-[#fcc025]" /></button>
-                        <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isPinned ? t('admin.unpin') : t('admin.pin')}>{ann.isPinned ? <PinOff size={14} className="text-[#fcc025]" /> : <Pin size={14} className="text-[#adaaaa]" />}</button>
-                        <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]" title={ann.isActive ? t('admin.hide') : t('admin.show')}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}</button>
+                        <button onClick={() => { const a = ann as any; setEditingAnnouncement(ann); setAnnouncementTitle(a.title); setAnnouncementContent(a.content); setAnnouncementType(a.type || 'info'); setAnnouncementPinned(!!a.isPinned); }} className="p-1.5 rounded border border-accent/30 hover:bg-accent/10" title={t('admin.edit_announcement')}><Edit2 size={14} className="text-accent" /></button>
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isPinned')} className="p-1.5 rounded border border-border/30 hover:bg-card" title={ann.isPinned ? t('admin.unpin') : t('admin.pin')}>{ann.isPinned ? <PinOff size={14} className="text-accent" /> : <Pin size={14} className="text-secondary" />}</button>
+                        <button onClick={() => handleAnnouncementToggle(ann, 'isActive')} className="p-1.5 rounded border border-border/30 hover:bg-card" title={ann.isActive ? t('admin.hide') : t('admin.show')}>{ann.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-secondary" />}</button>
                         <button onClick={() => handleAnnouncementDelete(ann)} className="p-1.5 rounded border border-red-500/30 hover:bg-red-500/10" title={t('admin.delete')}><Trash2 size={14} className="text-red-400" /></button>
                       </div>
                     </div>
@@ -973,56 +973,56 @@ export default function AdminView() {
         {activeTab === 'usermgr' && (
           <section className="space-y-6">
 
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
+            <div className="bg-card rounded-2xl p-6 border border-border/20 space-y-4">
               <h3 className="text-sm font-black tracking-wide text-white">{t('admin.user_query')}</h3>
               <div className="flex gap-2">
-                <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder={t('admin.user_query_placeholder')} className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110">{t('admin.query')}</button>
+                <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder={t('admin.user_query_placeholder')} className="flex-1 rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none" />
+                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-accent px-4 text-xs font-black text-black hover:brightness-110">{t('admin.query')}</button>
               </div>
               {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
               {userInspect && (
-                <div className="space-y-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-4">
-                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">{t('admin.address')}：</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
-                  {userInspect.user.displayName && <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">{t('admin.display_name')}：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
+                <div className="space-y-3 rounded-lg border border-border/20 bg-elevated p-4">
+                  <div className="text-xs text-secondary"><span className="text-muted">{t('admin.address')}：</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
+                  {userInspect.user.displayName && <div className="text-xs text-secondary"><span className="text-muted">{t('admin.display_name')}：</span><span className="text-white">{userInspect.user.displayName}</span></div>}
                   {userInspect.balances && (
-                    <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
-                      <div><p className="text-xs text-[#494847]">{t('admin.zxc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">{t('admin.yjc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p></div>
-                      <div><p className="text-xs text-[#494847]">{t('admin.total_bet')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p></div>
+                    <div className="grid grid-cols-3 gap-2 rounded-lg bg-card p-3">
+                      <div><p className="text-xs text-muted">{t('admin.zxc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p></div>
+                      <div><p className="text-xs text-muted">{t('admin.yjc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p></div>
+                      <div><p className="text-xs text-muted">{t('admin.total_bet')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p></div>
                     </div>
                   )}
-                  <div className="text-xs text-[#adaaaa]"><span className="text-[#494847]">{t('admin.current_win_bias')}</span><span className="text-[#fcc025] font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : t('admin.win_bias_not_set')}</span></div>
+                  <div className="text-xs text-secondary"><span className="text-muted">{t('admin.current_win_bias')}</span><span className="text-accent font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : t('admin.win_bias_not_set')}</span></div>
                   <div className="flex gap-2">
-                    <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder={t('admin.win_bias_placeholder')} className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                    <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> {t('admin.apply')}</button>
-                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300">{t('admin.clear')}</button>
+                    <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder={t('admin.win_bias_placeholder')} className="flex-1 rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none" />
+                    <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-accent px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> {t('admin.apply')}</button>
+                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-border/40 bg-card px-3 text-xs font-black text-secondary hover:border-red-400/60 hover:text-red-300">{t('admin.clear')}</button>
                   </div>
-                  <div className="space-y-2 border-t border-[#494847]/20 pt-3">
-                    <p className="text-xs text-[#adaaaa]">{t('admin.vip_level')}<span className="ml-1 font-black text-[#fcc025]">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
+                  <div className="space-y-2 border-t border-border/20 pt-3">
+                    <p className="text-xs text-secondary">{t('admin.vip_level')}<span className="ml-1 font-black text-accent">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
                     <div className="flex flex-wrap gap-1">{[0, 1, 2, 3, 4, 5].map((lv) => (
-                      <button key={lv} type="button" onClick={() => handleSetVipLevel(lv)} className={`px-3 py-1 rounded text-xs font-bold ${(userInspect.vipLevel ?? -1) === lv ? 'bg-[#fcc025] text-black' : 'bg-[#0e0e0e] text-[#adaaaa] hover:bg-[#1a1919]'}`}>T{lv}</button>
+                      <button key={lv} type="button" onClick={() => handleSetVipLevel(lv)} className={`px-3 py-1 rounded text-xs font-bold ${(userInspect.vipLevel ?? -1) === lv ? 'bg-accent text-black' : 'bg-surface text-secondary hover:bg-card'}`}>T{lv}</button>
                     ))}</div>
                   </div>
-                  <div className="flex gap-2 pt-2 border-t border-[#494847]/20">
+                  <div className="flex gap-2 pt-2 border-t border-border/20">
                     <button type="button" onClick={() => handleResetTotalBet(userInspect.user.address)} className="rounded-lg border border-red-500/30 px-3 py-1 text-xs font-bold text-red-400 hover:bg-red-500/10">{t('admin.reset_total_bet')}</button>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
-              <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-[#fcc025]" /><h3 className="text-sm font-black tracking-wide text-white">{t('admin.blacklist')}</h3></div>
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
+              <div className="flex items-center gap-2 mb-4"><Ban size={18} className="text-accent" /><h3 className="text-sm font-black tracking-wide text-white">{t('admin.blacklist')}</h3></div>
               <form onSubmit={handleBlacklist} className="space-y-3">
-                <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_address_placeholder')} />
-                <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_reason_placeholder')} maxLength={200} />
+                <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_address_placeholder')} />
+                <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_reason_placeholder')} maxLength={200} />
                 <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">{t('admin.add_to_blacklist')}</button>
               </form>
-              <div className="mt-6 pt-4 border-t border-[#494847]/30">
-                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-[#fcc025] hover:underline">{t('admin.refresh')}</button></div>
-                {blacklist.length === 0 ? <p className="text-xs text-[#adaaaa]">{t('admin.no_blacklist_records')}</p> : (
+              <div className="mt-6 pt-4 border-t border-border/30">
+                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-accent hover:underline">{t('admin.refresh')}</button></div>
+                {blacklist.length === 0 ? <p className="text-xs text-secondary">{t('admin.no_blacklist_records')}</p> : (
                   <ul className="space-y-2 max-h-64 overflow-y-auto">{blacklist.map((b: any, i: number) => (
-                    <li key={b.address || b.key || i} className="flex items-center justify-between bg-[#0e0e0e] rounded-lg px-3 py-2 text-xs">
-                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}…</div>{b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}</div>
+                    <li key={b.address || b.key || i} className="flex items-center justify-between bg-surface rounded-lg px-3 py-2 text-xs">
+                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}…</div>{b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}</div>
                       <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show(t('admin.removed_from_blacklist')); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">{t('admin.remove')}</button>
                     </li>
                   ))}</ul>
@@ -1030,42 +1030,42 @@ export default function AdminView() {
               </div>
             </div>
 
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
-              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">{t('admin.grant_title')}</h3><p className="text-xs text-[#adaaaa]">{t('admin.grant_description')}</p></div>
+            <div className="bg-card rounded-2xl p-6 border border-border/20 space-y-4">
+              <div><h3 className="text-sm font-black tracking-wide text-white mb-1">{t('admin.grant_title')}</h3><p className="text-xs text-secondary">{t('admin.grant_description')}</p></div>
               <div className="relative">
-                <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder={t('admin.grant_address_placeholder')} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="text" value={grantAddress} onChange={(e) => { setGrantAddress(e.target.value); setUserSearch(e.target.value); }} placeholder={t('admin.grant_address_placeholder')} className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none" />
                 {userResults.length > 0 && (
-                  <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-[#494847]/30 bg-[#1a1919] shadow-xl">
-                    {userResults.map((u) => (<button key={u.address} type="button" onClick={() => { setGrantAddress(u.address); setUserSearch(''); setUserResults([]); }} className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"><span className="font-bold">{u.displayName || u.username || t('admin.unknown')}</span><span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span></button>))}
+                  <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border/30 bg-card shadow-xl">
+                    {userResults.map((u) => (<button key={u.address} type="button" onClick={() => { setGrantAddress(u.address); setUserSearch(''); setUserResults([]); }} className="w-full px-3 py-2 text-left text-xs text-white hover:bg-elevated border-b border-border/10 last:border-0"><span className="font-bold">{u.displayName || u.username || t('admin.unknown')}</span><span className="text-secondary ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span></button>))}
                   </div>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="number" value={grantZxc} onChange={(e) => setGrantZxc(e.target.value)} placeholder={t('admin.grant_zxc_placeholder')} className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-                <input type="number" value={grantYjc} onChange={(e) => setGrantYjc(e.target.value)} placeholder={t('admin.grant_yjc_placeholder')} className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" value={grantZxc} onChange={(e) => setGrantZxc(e.target.value)} placeholder={t('admin.grant_zxc_placeholder')} className="rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none" />
+                <input type="number" value={grantYjc} onChange={(e) => setGrantYjc(e.target.value)} placeholder={t('admin.grant_yjc_placeholder')} className="rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none" />
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <select value={grantItemId} onChange={(e) => setGrantItemId(e.target.value)} className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
+                <select value={grantItemId} onChange={(e) => setGrantItemId(e.target.value)} className="col-span-2 rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none">
                   <option value="">{t('admin.grant_item_select')}</option>{allItemsList.filter((i) => i.type !== 'avatar' && i.type !== 'title').map((item) => (<option key={item.id} value={item.id}>{item.icon || ''} {item.name || item.id} [{item.rarity || ''}]</option>))}
                 </select>
-                <input type="number" min="1" value={grantItemQty} onChange={(e) => setGrantItemQty(e.target.value)} placeholder={t('admin.quantity')} className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
+                <input type="number" min="1" value={grantItemQty} onChange={(e) => setGrantItemQty(e.target.value)} placeholder={t('admin.quantity')} className="rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none" />
               </div>
-              <select value={grantAvatarId} onChange={(e) => setGrantAvatarId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
+              <select value={grantAvatarId} onChange={(e) => setGrantAvatarId(e.target.value)} className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none">
                 <option value="">{t('admin.grant_avatar_select')}</option>{allAvatars.map((av) => (<option key={av.id} value={av.id}>{av.icon || ''} {av.name || av.id}</option>))}
               </select>
-              <select value={grantTitleId} onChange={(e) => setGrantTitleId(e.target.value)} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none">
+              <select value={grantTitleId} onChange={(e) => setGrantTitleId(e.target.value)} className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none">
                 <option value="">{t('admin.grant_title_select')}</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.label || t.id}</option>))}
               </select>
-              <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder={t('admin.grant_note_placeholder')} className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none" />
-              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> {t('admin.grant_submit')}</button>
+              <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder={t('admin.grant_note_placeholder')} className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none" />
+              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> {t('admin.grant_submit')}</button>
             </div>
           </section>
         )}
 
         {activeTab === 'blacklist' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+          <section className="bg-card rounded-2xl p-6 border border-border/20">
             <div className="flex items-center gap-2 mb-4">
-              <Ban size={18} className="text-[#fcc025]" />
+              <Ban size={18} className="text-accent" />
               <h3 className="text-sm font-black tracking-wide text-white">{t('admin.blacklist')}</h3>
             </div>
             <form onSubmit={handleBlacklist} className="space-y-3">
@@ -1073,14 +1073,14 @@ export default function AdminView() {
                 type="text"
                 value={blacklistAddress}
                 onChange={(e) => setBlacklistAddress(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
+                className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm"
                 placeholder={t('admin.blacklist_address_placeholder')}
               />
               <input
                 type="text"
                 value={blacklistReason}
                 onChange={(e) => setBlacklistReason(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
+                className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm"
                 placeholder={t('admin.blacklist_reason_placeholder')}
                 maxLength={200}
               />
@@ -1089,31 +1089,31 @@ export default function AdminView() {
               </button>
             </form>
 
-            <div className="mt-6 pt-4 border-t border-[#494847]/30">
+            <div className="mt-6 pt-4 border-t border-border/30">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-xs font-black tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4>
                 <button
                   type="button"
                   onClick={refreshBlacklist}
-                  className="text-xs text-[#fcc025] hover:underline"
+                  className="text-xs text-accent hover:underline"
                 >
                   {t('admin.refresh')}
                 </button>
               </div>
               {blacklist.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">{t('admin.no_blacklist_records')}</p>
+                <p className="text-xs text-secondary">{t('admin.no_blacklist_records')}</p>
               ) : (
                 <ul className="space-y-2 max-h-64 overflow-y-auto">
                   {blacklist.map((b: any, i: number) => (
                     <li
                       key={b.address || b.key || i}
-                      className="flex items-center justify-between bg-[#0e0e0e] rounded-lg px-3 py-2 text-xs"
+                      className="flex items-center justify-between bg-surface rounded-lg px-3 py-2 text-xs"
                     >
                       <div>
                         <div className="text-white font-mono">
                           {String(b.address || b.key || '').slice(0, 10)}…
                         </div>
-                        {b.reason && <div className="text-[#adaaaa] text-xs mt-1">{b.reason}</div>}
+                        {b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}
                       </div>
                       <button
                         type="button"
@@ -1143,9 +1143,9 @@ export default function AdminView() {
         )}
 
         {activeTab === 'users' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
+          <section className="bg-card rounded-2xl p-6 border border-border/20 space-y-4">
             <h3 className="text-sm font-black tracking-wide text-white">{t('admin.user_query')}</h3>
-            <p className="text-xs text-[#adaaaa]">
+            <p className="text-xs text-secondary">
               {t('admin.user_query_desc')}
             </p>
             <div className="flex gap-2">
@@ -1154,48 +1154,48 @@ export default function AdminView() {
                 value={userQueryAddress}
                 onChange={(e) => setUserQueryAddress(e.target.value)}
                 placeholder={t('admin.user_query_placeholder')}
-                className="flex-1 rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="flex-1 rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
               <button
                 type="button"
                 onClick={handleUserInspect}
-                className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110"
+                className="rounded-lg bg-accent px-4 text-xs font-black text-black hover:brightness-110"
               >
                 {t('admin.query')}
               </button>
             </div>
             {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
             {userInspect && (
-              <div className="space-y-3 rounded-lg border border-[#494847]/20 bg-[#262626] p-4">
-                <div className="text-xs text-[#adaaaa]">
-                  <span className="text-[#494847]">{t('admin.address')}：</span>
+              <div className="space-y-3 rounded-lg border border-border/20 bg-elevated p-4">
+                <div className="text-xs text-secondary">
+                  <span className="text-muted">{t('admin.address')}：</span>
                   <span className="font-mono text-white break-all">{userInspect.user.address}</span>
                 </div>
                 {userInspect.user.displayName && (
-                  <div className="text-xs text-[#adaaaa]">
-                    <span className="text-[#494847]">{t('admin.display_name')}：</span>
+                  <div className="text-xs text-secondary">
+                    <span className="text-muted">{t('admin.display_name')}：</span>
                     <span className="text-white">{userInspect.user.displayName}</span>
                   </div>
                 )}
                 {userInspect.balances && (
-                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-[#1a1919] p-3">
+                  <div className="grid grid-cols-3 gap-2 rounded-lg bg-card p-3">
                     <div>
-                      <p className="text-xs text-[#494847]">{t('admin.zxc_balance')}</p>
+                      <p className="text-xs text-muted">{t('admin.zxc_balance')}</p>
                       <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#494847]">{t('admin.yjc_balance')}</p>
+                      <p className="text-xs text-muted">{t('admin.yjc_balance')}</p>
                       <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.yjc) || 0)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#494847]">{t('admin.total_bet')}</p>
+                      <p className="text-xs text-muted">{t('admin.total_bet')}</p>
                       <p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.totalBet) || 0)}</p>
                     </div>
                   </div>
                 )}
-                <div className="text-xs text-[#adaaaa]">
-                  <span className="text-[#494847]">{t('admin.current_win_bias')}</span>
-                  <span className="text-[#fcc025] font-black">
+                <div className="text-xs text-secondary">
+                  <span className="text-muted">{t('admin.current_win_bias')}</span>
+                  <span className="text-accent font-black">
                     {userInspect.profile?.winBias != null ? userInspect.profile.winBias : t('admin.win_bias_not_set')}
                   </span>
                 </div>
@@ -1205,28 +1205,28 @@ export default function AdminView() {
                     value={userBiasInput}
                     onChange={(e) => setUserBiasInput(e.target.value)}
                     placeholder={t('admin.win_bias_placeholder')}
-                    className="flex-1 rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                    className="flex-1 rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleSetWinBias}
-                    className="flex items-center gap-1 rounded-lg bg-[#fcc025] px-3 text-xs font-black text-black hover:brightness-110"
+                    className="flex items-center gap-1 rounded-lg bg-accent px-3 text-xs font-black text-black hover:brightness-110"
                   >
                     <Sliders size={12} /> {t('admin.apply')}
                   </button>
                   <button
                     type="button"
                     onClick={handleClearWinBias}
-                    className="rounded-lg border border-[#494847]/40 bg-[#1a1919] px-3 text-xs font-black text-[#adaaaa] hover:border-red-400/60 hover:text-red-300"
+                    className="rounded-lg border border-border/40 bg-card px-3 text-xs font-black text-secondary hover:border-red-400/60 hover:text-red-300"
                   >
                     {t('admin.clear')}
                   </button>
                 </div>
 
-                <div className="space-y-2 border-t border-[#494847]/20 pt-3">
-                  <p className="text-xs text-[#adaaaa]">
+                <div className="space-y-2 border-t border-border/20 pt-3">
+                  <p className="text-xs text-secondary">
                     {t('admin.vip_level')}
-                    <span className="ml-1 font-black text-[#fcc025]">
+                    <span className="ml-1 font-black text-accent">
                       {typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}
                     </span>
                   </p>
@@ -1236,7 +1236,7 @@ export default function AdminView() {
                         key={lv}
                         type="button"
                         onClick={() => handleSetVipLevel(lv)}
-                        className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-1.5 text-xs font-black text-white hover:border-[#fcc025]/60 hover:text-[#fcc025]"
+                        className="rounded-lg border border-border/30 bg-card px-3 py-1.5 text-xs font-black text-white hover:border-accent/60 hover:text-accent"
                       >
                         VIP {lv}
                       </button>
@@ -1244,7 +1244,7 @@ export default function AdminView() {
                   </div>
                 </div>
 
-                <div className="border-t border-[#494847]/20 pt-3">
+                <div className="border-t border-border/20 pt-3">
                   <button
                     type="button"
                     onClick={handleResetTotalBet}
@@ -1263,12 +1263,12 @@ export default function AdminView() {
         )}
         {activeTab === 'catalog' && (
           <section className="space-y-6">
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
               <div className="flex items-center gap-2 mb-4">
-                <Package size={18} className="text-[#fcc025]" />
+                <Package size={18} className="text-accent" />
                 <h3 className="text-sm font-black tracking-wide text-white">{t('admin.catalog_save_new')}</h3>
               </div>
-              <p className="text-xs text-[#adaaaa] mb-3">
+              <p className="text-xs text-secondary mb-3">
                 {t('admin.catalog_description')}
               </p>
               <form onSubmit={handleCatalogCreate} className="space-y-3">
@@ -1277,13 +1277,13 @@ export default function AdminView() {
                     type="text"
                     value={catalogItemId}
                     onChange={(e) => setCatalogItemId(e.target.value)}
-                    className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
+                    className="bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm"
                     placeholder={t('admin.item_id_auto')}
                   />
                   <select
                     value={catalogType}
                     onChange={(e) => setCatalogType(e.target.value as any)}
-                    className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
+                    className="bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="avatar">{t('admin.type_avatar')}</option>
                     <option value="title">{t('admin.type_title')}</option>
@@ -1297,14 +1297,14 @@ export default function AdminView() {
                   type="text"
                   value={catalogName}
                   onChange={(e) => setCatalogName(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm"
                   placeholder={t('admin.item_name_placeholder')}
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <select
                     value={catalogRarity}
                     onChange={(e) => setCatalogRarity(e.target.value as any)}
-                    className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
+                    className="bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm"
                   >
                     {['common', 'rare', 'epic', 'legendary', 'mythic', 'vip'].map((key) => (
                       <option key={key} value={key}>
@@ -1316,56 +1316,56 @@ export default function AdminView() {
                     type="text"
                     value={catalogIcon}
                     onChange={(e) => setCatalogIcon(e.target.value)}
-                    className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm"
+                    className="bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm"
                     placeholder={t('admin.item_icon_placeholder')}
                   />
                 </div>
                 <textarea
                   value={catalogDescription}
                   onChange={(e) => setCatalogDescription(e.target.value)}
-                  className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm min-h-16"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm min-h-16"
                   placeholder={t('admin.item_desc_placeholder')}
                   maxLength={500}
                 />
-                <button type="submit" className="w-full py-2 bg-[#fcc025] text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">
+                <button type="submit" className="w-full py-2 bg-accent text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">
                   {t('admin.save_item')}
                 </button>
               </form>
             </div>
 
-            <div className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+            <div className="bg-card rounded-2xl p-6 border border-border/20">
               <h3 className="text-sm font-black tracking-wide text-white mb-4">
                 {t('admin.custom_items_count', { count: avatarsAndTitles.length })}
               </h3>
               {avatarsAndTitles.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">{t('admin.no_custom_items')}</p>
+                <p className="text-xs text-secondary">{t('admin.no_custom_items')}</p>
               ) : (
                 <ul className="space-y-2">
                   {avatarsAndTitles.map((item) => (
-                    <li key={item.itemId} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-3">
+                    <li key={item.itemId} className="rounded-lg border border-border/30 bg-surface p-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="text-lg">{item.icon || (item.type === 'avatar' ? '👤' : '🏷️')}</span>
-                            <p className={`text-sm font-bold ${item.isActive ? 'text-white' : 'text-[#494847] line-through'}`}>
+                            <p className={`text-sm font-bold ${item.isActive ? 'text-white' : 'text-muted line-through'}`}>
                               {item.name}
                             </p>
-                            <span className="text-xs font-black tracking-widest uppercase text-[#fcc025]">
+                            <span className="text-xs font-black tracking-widest uppercase text-accent">
                               {t(`admin.type_${item.type}`) || item.type} · {t(`admin.rarity_${item.rarity}`) || item.rarity}
                             </span>
                           </div>
-                          <p className="text-xs text-[#494847] mt-1">id: {item.itemId}</p>
+                          <p className="text-xs text-muted mt-1">id: {item.itemId}</p>
                           {item.description && (
-                            <p className="text-xs text-[#adaaaa] mt-1 line-clamp-2">{item.description}</p>
+                            <p className="text-xs text-secondary mt-1 line-clamp-2">{item.description}</p>
                           )}
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
                           <button
                             onClick={() => handleCatalogToggle(item)}
-                            className="p-1.5 rounded border border-[#494847]/30 hover:bg-[#1a1919]"
+                            className="p-1.5 rounded border border-border/30 hover:bg-card"
                             title={item.isActive ? t('admin.hide') : t('admin.show')}
                           >
-                            {item.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-[#adaaaa]" />}
+                            {item.isActive ? <Eye size={14} className="text-emerald-400" /> : <EyeOff size={14} className="text-secondary" />}
                           </button>
                           <button
                             onClick={() => handleCatalogDelete(item)}
@@ -1385,49 +1385,49 @@ export default function AdminView() {
         )}
 
         {activeTab === 'submissions' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20">
+          <section className="bg-card rounded-2xl p-6 border border-border/20">
             <h3 className="text-sm font-black tracking-wide text-white mb-4">{t('admin.submission_count', { count: submissions.length })}</h3>
             {submissions.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">{t('admin.no_submissions')}</p>
+              <p className="text-xs text-secondary">{t('admin.no_submissions')}</p>
             ) : (
               <ul className="space-y-3">
                 {submissions.map((sub) => (
                   <li
                     key={sub.submissionId}
-                    className="rounded-lg border border-[#494847]/20 bg-[#262626] p-4"
+                    className="rounded-lg border border-border/20 bg-elevated p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1a1919] text-2xl">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card text-2xl">
                           {sub.icon || (sub.type === 'avatar' ? '👤' : '🏷')}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-black text-white">{sub.name}</span>
-                            <span className="text-xs font-bold uppercase text-[#fcc025]">
+                            <span className="text-xs font-bold uppercase text-accent">
                               {sub.type === 'avatar' ? t('admin.submission_type_avatar') : t('admin.submission_type_title')}
                             </span>
                             <span className={`text-xs font-bold uppercase ${
                               sub.status === 'pending'
-                                ? 'text-[#fcc025]'
+                                ? 'text-accent'
                                 : sub.status === 'approved'
                                 ? 'text-emerald-400'
                                 : 'text-red-400'
                             }`}>
                               {sub.status === 'pending' ? t('admin.status_pending') : sub.status === 'approved' ? t('admin.status_approved') : t('admin.status_rejected')}
                             </span>
-                            <span className="text-xs font-bold uppercase text-[#adaaaa]">
+                            <span className="text-xs font-bold uppercase text-secondary">
                               {t(`admin.rarity_${sub.rarity}`) || sub.rarity}
                             </span>
                           </div>
                           {sub.description && (
-                            <p className="mt-1 text-xs text-[#adaaaa] break-words">{sub.description}</p>
+                            <p className="mt-1 text-xs text-secondary break-words">{sub.description}</p>
                           )}
-                          <p className="mt-1 text-xs text-[#494847] break-all">
+                          <p className="mt-1 text-xs text-muted break-all">
                             {t('admin.submitted_by', { address: `${sub.address?.slice(0, 10)}...${sub.address?.slice(-6)}` })}
                           </p>
                           {sub.reviewNote && (
-                            <p className="mt-1 text-xs text-[#adaaaa]">{t('admin.review_note', { note: sub.reviewNote })}</p>
+                            <p className="mt-1 text-xs text-secondary">{t('admin.review_note', { note: sub.reviewNote })}</p>
                           )}
                         </div>
                       </div>
@@ -1460,49 +1460,49 @@ export default function AdminView() {
         )}
 
         {activeTab === 'campaigns' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-6">
+          <section className="bg-card rounded-2xl p-6 border border-border/20 space-y-6">
             <div>
               <h3 className="text-sm font-black tracking-wide text-white mb-1">{t('admin.campaign_management')}</h3>
-              <p className="text-xs text-[#adaaaa]">
+              <p className="text-xs text-secondary">
                 {t('admin.campaign_management_desc')}
               </p>
             </div>
 
-            <div className="rounded-lg border border-[#494847]/20 bg-[#262626] p-4 space-y-3">
-              <div className="text-xs font-black text-[#fcc025]">{t('admin.add_edit_campaign')}</div>
+            <div className="rounded-lg border border-border/20 bg-elevated p-4 space-y-3">
+              <div className="text-xs font-black text-accent">{t('admin.add_edit_campaign')}</div>
               <input
                 type="text"
                 value={campaignDraftId}
                 onChange={(e) => setCampaignDraftId(e.target.value)}
                 placeholder={t('admin.campaign_id_placeholder')}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
               <input
                 type="text"
                 value={campaignTitle}
                 onChange={(e) => setCampaignTitle(e.target.value)}
                 placeholder={t('admin.campaign_title_placeholder')}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
               <textarea
                 value={campaignDescription}
                 onChange={(e) => setCampaignDescription(e.target.value)}
                 placeholder={t('admin.campaign_desc_placeholder')}
                 rows={4}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="datetime-local"
                   value={campaignStartAt}
                   onChange={(e) => setCampaignStartAt(e.target.value)}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-border/30 bg-card px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
                 />
                 <input
                   type="datetime-local"
                   value={campaignEndAt}
                   onChange={(e) => setCampaignEndAt(e.target.value)}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-border/30 bg-card px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -1512,28 +1512,28 @@ export default function AdminView() {
                   value={campaignClaimLimit}
                   onChange={(e) => setCampaignClaimLimit(e.target.value)}
                   placeholder={t('admin.claims_per_user')}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-border/30 bg-card px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
                 />
                 <input
                   type="number"
                   value={campaignRewardZxc}
                   onChange={(e) => setCampaignRewardZxc(e.target.value)}
                   placeholder={t('admin.reward_zxc')}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-border/30 bg-card px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
                 />
                 <input
                   type="number"
                   value={campaignRewardYjc}
                   onChange={(e) => setCampaignRewardYjc(e.target.value)}
                   placeholder={t('admin.reward_yjc')}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-border/30 bg-card px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <select
                   value={campaignRewardItemId}
                   onChange={(e) => setCampaignRewardItemId(e.target.value)}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-border/30 bg-card px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
                 >
                   <option value="">{t('admin.reward_item_select')}</option>
                   {allItemsList
@@ -1550,13 +1550,13 @@ export default function AdminView() {
                   value={campaignRewardItemQty}
                   onChange={(e) => setCampaignRewardItemQty(e.target.value)}
                   placeholder={t('admin.reward_qty')}
-                  className="rounded-lg border border-[#494847]/30 bg-[#1a1919] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                  className="rounded-lg border border-border/30 bg-card px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
                 />
               </div>
               <select
                 value={campaignRewardAvatarId}
                 onChange={(e) => setCampaignRewardAvatarId(e.target.value)}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
               >
                 <option value="">{t('admin.reward_avatar_select')}</option>
                 {allAvatars.map((av) => (
@@ -1568,7 +1568,7 @@ export default function AdminView() {
               <select
                 value={campaignRewardTitleId}
                 onChange={(e) => setCampaignRewardTitleId(e.target.value)}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#1a1919] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
               >
                 <option value="">{t('admin.reward_title_select')}</option>
                 {allTitles.map((t) => (
@@ -1577,7 +1577,7 @@ export default function AdminView() {
                   </option>
                 ))}
               </select>
-              <label className="flex items-center gap-2 text-xs text-[#adaaaa]">
+              <label className="flex items-center gap-2 text-xs text-secondary">
                 <input
                   type="checkbox"
                   checked={campaignIsActive}
@@ -1588,7 +1588,7 @@ export default function AdminView() {
               <button
                 type="button"
                 onClick={handleCampaignSave}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-3 py-2 text-xs font-black text-black hover:brightness-110"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-xs font-black text-black hover:brightness-110"
               >
                 <CalendarClock size={12} /> {t('admin.save_campaign')}
               </button>
@@ -1597,13 +1597,13 @@ export default function AdminView() {
             <div>
               <h4 className="mb-2 text-xs font-black text-white">{t('admin.current_campaigns', { count: campaigns.length })}</h4>
               {campaigns.length === 0 ? (
-                <p className="text-xs text-[#adaaaa]">{t('admin.no_campaigns')}</p>
+                <p className="text-xs text-secondary">{t('admin.no_campaigns')}</p>
               ) : (
                 <ul className="space-y-2">
                   {campaigns.map((c) => (
                     <li
                       key={c.campaignId}
-                      className="rounded-lg border border-[#494847]/20 bg-[#262626] p-3"
+                      className="rounded-lg border border-border/20 bg-elevated p-3"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
@@ -1613,17 +1613,17 @@ export default function AdminView() {
                               className={`text-xs font-bold px-2 py-0.5 rounded ${
                                 c.isActive
                                   ? 'bg-emerald-500/20 text-emerald-300'
-                                  : 'bg-[#494847]/30 text-[#adaaaa]'
+                                  : 'bg-[#494847]/30 text-secondary'
                               }`}
                             >
                               {c.isActive ? t('admin.campaign_active') : t('admin.campaign_inactive')}
                             </span>
                           </div>
-                          <p className="mt-1 text-xs text-[#adaaaa] break-words">
+                          <p className="mt-1 text-xs text-secondary break-words">
                             ID: {c.campaignId}
                           </p>
                           {c.description && (
-                            <p className="mt-1 text-xs text-[#adaaaa] break-words">
+                            <p className="mt-1 text-xs text-secondary break-words">
                               {c.description}
                             </p>
                           )}
@@ -1648,7 +1648,7 @@ export default function AdminView() {
                               setCampaignRewardAvatarId((r.avatars || [])[0] || '');
                               setCampaignRewardTitleId((r.titles || [])[0] || '');
                             }}
-                            className="rounded-lg bg-[#1a1919] p-2 hover:bg-[#fcc025]/10"
+                            className="rounded-lg bg-card p-2 hover:bg-accent/10"
                             title={t('admin.edit_announcement')}
                           >
                             <Edit2 size={12} />
@@ -1656,7 +1656,7 @@ export default function AdminView() {
                           <button
                             type="button"
                             onClick={() => handleCampaignToggle(c)}
-                            className="rounded-lg bg-[#1a1919] p-2 hover:bg-[#fcc025]/10"
+                            className="rounded-lg bg-card p-2 hover:bg-accent/10"
                             title={c.isActive ? t('admin.hide') : t('admin.show')}
                           >
                             {c.isActive ? <EyeOff size={12} /> : <Eye size={12} />}
@@ -1664,7 +1664,7 @@ export default function AdminView() {
                           <button
                             type="button"
                             onClick={() => handleCampaignDelete(c.campaignId)}
-                            className="rounded-lg bg-[#1a1919] p-2 hover:bg-red-500/10"
+                            className="rounded-lg bg-card p-2 hover:bg-red-500/10"
                           >
                             <Trash2 size={12} className="text-red-400" />
                           </button>
@@ -1679,10 +1679,10 @@ export default function AdminView() {
         )}
 
         {activeTab === 'grant' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
+          <section className="bg-card rounded-2xl p-6 border border-border/20 space-y-4">
             <div>
               <h3 className="text-sm font-black tracking-wide text-white mb-1">{t('admin.grant_title')}</h3>
-              <p className="text-xs text-[#adaaaa]">
+              <p className="text-xs text-secondary">
                 {t('admin.grant_description')}
               </p>
             </div>
@@ -1695,10 +1695,10 @@ export default function AdminView() {
                   setUserSearch(e.target.value);
                 }}
                 placeholder={t('admin.grant_address_placeholder')}
-                className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
               {showUserDropdown && (
-                <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-[#494847]/30 bg-[#1a1919] shadow-xl">
+                <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border/30 bg-card shadow-xl">
                   {userResults.map((u) => (
                     <button
                       key={u.address}
@@ -1708,10 +1708,10 @@ export default function AdminView() {
                         setUserSearch('');
                         setUserResults([]);
                       }}
-                      className="w-full px-3 py-2 text-left text-xs text-white hover:bg-[#262626] border-b border-[#494847]/10 last:border-0"
+                      className="w-full px-3 py-2 text-left text-xs text-white hover:bg-elevated border-b border-border/10 last:border-0"
                     >
                       <span className="font-bold">{u.displayName || u.username || t('admin.unknown')}</span>
-                      <span className="text-[#adaaaa] ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span>
+                      <span className="text-secondary ml-2">{u.address.slice(0, 10)}...{u.address.slice(-6)}</span>
                     </button>
                   ))}
                 </div>
@@ -1723,21 +1723,21 @@ export default function AdminView() {
                 value={grantZxc}
                 onChange={(e) => setGrantZxc(e.target.value)}
                 placeholder={t('admin.grant_zxc_placeholder')}
-                className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
               <input
                 type="number"
                 value={grantYjc}
                 onChange={(e) => setGrantYjc(e.target.value)}
                 placeholder={t('admin.grant_yjc_placeholder')}
-                className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
               <select
                 value={grantItemId}
                 onChange={(e) => setGrantItemId(e.target.value)}
-                className="col-span-2 rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="col-span-2 rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
               >
                 <option value="">{t('admin.grant_item_select')}</option>
                 {allItemsList
@@ -1754,13 +1754,13 @@ export default function AdminView() {
                 value={grantItemQty}
                 onChange={(e) => setGrantItemQty(e.target.value)}
                 placeholder={t('admin.quantity')}
-                className="rounded-lg border border-[#494847]/30 bg-[#262626] px-2 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+                className="rounded-lg border border-border/30 bg-elevated px-2 py-2 text-xs text-white focus:border-accent focus:outline-none"
               />
             </div>
             <select
               value={grantAvatarId}
               onChange={(e) => setGrantAvatarId(e.target.value)}
-              className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+              className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
             >
               <option value="">{t('admin.grant_avatar_select')}</option>
               {allAvatars.map((av) => (
@@ -1772,7 +1772,7 @@ export default function AdminView() {
             <select
               value={grantTitleId}
               onChange={(e) => setGrantTitleId(e.target.value)}
-              className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+              className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
             >
               <option value="">{t('admin.grant_title_select')}</option>
               {allTitles.map((t) => (
@@ -1786,12 +1786,12 @@ export default function AdminView() {
               value={grantNote}
               onChange={(e) => setGrantNote(e.target.value)}
               placeholder={t('admin.grant_note_placeholder')}
-              className="w-full rounded-lg border border-[#494847]/30 bg-[#262626] px-3 py-2 text-xs text-white focus:border-[#fcc025] focus:outline-none"
+              className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none"
             />
             <button
               type="button"
               onClick={handleGrantSubmit}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#fcc025] px-4 py-3 text-xs font-black text-black hover:brightness-110"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-xs font-black text-black hover:brightness-110"
             >
               <Send size={12} /> {t('admin.grant_submit')}
             </button>
@@ -1799,16 +1799,16 @@ export default function AdminView() {
         )}
 
         {activeTab === 'tickets' && (
-          <section className="bg-[#1a1919] rounded-2xl p-6 border border-[#494847]/20 space-y-4">
+          <section className="bg-card rounded-2xl p-6 border border-border/20 space-y-4">
             <div className="flex items-center gap-2">
-              <MessageCircle size={18} className="text-[#fcc025]" />
+              <MessageCircle size={18} className="text-accent" />
               <h3 className="text-sm font-black tracking-wide text-white">{t('admin.ticket_title', { count: tickets.length })}</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               <select
                 value={ticketStatusFilter}
                 onChange={(e) => setTicketStatusFilter(e.target.value)}
-                className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white"
+                className="bg-surface border border-border/30 rounded-lg px-3 py-2 text-xs text-white"
               >
                 <option value="">{t('admin.all_statuses')}</option>
                 <option value="open">{t('admin.status_open')}</option>
@@ -1821,26 +1821,26 @@ export default function AdminView() {
                 value={ticketKeyword}
                 onChange={(e) => setTicketKeyword(e.target.value)}
                 placeholder={t('admin.keyword_search')}
-                className="flex-1 min-w-[160px] bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white"
+                className="flex-1 min-w-[160px] bg-surface border border-border/30 rounded-lg px-3 py-2 text-xs text-white"
               />
               <button
                 type="button"
                 onClick={refreshTickets}
-                className="rounded-lg bg-[#fcc025] px-4 text-xs font-black text-black hover:brightness-110"
+                className="rounded-lg bg-accent px-4 text-xs font-black text-black hover:brightness-110"
               >
                 {t('admin.query')}
               </button>
             </div>
             {tickets.length === 0 ? (
-              <p className="text-xs text-[#adaaaa]">{t('admin.no_tickets')}</p>
+              <p className="text-xs text-secondary">{t('admin.no_tickets')}</p>
             ) : (
               <ul className="space-y-3 max-h-[60vh] overflow-y-auto">
                 {tickets.map((t: any) => (
-                  <li key={t.reportId} className="rounded-lg border border-[#494847]/30 bg-[#0e0e0e] p-4 space-y-2">
+                  <li key={t.reportId} className="rounded-lg border border-border/30 bg-surface p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
                         <p className="text-sm font-black text-white">{t.title || t('admin.no_title')}</p>
-                        <p className="text-xs text-[#adaaaa]">
+                        <p className="text-xs text-secondary">
                           {t.category || t('admin.other')} · {t.address ? `${String(t.address).slice(0, 10)}…` : t('admin.anonymous')}
                           {t.createdAt && ` · ${new Date(t.createdAt).toLocaleString()}`}
                         </p>
@@ -1850,10 +1850,10 @@ export default function AdminView() {
                           t.status === 'open'
                             ? 'bg-red-500/20 text-red-300'
                             : t.status === 'in_progress'
-                            ? 'bg-[#fcc025]/20 text-[#fcc025]'
+                            ? 'bg-accent/20 text-accent'
                             : t.status === 'resolved'
                             ? 'bg-emerald-500/20 text-emerald-300'
-                            : 'bg-[#494847]/20 text-[#adaaaa]'
+                            : 'bg-[#494847]/20 text-secondary'
                         }`}
                       >
                         {t.status === 'open'
@@ -1869,8 +1869,8 @@ export default function AdminView() {
                     </div>
                     {t.message && <p className="text-xs text-white whitespace-pre-wrap break-words">{t.message}</p>}
                     {t.adminUpdate && (
-                      <div className="rounded bg-[#fcc025]/10 border border-[#fcc025]/30 p-2">
-                        <p className="text-xs font-black text-[#fcc025] mb-1">{t('admin.admin_reply')}</p>
+                      <div className="rounded bg-accent/10 border border-accent/30 p-2">
+                        <p className="text-xs font-black text-accent mb-1">{t('admin.admin_reply')}</p>
                         <p className="text-xs text-white whitespace-pre-wrap break-words">{t.adminUpdate}</p>
                       </div>
                     )}
@@ -1878,7 +1878,7 @@ export default function AdminView() {
                       value={ticketReplyDraft[t.reportId] ?? ''}
                       onChange={(e) => setTicketReplyDraft((prev) => ({ ...prev, [t.reportId]: e.target.value }))}
                       placeholder={t('admin.reply_placeholder')}
-                      className="w-full bg-[#1a1919] border border-[#494847]/30 rounded-lg px-3 py-2 text-xs text-white resize-y"
+                      className="w-full bg-card border border-border/30 rounded-lg px-3 py-2 text-xs text-white resize-y"
                       rows={2}
                     />
                     <div className="flex flex-wrap gap-2">
@@ -1902,8 +1902,8 @@ export default function AdminView() {
                           }}
                           className={`text-xs font-black px-2 py-1 rounded border ${
                             t.status === s
-                              ? 'border-[#fcc025] bg-[#fcc025]/10 text-[#fcc025]'
-                              : 'border-[#494847]/40 text-[#adaaaa] hover:border-[#fcc025]/60 hover:text-[#fcc025]'
+                              ? 'border-accent bg-accent/10 text-accent'
+                              : 'border-border/40 text-secondary hover:border-accent/60 hover:text-accent'
                           }`}
                         >
                           {s === 'open' ? t('admin.status_open') : s === 'in_progress' ? t('admin.status_in_progress') : s === 'resolved' ? t('admin.status_resolved') : t('admin.status_closed')}
@@ -1962,33 +1962,33 @@ export function AnnouncementManager() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="bg-[#1a1919] p-4 rounded-xl border border-[#494847]/30 space-y-3">
-        <h3 className="text-sm font-black text-[#fcc025]">{editing ? t('admin.edit_announcement') : t('admin.new_announcement_title')}</h3>
+      <form onSubmit={handleSubmit} className="bg-card p-4 rounded-xl border border-border/30 space-y-3">
+        <h3 className="text-sm font-black text-accent">{editing ? t('admin.edit_announcement') : t('admin.new_announcement_title')}</h3>
         <input
           value={form.title}
           onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
           placeholder={t('admin.announcement_title_placeholder')}
-          className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
+          className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm text-white"
           required
         />
         <textarea
           value={form.content}
           onChange={e => setForm(prev => ({ ...prev, content: e.target.value }))}
           placeholder={t('admin.announcement_content_placeholder')}
-          className="w-full bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white min-h-[100px]"
+          className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm text-white min-h-[100px]"
           required
         />
         <div className="flex gap-4">
           <select
             value={form.type}
             onChange={e => setForm(prev => ({ ...prev, type: e.target.value }))}
-            className="bg-[#0e0e0e] border border-[#494847]/30 rounded-lg px-3 py-2 text-sm text-white"
+            className="bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm text-white"
           >
             <option value="info">{t('admin.type_normal')}</option>
             <option value="warning">{t('admin.type_maintenance')}</option>
             <option value="urgent">{t('admin.type_urgent')}</option>
           </select>
-          <label className="flex items-center gap-2 text-sm text-[#adaaaa]">
+          <label className="flex items-center gap-2 text-sm text-secondary">
             <input
               type="checkbox"
               checked={form.active}
@@ -1998,14 +1998,14 @@ export function AnnouncementManager() {
           </label>
         </div>
         <div className="flex gap-2">
-          <button type="submit" disabled={loading} className="flex-1 bg-[#fcc025] text-black font-black py-2 rounded-lg">
+          <button type="submit" disabled={loading} className="flex-1 bg-accent text-black font-black py-2 rounded-lg">
             {loading ? t('admin.processing') : t('admin.save_announcement')}
           </button>
           {editing && (
             <button
               type="button"
               onClick={() => { setEditing(null); setForm({ title: '', content: '', type: 'info', active: true }); }}
-              className="px-4 border border-[#494847]/30 text-[#adaaaa] rounded-lg"
+              className="px-4 border border-border/30 text-secondary rounded-lg"
             >
               {t('common.cancel')}
             </button>
@@ -2015,17 +2015,17 @@ export function AnnouncementManager() {
 
       <div className="space-y-2">
         {anns.map(ann => (
-          <div key={ann.id} className="bg-[#1a1919] p-3 rounded-xl border border-[#494847]/20 flex justify-between items-center">
+          <div key={ann.id} className="bg-card p-3 rounded-xl border border-border/20 flex justify-between items-center">
             <div>
               <p className="text-sm font-bold text-white">{ann.title}</p>
-              <p className="text-xs text-[#adaaaa]">{ann.type} · {ann.active ? t('admin.enabled') : t('admin.disabled')}</p>
+              <p className="text-xs text-secondary">{ann.type} · {ann.active ? t('admin.enabled') : t('admin.disabled')}</p>
             </div>
             <button
               onClick={() => {
                 setEditing(ann);
                 setForm({ title: ann.title, content: ann.content, type: ann.type, active: ann.active });
               }}
-              className="text-[#fcc025] text-xs font-bold border border-[#fcc025]/30 px-2 py-1 rounded"
+              className="text-accent text-xs font-bold border border-accent/30 px-2 py-1 rounded"
             >
               {t('admin.edit_announcement')}
             </button>

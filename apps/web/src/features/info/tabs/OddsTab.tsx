@@ -61,7 +61,7 @@ export default function OddsTab() {
           <Shield className="h-6 w-6 text-emerald-400" />
           <h2 className="text-lg font-black text-emerald-400">{t('info.fair_play_title')}</h2>
         </div>
-        <p className="mt-3 text-sm font-bold leading-relaxed text-[#adaaaa]">
+        <p className="mt-3 text-sm font-bold leading-relaxed text-secondary">
           {t('info.fair_play_description')}
         </p>
         <div className="mt-4 flex items-center gap-2">
@@ -70,28 +70,28 @@ export default function OddsTab() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">{t('info.what_is_rtp')}</h2>
-        <p className="mt-3 text-sm font-bold leading-relaxed text-[#adaaaa]">
+      <section className="rounded-2xl border border-border/10 bg-card p-6">
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">{t('info.what_is_rtp')}</h2>
+        <p className="mt-3 text-sm font-bold leading-relaxed text-secondary">
           {t('info.rtp_explanation_detail')}
         </p>
-        <div className="mt-4 rounded-lg bg-[#0e0e0e] p-3">
+        <div className="mt-4 rounded-lg bg-surface p-3">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-[#adaaaa]">{t('info.platform_advantage')}</span>
-            <span className="font-black text-[#fcc025]">{t('info.lower_is_better')}</span>
+            <span className="font-bold text-secondary">{t('info.platform_advantage')}</span>
+            <span className="font-black text-accent">{t('info.lower_is_better')}</span>
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">{t('info.fee_title')}</h2>
-        <p className="mt-3 text-sm font-bold leading-relaxed text-[#adaaaa]">
+      <section className="rounded-2xl border border-border/10 bg-card p-6">
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">{t('info.fee_title')}</h2>
+        <p className="mt-3 text-sm font-bold leading-relaxed text-secondary">
           {t('info.fee_formula_label')}<span className="text-emerald-400">{t('info.fee_formula')}</span>。
         </p>
-        <p className="mt-1 text-sm font-bold leading-relaxed text-[#adaaaa]">
-          {t('info.fee_max_discount_prefix')}<span className="text-[#fcc025]">100%</span>{t('info.fee_max_discount_suffix')}
+        <p className="mt-1 text-sm font-bold leading-relaxed text-secondary">
+          {t('info.fee_max_discount_prefix')}<span className="text-accent">100%</span>{t('info.fee_max_discount_suffix')}
         </p>
-        <ul className="mt-3 space-y-2 text-xs font-bold text-[#adaaaa]">
+        <ul className="mt-3 space-y-2 text-xs font-bold text-secondary">
           <li>• {t('info.fee_discount_detail_normal')}</li>
           <li>• {t('info.fee_discount_detail_silver')}</li>
           <li>• {t('info.fee_discount_detail_gold')}</li>
@@ -101,34 +101,34 @@ export default function OddsTab() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa]">{t('info.game_probabilities')}</h2>
+        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-secondary">{t('info.game_probabilities')}</h2>
         {GAME_ODDS.map((game) => (
-          <div key={game.key} className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-4">
+          <div key={game.key} className="rounded-xl border border-border/10 bg-card p-4">
             <button
               onClick={() => setSelectedGame(selectedGame === game.key ? null : game.key)}
               className="flex w-full items-center justify-between"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#fcc025]/10">
-                  <Dice5 className="h-5 w-5 text-[#fcc025]" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
+                  <Dice5 className="h-5 w-5 text-accent" />
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-white">{game.name}</h3>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-emerald-400">RTP {game.rtp}%</span>
-                    <span className="text-xs font-bold text-[#adaaaa]">{t('info.house_edge_label')} {game.houseEdge}%</span>
+                    <span className="text-xs font-bold text-secondary">{t('info.house_edge_label')} {game.houseEdge}%</span>
                   </div>
                 </div>
               </div>
-              <HelpCircle className="h-5 w-5 text-[#494847]" />
+              <HelpCircle className="h-5 w-5 text-muted" />
             </button>
 
             {selectedGame === game.key && (
-              <div className="mt-4 space-y-3 border-t border-[#494847]/10 pt-4">
-                <p className="text-sm font-bold text-[#adaaaa]">{game.description}</p>
-                <div className="rounded-lg bg-[#0e0e0e] p-3">
-                  <p className="text-xs font-bold text-[#fcc025]">{t('info.payout_rules_label')}{game.payout}</p>
-                  <p className="mt-1 text-xs font-bold text-[#adaaaa]">{t('info.probability_highlight_label')}{game.probability}</p>
+              <div className="mt-4 space-y-3 border-t border-border/10 pt-4">
+                <p className="text-sm font-bold text-secondary">{game.description}</p>
+                <div className="rounded-lg bg-surface p-3">
+                  <p className="text-xs font-bold text-accent">{t('info.payout_rules_label')}{game.payout}</p>
+                  <p className="mt-1 text-xs font-bold text-secondary">{t('info.probability_highlight_label')}{game.probability}</p>
                 </div>
                 <div className="rounded-lg bg-emerald-500/10 p-3">
                   <p className="text-xs font-bold text-emerald-400">
@@ -137,13 +137,13 @@ export default function OddsTab() {
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg bg-[#0e0e0e] p-2 text-center">
-                    <p className="text-xs font-bold text-[#adaaaa]">{t('info.long_term_rtp')}</p>
+                  <div className="rounded-lg bg-surface p-2 text-center">
+                    <p className="text-xs font-bold text-secondary">{t('info.long_term_rtp')}</p>
                     <p className="text-lg font-black text-emerald-400">{game.rtp}%</p>
                   </div>
-                  <div className="rounded-lg bg-[#0e0e0e] p-2 text-center">
-                    <p className="text-xs font-bold text-[#adaaaa]">{t('info.house_edge_label')}</p>
-                    <p className="text-lg font-black text-[#ff7351]">{game.houseEdge}%</p>
+                  <div className="rounded-lg bg-surface p-2 text-center">
+                    <p className="text-xs font-bold text-secondary">{t('info.house_edge_label')}</p>
+                    <p className="text-lg font-black text-danger">{game.houseEdge}%</p>
                   </div>
                 </div>
               </div>
@@ -153,31 +153,31 @@ export default function OddsTab() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-[#adaaaa] flex items-center gap-2">
+        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-2">
           <Gift size={14} />{t('info.chest_probabilities_title')}
         </h2>
 
-        <div className="rounded-xl border border-[#494847]/10 bg-[#1a1919] p-4">
-          <p className="text-sm font-bold text-[#adaaaa] mb-3">
+        <div className="rounded-xl border border-border/10 bg-card p-4">
+          <p className="text-sm font-bold text-secondary mb-3">
             {t('info.chest_probabilities_desc')}
           </p>
 
           {CHEST_DATA.map((chest) => (
-            <div key={chest.key} className="mb-3 last:mb-0 rounded-lg border border-[#494847]/10 bg-[#0e0e0e] p-4">
+            <div key={chest.key} className="mb-3 last:mb-0 rounded-lg border border-border/10 bg-surface p-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-bold text-white">{chest.type}</h3>
-                <span className="text-xs font-bold text-[#fcc025]">{chest.price}</span>
+                <span className="text-xs font-bold text-accent">{chest.price}</span>
               </div>
-              <p className="text-[10px] font-bold text-[#adaaaa] mb-2">{chest.pity}</p>
+              <p className="text-[10px] font-bold text-secondary mb-2">{chest.pity}</p>
               <div className="flex items-center gap-2">
                 {chest.w.map((pct, i) => pct > 0 && (
                   <div key={i} className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full" style={{ background: chest.colors[i] }} />
-                    <span className="text-[10px] font-bold text-[#adaaaa]">{chest.labels[i]} {pct}%</span>
+                    <span className="text-[10px] font-bold text-secondary">{chest.labels[i]} {pct}%</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-2 h-2 w-full rounded-full bg-[#1a1919] flex overflow-hidden">
+              <div className="mt-2 h-2 w-full rounded-full bg-card flex overflow-hidden">
                 {chest.w.map((pct, i) => pct > 0 && (
                   <div key={i} className="h-full" style={{ width: `${pct}%`, background: chest.colors[i] }} />
                 ))}

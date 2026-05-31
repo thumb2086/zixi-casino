@@ -106,12 +106,12 @@ export default function RoomLobbyView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-4">
-            <LayoutGrid className="text-[#fcc025]" />
-            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">{t('casino.title')}</h1>
+            <LayoutGrid className="text-accent" />
+            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">{t('casino.title')}</h1>
           </div>
         </div>
       </header>
@@ -126,10 +126,10 @@ export default function RoomLobbyView() {
           />
           <div className="absolute bottom-0 left-0 z-20 space-y-4 p-10">
             <div className="flex items-center gap-2">
-              <span className="rounded-sm bg-[#fcc025] px-2 py-1 text-xs font-black uppercase tracking-widest text-black">
+              <span className="rounded-sm bg-accent px-2 py-1 text-xs font-black uppercase tracking-widest text-black">
                 {t('casino.featured')}
               </span>
-              <div className="flex items-center gap-1.5 text-[#fcc025]">
+              <div className="flex items-center gap-1.5 text-accent">
                 <Flame size={14} className="fill-current" />
                 <span className="text-xs font-bold uppercase tracking-widest">
                   {t('casino.high_stakes')}
@@ -141,7 +141,7 @@ export default function RoomLobbyView() {
             </h2>
             <Link
               to="/app/casino/horse"
-              className="group flex w-fit items-center gap-3 rounded-xl bg-[#fcc025] px-8 py-3.5 font-black uppercase italic tracking-tighter text-black transition-colors hover:bg-white"
+              className="group flex w-fit items-center gap-3 rounded-xl bg-accent px-8 py-3.5 font-black uppercase italic tracking-tighter text-black transition-colors hover:bg-white"
             >
               {t('casino.play_now')}
               <ChevronRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -157,28 +157,28 @@ export default function RoomLobbyView() {
                 key={game.id}
                 className={`group relative overflow-hidden rounded-2xl border p-6 transition-all ${
                   game.vipOnly
-                    ? 'border-[#fcc025]/15 bg-[#151515] hover:bg-[#1c1b1b]'
-                    : 'border-[#494847]/10 bg-[#1a1919] hover:bg-[#262626]'
+                    ? 'border-accent/15 bg-[#151515] hover:bg-[#1c1b1b]'
+                    : 'border-border/10 bg-card hover:bg-elevated'
                 }`}
               >
                 {game.vipOnly && (
-                  <div className="absolute left-3 top-3 rounded-full border border-[#fcc025]/25 bg-[#fcc025]/10 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-[#fcc025]">
+                  <div className="absolute left-3 top-3 rounded-full border border-accent/25 bg-accent/10 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-accent">
                     {t('lobby.vip')}
                   </div>
                 )}
                 {game.hot && (
                   <div className="absolute right-0 top-0 p-3">
-                    <div className="h-2 w-2 animate-ping rounded-full bg-[#fcc025]" />
+                    <div className="h-2 w-2 animate-ping rounded-full bg-accent" />
                   </div>
                 )}
                 <div className="flex flex-col items-center space-y-4 text-center">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-[#494847]/20 bg-[#0e0e0e] text-4xl transition-transform duration-300 group-hover:scale-110">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-border/20 bg-surface text-4xl transition-transform duration-300 group-hover:scale-110">
                     {Array.isArray(game.icon) ? (
-                      <div className="flex items-center gap-2 text-base font-black text-[#fcc025]">
+                      <div className="flex items-center gap-2 text-base font-black text-accent">
                         {game.icon.map((label) => (
                           <span
                             key={label}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#fcc025]/25 bg-[#161616] shadow-[0_0_12px_rgba(252,192,37,0.08)]"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-accent/25 bg-[#161616] shadow-[0_0_12px_rgba(252,192,37,0.08)]"
                           >
                             {label}
                           </span>
@@ -189,12 +189,12 @@ export default function RoomLobbyView() {
                     )}
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold uppercase tracking-tight text-white transition-colors group-hover:text-[#fcc025]">
+                    <h3 className="text-sm font-bold uppercase tracking-tight text-white transition-colors group-hover:text-accent">
                       {t(`game.${game.id}`)}
                     </h3>
                     <div className="mt-2 flex items-center justify-center gap-1.5">
-                      <Users size={10} className="text-[#adaaaa]" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-[#adaaaa]">
+                      <Users size={10} className="text-secondary" />
+                      <span className="text-xs font-bold uppercase tracking-widest text-secondary">
                         {game.vipOnly
                           ? (locked ? t('casino.vip_locked') : t('casino.vip_room'))
                           : `${game.players} ${t('casino.active_players')}`}
@@ -207,7 +207,7 @@ export default function RoomLobbyView() {
                       type="button"
                       disabled={locked || joinRoomMutation.isPending}
                       onClick={() => handleVipEnter(game.id)}
-                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#fcc025]/30 bg-[#121212] px-3 py-1.5 text-xs font-black uppercase tracking-widest text-[#fcc025] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-accent/30 bg-[#121212] px-3 py-1.5 text-xs font-black uppercase tracking-widest text-accent disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {locked ? <Lock size={12} /> : <ChevronRight size={12} />}
                       {joinRoomMutation.isPending ? t('casino.entering') : t('casino.enter_room')}
@@ -215,14 +215,14 @@ export default function RoomLobbyView() {
                   ) : (
                     <Link
                       to={`/app/casino/${game.id}`}
-                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-[#494847]/30 bg-[#121212] px-3 py-1.5 text-xs font-black uppercase tracking-widest text-[#d7d7d7]"
+                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-border/30 bg-[#121212] px-3 py-1.5 text-xs font-black uppercase tracking-widest text-[#d7d7d7]"
                     >
                       <ChevronRight size={12} />
                       {t('casino.play')}
                     </Link>
                   )}
                 </div>
-                <div className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-[#fcc025] transition-transform group-hover:scale-x-100" />
+                <div className="absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-accent transition-transform group-hover:scale-x-100" />
               </div>
             );
           })}

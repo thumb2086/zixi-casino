@@ -16,13 +16,13 @@ export default function UnderConstruction({
   current = 'none'
 }: UnderConstructionProps) {
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center gap-4 px-6 py-4">
-          <Link to="/app" className="text-[#adaaaa] transition-colors hover:text-[#fcc025]">
+          <Link to="/app" className="text-secondary transition-colors hover:text-accent">
             <ChevronLeft size={24} />
           </Link>
-          <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
+          <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
             {title}
           </h1>
         </div>
@@ -30,34 +30,34 @@ export default function UnderConstruction({
 
       <main className="mx-auto flex max-w-2xl flex-col items-center justify-center px-6 pt-32">
         <div className="relative">
-          <div className="absolute inset-0 animate-pulse rounded-full bg-[#fcc025]/20 blur-3xl" />
-          <div className="relative flex h-32 w-32 items-center justify-center rounded-2xl border border-[#fcc025]/30 bg-[#1a1919]">
-            <Construction size={48} className="text-[#fcc025]" />
+          <div className="absolute inset-0 animate-pulse rounded-full bg-accent/20 blur-3xl" />
+          <div className="relative flex h-32 w-32 items-center justify-center rounded-2xl border border-accent/30 bg-card">
+            <Construction size={48} className="text-accent" />
           </div>
         </div>
 
         <h2 className="mt-8 text-2xl font-black uppercase italic tracking-tight text-white">
           開發中
         </h2>
-        <p className="mt-4 text-center text-sm font-bold text-[#adaaaa]">
+        <p className="mt-4 text-center text-sm font-bold text-secondary">
           {description}
         </p>
 
-        <div className="mt-8 rounded-xl border border-[#494847]/20 bg-[#1a1919] p-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#494847]">
+        <div className="mt-8 rounded-xl border border-border/20 bg-card p-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted">
             預計上線功能
           </p>
-          <ul className="mt-4 space-y-2 text-sm font-bold text-[#adaaaa]">
+          <ul className="mt-4 space-y-2 text-sm font-bold text-secondary">
             <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               完整數據串接
             </li>
             <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               即時互動功能
             </li>
             <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#fcc025]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               歷史記錄查詢
             </li>
           </ul>
@@ -65,7 +65,7 @@ export default function UnderConstruction({
 
         <Link
           to="/app"
-          className="mt-8 rounded-xl bg-[#fcc025] px-8 py-4 text-sm font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
+          className="mt-8 rounded-xl bg-accent px-8 py-4 text-sm font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
         >
           返回首頁
         </Link>

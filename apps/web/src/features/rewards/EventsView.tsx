@@ -149,17 +149,17 @@ export default function EventsView() {
 
   return (
     <div className="min-h-screen bg-[#0f0e0e] pb-20 text-white">
-      <header className="sticky top-0 z-10 border-b border-[#494847]/20 bg-[#0f0e0e]/90 px-4 py-3 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-border/20 bg-[#0f0e0e]/90 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="rounded-lg bg-[#1a1919] p-2 hover:bg-[#fcc025]/10"
+            className="rounded-lg bg-card p-2 hover:bg-accent/10"
           >
             <ArrowLeft size={16} />
           </button>
           <div className="flex items-center gap-2">
-            <CalendarClock size={16} className="text-[#fcc025]" />
+            <CalendarClock size={16} className="text-accent" />
             <h1 className="text-lg font-black">活動中心</h1>
           </div>
         </div>
@@ -167,39 +167,39 @@ export default function EventsView() {
 
       <main className="mx-auto max-w-xl px-4 py-6 space-y-4">
         {msg && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-[#1a1919] border border-[#fcc025]/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
             {msg}
           </div>
         )}
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin text-[#fcc025]" size={24} />
+            <Loader2 className="animate-spin text-accent" size={24} />
           </div>
         ) : campaigns.length === 0 ? (
-          <div className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] px-4 py-8 text-center text-sm text-[#adaaaa]">
+          <div className="rounded-2xl border border-border/20 bg-card px-4 py-8 text-center text-sm text-secondary">
             目前沒有進行中的活動
           </div>
         ) : (
           campaigns.map((c) => (
             <section
               key={c.campaignId}
-              className="rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-4"
+              className="rounded-2xl border border-border/20 bg-card p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="text-base font-black text-white">{c.title}</h2>
                   {c.description && (
-                    <p className="mt-1 text-sm text-[#adaaaa] break-words">{c.description}</p>
+                    <p className="mt-1 text-sm text-secondary break-words">{c.description}</p>
                   )}
                 </div>
-                <Gift size={18} className="shrink-0 text-[#fcc025]" />
+                <Gift size={18} className="shrink-0 text-accent" />
               </div>
-              <div className="mt-3 rounded-lg bg-[#262626] px-3 py-2 text-sm text-[#fcc025]">
+              <div className="mt-3 rounded-lg bg-elevated px-3 py-2 text-sm text-accent">
                 {formatRewardSummary(c.rewards)}
               </div>
               {(c.startAt || c.endAt) && (
-                <p className="mt-2 text-sm text-[#adaaaa]">
+                <p className="mt-2 text-sm text-secondary">
                   {c.startAt ? new Date(c.startAt).toLocaleString() : '即刻'} ~{' '}
                   {c.endAt ? new Date(c.endAt).toLocaleString() : '無期限'}
                 </p>
@@ -208,7 +208,7 @@ export default function EventsView() {
                 type="button"
                 disabled={Boolean(c.claimed) || !sessionId}
                 onClick={() => claim(c.campaignId)}
-                className="mt-3 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-110"
+                className="mt-3 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-110"
               >
                 {c.claimed ? '已領取' : !sessionId ? '請先登入' : '領取獎勵'}
               </button>
@@ -219,9 +219,9 @@ export default function EventsView() {
 
       {successBundle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={() => setSuccessBundle(null)}>
-          <div className="w-full max-w-sm rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm rounded-2xl border border-border/20 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-[#fcc025]">🎉 領取成功</h3>
+              <h3 className="text-base font-black text-accent">🎉 領取成功</h3>
               <button type="button" onClick={() => setSuccessBundle(null)} className="rounded-lg p-1 hover:bg-white/10">
                 <X size={16} />
               </button>
@@ -242,7 +242,7 @@ export default function EventsView() {
             <button
               type="button"
               onClick={() => setSuccessBundle(null)}
-              className="mt-4 w-full rounded-lg bg-[#fcc025] px-3 py-2 text-sm font-black text-black"
+              className="mt-4 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black"
             >
               確定
             </button>

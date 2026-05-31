@@ -294,25 +294,25 @@ export default function ChestView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0e0e0e] pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-[#494847]/15 bg-[#0e0e0e]/90 backdrop-blur-xl">
+    <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
+      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <Package className="text-[#fcc025]" />
+            <Package className="text-accent" />
             <div>
-              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-[#fcc025]">
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
                 物資中心
               </h1>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#adaaaa]">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
                 背包與補給
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">空間</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-secondary">空間</p>
             <p className="text-sm font-black text-white">
               {status?.inventorySlotsUsed || 0}
-              <span className="mx-1 text-[#494847]">/</span>
+              <span className="mx-1 text-muted">/</span>
               {status?.inventorySlotsMax || 0}
             </p>
           </div>
@@ -324,13 +324,13 @@ export default function ChestView() {
         {inventory.activeBuffs.length > 0 && (
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {inventory.activeBuffs.map((buff) => (
-              <div key={buff.id} className="relative overflow-hidden rounded-xl border border-[#fcc025]/20 bg-[#1a1919] p-3">
+              <div key={buff.id} className="relative overflow-hidden rounded-xl border border-accent/20 bg-card p-3">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fcc025]/10 text-[#fcc025]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
                     {buff.type === 'prevent_loss' ? <Shield size={16} /> : <Zap size={16} />}
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-wider text-[#adaaaa]">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-secondary">
                       {t(`chest.buff_type_${buff.type}`)}
                     </p>
                     <p className="text-xs font-black text-white">
@@ -338,7 +338,7 @@ export default function ChestView() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 text-[10px] font-bold text-[#adaaaa] opacity-60">
+                <div className="mt-2 text-[10px] font-bold text-secondary opacity-60">
                   {buff.expiresAt ? formatExpires(buff.expiresAt, t) : t('chest.buff_active')}
                 </div>
               </div>
@@ -347,13 +347,13 @@ export default function ChestView() {
         )}
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 border-b border-[#494847]/20 pb-3">
+        <div className="flex gap-2 border-b border-border/20 pb-3">
           {(['chests', 'tokens', 'buffs', 'collection'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setInvTab(tab)}
               className={`text-sm font-black uppercase tracking-widest px-3 py-1.5 rounded-lg transition-colors ${
-                invTab === tab ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/20 text-[#adaaaa] hover:bg-[#494847]/30'
+                invTab === tab ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary hover:bg-[#494847]/30'
               }`}
             >
               {{ chests: '寶箱', tokens: '代幣', buffs: '加成', collection: '收藏' }[tab]}
@@ -364,7 +364,7 @@ export default function ChestView() {
         {/* Tab: Chests */}
         {invTab === 'chests' && (
         <section className="space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa] mb-4">可開啟寶箱</h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">可開啟寶箱</h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {chests.map((chest) => {
@@ -375,12 +375,12 @@ export default function ChestView() {
               const canOpen = keys >= openQtyNum;
 
               return (
-                <div key={chest.id} className="group relative overflow-hidden rounded-2xl border border-[#494847]/20 bg-[#1a1919] p-5 transition-all hover:border-[#fcc025]/30">
+                <div key={chest.id} className="group relative overflow-hidden rounded-2xl border border-border/20 bg-card p-5 transition-all hover:border-accent/30">
                   <div className="mb-4 flex items-start justify-between">
                     <div>
                       <h3 className="text-lg font-black text-white">{chest.name}</h3>
                       <div className="mt-1 flex items-center gap-2">
-                        <span className="rounded bg-[#fcc025]/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#fcc025]">
+                        <span className="rounded bg-accent/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-accent">
                           {keys} 把鑰匙
                         </span>
                       </div>
@@ -389,11 +389,11 @@ export default function ChestView() {
                   </div>
 
                   <div className="mb-4 space-y-2">
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-[#adaaaa]">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-secondary">
                       <span>保底進度</span>
-                      <span className="text-[#fcc025]">{currentPity} / {chest.pityThreshold}</span>
+                      <span className="text-accent">{currentPity} / {chest.pityThreshold}</span>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#0e0e0e]">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${(currentPity / chest.pityThreshold) * 100}%` }}
@@ -405,12 +405,12 @@ export default function ChestView() {
                   <div className="flex items-center justify-center gap-2 mb-3">
                     {[1, 5, 10, 100].map((q) => (
                       <button key={q} onClick={() => setOpenQtys(p => ({ ...p, [chest.id]: String(q) }))}
-                        className={`rounded-md px-2 py-1 text-[10px] font-black transition-all ${parseInt(chestOpenQty, 10) === q ? 'bg-[#fcc025] text-black' : 'bg-[#494847]/20 text-[#adaaaa]'}`}>x{q}</button>
+                        className={`rounded-md px-2 py-1 text-[10px] font-black transition-all ${parseInt(chestOpenQty, 10) === q ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary'}`}>x{q}</button>
                     ))}
                     <input type="text" inputMode="numeric" value={chestOpenQty}
                       onChange={(e) => setOpenQtys(p => ({ ...p, [chest.id]: e.target.value }))}
                       onBlur={(e) => { const v = parseInt(e.target.value, 10); if (!v || v < 1) setOpenQtys(p => ({ ...p, [chest.id]: '1' })); }}
-                      className="w-14 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center py-1 focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                      className="w-14 bg-surface border border-border/40 rounded-lg text-white font-bold text-xs text-center py-1 focus:outline-none focus:border-accent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                   </div>
 
                   <button
@@ -418,8 +418,8 @@ export default function ChestView() {
                     disabled={!canOpen || opening}
                     className={`w-full rounded-xl py-3 text-xs font-black uppercase tracking-widest transition-all ${
                       canOpen
-                        ? 'bg-[#fcc025] text-black shadow-lg shadow-[#fcc025]/20 hover:brightness-110 active:scale-[0.98]'
-                        : 'bg-[#494847]/20 text-[#494847] cursor-not-allowed border border-[#494847]/10'
+                        ? 'bg-accent text-black shadow-lg shadow-[#fcc025]/20 hover:brightness-110 active:scale-[0.98]'
+                        : 'bg-[#494847]/20 text-muted cursor-not-allowed border border-border/10'
                     }`}
                   >
                     {opening ? '解鎖中...' : `開啟 ${openQtyNum} 個`}
@@ -435,7 +435,7 @@ export default function ChestView() {
         {invTab === 'tokens' && (
           <section className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">代幣</h2>
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">代幣</h2>
               {(() => {
                 const tokenItems = groupedItems['token'] || [];
                 const totalTokens = tokenItems.reduce((sum, i) => sum + (i.effect?.value || 0) * i.quantity, 0);
@@ -451,17 +451,17 @@ export default function ChestView() {
               })()}
             </div>
             {(!groupedItems['token'] || groupedItems['token'].length === 0) ? (
-              <p className="text-sm text-[#adaaaa] text-center py-8">暫無代幣物品</p>
+              <p className="text-sm text-secondary text-center py-8">暫無代幣物品</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['token'].map((item) => (
-                  <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3">
+                  <div key={item.id} className="flex flex-col rounded-xl border border-border/20 bg-card p-3">
                     <div className="mb-2 flex items-start justify-between">
                       <span className="text-2xl">{item.icon}</span>
-                      <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">x{item.quantity}</span>
+                      <span className="rounded bg-elevated px-1.5 py-0.5 text-[10px] font-black text-secondary">x{item.quantity}</span>
                     </div>
                     <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
-                    <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
+                    <p className="mb-3 text-[10px] font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
                       <input type="text" inputMode="numeric"
                         value={useQty[item.id] ?? '1'}
@@ -471,14 +471,14 @@ export default function ChestView() {
                           if (!v || v < 1) setUseQty(p => ({ ...p, [item.id]: '1' }));
                           else if (v > item.quantity) setUseQty(p => ({ ...p, [item.id]: String(item.quantity) }));
                         }}
-                        className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
+                        className="w-12 bg-surface border border-border/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-accent"
                       />
                       <button onClick={() => setUseQty(p => ({ ...p, [item.id]: String(item.quantity) }))}
-                        className="text-[10px] font-black bg-[#494847]/20 text-[#adaaaa] px-1.5 py-1 rounded-lg hover:bg-[#494847]/40">Max</button>
+                        className="text-[10px] font-black bg-[#494847]/20 text-secondary px-1.5 py-1 rounded-lg hover:bg-[#494847]/40">Max</button>
                       <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
-                        className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
+                        className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                        className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
+                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈送</button>
                     </div>
                   </div>
                 ))}
@@ -490,19 +490,19 @@ export default function ChestView() {
         {/* Tab: Buffs */}
         {invTab === 'buffs' && (
           <section className="space-y-4">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">加成物品</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">加成物品</h2>
             {(!groupedItems['buff'] || groupedItems['buff'].length === 0) ? (
-              <p className="text-sm text-[#adaaaa] text-center py-8">暫無加成物品</p>
+              <p className="text-sm text-secondary text-center py-8">暫無加成物品</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['buff'].map((item) => (
-                  <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3">
+                  <div key={item.id} className="flex flex-col rounded-xl border border-border/20 bg-card p-3">
                     <div className="mb-2 flex items-start justify-between">
                       <span className="text-2xl">{item.icon}</span>
-                      <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">x{item.quantity}</span>
+                      <span className="rounded bg-elevated px-1.5 py-0.5 text-[10px] font-black text-secondary">x{item.quantity}</span>
                     </div>
                     <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
-                    <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
+                    <p className="mb-3 text-[10px] font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
                       <input type="text" inputMode="numeric"
                         value={useQty[item.id] ?? '1'}
@@ -512,12 +512,12 @@ export default function ChestView() {
                           if (!v || v < 1) setUseQty(p => ({ ...p, [item.id]: '1' }));
                           else if (v > item.quantity) setUseQty(p => ({ ...p, [item.id]: String(item.quantity) }));
                         }}
-                        className="w-12 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-[#fcc025]"
+                        className="w-12 bg-surface border border-border/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-accent"
                       />
                       <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
-                        className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
+                        className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                        className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
+                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈送</button>
                     </div>
                   </div>
                 ))}
@@ -529,30 +529,30 @@ export default function ChestView() {
         {/* Tab: Collection */}
         {invTab === 'collection' && (
           <section className="space-y-6">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#adaaaa]">收藏</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">收藏</h2>
             {(['avatar', 'title', 'collectible', 'chest_key'] as const).map((type) => {
               const items = groupedItems[type] || [];
               if (items.length === 0) return null;
               return (
                 <div key={type} className="space-y-3">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">{itemTypeLabels[type] || type}</h3>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-secondary">{itemTypeLabels[type] || type}</h3>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {items.map((item) => (
-                      <div key={item.id} className="flex flex-col rounded-xl border border-[#494847]/20 bg-[#1a1919] p-3">
+                      <div key={item.id} className="flex flex-col rounded-xl border border-border/20 bg-card p-3">
                         <div className="mb-2 flex items-start justify-between">
                           <span className="text-2xl">{item.icon}</span>
                           {(type === 'chest_key' || item.quantity > 1) && (
-                            <span className="rounded bg-[#262626] px-1.5 py-0.5 text-[10px] font-black text-[#adaaaa]">x{item.quantity}</span>
+                            <span className="rounded bg-elevated px-1.5 py-0.5 text-[10px] font-black text-secondary">x{item.quantity}</span>
                           )}
                         </div>
                         <h4 className="mb-1 truncate text-xs font-black text-white">{item.name}</h4>
-                        <p className="mb-3 text-[10px] font-bold text-[#adaaaa] leading-relaxed min-h-[2.4em]">{item.description}</p>
+                        <p className="mb-3 text-[10px] font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
                         {(type === 'avatar' || type === 'title') && (
                           <div className="mt-auto flex gap-2">
                             <button onClick={() => useItem(item.id)}
-                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025] hover:text-black">裝備</button>
+                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent hover:text-black">裝備</button>
                             <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                              className="flex-1 border border-[#fcc025] text-[#fcc025] font-black text-sm py-2 rounded-lg hover:bg-[#fcc025]/10">贈送</button>
+                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈送</button>
                           </div>
                         )}
                       </div>
@@ -562,7 +562,7 @@ export default function ChestView() {
               );
             })}
             {['avatar', 'title', 'collectible', 'chest_key'].every(t => !groupedItems[t]?.length) && (
-              <p className="text-sm text-[#adaaaa] text-center py-8">暫無收藏物品</p>
+              <p className="text-sm text-secondary text-center py-8">暫無收藏物品</p>
             )}
           </section>
         )}
@@ -577,7 +577,7 @@ export default function ChestView() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] bg-[#fcc025] text-black px-6 py-3 rounded-full font-black shadow-2xl"
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] bg-accent text-black px-6 py-3 rounded-full font-black shadow-2xl"
           >
             {toastMsg}
           </motion.div>
@@ -598,7 +598,7 @@ export default function ChestView() {
               animate={{ scale: 1, opacity: 1 }}
               className="max-w-3xl w-full max-h-[75vh] flex flex-col"
             >
-              <h2 className="text-3xl font-black italic text-center text-[#fcc025] mb-6">
+              <h2 className="text-3xl font-black italic text-center text-accent mb-6">
                 恭喜獲得!
               </h2>
 
@@ -615,17 +615,17 @@ export default function ChestView() {
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ delay: index * 0.03, type: 'spring' }}
-                      className="bg-[#1a1919] rounded-xl p-2 border-2 text-center relative"
+                      className="bg-card rounded-xl p-2 border-2 text-center relative"
                       style={{ borderColor: RARITY_COLORS[item.item.rarity] || '#494847' }}
                     >
                       {(item.quantity || 0) > 1 && (
-                        <span className="absolute -top-2 -right-2 bg-[#fcc025] text-black text-xs font-black min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-lg z-10">
+                        <span className="absolute -top-2 -right-2 bg-accent text-black text-xs font-black min-w-[20px] h-5 rounded-full flex items-center justify-center px-1 shadow-lg z-10">
                           x{item.quantity}
                         </span>
                       )}
                       <div className="text-2xl mb-1">{item.item.icon}</div>
                       <h3 className="font-bold text-xs mb-0.5 truncate">{item.item.name}</h3>
-                      <p className="text-xs text-[#adaaaa] mb-1 truncate">{item.item.description}</p>
+                      <p className="text-xs text-secondary mb-1 truncate">{item.item.description}</p>
                       <div className="flex items-center justify-center gap-1">
                         <span
                           className="text-xs px-1 py-0.5 rounded-full font-bold"
@@ -637,7 +637,7 @@ export default function ChestView() {
                           {item.item.rarity}
                         </span>
                         {item.isNew && (
-                          <span className="text-xs bg-[#fcc025] text-black px-1 py-0.5 rounded-full font-bold">
+                          <span className="text-xs bg-accent text-black px-1 py-0.5 rounded-full font-bold">
                             NEW
                           </span>
                         )}
@@ -649,13 +649,13 @@ export default function ChestView() {
 
               {openCompensation > 0 && (
                 <div className="text-center mb-4">
-                  <div className="inline-flex items-center gap-3 bg-gradient-to-br from-[#fcc025]/20 to-[#e6ad03]/10 border border-[#fcc025]/40 rounded-2xl px-6 py-4 shadow-lg shadow-[#fcc025]/5">
+                  <div className="inline-flex items-center gap-3 bg-gradient-to-br from-[#fcc025]/20 to-[#e6ad03]/10 border border-accent/40 rounded-2xl px-6 py-4 shadow-lg shadow-[#fcc025]/5">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fcc025] to-[#e6ad03] flex items-center justify-center shadow-lg">
                        <span className="text-lg">💰</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-black uppercase tracking-widest text-[#adaaaa]">重複補償</p>
-                      <p className="text-lg font-black italic text-[#fcc025]">+{nf(openCompensation)} ZXC</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-secondary">重複補償</p>
+                      <p className="text-lg font-black italic text-accent">+{nf(openCompensation)} ZXC</p>
                     </div>
                   </div>
                 </div>
@@ -694,21 +694,21 @@ export default function ChestView() {
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#1a1919] rounded-2xl p-6 max-w-sm w-full border border-[#494847]/30"
+              className="bg-card rounded-2xl p-6 max-w-sm w-full border border-border/30"
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-black">贈送 {giftDialog.name}</h2>
                 <button onClick={() => setGiftDialog(null)}>
-                  <X className="w-5 h-5 text-[#adaaaa]" />
+                  <X className="w-5 h-5 text-secondary" />
                 </button>
               </div>
 
-              <label className="block text-sm font-bold text-[#adaaaa] mb-1">接收者</label>
+              <label className="block text-sm font-bold text-secondary mb-1">接收者</label>
               <select
                 value={giftAddress}
                 onChange={(e) => setGiftAddress(e.target.value)}
-                className="w-full bg-[#0e0e0e] border border-[#494847]/40 rounded-lg px-3 py-2 text-white text-sm
-                  focus:outline-none focus:border-[#fcc025] mb-4"
+                className="w-full bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-sm
+                  focus:outline-none focus:border-accent mb-4"
               >
                 <option value="">選擇接收者...</option>
                 {recipients.map(r => (
@@ -718,12 +718,12 @@ export default function ChestView() {
                 ))}
               </select>
 
-              <label className="block text-sm font-bold text-[#adaaaa] mb-1">數量</label>
+              <label className="block text-sm font-bold text-secondary mb-1">數量</label>
               <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => setGiftQty(String(Math.max(1, (parseInt(giftQty || '1', 10) || 1) - 1)))}
                   disabled={(parseInt(giftQty || '1', 10) || 1) <= 1}
-                  className="w-8 h-8 rounded-full bg-[#494847]/40 text-[#fcc025] font-bold text-lg
+                  className="w-8 h-8 rounded-full bg-[#494847]/40 text-accent font-bold text-lg
                     flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
                     hover:bg-[#494847]/60 transition-colors"
                 >
@@ -739,25 +739,25 @@ export default function ChestView() {
                     if (!v || v < 1) setGiftQty('1');
                     else if (v > giftDialog.maxQty) setGiftQty(String(giftDialog.maxQty));
                   }}
-                  className="w-16 bg-[#0e0e0e] border border-[#494847]/40 rounded-lg text-white font-bold text-lg text-center
-                    focus:outline-none focus:border-[#fcc025] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-16 bg-surface border border-border/40 rounded-lg text-white font-bold text-lg text-center
+                    focus:outline-none focus:border-accent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <button
                   onClick={() => setGiftQty(String(Math.min(giftDialog.maxQty, (parseInt(giftQty || '1', 10) || 1) + 1)))}
                   disabled={(parseInt(giftQty || '1', 10) || 1) >= giftDialog.maxQty}
-                  className="w-8 h-8 rounded-full bg-[#494847]/40 text-[#fcc025] font-bold text-lg
+                  className="w-8 h-8 rounded-full bg-[#494847]/40 text-accent font-bold text-lg
                     flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
                     hover:bg-[#494847]/60 transition-colors"
                 >
                   +
                 </button>
-                <span className="text-sm text-[#adaaaa]">/ {giftDialog.maxQty}</span>
+                <span className="text-sm text-secondary">/ {giftDialog.maxQty}</span>
               </div>
 
               <div className="flex gap-2">
                 <button
                   onClick={() => setGiftDialog(null)}
-                  className="flex-1 border border-[#494847]/40 text-[#adaaaa] font-bold text-sm py-2 rounded-lg hover:bg-[#494847]/20"
+                  className="flex-1 border border-border/40 text-secondary font-bold text-sm py-2 rounded-lg hover:bg-[#494847]/20"
                 >
                   取消
                 </button>
@@ -787,7 +787,7 @@ export default function ChestView() {
                       setGiftSending(false);
                     }
                   }}
-                  className="flex-1 bg-[#fcc025] text-black font-black text-sm py-2 rounded-lg
+                  className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg
                     disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6ad03]"
                 >
                   {giftSending ? '發送中...' : '確認贈送'}
