@@ -102,11 +102,42 @@ export class MultiplayerGameManager {
     private ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
     private drawCard(seed: string): any {
-        const hash = this._fnv1a32(seed + Math.random());
+        const hash = this._fnv1a32(seed) >>> 0;
         return {
             rank: this.ranks[hash % this.ranks.length],
             suit: this.suites[Math.floor(hash / this.ranks.length) % this.suites.length]
         };
+    }
+
+    private _evalHand(cards: any[]): { rank: number; name: string; kickers: number[] } {
+        const suits = ['♠', '♥', '♦', '♣'];
+        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        const rankCounts: Record<string, number> = {};
+        const suitCounts: Record<string, number> = {};
+        cards.forEach(c => {
+            rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
+            suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
+        });
+        const counts = Object.values(rankCounts);
+        const uniqueRanks = Object.keys(rankCounts).map(r => ranks.indexOf(r)).sort((a, b) => a - b);
+        const isFlush = Object.values(suitCounts).some(c => c >= 5);
+        let isStraight = false;
+        for (let i = 0; i <= uniqueRanks.length - 5; i++) {
+            if (uniqueRanks[i + 4] - uniqueRanks[i] === 4) { isStraight = true; break; }
+        }
+        if (uniqueRanks.includes(12) && uniqueRanks.includes(0) && uniqueRanks.includes(1) && uniqueRanks.includes(2) && uniqueRanks.includes(3)) isStraight = true;
+        const kickers = Object.entries(rankCounts).sort((a, b) => b[1] - a[1] || ranks.indexOf(b[0]) - ranks.indexOf(a[0])).map(e => ranks.indexOf(e[0]));
+
+        if (isFlush && isStraight && cards.some(c => c.rank === 'A')) return { rank: 10, name: 'Royal Flush', kickers };
+        if (isFlush && isStraight) return { rank: 9, name: 'Straight Flush', kickers };
+        if (counts.includes(4)) return { rank: 8, name: 'Four of a Kind', kickers };
+        if (counts.includes(3) && counts.includes(2)) return { rank: 7, name: 'Full House', kickers };
+        if (isFlush) return { rank: 6, name: 'Flush', kickers };
+        if (isStraight) return { rank: 5, name: 'Straight', kickers };
+        if (counts.includes(3)) return { rank: 4, name: 'Three of a Kind', kickers };
+        if (counts.filter(c => c === 2).length === 2) return { rank: 3, name: 'Two Pair', kickers };
+        if (counts.includes(2)) return { rank: 2, name: 'One Pair', kickers };
+        return { rank: 1, name: 'High Card', kickers };
     }
 
     advancePoker(state: PokerState, action?: { type: string; userId: string; amount?: number }): PokerState {
@@ -132,13 +163,46 @@ export class MultiplayerGameManager {
     }
 
     resolvePokerHand(hands: { userId: string; cards: any[] }[]): { winnerId: string; rank: string } {
-        // Sort by rank value (mock logic)
-        return { winnerId: hands[0].userId, rank: "Pair of Aces" };
+        if (hands.length === 0) return { winnerId: '', rank: '' };
+        let best = hands[0];
+        let bestEval = this._evalHand(best.cards);
+        for (let i = 1; i < hands.length; i++) {
+            const ev = this._evalHand(hands[i].cards);
+            if (ev.rank > bestEval.rank) {
+                best = hands[i];
+                bestEval = ev;
+            } else if (ev.rank === bestEval.rank) {
+                for (let k = 0; k < Math.min(ev.kickers.length, bestEval.kickers.length); k++) {
+                    if (ev.kickers[k] > bestEval.kickers[k]) {
+                        best = hands[i];
+                        bestEval = ev;
+                        break;
+                    } else if (ev.kickers[k] < bestEval.kickers[k]) {
+                        break;
+                    }
+                }
+            }
+        }
+        return { winnerId: best.userId, rank: bestEval.name };
     }
 
     resolveBluffDice(bets: { userId: string; quantity: number; value: number }[], actualDice: number[][]): { winnerId: string } {
-        // Simple logic: if anyone called bluff and they were right, they win.
-        return { winnerId: bets[0].userId };
+        // Count actual dice showing the claimed value
+        const allDice = actualDice.flat();
+        for (const bet of bets) {
+            const count = allDice.filter(d => d === bet.value).length;
+            // If a player called bluff (quantity=0 means challenge), check if claim is false
+            if (bet.quantity === 0) continue;
+            // If the actual count is less than the claim, the claim was a bluff
+            // The challenger (next player who called bluff) wins
+            const nextBet = bets[bets.indexOf(bet) + 1];
+            if (nextBet && nextBet.quantity === 0 && count < bet.quantity) {
+                return { winnerId: nextBet.userId };
+            }
+        }
+        // If no bluff caught, last better wins
+        const lastBet = bets.filter(b => b.quantity > 0);
+        return { winnerId: lastBet.length > 0 ? lastBet[lastBet.length - 1].userId : bets[0]?.userId || '' };
     }
 
     private _fnv1a32(input: string): number {

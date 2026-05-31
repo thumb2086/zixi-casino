@@ -204,7 +204,8 @@ export default function SettingsView() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 pt-24">
+      <main className="app-shell pt-24">
+        <div className="content-grid">
         <section className="rounded-2xl border border-[#494847]/10 bg-[#1a1919] p-6 shadow-2xl">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-start gap-4">
@@ -430,10 +431,11 @@ export default function SettingsView() {
             {t('settings.terminate_session')}
           </button>
         </section>
+        </div>
       </main>
 
-          <AppBottomNav current="settings" />
-            <p className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer', { version: APP_VERSION })}</p>
-        </div>
+      <AppBottomNav current="settings" />
+      <footer className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-[#494847]">{t('settings.footer', { version: APP_VERSION })}</footer>
+    </div>
   );
 }

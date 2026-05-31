@@ -24,7 +24,7 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.16** | Crash | 賠率/機率微調；FNV hash 負數修復 | ✅ |
 | **v1.0.17** | Poker | 賠率/機率微調；FNV hash 負數修復 | ✅ |
 | **v1.0.18** | Blackjack | 賠率/機率微調；FNV hash 負數修復 | ✅ |
-| **v1.0.19** | VIP 遊戲 | Poker VIP / BluffDice VIP 房間入口、多人配對、牌型/骰子判定實作 | ⏳ |
+| **v1.0.19** | VIP 遊戲 + 色彩系統 + RWD 排版 | VIP 房間多人配對、牌型/骰子判定實作（`resolvePokerHand`/`resolveBluffDice`）；CSS 變數色彩系統、`content-grid`/`layout-sidebar` RWD 佈局、SettingsView/多頁 app-shell 修正 | 🏗️ |
 | **v1.0.20** | 股市調整 + 交易效能 | 背景 tick、admin 端點、清算修正、前端極速反饋 | ⏳ |
 | **v1.0.21** | 上鏈系統 | 上鏈排隊佇列、上鏈公開頁面 | ⏳ |
 | **v1.0.22** | 交易紀錄 + 動態重構 | 交易紀錄系統完善、公開動態保留市場與錢包、移除重複錢包動態 | ⏳ |
