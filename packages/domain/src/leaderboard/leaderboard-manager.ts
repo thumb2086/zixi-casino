@@ -29,6 +29,63 @@ export class LeaderboardManager {
   constructor(private db: PostgresJsDatabase<typeof schema>) {}
 
   // ─────────────────────────────────────────
+  // Kings: aggregate all historical #1 records
+  // ─────────────────────────────────────────
+  async getKings(selfAddress?: string): Promise<LeaderboardResult> {
+    const rows = await this.db
+      .select({ key: schema.kvStore.key, value: schema.kvStore.value })
+      .from(schema.kvStore)
+      .where(sql`${schema.kvStore.key} LIKE 'lb_kings:xp:%'`);
+    const kingMap = new Map<string, { address: string; displayName: string; count: number; lastCrowned: number }>();
+
+    for (const row of rows) {
+      if (!row.value) continue;
+      try {
+        const record = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
+        const addr = (record.address || '').toLowerCase();
+        if (!addr) continue;
+        const existing = kingMap.get(addr);
+        if (existing) {
+          existing.count++;
+          if (record.crownedAt > existing.lastCrowned) existing.lastCrowned = record.crownedAt;
+        } else {
+          kingMap.set(addr, { address: addr, displayName: record.displayName || '未知', count: 1, lastCrowned: record.crownedAt || 0 });
+        }
+      } catch {}
+    }
+
+    const entries: LeaderboardEntry[] = Array.from(kingMap.values())
+      .sort((a, b) => b.count - a.count || b.lastCrowned - a.lastCrowned)
+      .slice(0, 100)
+      .map((k, i) => ({
+        rank: i + 1,
+        address: k.address,
+        displayName: k.displayName,
+        amount: k.count,
+      }));
+
+    let selfRank: LeaderboardEntry | null = null;
+    if (selfAddress) {
+      const addr = selfAddress.toLowerCase();
+      const inList = entries.find(e => e.address.toLowerCase() === addr);
+      if (inList) {
+        selfRank = inList;
+      } else {
+        const myData = kingMap.get(addr);
+        if (myData) {
+          let rank = 1;
+          for (const [, v] of kingMap) {
+            if (v.count > myData.count || (v.count === myData.count && v.lastCrowned > myData.lastCrowned)) rank++;
+          }
+          selfRank = { rank, address: addr, displayName: myData.displayName, amount: myData.count };
+        }
+      }
+    }
+
+    return { type: "kings" as any, periodId: "all", entries, selfRank, updatedAt: new Date().toISOString() };
+  }
+
+  // ─────────────────────────────────────────
   // Utils: Get current period_id
   // ─────────────────────────────────────────
   getCurrentPeriodId(type: LeaderboardType): string {

@@ -160,6 +160,14 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ success: true, data: result }, request.id);
       }
 
+      // Kings: aggregate all historical #1 records
+      if (type === "kings") {
+        const result = await manager.getKings(selfAddress);
+        await enrichEntriesWithCosmetics(result.entries);
+        if (result.selfRank) await enrichEntriesWithCosmetics([result.selfRank]);
+        return createApiEnvelope({ success: true, data: result }, request.id);
+      }
+
       // XP leaderboard: week/month/season → period-based, others → all-time
       const isPeriodType = ["week", "month", "season", "all"].includes(type);
       const result = isPeriodType
@@ -173,6 +181,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
           const kingName = result.entries[0].displayName;
           const kingAmt = result.entries[0].amount;
           const kingKey = `lb_kings:xp:${type}:${result.periodId}`;
+          // Always update if different address or not yet recorded
           const current = await kv.get<string>(kingKey);
           if (!current) {
             await kv.set(kingKey, JSON.stringify({ address: kingAddr, displayName: kingName, amount: kingAmt, crownedAt: Date.now() }));
