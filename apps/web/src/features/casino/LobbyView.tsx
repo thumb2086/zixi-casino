@@ -247,7 +247,7 @@ export default function LobbyView() {
             <div className="flex items-center justify-between mb-3">
               <div>
             <div className="section-title">
-              <Swords size={14} className="text-accent shrink-0" />
+              <Trophy size={14} className="text-accent shrink-0" />
               <h2 className="section-title-text">{t('lobby.featured')}</h2>
             </div>
                 <p className="text-3xl font-black italic text-accent mt-1">
