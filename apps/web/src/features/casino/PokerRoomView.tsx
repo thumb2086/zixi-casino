@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -115,6 +115,22 @@ export default function PokerRoomView() {
   const isMyTurn = turnIdx === 0;
   const currentPlayer = allPlayers[turnIdx];
 
+  // Bot auto-play: when it's a bot's turn, auto-move after a delay
+  const doActionRef = useRef(doAction);
+  doActionRef.current = doAction;
+
+  useEffect(() => {
+    if (winner) return;
+    const p = allPlayers[turnIdx];
+    if (p?.isBot) {
+      const timer = setTimeout(() => {
+        const botAction = Math.random() > 0.3 ? 'call' : 'fold';
+        doActionRef.current(botAction);
+      }, 1200 + Math.random() * 800);
+      return () => clearTimeout(timer);
+    }
+  }, [turnIdx, winner, allPlayers]);
+
   const doAction = useCallback((action: string, amount?: number) => {
     if (winner) return;
     const p = allPlayers[turnIdx];
@@ -170,13 +186,6 @@ export default function PokerRoomView() {
       const p = allPlayers[next];
       if (!p.folded && !p.allIn) {
         setTurnIdx(next);
-        // If it's a bot's turn, auto-play after a delay
-        if (p.isBot) {
-          setTimeout(() => {
-            const botAction = p.userId.includes('bot') ? 'call' : (Math.random() > 0.5 ? 'fold' : 'call');
-            doAction(botAction);
-          }, 1500);
-        }
         return;
       }
     }
