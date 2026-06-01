@@ -242,7 +242,7 @@ export default function LeaderboardView() {
               </div>
             )}
 
-            <section className="flex flex-col items-center justify-center space-y-2">
+            <section className="flex flex-col items-center justify-center space-y-2 mb-4">
               <div className="flex items-center gap-2 text-accent opacity-60">
                 <span className="text-xs font-bold uppercase tracking-[0.2em]">{showTimeRemaining ? '剩餘時間' : '共 ' + (data?.entries?.length || 0) + ' 人'}</span>
               </div>
@@ -251,7 +251,7 @@ export default function LeaderboardView() {
               </div>
             </section>
 
-            <section className="flex items-end justify-center gap-4 pt-10">
+            <section className="flex items-end justify-center gap-4 pt-6">
               {orderedTopThree[0] && (
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
