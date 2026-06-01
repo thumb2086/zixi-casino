@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Crown, Loader2, Target, TrendingUp, Trophy, Wallet } from 'lucide-react';
+import { Crown, Loader2, Trophy, Wallet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
 import { useUserStore } from '../../store/useUserStore';
@@ -7,7 +7,7 @@ import { usePreferencesStore } from '../../store/usePreferencesStore';
 import { useLeaderboard, type LeaderboardType } from '../../hooks/useLeaderboard';
 import AppBottomNav from '../../components/AppBottomNav';
 
-type LeaderboardCategory = 'kings' | 'xp' | 'asset';
+type LeaderboardCategory = 'xp' | 'asset';
 type FilterLabel = 'WEEKLY' | 'MONTHLY' | 'SEASON' | 'ALL-TIME';
 
 const FILTER_MAP: Record<FilterLabel, string> = {
@@ -24,18 +24,52 @@ const getAvatarUrl = (seed: string) => `https://api.dicebear.com/7.x/avataaars/s
 const getDisplayName = (entry: { displayName: string | null; address: string }) =>
   entry.displayName || `${entry.address.slice(0, 6)}...${entry.address.slice(-4)}`;
 
-
+function KingPodium({ kings, nf }: { kings: any[]; nf: (v: any) => string }) {
+  if (!kings || kings.length === 0) return null;
+  const ordered = kings.length < 3 ? kings : [kings[1], kings[0], kings[2]].filter(Boolean);
+  const podium = [
+    { item: ordered[1], cls: 'h-32 w-28 border-t-accent/30 bg-gradient-to-t from-card to-accent/20', icon: <Crown size={32} className="text-accent" fill="currentColor" />, rankCls: 'bg-accent text-black text-sm', extraCls: '-translate-y-4' },
+    { item: ordered[0], cls: 'h-24 w-20 border-t-slate-400/30 bg-gradient-to-t from-card to-slate-400/20', rankCls: 'bg-slate-400 text-black text-xs', extraCls: '' },
+    { item: ordered[2], cls: 'h-20 w-20 border-t-amber-700/30 bg-gradient-to-t from-card to-amber-700/20', rankCls: 'bg-amber-700 text-white text-xs', extraCls: '' },
+  ];
+  return (
+    <section className="card-accent bg-card p-4 mb-6 border border-border/10">
+      <div className="flex items-center gap-2 mb-4">
+        <Crown size={16} className="text-accent" />
+        <span className="text-xs font-black uppercase tracking-widest text-accent">🏆 榜王前三</span>
+      </div>
+      <div className="flex items-end justify-center gap-4">
+        {podium.map((p, i) => p.item ? (
+          <div key={i} className={`flex flex-col items-center space-y-3 ${p.extraCls}`}>
+            <div className="relative">
+              {i === 0 && <div className="absolute left-1/2 -top-8 -translate-x-1/2">{p.icon}</div>}
+              <div className={`flex ${i === 0 ? 'h-20 w-20 border-4' : 'h-14 w-14 border-2'} items-center justify-center overflow-hidden rounded-2xl border-accent bg-elevated text-3xl`}>
+                {p.item.avatarIcon || <img src={getAvatarUrl(p.item.name)} alt={p.item.name} className="w-full h-full object-cover" />}
+              </div>
+              <div className={`absolute -left-2 -top-2 flex h-6 w-6 items-center justify-center rounded-lg ${p.rankCls} font-black`}>
+                {p.item.rank}
+              </div>
+            </div>
+            <div className={`flex flex-col items-center justify-center rounded-t-xl border-t p-2 text-center ${p.cls}`}>
+              <p className="w-full truncate text-xs font-black text-white">{p.item.name}</p>
+              <p className="mt-0.5 text-xs font-black text-accent">{nf(p.item.amount)} 次</p>
+            </div>
+          </div>
+        ) : null)}
+      </div>
+    </section>
+  );
+}
 
 export default function LeaderboardView() {
   const { t } = useTranslation();
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { address } = useUserStore();
-  const [category, setCategory] = useState<LeaderboardCategory>('kings');
+  const [category, setCategory] = useState<LeaderboardCategory>('xp');
   const [filter, setFilter] = useState<FilterLabel>('ALL-TIME');
 
   const currentType: LeaderboardType = useMemo(() => {
-    if (category === 'kings') return 'kings';
     if (category === 'asset') return 'asset';
     return FILTER_MAP[filter] as any;
   }, [category, filter]);
@@ -43,15 +77,24 @@ export default function LeaderboardView() {
   const showTimeRemaining = category === 'xp' && filter !== 'ALL-TIME';
 
   const { data, isLoading, error } = useLeaderboard(currentType, 50);
+  const { data: kingsData } = useLeaderboard('kings', 3);
+
+  const kingTop3 = useMemo(() => {
+    return (kingsData?.entries || []).map((entry: any) => ({
+      rank: entry.rank,
+      name: getDisplayName(entry),
+      amount: Number(entry.amount ?? 0),
+      avatarIcon: (entry as any).activeAvatarIcon ?? null,
+    }));
+  }, [kingsData]);
 
   const categoryTabs = [
-    { id: 'kings' as LeaderboardCategory, icon: TrendingUp, label: '榜王排行' },
     { id: 'xp' as LeaderboardCategory, icon: Trophy, label: '經驗榜' },
     { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產榜' },
   ];
 
-  const metricLabels: Record<LeaderboardCategory, string> = { kings: '榜一次數', xp: '經驗', asset: '資產' };
-  const units: Record<LeaderboardCategory, string> = { kings: '次', xp: 'XP', asset: 'ZXC' };
+  const metricLabels: Record<LeaderboardCategory, string> = { xp: '經驗', asset: '資產' };
+  const units: Record<LeaderboardCategory, string> = { xp: 'XP', asset: 'ZXC' };
   const metricLabel = metricLabels[category];
   const unit = units[category];
 
@@ -161,6 +204,8 @@ export default function LeaderboardView() {
                 ))}
               </div>
             )}
+
+            <KingPodium kings={kingTop3} nf={nf} />
 
             <section className="flex flex-col items-center justify-center space-y-2">
               <div className="flex items-center gap-2 text-accent opacity-60">
