@@ -73,9 +73,9 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
         </div>
         <div className="flex items-center gap-3">
           {remainingTime ? (
-            <span className="text-[10px] text-accent/60">{remainingTime}</span>
+            <span className="text-sm font-bold text-accent/60">{remainingTime}</span>
           ) : totalCount !== undefined ? (
-            <span className="text-[10px] text-secondary">共 {totalCount} 人</span>
+            <span className="text-sm font-bold text-secondary">共 {totalCount} 人</span>
           ) : null}
           {kings.length === 0 && (
             <span className="text-[10px] text-secondary">暫無資料</span>
