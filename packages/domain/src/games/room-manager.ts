@@ -89,29 +89,83 @@ export class RoomManager {
     }
 }
 
+export type PokerPhase = 'waiting' | 'preflop' | 'flop' | 'turn' | 'river' | 'showdown';
+
+export interface PokerPlayer {
+    userId: string;
+    displayName: string;
+    hand: any[];
+    stack: number;
+    bet: number;
+    totalBet: number;
+    folded: boolean;
+    allIn: boolean;
+    isBot: boolean;
+}
+
 export interface PokerState {
-    status: 'waiting' | 'dealing' | 'betting' | 'showdown';
+    status: PokerPhase;
     pot: number;
-    currentTurn: string;
+    currentTurnIdx: number;
+    dealerIdx: number;
     communityCards: any[];
-    players: { userId: string; hand: any[]; stack: number; lastBet: number; folded: boolean }[];
+    players: PokerPlayer[];
+    deck: any[];
+    lastRaise: number;
+    minBet: number;
+    roundEnd: boolean;
+    winnerId?: string;
+    winRank?: string;
 }
 
 export class MultiplayerGameManager {
     private suites = ['♠', '♥', '♦', '♣'];
     private ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-    private drawCard(seed: string): any {
-        const hash = this._fnv1a32(seed) >>> 0;
-        return {
-            rank: this.ranks[hash % this.ranks.length],
-            suit: this.suites[Math.floor(hash / this.ranks.length) % this.suites.length]
-        };
+    private createDeck(seed: string): any[] {
+        const deck: any[] = [];
+        let h = this._fnv1a32(seed) >>> 0;
+        for (const suit of this.suites) {
+            for (const rank of this.ranks) {
+                deck.push({ rank, suit });
+            }
+        }
+        // Fisher-Yates shuffle using FNV hash
+        for (let i = deck.length - 1; i > 0; i--) {
+            h = (Math.imul(h, 0x5deece66d) + 0xb) >>> 0;
+            const j = h % (i + 1);
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        return deck;
+    }
+
+    private _evalBestHand(hole: any[], community: any[]): { rank: number; name: string; kickers: number[]; bestFive: any[] } {
+        const allCards = [...hole, ...community];
+        if (allCards.length < 5) {
+            // Fallback: evaluate with what we have
+            return this._evalHand(allCards.slice(0, 5));
+        }
+        let best: any = null;
+        // Try all C(n,5) combinations
+        for (let a = 0; a < allCards.length; a++) {
+            for (let b = a + 1; b < allCards.length; b++) {
+                for (let c = b + 1; c < allCards.length; c++) {
+                    for (let d = c + 1; d < allCards.length; d++) {
+                        for (let e = d + 1; e < allCards.length; e++) {
+                            const five = [allCards[a], allCards[b], allCards[c], allCards[d], allCards[e]];
+                            const ev = this._evalHand(five);
+                            if (!best || ev.rank > best.rank || (ev.rank === best.rank && this._compareKickers(ev.kickers, best.kickers) > 0)) {
+                                best = { ...ev, bestFive: five };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return best || this._evalHand(allCards.slice(0, 5));
     }
 
     private _evalHand(cards: any[]): { rank: number; name: string; kickers: number[] } {
-        const suits = ['♠', '♥', '♦', '♣'];
-        const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         const rankCounts: Record<string, number> = {};
         const suitCounts: Record<string, number> = {};
         cards.forEach(c => {
@@ -119,14 +173,14 @@ export class MultiplayerGameManager {
             suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1;
         });
         const counts = Object.values(rankCounts);
-        const uniqueRanks = Object.keys(rankCounts).map(r => ranks.indexOf(r)).sort((a, b) => a - b);
+        const uniqueRanks = Object.keys(rankCounts).map(r => this.ranks.indexOf(r)).sort((a, b) => a - b);
         const isFlush = Object.values(suitCounts).some(c => c >= 5);
         let isStraight = false;
         for (let i = 0; i <= uniqueRanks.length - 5; i++) {
             if (uniqueRanks[i + 4] - uniqueRanks[i] === 4) { isStraight = true; break; }
         }
         if (uniqueRanks.includes(12) && uniqueRanks.includes(0) && uniqueRanks.includes(1) && uniqueRanks.includes(2) && uniqueRanks.includes(3)) isStraight = true;
-        const kickers = Object.entries(rankCounts).sort((a, b) => b[1] - a[1] || ranks.indexOf(b[0]) - ranks.indexOf(a[0])).map(e => ranks.indexOf(e[0]));
+        const kickers = Object.entries(rankCounts).sort((a, b) => b[1] - a[1] || this.ranks.indexOf(b[0]) - this.ranks.indexOf(a[0])).map(e => this.ranks.indexOf(e[0]));
 
         if (isFlush && isStraight && cards.some(c => c.rank === 'A')) return { rank: 10, name: 'Royal Flush', kickers };
         if (isFlush && isStraight) return { rank: 9, name: 'Straight Flush', kickers };
@@ -140,26 +194,206 @@ export class MultiplayerGameManager {
         return { rank: 1, name: 'High Card', kickers };
     }
 
+    private _compareKickers(a: number[], b: number[]): number {
+        for (let i = 0; i < Math.min(a.length, b.length); i++) {
+            if (a[i] > b[i]) return 1;
+            if (a[i] < b[i]) return -1;
+        }
+        return 0;
+    }
+
+    initPoker(players: { userId: string; displayName: string; stack: number; isBot: boolean }[]): PokerState {
+        const dealerIdx = Math.floor(Math.random() * players.length);
+        const deck = this.createDeck(Date.now().toString());
+        let deckIdx = 0;
+        const deal = () => deck[deckIdx++];
+
+        // Deal 2 cards each
+        const pokerPlayers = players.map(p => ({
+            ...p,
+            hand: [deal(), deal()],
+            bet: 0,
+            totalBet: 0,
+            folded: false,
+            allIn: false,
+        }));
+
+        // Blinds
+        const sbIdx = (dealerIdx + 1) % players.length;
+        const bbIdx = (dealerIdx + 2) % players.length;
+        pokerPlayers[sbIdx].bet = 10;
+        pokerPlayers[sbIdx].stack -= 10;
+        pokerPlayers[bbIdx].bet = 20;
+        pokerPlayers[bbIdx].stack -= 20;
+
+        return {
+            status: 'preflop',
+            pot: 30,
+            currentTurnIdx: (bbIdx + 1) % players.length,
+            dealerIdx,
+            communityCards: [],
+            players: pokerPlayers,
+            deck,
+            lastRaise: 20,
+            minBet: 20,
+            roundEnd: false,
+        };
+    }
+
     advancePoker(state: PokerState, action?: { type: string; userId: string; amount?: number }): PokerState {
-        if (state.status === 'waiting' && state.players.length >= 2) {
-            return {
-                ...state,
-                status: 'dealing',
-                communityCards: [this.drawCard('comm1'), this.drawCard('comm2'), this.drawCard('comm3')],
-                players: state.players.map(p => ({ ...p, hand: [this.drawCard(p.userId + '1'), this.drawCard(p.userId + '2')] })),
-                currentTurn: state.players[0].userId
-            };
+        if (action?.type === 'fold') {
+            const p = state.players.find(x => x.userId === action.userId);
+            if (p) p.folded = true;
+            const active = state.players.filter(x => !x.folded);
+            if (active.length <= 1) {
+                state.status = 'showdown';
+                state.winnerId = active[0]?.userId;
+                state.winRank = 'Fold';
+                state.roundEnd = true;
+                return { ...state };
+            }
+            this._nextTurn(state);
+            return { ...state };
         }
 
-        if (action?.type === 'fold') {
-            const player = state.players.find(p => p.userId === action.userId);
-            if (player) player.folded = true;
-            // Advance turn logic
-            const activePlayers = state.players.filter(p => !p.folded);
-            if (activePlayers.length === 1) return { ...state, status: 'showdown' };
+        if (action?.type === 'call') {
+            const p = state.players[state.currentTurnIdx];
+            const callAmt = state.lastRaise - p.bet;
+            const actual = Math.min(callAmt, p.stack);
+            p.bet += actual;
+            p.stack -= actual;
+            p.totalBet += actual;
+            state.pot += actual;
+            if (p.stack <= 0) p.allIn = true;
+            this._nextTurn(state);
+            return { ...state };
+        }
+
+        if (action?.type === 'raise' && action.amount) {
+            const p = state.players[state.currentTurnIdx];
+            const totalBet = action.amount;
+            const addAmt = totalBet - p.bet;
+            const actual = Math.min(addAmt, p.stack);
+            p.bet += actual;
+            p.stack -= actual;
+            p.totalBet += actual;
+            state.pot += actual;
+            state.lastRaise = p.bet;
+            if (p.stack <= 0) p.allIn = true;
+            this._nextTurn(state);
+            return { ...state };
+        }
+
+        if (action?.type === 'check') {
+            this._nextTurn(state);
+            return { ...state };
+        }
+
+        // Auto-advance dealing phase
+        if (!action && state.status !== 'waiting') {
+            this._advancePhase(state);
+            return { ...state };
         }
 
         return state;
+    }
+
+    private _nextTurn(state: PokerState) {
+        const active = state.players.filter(p => !p.folded && !p.allIn);
+        if (active.length <= 1) {
+            state.roundEnd = true;
+            return;
+        }
+        // Check if all active players have equal bets
+        const bets = active.map(p => p.bet);
+        const allEqual = bets.every(b => b === bets[0]);
+        if (allEqual && bets[0] >= state.lastRaise) {
+            this._advancePhase(state);
+            return;
+        }
+        // Find next active player
+        let next = state.currentTurnIdx;
+        for (let i = 0; i < state.players.length; i++) {
+            next = (next + 1) % state.players.length;
+            const p = state.players[next];
+            if (!p.folded && !p.allIn && p.bet < state.lastRaise) {
+                state.currentTurnIdx = next;
+                return;
+            }
+        }
+        // Everyone matched or all-in
+        this._advancePhase(state);
+    }
+
+    private _advancePhase(state: PokerState) {
+        // Reset bets for next phase
+        for (const p of state.players) p.bet = 0;
+
+        if (state.status === 'preflop') {
+            state.status = 'flop';
+            state.communityCards.push(state.deck.pop(), state.deck.pop(), state.deck.pop());
+        } else if (state.status === 'flop') {
+            state.status = 'turn';
+            state.deck.pop(); // burn
+            state.communityCards.push(state.deck.pop());
+        } else if (state.status === 'turn') {
+            state.status = 'river';
+            state.deck.pop(); // burn
+            state.communityCards.push(state.deck.pop());
+        } else if (state.status === 'river') {
+            this._resolveShowdown(state);
+            return;
+        }
+
+        // Who starts betting in new phase: first active after dealer
+        const firstIdx = (state.dealerIdx + 1) % state.players.length;
+        state.currentTurnIdx = firstIdx;
+        state.lastRaise = state.minBet;
+    }
+
+    private _resolveShowdown(state: PokerState) {
+        state.status = 'showdown';
+        state.roundEnd = true;
+        const active = state.players.filter(p => !p.folded);
+        if (active.length === 1) {
+            state.winnerId = active[0].userId;
+            state.winRank = 'Fold';
+            return;
+        }
+        // Evaluate best hand for each active player
+        const hands = active.map(p => ({
+            userId: p.userId,
+            evaluation: this._evalBestHand(p.hand, state.communityCards),
+        }));
+        let best = hands[0];
+        for (let i = 1; i < hands.length; i++) {
+            if (hands[i].evaluation.rank > best.evaluation.rank) {
+                best = hands[i];
+            } else if (hands[i].evaluation.rank === best.evaluation.rank) {
+                if (this._compareKickers(hands[i].evaluation.kickers, best.evaluation.kickers) > 0) {
+                    best = hands[i];
+                }
+            }
+        }
+        state.winnerId = best.userId;
+        state.winRank = best.evaluation.name;
+    }
+
+    // Bot AI: simple heuristic
+    getBotAction(state: PokerState, userId: string): { type: string; amount?: number } {
+        const p = state.players.find(x => x.userId === userId);
+        if (!p) return { type: 'fold' };
+        const hand = p.hand;
+        // Simple hand strength: high card value
+        const highCard = Math.max(...hand.map((c: any) => this.ranks.indexOf(c.rank)));
+        const hasPair = hand[0].rank === hand[1].rank;
+        const bothHigh = highCard >= 10; // J, Q, K, A
+
+        if (hasPair && highCard >= 8) return { type: 'raise', amount: state.lastRaise * 2 };
+        if (hasPair) return { type: 'call' };
+        if (bothHigh) return { type: 'call' };
+        if (highCard >= 8 && Math.random() > 0.5) return { type: 'call' };
+        return { type: 'fold' };
     }
 
     resolvePokerHand(hands: { userId: string; cards: any[] }[]): { winnerId: string; rank: string } {
@@ -173,13 +407,8 @@ export class MultiplayerGameManager {
                 bestEval = ev;
             } else if (ev.rank === bestEval.rank) {
                 for (let k = 0; k < Math.min(ev.kickers.length, bestEval.kickers.length); k++) {
-                    if (ev.kickers[k] > bestEval.kickers[k]) {
-                        best = hands[i];
-                        bestEval = ev;
-                        break;
-                    } else if (ev.kickers[k] < bestEval.kickers[k]) {
-                        break;
-                    }
+                    if (ev.kickers[k] > bestEval.kickers[k]) { best = hands[i]; bestEval = ev; break; }
+                    else if (ev.kickers[k] < bestEval.kickers[k]) break;
                 }
             }
         }
@@ -187,20 +416,15 @@ export class MultiplayerGameManager {
     }
 
     resolveBluffDice(bets: { userId: string; quantity: number; value: number }[], actualDice: number[][]): { winnerId: string } {
-        // Count actual dice showing the claimed value
         const allDice = actualDice.flat();
-        for (const bet of bets) {
-            const count = allDice.filter(d => d === bet.value).length;
-            // If a player called bluff (quantity=0 means challenge), check if claim is false
-            if (bet.quantity === 0) continue;
-            // If the actual count is less than the claim, the claim was a bluff
-            // The challenger (next player who called bluff) wins
-            const nextBet = bets[bets.indexOf(bet) + 1];
-            if (nextBet && nextBet.quantity === 0 && count < bet.quantity) {
+        for (let i = 0; i < bets.length; i++) {
+            if (bets[i].quantity === 0) continue; // challenge marker
+            const count = allDice.filter(d => d === bets[i].value).length;
+            const nextBet = bets[i + 1];
+            if (nextBet && nextBet.quantity === 0 && count < bets[i].quantity) {
                 return { winnerId: nextBet.userId };
             }
         }
-        // If no bluff caught, last better wins
         const lastBet = bets.filter(b => b.quantity > 0);
         return { winnerId: lastBet.length > 0 ? lastBet[lastBet.length - 1].userId : bets[0]?.userId || '' };
     }
