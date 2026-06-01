@@ -3,12 +3,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Building2, Users, Microscope, Cpu, TrendingUp, DollarSign, ArrowLeft } from "lucide-react";
+import { formatNumber } from "@repo/shared";
+import { usePreferencesStore } from "../../store/usePreferencesStore";
 import { api } from "../../store/api";
 import { useAuthStore } from "../../store/useAuthStore";
 import AppBottomNav from "../../components/AppBottomNav";
 
 export default function CompanyView() {
   const { t } = useTranslation("company");
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { sessionId } = useAuthStore();
   const qc = useQueryClient();
   const [tab, setTab] = useState<"dashboard" | "hire" | "invest">("dashboard");
@@ -158,7 +162,7 @@ export default function CompanyView() {
               </div>
               <div className="rounded-2xl bg-card p-4 border border-border/10">
                 <p className="text-[10px] text-secondary font-bold">{t("operating_cash")}</p>
-                <p className="text-lg font-black text-accent">{sum?.cash?.toLocaleString() || 0} ZXC</p>
+                <p className="text-lg font-black text-accent">{nf(sum?.cash || 0)} ZXC</p>
               </div>
               <div className="rounded-2xl bg-card p-4 border border-border/10">
                 <p className="text-[10px] text-secondary font-bold">{t("revenue_per_tick")}</p>
@@ -265,7 +269,7 @@ export default function CompanyView() {
 
             {/* Deposit / Withdraw */}
             <div className="rounded-2xl bg-card p-4 border border-border/10">
-              <p className="text-xs font-bold text-secondary mb-2">{t("operating_cash")} {sum?.cash?.toLocaleString()} ZXC</p>
+              <p className="text-xs font-bold text-secondary mb-2">{t("operating_cash")} {nf(sum?.cash || 0)} ZXC</p>
               <div className="flex gap-2">
                 <input type="number" min={1} value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
                   placeholder="ZXC" className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-2 text-sm" />
