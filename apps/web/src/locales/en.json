@@ -1100,7 +1100,8 @@
     "43": "Oracle XI", "44": "Oracle XII",
     "45": "Oracle XIII", "46": "Oracle XIV",
     "47": "Oracle XV", "48": "Oracle XVI",
-    "49": "Oracle XVII",     "50": "Myth",
+    "49": "Oracle XVII",     "50": "Myth"
+  },
     "game_data": {
       "coinflip_name": "Coinflip",
       "coinflip_desc": "Simple 2-choice. Pick heads or tails, round reveals a fixed side.",
@@ -1190,8 +1191,7 @@
       "chaos": "Chaos",
       "abyss": "Abyss",
       "oracle": "Oracle"
-    }
-  },
+    },
   "chat": {
     "title": "Global Chat",
     "global": "Global",
