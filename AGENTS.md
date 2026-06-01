@@ -4,157 +4,168 @@
 
 ```
 apps/
-  api/     — Fastify backend (port auto, Render/Vercel)
+  api/     — Fastify backend (port auto, Render)
   web/     — React SPA (Vite, deployed on Vercel)
   worker/  — Background chain sync scripts
 packages/
-  shared/    — Types, constants, chest/item definitions, version
-  domain/    — Game logic, VIP/mission/XP/market/company engines
-  on-chain/  — Settlement, transaction queries, DashboardService
-  infrastructure/ — DB (Drizzle ORM + Postgres), KV (Upstash Redis), repos
+  shared/          — Types, constants, chest/item defs, version, formatNumber
+  domain/          — Game logic, VIP/XP/missions/market/company engines
+  on-chain/        — Settlement, tx queries, DashboardService
+  infrastructure/  — DB (Drizzle ORM + Postgres), KV (Upstash Redis), repos
 ```
 
 ## Workspace
 
-- **pnpm workspace monorepo** (`pnpm@10.33.0`)
-- `pnpm-lock.yaml` is the lockfile
-- TypeScript 5.4+, `"type": "module"` (ESM)
+- **pnpm workspace monorepo** (`pnpm@10`), `pnpm-lock.yaml`
+- TypeScript 5.4+, ESM (`"type": "module"`)
+- All packages importable via `@repo/shared`, `@repo/domain`, `@repo/infrastructure`, `@repo/on-chain`
 
 ## Key commands
 
 ```bash
-pnpm install                  # install all packages
-pnpm --filter web dev         # frontend dev server (Vite, http://localhost:5173)
-pnpm build:web                # build frontend only
-pnpm build                    # build API + frontend
+pnpm install                         # install all
+pnpm --filter web dev                # frontend dev (Vite :5173, proxies /api→:3000)
+pnpm build:web                       # build frontend only (shared → web)
+pnpm build                           # build shared + web (NOT api)
 
-# Type-checking (run from any package dir)
+# Type-checking (order matters after shared/domain changes):
 cd packages/shared && npx tsc
 cd packages/domain && npx tsc
-cd apps/api && npx tsc --noEmit
+cd apps/api && npx tsc --noEmit      # API needs domain built first
 cd apps/web && npx tsc --noEmit
-
-# Build & type-check in order (required after shared/domain changes):
-cd packages/shared && npx tsc
-cd packages/domain && npx tsc
-cd apps/api && npx tsc --noEmit
 ```
 
-## Build order dependency
-
-`shared → domain → api` must be built in order. `web` depends on `shared` (`build:web`).
-
-## Version
-
-- Source of truth: `packages/shared/src/constants/version.ts` — `APP_VERSION`
-- Tags: `v1.0.5` (master), `v1.0.6`+ on `dev` branch
-- Frontend footer/settings read `APP_VERSION` from `@repo/shared`
-
-## Branches
-
-- `master` — stable, production (Vercel + Render API)
-- `dev` — feature development, preview on beta Render
-- Dev branch API URL: `https://zixi-casino-beta.onrender.com` (set via Vercel env `VITE_API_URL`)
-
-## Key packages
-
-| Package | Import path | Role |
-|---------|------------|------|
-| `@repo/shared` | Types, `CHEST_CONFIGS`, `APP_VERSION`, `formatNumber` |
-| `@repo/domain` | GameManager (12 games), VIP, XP, missions, market, company |
-| `@repo/infrastructure` | DB repos (Drizzle), KV (Upstash Redis), ChainClient |
-| `@repo/on-chain` | Settlement, TransactionQueryService, DashboardService |
-
-## Important patterns
-
-- **API routes** in `apps/api/src/routes/v1/` — each game/feature has its own file
-- **Game resolution**: `packages/domain/src/games/game-manager.ts` — FNV-1a 32bit deterministic hashing
-- **Settlement**: async by default (`GAME_SETTLEMENT_ASYNC=true`). Balance credited immediately via DB, chain tx queued to background
-- **KV cache**: `apps/api/src/plugins/cache.ts` — per-route TTL caching via Upstash Redis. `invalidateCache()` exists but is not called from routes (cache relies on TTL expiry)
-- **Pagination**: `limit`/`page` query params on `GET /api/v1/dashboard/transactions`
-- **Locale**: `apps/web/src/locales/zh.json` / `en.json` — used via `useTranslation()` / `t('key')`
-
-## Game routes
-
-Each game has its own route at `apps/api/src/routes/v1/games/<game>.ts`. Some games (coinflip, roulette, horse, shoot-dragon-gate) bypass `GameManager` and implement their own resolution — these are known discrepancies.
-
-## Caching
-
-- Backend API cache: `apps/api/src/plugins/cache.ts` (TTL per route)
-- Frontend: most pages use `useEffect` + `api.get()` (no React Query caching). MarketView/CompanyView/LobbyView use `useQuery` with polling
-- To reduce server calls, use React Query's `staleTime` for non-critical pages
-
-## DB
-
-- PostgreSQL via Neon (connection URL from `DATABASE_URL` env)
-- Drizzle ORM with schema in `packages/infrastructure/src/db/schema.ts`
-- KV: Upstash Redis via `@repo/infrastructure` (used for session, cache, mission tracking, check-in streaks)
-
-## Deployment
-
-- **Frontend**: Vercel — auto-deploys from git. Vite build outputs to `apps/web/dist`
-- **API**: Render — `render.yaml` config. Starts with `node apps/api/dist/index.js`
-- Health check: `GET /health` (Render uses this)
-- Env var `VITE_API_URL` controls which API the frontend calls
-
-## Chest/item system
-
-- 6 rarities on master (common→mythic), 8 on dev (+chaos, +abyss, oracle)
-- 8 chest types (common→oracle on dev)
-- Item definitions: `packages/shared/src/constants/chests.ts`
-- Chest opening: `packages/domain/src/rewards/chest-manager.ts`
-- Pity system: weighted re-roll among guaranteed rarity and above
-- `wallet_ledger_entries` DB table tracks all financial events (game payouts, chest buys, airdrops, transfers)
-
-## Mission system
-
-- API: `GET /api/v1/missions`, `POST /api/v1/missions/claim`
-- 4 random daily missions per user (from pool of ~35), determined by FNV hash of date+address
-- Progress tracked in KV: `mission:bet:<addr>:<date>`, `mission:win:<addr>:<date>`, `mission:play:<addr>:<date>`
-- Some missions require VIP 1+ (checked via `vip_tier` buff type)
-- After claiming, missions are hidden (not re-shown)
-
-## Airdrop & check-in
-
-- Airdrop endpoint: `POST /api/v1/wallet/airdrop`
-- Midnight reset (date string comparison, not 24h timer)
-- Check-in streak tracked in KV: `checkin_streak:<addr>`, `checkin_history:<addr>`
-- `last_airdrop:<addr>` stores last claim timestamp
-
-## VIP
-
-- VIP pass item (`vip_pass`) activates a buff with `type: 'vip_tier', value: 1`
-- VIP manager checks `b.type === 'vip_tier' && b.value === N` (in addition to legacy `id === 'vip_N_permanent'`)
-- VIP 1+ unlocks special missions and game rooms
-
-## Known issues / quirks
-
-- `inferAnnouncementType` in `announcements.ts` guesses type from content keywords — does not read a stored `type` column (column doesn't exist in DB)
-- `SERVER_STARTED_AT` in `api/index.ts` may reset on Render cold starts — uptime shows "< 1m"
-- `useQuery` with `queryFn` calling state setters is unreliable — use `useEffect` pattern instead for data fetching + component state
+`pnpm build:web` runs `shared → tsc` then `web → vite build`.
 
 ## Branch workflow
 
-- Features developed on `dev` branch, tagged per version (`v1.0.6`, `v1.0.7`, ...)
-- Master receives merges when stable
-- Version tags moved via `git tag -d && git tag && git push --force`
-- `git push origin master --force-with-lease` for master updates (shared branch — use with care)
+- `master` — stable production (Vercel + Render)
+- `dev` — feature branch, preview on beta Render
+- Merge dev→master: `git checkout master && git merge --ff-only dev && git push origin master --tags`
+- Tag: `git tag v1.0.x dev && git push origin v1.0.x`
+- Version: `packages/shared/src/constants/version.ts`
 
-## 🔴 SECURITY: Database credentials — ABSOLUTELY NEVER hardcode
+## Key packages
 
-**Database credentials (`DATABASE_URL`, `KV_REST_API_TOKEN`, `ADMIN_PRIVATE_KEY`, etc.) must NEVER be written into any file.**
+| Package | Role |
+|---------|------|
+| `@repo/shared` | `APP_VERSION`, `formatNumber()`, `CHEST_CONFIGS`, `RARITY_NAMES` |
+| `@repo/domain` | `GameManager` (resolve all games via FNV-1a), VIP/XP/missions/market/company |
+| `@repo/infrastructure` | Drizzle schema, `WalletRepository`, `kv` (Upstash Redis), `ChainClient` |
+| `@repo/on-chain` | Settlement, `DashboardService`, `TransactionQueryService` |
 
-- ❌ **NEVER create temp/script files with hardcoded `DATABASE_URL` or any credential**
-- ❌ **NEVER `console.log()` or `console.error()` database connection strings**
-- ❌ **NEVER write credentials to disk for any reason**
-- ✅ Use environment variables exclusively: `process.env.DATABASE_URL`
-- ✅ One-liner queries via `node -e "..."` with env passed inline
-- ✅ Temp files must use `process.env.*` and must be in `.gitignore` before creation
-- ✅ If a temp file is needed, CREATE IT IN `C:\Users\CPXru\AppData\Local\Temp\opencode\` (not in the repo)
-- ✅ Delete temp files immediately after use
+## FNV-1a hash rule (CRITICAL)
 
-**If this rule is violated, the agent must:**
-1. Immediately `git filter-branch --index-filter` to purge the file from ALL history
-2. Force push ALL branches
-3. Update `.gitignore` to prevent recurrence
-4. Report to the user immediately
+**Every `_fnv1a32()` call that feeds into `%` must use `>>> 0`:**
+
+```typescript
+const hash = this._fnv1a32(seed) >>> 0;  // correct
+const num = hash % 6;                      // was negative without >>> 0
+```
+
+Applies to: Bingo, DragonTiger drawCard, BluffDice, Duel, Crash, Poker drawCard, Blackjack drawCard, Sicbo, and all bias checks. The `_fnv1a32` method itself returns `>>> 0` but subsequent `Math.imul` chaining can produce negatives — re-apply `>>> 0` after each multiplication step.
+
+## Game-specific notes
+
+| Game | Key facts |
+|------|-----------|
+| **Duel** | Server determines p2 (always opposite of p1). Payout 1.96x. No draw abuse possible. |
+| **DragonTiger** | Dynamic payout `max(2, floor(12/range))`. Gate open fee suggested. |
+| **Sicbo** | All-triple → big/small auto-lose. Dynamic total payouts (4→60x, 10→6x). |
+| **BluffDice** | Player picks predicted total (5-30). Payout: exact=5x, off≤2=1x(push), else=0x. |
+| **Bingo** | Draws 20/75. Player picks 5-10 numbers. Dynamic multiplier by pick count. |
+| **Slots** | Triple-only wins (no pair payouts). |
+| **Shared** | All games use deterministic FNV-1a hashing via `game-manager.ts`. Admin `bias` param wrapped in `>>> 0`. |
+
+## Balance & settlement
+
+- `adjustBalanceAtomic()` (via raw SQL `UPDATE wallet_accounts SET balance = balance ± delta WHERE balance >= delta RETURNING balance`) prevents race conditions on game bets.
+- `creditPayout()` also uses atomic adjust.
+- `sync-down.ts` skips addresses with pending `admin_credit` TxIntents to prevent overwrite.
+- `wallet_ledger_entries` table tracks all financial events.
+
+## Color system (Tailwind custom colors)
+
+Use these classes instead of raw hex:
+
+| Class | Replaces | Purpose |
+|-------|----------|---------|
+| `bg-surface` | `bg-[#080810]` | Page background |
+| `bg-card` | `bg-[#16162a]` | Card background |
+| `bg-elevated` | `bg-[#1e1e3a]` | Hover/elevated surface |
+| `text-accent` / `bg-accent` / `border-accent` | `#f5a623` | Gold brand accent |
+| `text-secondary` | `#8080aa` | Secondary text |
+| `text-muted` | `#50507a` | Muted text |
+| `text-info` | `#2979ff` | Info blue |
+| `text-success` | `#00c853` | Success green |
+| `text-danger` | `#ff1744` | Danger red |
+| `text-warning` | `#ff9100` | Warning amber |
+| `border-border` | `#2a2a48` | Standard border (supports `/20` opacity) |
+
+Card top-border accents: `card-accent`/`card-info`/`card-success`/`card-warning`/`card-danger`
+Section titles: `section-title` + `section-title-{accent|info|success|warning|danger}`
+VIP text: `text-gradient-diamond` / `text-gradient-gold`
+Glow: `text-glow-success` / `text-glow-danger`
+
+## i18n
+
+- Locale files: `apps/web/src/locales/zh.json` / `en.json`
+- All user-facing text uses `useTranslation()` + `t('namespace.key')`
+- Keys must be in the correct namespace — earlier bug had `game_data`/`chest_data`/`rarity_labels` accidentally nested inside `xpLevel` instead of `info`.
+- Key structure: `info.game_data.*`, `info.chest_data.*`, `txType.*`, `txStatus.*`, `company.*`, etc.
+
+## Layout & responsive
+
+- `app-shell` — max-width 1760px wrapper for all pages
+- `content-grid` — 1/2/3 column responsive grid for content sections
+- `layout-sidebar` — content + 360px sidebar
+- All heavy pages are `React.lazy()` loaded; `Layout.tsx` wraps `<Outlet>` in `<Suspense>`.
+- Performance monitoring: `GET /api/v1/stats/performance` → `/app/performance` view
+
+## Number formatting
+
+Always use `formatNumber(value, amountDisplay)` from `@repo/shared` instead of `.toLocaleString()`. The user's `amountDisplay` preference is `'short'` (compact: 兆/億/萬) or `'full'` (full number). The `nf` helper pattern in components:
+```typescript
+const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
+```
+
+Do NOT call `.toLocaleString()` directly for numeric values — it bypasses the short/full preference.
+
+## Leaderboard
+
+- Three tabs: 經驗榜 (xp), 資產榜 (asset)
+- Kings (`leaderboard_kings` DB table) displayed as top-3 banner ABOVE both tabs
+- All leaderboard types (xp/asset/week/month/season) are prefetched on mount for instant tab switching
+- Period types: WEEKLY (ends Sunday 3AM), MONTHLY (end of month), SEASON (end of quarter)
+
+## VIP games (room-manager)
+
+- `MultiplayerGameManager` in `packages/domain/src/games/room-manager.ts`
+- `resolvePokerHand` — real 10-hand-rank evaluation with kickers
+- `resolveBluffDice` — counts actual dice values, finds bluffer/challenger
+- Rooms stored in KV, bots auto-fill to 70% capacity
+
+## API endpoints
+
+| Path | Purpose |
+|------|---------|
+| `/api/v1/leaderboard?type={xp\|season\|kings\|asset}` | Leaderboard data |
+| `/api/v1/stats/performance` | Server uptime, user count, session count, 24h tx count |
+| `/api/v1/stats/health` | Old health endpoint (uptime %, failure rate) |
+| `/api/v1/stats/recent-txs` | Recent wallet ledger entries |
+| `/api/v1/support/chat/stream` | SSE for real-time chat |
+
+## Company system
+
+- `/upgrade-fab` chip-only, deducts `fabLevel × 10,000` from company cash
+- `/deposit` wallet ZXC → company cash
+- Hire deposit: `salary × 10` deducted from company cash
+- Bankruptcy: `cash < -5000` auto-fires all employees, resets level/products
+
+## 🔴 SECURITY: No hardcoded credentials
+
+- NEVER write `DATABASE_URL`, `KV_REST_API_TOKEN`, `ADMIN_PRIVATE_KEY` into any file
+- Use `process.env.*` exclusively
+- Temp files go to `C:\Users\CPXru\AppData\Local\Temp\opencode\` (gitignored parent)
+- Delete temp files immediately after use
+- If violated: `git filter-branch` + force push all branches + update `.gitignore`
