@@ -137,6 +137,16 @@ export async function marketRoutes(fastify: FastifyInstance) {
         const currentBalance = Number(await gameSettlement.getBalance(address, "zhixi"));
         const newBalance = Number(Math.max(0, currentBalance + cashDelta).toFixed(2));
         await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+
+        const walletAction = new WalletManager();
+        const isCredit = cashDelta > 0;
+        const walletAbs = Math.abs(cashDelta);
+        const intentType = isCredit ? "admin_credit" : "admin_debit";
+        const intent = walletAction.createTxIntent(userId, "ZXC", intentType, String(walletAbs));
+        intent.address = address;
+        intent.meta = { source: "market_liquidation", eventCount: liqEvents.length };
+        await walletRepo.saveTxIntent(intent);
+
         await walletRepo.saveLedgerEntry({
           id: randomUUID(),
           userId,
@@ -149,6 +159,30 @@ export async function marketRoutes(fastify: FastifyInstance) {
           meta: { events: liqEvents.map(e => ({ type: e.type, symbol: e.symbol, side: e.side, pnl: e.pnl ?? e.estimatedPnl, margin: e.margin ?? e.marginLost, fee: e.fee, closePrice: e.closePrice ?? e.markPrice })) },
           createdAt: new Date(),
         });
+
+        // Fire async on-chain transfer for settlement
+        const runtime = onchainManager.getRuntimeConfig();
+        if (runtime.rpcUrl && runtime.adminPrivateKey) {
+          const treasuryAddr = (await import("@repo/on-chain")).getOnChainConfig().treasuryAddress;
+          const fromAddr = isCredit ? treasuryAddr : address;
+          const toAddr = isCredit ? address : treasuryAddr;
+          const { SettlementServiceImpl, ViemRepository } = await import("@repo/on-chain");
+          const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+          const svc = new SettlementServiceImpl(repo);
+          void svc.adminTransfer({
+            from: fromAddr,
+            to: toAddr,
+            amount: String(walletAbs),
+            tokenAddress: runtime.tokens.zhixi.contractAddress,
+          }).then((txResult: any) => {
+            if (txResult.confirmed) {
+              walletRepo.saveTxIntent(walletAction.processTxIntent(intent, "confirmed", txResult.txHash)).catch(() => {});
+            }
+          }).catch((err: any) => {
+            console.error("[Market] liquidation on-chain transfer failed:", err);
+            walletRepo.saveTxIntent(walletAction.processTxIntent(intent, "failed", undefined, err.message)).catch(() => {});
+          });
+        }
       }
       await marketRepo.saveAccount(ctx.session.address, ctx.user.id, normalized);
     }
