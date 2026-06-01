@@ -151,7 +151,12 @@ export default function LeaderboardView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-10 px-6 pt-24">
+      <main className="app-shell pt-24">
+        {/* Kings banner — independent, outside tabs */}
+        <div className="mb-6">
+          <KingPodium kings={kingTop3} nf={nf} />
+        </div>
+
         {isLoading && (
           <section className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -204,8 +209,6 @@ export default function LeaderboardView() {
                 ))}
               </div>
             )}
-
-            <KingPodium kings={kingTop3} nf={nf} />
 
             <section className="flex flex-col items-center justify-center space-y-2">
               <div className="flex items-center gap-2 text-accent opacity-60">
@@ -298,7 +301,7 @@ export default function LeaderboardView() {
 
 
 
-            <section className="space-y-3">
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {otherPlayers.map((player) => (
                 <div
                   key={`${player.rank}-${player.name}`}
@@ -348,7 +351,7 @@ export default function LeaderboardView() {
               ))}
 
               {selfEntry && !otherPlayers.some((player) => player.isSelf) && (
-                <div className="relative flex items-center justify-between overflow-hidden rounded-xl border-2 border-accent bg-card p-5 shadow-[0_0_30px_rgba(252,192,37,0.1)]">
+                <div className="relative flex items-center justify-between overflow-hidden rounded-xl border-2 border-accent bg-card p-5 shadow-[0_0_30px_rgba(252,192,37,0.1)] md:col-span-2">
                   <div className="absolute right-0 top-0 p-2">
                     <span className="rounded-sm bg-accent px-1.5 py-0.5 text-[8px] font-black uppercase text-black">
                       {t('leaderboard.you')}
@@ -375,7 +378,7 @@ export default function LeaderboardView() {
               )}
 
               {(data?.entries?.length ?? 0) === 0 && (
-                <div className="py-16 text-center">
+                <div className="py-16 text-center md:col-span-2">
                   <Trophy className="mx-auto mb-4 h-12 w-12 text-muted" />
                   <p className="text-sm font-bold text-secondary">{t('leaderboard.no_rankings')}</p>
                   <p className="mt-2 text-xs text-muted">{t('leaderboard.no_data')}</p>
