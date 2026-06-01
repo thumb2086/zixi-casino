@@ -24,13 +24,13 @@ dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
 | **v1.0.16** | Crash | 賠率/機率微調；FNV hash 負數修復 | ✅ |
 | **v1.0.17** | Poker | 賠率/機率微調；FNV hash 負數修復 | ✅ |
 | **v1.0.18** | Blackjack | 賠率/機率微調；FNV hash 負數修復 | ✅ |
-| **v1.0.19** | VIP 遊戲 + 色彩系統 + RWD 排版 | VIP 房間多人配對、牌型/骰子判定實作（`resolvePokerHand`/`resolveBluffDice`）；CSS 變數色彩系統、`content-grid`/`layout-sidebar` RWD 佈局、SettingsView/多頁 app-shell 修正 | 🏗️ |
-| **v1.0.20** | 股市調整 + 交易效能 | 背景 tick、admin 端點、清算修正、前端極速反饋 | ⏳ |
+| **v1.0.19** | VIP 遊戲 + 色彩系統 + RWD 排版 | 德州撲克/吹牛骰多人房間（牌型判定、52 張牌庫、盲注/下注輪）；CSS 變數色彩系統、Tailwind 自訂色、card-accent/info/success 卡片系統、section-title 區塊標題；SettingsView/排行榜/商城 app-shell RWD；榜王前三 banner + 結算機制 | ✅ |
+| **v1.0.20** | 全站效能 + 監控 + VIP 遊戲補完 | 效能監控頁 `/app/performance` + `GET /api/v1/stats/performance`；React.lazy 懶載入 19 頁（bundle 1.1MB→695kB）；VIP 撲克房/吹牛房前端畫面；Bot AI 自動下單；多人房間 API（poker/bluffdice action）；Admin 市場端點（price/volatility/rate/shock）；全站數字簡寫修正；12 頁 RWD `max-w-2xl`→`app-shell` | ✅ |
 | **v1.0.21** | 上鏈系統 | 上鏈排隊佇列、上鏈公開頁面 | ⏳ |
 | **v1.0.22** | 交易紀錄 + 動態重構 | 交易紀錄系統完善、公開動態保留市場與錢包、移除重複錢包動態 | ⏳ |
 | **v1.0.23** | 全站快取 + 監控 | 管理頁面載入優化、伺服器運行時間、重新登入時間反饋圖表 | ⏳ |
 | **v1.0.24** | 公司系統 | `/upgrade-fab`、`/deposit`、招聘押金、export、測試 | ⏳ |
-| **v1.0.25** | 排版檢查 + 色彩設計語言 | 全站頁面 UI 排列、文字溢出、RWD 斷點、元件間距一致性檢查與修正；導入新色彩系統（會員漸層、暗色主題色票、CSS 變數） | ⏳ |
+| **v1.0.25** | 排版檢查 + 色彩設計語言 | 全站頁面 UI 排列、文字溢出、RWD 斷點、元件間距一致性檢查與修正；導入新色彩系統（會員漸層、暗色主題色票、CSS 變數） | ✅（合併至 v1.0.19） |
 | **v1.0.26** | 全站浮點修正 + 市場功能補強 | `round()` 預設 2dp、`formatNumber` 最大 2dp、全站 `.toFixed()` 統一為 2dp；市場新增 TP/SL 即時修改、一次還清貸款、全部賣出/全額買入、持倉點擊選股、浮動圖表放大拖曳、銀行利率顯示、slots auto-skip | ✅ |
 | **v1.0.27** | 管理員工具全面升級 (zixi-dev-tool) | 後台管理 SPA（儀表板/維護/用戶/目錄/審核/活動/工單 7 標籤頁）+ 全站 i18n 重構（800+ locale key） | ✅ |
 | **v1.1.0** | 正式版 | 全部合併至 master，穩定化 | 🎯 |
