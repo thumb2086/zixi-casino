@@ -181,10 +181,11 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
           const kingAddr = result.entries[0].address.toLowerCase();
           const kingName = result.entries[0].displayName;
           const db = await requireDb();
-          const kingUserId = result.entries[0].userId || (await db.query.users.findFirst({
+          const userRow = await db.query.users.findFirst({
             where: (u: any, { eq }: any) => eq(u.address, kingAddr),
             columns: { id: true },
-          }))?.id;
+          });
+          const kingUserId = userRow?.id;
           if (kingUserId) {
             const existing = await db.query.leaderboardKings.findFirst({
               where: (lk: any, { and, eq }: any) => and(eq(lk.category, type), eq(lk.periodId, result.periodId)),
