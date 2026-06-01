@@ -65,10 +65,15 @@ function KingPodium({ kings, nf }: { kings: any[]; nf: (v: any) => string }) {
     { item: ordered[2], cls: 'h-20 w-20 border-t-amber-700/30 bg-gradient-to-t from-card to-amber-700/20', rankCls: 'bg-amber-700 text-white text-xs', extraCls: '' },
   ];
   return (
-    <section className="card-accent bg-card p-4 mb-6 border border-border/10">
-      <div className="flex items-center gap-2 mb-4">
-        <Crown size={16} className="text-accent" />
-        <span className="text-xs font-black uppercase tracking-widest text-accent">🏆 榜王前三</span>
+      <section className="card-accent bg-card p-4 border border-border/10">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Crown size={16} className="text-accent" />
+          <span className="text-xs font-black uppercase tracking-widest text-accent">🏆 榜王前三</span>
+        </div>
+        {kings.length === 0 && (
+          <span className="text-[10px] text-secondary">暫無資料</span>
+        )}
       </div>
       <div className="flex items-end justify-center gap-4 pt-6">
         {podium.map((p, i) => p.item ? (
@@ -242,16 +247,7 @@ export default function LeaderboardView() {
               </div>
             )}
 
-            <section className="flex flex-col items-center justify-center space-y-2 mb-4">
-              <div className="flex items-center gap-2 text-accent opacity-60">
-                <span className="text-xs font-bold uppercase tracking-[0.2em]">{showTimeRemaining ? '剩餘時間' : '共 ' + (data?.entries?.length || 0) + ' 人'}</span>
-              </div>
-              <div className="text-3xl font-black italic tracking-tighter text-white shadow-[0_0_30px_rgba(252,192,37,0.1)]">
-                {showTimeRemaining ? formatTimeRemaining(getPeriodEnd(filter).getTime() - Date.now()) : (data?.entries?.length || 0)}
-              </div>
-            </section>
-
-            <section className="flex items-end justify-center gap-4 pt-6">
+            <section className="flex items-end justify-center gap-4">
               {orderedTopThree[0] && (
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
