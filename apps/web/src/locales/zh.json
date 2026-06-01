@@ -1339,5 +1339,65 @@
     "broadcasted": "廣播中",
     "confirmed": "已確認",
     "failed": "失敗"
+  },
+  "landing": {
+    "meta": {
+      "title": "子熙幣 ZIXI - Web3 鏈上博弈娛樂平台",
+      "description": "子熙幣(ZIXI)是去中心化鏈上博弈平台，提供百家樂、龍虎、骰寶、吹牛骰子、賓果、老虎機、決鬥、撲克、21 點等多元遊戲，搭配 VIP 等級、公司經營、每日任務系統與 ZXC Token 經濟生態。"
+    },
+    "hero": {
+      "badge": "Web3 鏈上娛樂生態",
+      "title": "子熙幣 ZIXI",
+      "subtitle": "去中心化鏈上博弈娛樂平台",
+      "description": "整合 9 款經典博弈遊戲、VIP 會員體系、公司經營模擬與 ZXC Token 經濟，打造真正屬於玩家的 Web3 生態。",
+      "cta": "開始遊玩",
+      "enter": "進入大廳"
+    },
+    "features": {
+      "title": "核心特色",
+      "subtitle": "為什麼選擇 ZIXI？",
+      "games": {
+        "title": "多元遊戲",
+        "desc": "內建百家樂、龍虎、骰寶等 9 款遊戲，每局以 FNV-1a 雜湊鏈上驗證，確保公平可驗證。"
+      },
+      "token": {
+        "title": "Token 經濟",
+        "desc": "使用 ZXC 代幣作為生態核心貨幣，支援市場交易、物品典當、跨遊戲流通。"
+      },
+      "vip": {
+        "title": "VIP 等級",
+        "desc": "累積經驗值升級 VIP，解鎖更高下注上限、專屬獎勵與特殊權限，最高鑽石等級。"
+      },
+      "company": {
+        "title": "公司經營",
+        "desc": "僱用員工、研發產品、拓展業務，體驗模擬經營樂趣，打造自己的博弈帝國。"
+      }
+    },
+    "games": {
+      "title": "遊戲列表",
+      "subtitle": "9 款經典博弈遊戲，公平區塊鏈驗證",
+      "baccarat": "Baccarat",
+      "dragontiger": "Dragon Tiger",
+      "sicbo": "Sic Bo",
+      "bluffdice": "Bluff Dice",
+      "bingo": "Bingo",
+      "slots": "Slots",
+      "duel": "Duel",
+      "poker": "Poker",
+      "blackjack": "Blackjack"
+    },
+    "token": {
+      "title": "ZXC Token 經濟",
+      "description": "ZXC 是子熙幣生態的核心代幣，可用於遊戲下注、物品交易、VIP 升級、公司經營等場景。總發行量固定，經濟模型可持續。",
+      "supply": "總發行量",
+      "symbol": "代幣符號",
+      "chain": "底層鏈",
+      "chainName": "EVM 兼容鏈"
+    },
+    "cta": {
+      "title": "立即加入 ZIXI",
+      "description": "無需註冊，連接錢包即可開始暢玩。"
+    },
+    "footer": "© 2026 ZIXI Casino. All rights reserved."
   }
 }

@@ -1339,6 +1339,66 @@
     "broadcasted": "Broadcasted",
     "confirmed": "Confirmed",
     "failed": "Failed"
+  },
+  "landing": {
+    "meta": {
+      "title": "ZIXI Casino - Web3 On-Chain Gaming Platform",
+      "description": "ZIXI is a decentralized on-chain gaming platform featuring Baccarat, Dragon Tiger, Sic Bo, Bluff Dice, Bingo, Slots, Duel, Poker, Blackjack and more. VIP system, company management, daily missions, and ZXC Token economy."
+    },
+    "hero": {
+      "badge": "Web3 Gaming Ecosystem",
+      "title": "ZIXI Casino",
+      "subtitle": "Decentralized On-Chain Gaming",
+      "description": "9 classic casino games, VIP membership, company simulation, and ZXC Token economy — a Web3 entertainment ecosystem built for players.",
+      "cta": "Play Now",
+      "enter": "Enter Lobby"
+    },
+    "features": {
+      "title": "Core Features",
+      "subtitle": "Why Choose ZIXI?",
+      "games": {
+        "title": "Multiple Games",
+        "desc": "9 built-in games including Baccarat, Dragon Tiger, Sic Bo. Every round is verified on-chain via FNV-1a hashing for provable fairness."
+      },
+      "token": {
+        "title": "Token Economy",
+        "desc": "ZXC token powers the ecosystem — used for betting, trading, pawning items, and cross-game circulation."
+      },
+      "vip": {
+        "title": "VIP System",
+        "desc": "Earn XP to level up your VIP rank, unlock higher bet limits, exclusive rewards, and special privileges up to Diamond tier."
+      },
+      "company": {
+        "title": "Company Management",
+        "desc": "Hire employees, research products, expand your business — build your own gaming empire."
+      }
+    },
+    "games": {
+      "title": "Game Selection",
+      "subtitle": "9 classic games, provably fair on-chain",
+      "baccarat": "Baccarat",
+      "dragontiger": "Dragon Tiger",
+      "sicbo": "Sic Bo",
+      "bluffdice": "Bluff Dice",
+      "bingo": "Bingo",
+      "slots": "Slots",
+      "duel": "Duel",
+      "poker": "Poker",
+      "blackjack": "Blackjack"
+    },
+    "token": {
+      "title": "ZXC Token Economy",
+      "description": "ZXC is the core token of the ZIXI ecosystem, used for game betting, item trading, VIP upgrades, company operations and more. Fixed total supply with sustainable economic model.",
+      "supply": "Total Supply",
+      "symbol": "Token Symbol",
+      "chain": "Blockchain",
+      "chainName": "EVM Compatible"
+    },
+    "cta": {
+      "title": "Join ZIXI Now",
+      "description": "No registration needed. Connect your wallet and start playing."
+    },
+    "footer": "© 2026 ZIXI Casino. All rights reserved."
   }
 }
 
