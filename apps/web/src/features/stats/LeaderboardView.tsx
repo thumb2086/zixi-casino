@@ -247,7 +247,7 @@ export default function LeaderboardView() {
               </div>
             )}
 
-            <section className="flex items-end justify-center gap-4">
+            <section className="flex items-end justify-center gap-4 mt-10">
               {orderedTopThree[0] && (
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
