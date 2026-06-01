@@ -36,7 +36,7 @@ export default function LeaderboardView() {
 
   const currentType: LeaderboardType = useMemo(() => {
     if (category === 'asset') return 'asset';
-    if (category === 'season') return 'season' as any;
+    if (category === 'season') return 'season';
     return FILTER_MAP[filter] as any;
   }, [category, filter]);
 
