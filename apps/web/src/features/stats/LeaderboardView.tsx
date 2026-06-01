@@ -160,10 +160,10 @@ export default function LeaderboardView() {
 
             <section className="flex flex-col items-center justify-center space-y-2">
               <div className="flex items-center gap-2 text-accent opacity-60">
-                <span className="text-xs font-bold uppercase tracking-[0.2em]">{showTimeRemaining ? '剩餘時間' : '共 ∞'}</span>
+                <span className="text-xs font-bold uppercase tracking-[0.2em]">{showTimeRemaining ? '剩餘時間' : '共 ' + (data?.entries?.length || 0) + ' 人'}</span>
               </div>
               <div className="text-3xl font-black italic tracking-tighter text-white shadow-[0_0_30px_rgba(252,192,37,0.1)]">
-                {showTimeRemaining ? '—' : '∞'}
+                {showTimeRemaining ? '—' : (data?.entries?.length || 0)}
               </div>
             </section>
 
