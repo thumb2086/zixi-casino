@@ -200,7 +200,7 @@ export default function LobbyView() {
       </header>
 
       <main className="app-shell space-y-8 pt-24">
-        <section className="relative overflow-hidden rounded-2xl border border-accent/10 p-8 shadow-2xl" style={{ background: 'linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-elevated) 50%, rgba(252,192,37,0.04) 100%)' }}>
+        <section className="relative overflow-hidden rounded-2xl border border-accent/10 p-8 shadow-2xl" style={{ background: 'linear-gradient(135deg, #14141f 0%, #1a1925 40%, rgba(252,192,37,0.06) 60%, #1a1925 100%)' }}>
           <div className="absolute right-0 top-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/5 blur-[100px]" />
 
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -243,7 +243,7 @@ export default function LobbyView() {
         </section>
 
         {profileData?.level ? (
-          <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+          <section className="card-accent border border-border/10 bg-card p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-3">
               <div>
             <div className="section-title">
@@ -263,9 +263,9 @@ export default function LobbyView() {
               </div>
             </div>
             {profileData.xpProgress !== undefined && (
-              <div className="w-full h-2 bg-surface rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#fcc025] to-amber-400 rounded-full transition-all"
-                     style={{ width: `${Math.min(100, profileData.xpProgress)}%` }} />
+                <div className="w-full h-2.5 bg-surface rounded-full overflow-hidden shadow-inner">
+                <div className="h-full rounded-full transition-all shadow-[0_0_10px_rgba(252,192,37,0.4)]"
+                     style={{ width: `${Math.min(100, profileData.xpProgress)}%`, background: 'linear-gradient(90deg, #fcc025, #ff8c00, #ff4fff)' }} />
               </div>
             )}
           </section>
