@@ -211,14 +211,7 @@ export default function LeaderboardView() {
           </section>
         )}
 
-        {error && !isLoading && (
-          <section className="flex flex-col items-center justify-center py-20">
-            <p className="text-sm text-red-400">{t('common.error')}</p>
-            <p className="mt-2 text-xs text-secondary">{error.message}</p>
-          </section>
-        )}
-
-        {!isLoading && !error && (
+        {!isLoading && (
           <>
             <section className="mb-6">
               <KingPodium kings={kingTop3} nf={nf} totalCount={data?.entries?.length} remainingTime={showTimeRemaining ? formatTimeRemaining(getPeriodEnd(filter).getTime() - Date.now()) : undefined} />
