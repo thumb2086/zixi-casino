@@ -372,7 +372,7 @@ export default function LobbyView() {
             </h4>
             <div className="mt-4 space-y-3">
               <Link to="/app/info?tab=vip" className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-accent/40" style={{ background: 'linear-gradient(135deg, rgba(255,79,255,0.08), rgba(252,192,37,0.08))' }}>
-                <Crown className="h-5 w-5 text-accent" />
+                <Crown className="h-5 w-5 text-warning" />
                 <div className="flex-1 text-left">
                   <p className="text-sm font-bold text-white">{t('lobby.vip_levels')}</p>
                   <p className="text-xs font-bold uppercase tracking-widest text-secondary">
