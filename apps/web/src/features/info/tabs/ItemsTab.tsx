@@ -20,13 +20,18 @@ interface CatalogItem {
   meta?: { bundle?: Array<{ id: string; qty?: number }>; totalValue?: number };
 }
 
-const RARITY_STYLES = {
+const RARITY_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
   common: { bg: 'bg-gray-500/20', text: 'text-gray-300', border: 'border-gray-500/30', label: '普通' },
   rare: { bg: 'bg-blue-500/20', text: 'text-blue-300', border: 'border-blue-500/30', label: '稀有' },
   epic: { bg: 'bg-purple-500/20', text: 'text-purple-300', border: 'border-purple-500/30', label: '史詩' },
   legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-500/30', label: '傳說' },
   mythic: { bg: 'bg-pink-500/20', text: 'text-pink-300', border: 'border-pink-500/30', label: '神話' },
   vip: { bg: 'bg-accent/20', text: 'text-accent', border: 'border-accent/30', label: 'VIP' },
+  chaos: { bg: 'bg-red-500/20', text: 'text-red-300', border: 'border-red-500/30', label: '混沌' },
+  abyss: { bg: 'bg-indigo-500/20', text: 'text-indigo-300', border: 'border-indigo-500/30', label: '深淵' },
+  oracle: { bg: 'bg-cyan-500/20', text: 'text-cyan-300', border: 'border-cyan-500/30', label: '神諭' },
+  original: { bg: 'bg-amber-500/20', text: 'text-amber-300', border: 'border-amber-500/30', label: '原始' },
+  transcend: { bg: 'bg-white/20', text: 'text-white', border: 'border-white/30', label: '超越' },
 };
 
 const RARITY_RANK: Record<string, number> = {
@@ -221,7 +226,7 @@ export default function ItemsTab() {
         )}
 
         {filteredItems.map((item) => {
-          const rarity = RARITY_STYLES[item.rarity ?? 'common'];
+          const rarity = RARITY_STYLES[item.rarity] || RARITY_STYLES.common;
           const TypeIcon = TYPE_ICONS[item.type] || Gift;
           const itemName = item.name || item.label || item.id;
 
