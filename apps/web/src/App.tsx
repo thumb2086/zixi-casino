@@ -32,6 +32,7 @@ const VIPLevelsView = lazy(() => import('./features/info/VIPLevelsView'));
 const InfoView = lazy(() => import('./features/info/InfoView'));
 const CompanyView = lazy(() => import('./features/company/CompanyView'));
 const PerformanceView = lazy(() => import('./features/stats/PerformanceView'));
+const PokerRoomView = lazy(() => import('./features/casino/PokerRoomView'));
 import { Loader2 } from 'lucide-react';
 import { useFontSizeStore } from './store/useFontSizeStore';
 
@@ -168,6 +169,7 @@ function AppContent() {
             <Route path="info/odds" element={<Navigate to="/app/info?tab=odds" replace />} />
             <Route path="info" element={<InfoView />} />
             <Route path="company" element={<CompanyView />} />
+            <Route path="room/:roomId/:game" element={<PokerRoomView />} />
           </Route>
         )}
         {isAuthorized && <Route path="/" element={<Navigate to="/app" replace />} />}

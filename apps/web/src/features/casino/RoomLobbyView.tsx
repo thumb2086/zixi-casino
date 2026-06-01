@@ -98,8 +98,9 @@ export default function RoomLobbyView() {
   const handleVipEnter = async (gameId: string) => {
     if (!hasVip1 || joinRoomMutation.isPending) return;
     try {
-      await joinRoomMutation.mutateAsync({ roomId: resolveRoomId(gameId) });
-      navigate(`/app/casino/${gameId}`);
+      const roomId = resolveRoomId(gameId);
+      await joinRoomMutation.mutateAsync({ roomId });
+      navigate(`/app/room/${roomId}/${gameId}`);
     } catch {
       // ignore; join error shown by backend message in subsequent page attempts
     }
