@@ -36,12 +36,12 @@ export class LeaderboardManager {
       .select({
         address: schema.leaderboardKings.address,
         displayName: schema.leaderboardKings.displayName,
-        winCount: schema.leaderboardKings.winCount,
-        lastWinAt: schema.leaderboardKings.lastWinAt,
-        category: schema.leaderboardKings.category,
+        winCount: sql<number>`sum(${schema.leaderboardKings.winCount})`,
+        lastWinAt: sql<string>`max(${schema.leaderboardKings.lastWinAt})`,
       })
       .from(schema.leaderboardKings)
-      .orderBy(desc(schema.leaderboardKings.winCount))
+      .groupBy(schema.leaderboardKings.address, schema.leaderboardKings.displayName)
+      .orderBy(sql`sum(${schema.leaderboardKings.winCount}) desc`)
       .limit(100);
 
     const entries: LeaderboardEntry[] = rows
@@ -50,7 +50,7 @@ export class LeaderboardManager {
         rank: i + 1,
         address: r.address.toLowerCase(),
         displayName: r.displayName || '未知',
-        amount: r.winCount,
+        amount: Number(r.winCount) || 0,
       }));
 
     let selfRank: LeaderboardEntry | null = null;
