@@ -6,6 +6,9 @@ import { api } from './store/api';
 import LoginView from './features/auth/LoginView';
 import LobbyView from './features/casino/LobbyView';
 import LandingView from './features/landing/LandingView';
+import FAQView from './features/info/FAQView';
+import WhitepaperView from './features/info/WhitepaperView';
+import GuidesView from './features/info/GuidesView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
 import { useAuthStore } from './store/useAuthStore';
@@ -144,6 +147,9 @@ function AppContent() {
       {isAuthorized && <TransactionQueueIndicator />}
       <Routes>
         <Route path="/landing" element={<LandingView />} />
+        <Route path="/faq" element={<FAQView />} />
+        <Route path="/whitepaper" element={<WhitepaperView />} />
+        <Route path="/guides" element={<GuidesView />} />
         {!isAuthorized ? (
           <>
             <Route path="/" element={<Navigate to="/landing" replace />} />
