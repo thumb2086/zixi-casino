@@ -97,11 +97,21 @@ body {
   }
   .section-title::before {
     content: '';
-    @apply block w-1 h-5 rounded-full bg-accent shrink-0;
+    @apply block w-1 h-5 rounded-full shrink-0;
   }
   .section-title-text {
-    @apply text-xs font-black uppercase tracking-widest text-accent;
+    @apply text-xs font-black uppercase tracking-widest;
   }
+  .section-title-accent::before  { @apply bg-accent; }
+  .section-title-accent .section-title-text { @apply text-accent; }
+  .section-title-info::before    { @apply bg-info; }
+  .section-title-info .section-title-text   { @apply text-info; }
+  .section-title-success::before { @apply bg-success; }
+  .section-title-success .section-title-text { @apply text-success; }
+  .section-title-warning::before { @apply bg-warning; }
+  .section-title-warning .section-title-text { @apply text-warning; }
+  .section-title-danger::before  { @apply bg-danger; }
+  .section-title-danger .section-title-text { @apply text-danger; }
   /* VIP gradient text */
   .text-gradient-diamond {
     background: var(--gradient-diamond);

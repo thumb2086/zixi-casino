@@ -121,10 +121,10 @@ export default function WalletView() {
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">{t('vault.title')}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/app/shop" className="text-xs font-black uppercase tracking-[0.18em] text-accent">
-              {t('nav.inventory')}
+            <Link to="/app/shop" className="text-xs font-black uppercase tracking-[0.18em] text-info">
+              商店
             </Link>
-            <Link to="/app/swap" className="text-xs font-black uppercase tracking-[0.18em] text-accent">
+            <Link to="/app/swap" className="text-xs font-black uppercase tracking-[0.18em] text-info">
               {t('swap.title')}
             </Link>
             <Link to="/app/transactions" className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
@@ -224,7 +224,7 @@ export default function WalletView() {
           <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl md:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <History size={18} className="text-accent" />
+                <History size={18} className="text-info" />
                 <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">交易紀錄</h2>
               </div>
               <Link to="/app/transactions" className="text-[10px] font-bold text-accent hover:underline">查看全部</Link>
