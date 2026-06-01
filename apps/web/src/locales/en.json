@@ -1340,6 +1340,101 @@
     "confirmed": "Confirmed",
     "failed": "Failed"
   },
+  "faq": {
+    "meta": {
+      "title": "FAQ — ZIXI Casino",
+      "description": "Frequently asked questions about ZIXI: What is ZIXI? How are games verified? ZXC token, VIP system, company management."
+    },
+    "title": "Frequently Asked Questions",
+    "q1": "What is ZIXI?",
+    "a1": "ZIXI is a decentralized on-chain gaming platform featuring 9 classic casino games, VIP system, company management, and the ZXC token economy.",
+    "q2": "How are game results verified?",
+    "a2": "Every game outcome is determined by FNV-1a hashing (server seed + player seed). All results are verifiable on-chain — the platform cannot manipulate outcomes.",
+    "q3": "What games are available?",
+    "a3": "9 games: Baccarat, Dragon Tiger, Sic Bo, Bluff Dice, Bingo, Slots, Duel, Texas Hold'em Poker, and Blackjack. VIP rooms feature multiplayer Bluff Dice and Poker.",
+    "q4": "What is the ZXC token?",
+    "a4": "ZXC is the core token of the ZIXI ecosystem with a fixed supply of 10 million. Used for betting, item trading, VIP upgrades, and company operations.",
+    "q5": "How do I start playing?",
+    "a5": "No registration needed. Connect an EVM-compatible wallet and start playing immediately. Your account is created automatically on first connection.",
+    "q6": "How does the VIP system work?",
+    "a6": "Earn XP through gameplay to increase your VIP level. Higher levels unlock higher bet limits, exclusive rewards, and special privileges up to Diamond tier.",
+    "q7": "What is the company system?",
+    "a7": "Players can hire employees, research products, and grow their own gaming business. Companies need capital to operate; bankruptcy auto-resets everything.",
+    "q8": "Is the platform safe?",
+    "a8": "All games use FNV-1a hashing verified on-chain. Admin bias params are unsigned integer guarded. Settlement happens via smart contracts.",
+    "cta": {
+      "text": "Still have questions?",
+      "button": "Play Now"
+    }
+  },
+  "whitepaper": {
+    "meta": {
+      "title": "ZIXI Whitepaper — Technical Documentation",
+      "description": "ZIXI decentralized on-chain gaming platform whitepaper: Token economics, FNV-1a fairness mechanism, game system, VIP, company, tech architecture."
+    },
+    "title": "ZIXI Whitepaper",
+    "overview": {
+      "title": "Overview",
+      "body": "ZIXI is a blockchain-based decentralized gaming platform integrating classic casino games, VIP membership, company management simulation, and the ZXC Token economy. Every game outcome is verified on-chain via FNV-1a hashing for provable fairness."
+    },
+    "token": {
+      "title": "Token Economics",
+      "body": "ZXC is the core token with a fixed supply of 10 million. Use cases: game betting (exclusive currency), item trading (marketplace), VIP upgrades, company operations (capital, R&D, salaries). No inflation — the economic model is designed for sustainability."
+    },
+    "fairness": {
+      "title": "Fairness Mechanism",
+      "body": "All game results are computed by FNV-1a hash combining server seed and player seed. Every result is verifiable on-chain. Admin bias parameters use >>> 0 unsigned integer guards to prevent negative modulo vulnerabilities."
+    },
+    "games": {
+      "title": "Game System",
+      "body": "9 games available: Baccarat (dynamic payout), Dragon Tiger (up to 12x), Sic Bo (big/small/multiplier), Bluff Dice (predict sum 5-30), Bingo (20/75 draw), Slots (triple-only wins), Duel (1v1 fixed 1.96x), Texas Hold'em (10-rank evaluation), Blackjack. VIP multiplayer rooms for Bluff Dice and Poker."
+    },
+    "vip": {
+      "title": "VIP System",
+      "body": "Players earn XP through gameplay to increase VIP rank, unlocking higher bet limits, exclusive rewards, and special privileges. Top tier is Diamond level."
+    },
+    "company": {
+      "title": "Company System",
+      "body": "The company system adds a business simulation layer: hire employees to boost efficiency, research products to expand, manage finances. Bankruptcy (cash below -5000) auto-fires all employees and resets level/products."
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "body": "Short term: game experience optimization, new game types, deeper VIP features. Medium term: community features, DeFi integration. Long term: build a complete ZIXI ecosystem as a leading Web3 gaming brand."
+    },
+    "cta": "Back to Home"
+  },
+  "guides": {
+    "meta": {
+      "title": "Game Guides — ZIXI Casino",
+      "description": "ZIXI game guides: getting started, tips for each game, VIP strategy, company management tips."
+    },
+    "title": "Game Guides",
+    "gettingStarted": {
+      "title": "Getting Started",
+      "body": "To play ZIXI, you only need an EVM-compatible wallet. Connect your wallet and start betting with ZXC tokens. Your account is created automatically — no registration required."
+    },
+    "tips": {
+      "title": "Game Tips"
+    },
+    "strategy": {
+      "title": "Strategy Tips"
+    },
+    "vipTip": "Earn XP to unlock higher VIP tiers. Higher tiers mean bigger bet limits and exclusive rewards. Focus on games you know well to maximize XP gain.",
+    "companyTip": "Company management needs capital. Build up your ZXC balance first before starting a company. Check cash flow before hiring employees.",
+    "baccarat": "Watch trends in banker/player patterns. Set stop-loss limits and avoid chasing losses.",
+    "dragontiger": "Fast-paced game ideal for quick plays. Dynamic payout means smaller ranges pay more.",
+    "sicbo": "Big/small bets offer the best odds (~50%). All-triple pays high but carries more risk.",
+    "bluffdice": "Exact prediction pays 5x, off-by-≤2 is a push. Stay conservative and avoid extreme totals.",
+    "bingo": "Spread your numbers across the range. Picking 5 numbers gives the best match probability.",
+    "slots": "Only triple matches pay. Small frequent bets extend your play time.",
+    "duel": "Fixed 1.96x payout — good for consistent returns. The server assigns your opponent.",
+    "poker": "Choose starting hands carefully. Position matters — play more hands from late position.",
+    "blackjack": "Basic strategy: play保守 when dealer shows 2-6, aggressive when dealer shows 7-A. Always assume dealer's hole card is 10.",
+    "cta": {
+      "text": "Ready to play?",
+      "button": "Play Now"
+    }
+  },
   "landing": {
     "meta": {
       "title": "ZIXI Casino - Web3 On-Chain Gaming Platform",
