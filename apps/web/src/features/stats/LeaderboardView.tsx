@@ -7,7 +7,7 @@ import { usePreferencesStore } from '../../store/usePreferencesStore';
 import { useLeaderboard, type LeaderboardType } from '../../hooks/useLeaderboard';
 import AppBottomNav from '../../components/AppBottomNav';
 
-type LeaderboardCategory = 'xp' | 'asset';
+type LeaderboardCategory = 'kings' | 'xp' | 'asset';
 type FilterLabel = 'WEEKLY' | 'MONTHLY' | 'SEASON' | 'ALL-TIME';
 
 const FILTER_MAP: Record<FilterLabel, string> = {
@@ -31,7 +31,7 @@ export default function LeaderboardView() {
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const { address } = useUserStore();
-  const [category, setCategory] = useState<LeaderboardCategory>('xp');
+  const [category, setCategory] = useState<LeaderboardCategory>('kings');
   const [filter, setFilter] = useState<FilterLabel>('ALL-TIME');
 
   const currentType: LeaderboardType = useMemo(() => {
@@ -39,17 +39,20 @@ export default function LeaderboardView() {
     return FILTER_MAP[filter] as any;
   }, [category, filter]);
 
-  const showTimeRemaining = category !== 'asset' && filter !== 'ALL-TIME';
+  const showTimeRemaining = filter !== 'ALL-TIME';
 
   const { data, isLoading, error } = useLeaderboard(currentType, 50);
 
   const categoryTabs = [
-    { id: 'xp' as LeaderboardCategory, icon: TrendingUp, label: '經驗榜' },
+    { id: 'kings' as LeaderboardCategory, icon: TrendingUp, label: '榜王排行' },
+    { id: 'xp' as LeaderboardCategory, icon: Trophy, label: '經驗榜' },
     { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產榜' },
   ];
 
-  const metricLabel = category === 'asset' ? '資產' : '經驗';
-  const unit = category === 'asset' ? 'ZXC' : 'XP';
+  const metricLabels: Record<LeaderboardCategory, string> = { kings: '經驗', xp: '經驗', asset: '資產' };
+  const units: Record<LeaderboardCategory, string> = { kings: 'XP', xp: 'XP', asset: 'ZXC' };
+  const metricLabel = metricLabels[category];
+  const unit = units[category];
 
   const { topThree, otherPlayers, selfEntry } = useMemo(() => {
     const entries = data?.entries ?? [];
