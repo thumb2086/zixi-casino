@@ -243,7 +243,7 @@ export default function LobbyView() {
         </section>
 
         {profileData?.level ? (
-          <section className="card-accent border border-border/10 bg-card p-6 shadow-2xl">
+          <section className="card-accent bg-card p-6 shadow-2xl border border-border/10">
             <div className="flex items-center justify-between mb-3">
               <div>
             <div className="section-title">
@@ -273,11 +273,11 @@ export default function LobbyView() {
 
         <section className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Missions at top */}
-          <div className="rounded-2xl border border-accent/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-[0_0_30px_rgba(252,192,37,0.05)] md:col-span-2 lg:col-span-3">
+          <div className="card-success bg-card p-6 md:col-span-2 lg:col-span-3 border border-border/10">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <span className="text-xl">🎯</span>
-                <h2 className="text-sm font-black uppercase tracking-widest text-accent">每日任務</h2>
+                <h2 className="section-title-text text-success">每日任務</h2>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
