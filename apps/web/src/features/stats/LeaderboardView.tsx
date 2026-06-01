@@ -35,6 +35,7 @@ export default function LeaderboardView() {
   const [filter, setFilter] = useState<FilterLabel>('ALL-TIME');
 
   const currentType: LeaderboardType = useMemo(() => {
+    if (category === 'kings') return 'kings';
     if (category === 'asset') return 'asset';
     return FILTER_MAP[filter] as any;
   }, [category, filter]);
@@ -49,8 +50,8 @@ export default function LeaderboardView() {
     { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產榜' },
   ];
 
-  const metricLabels: Record<LeaderboardCategory, string> = { kings: '經驗', xp: '經驗', asset: '資產' };
-  const units: Record<LeaderboardCategory, string> = { kings: 'XP', xp: 'XP', asset: 'ZXC' };
+  const metricLabels: Record<LeaderboardCategory, string> = { kings: '榜一次數', xp: '經驗', asset: '資產' };
+  const units: Record<LeaderboardCategory, string> = { kings: '次', xp: 'XP', asset: 'ZXC' };
   const metricLabel = metricLabels[category];
   const unit = units[category];
 
