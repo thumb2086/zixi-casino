@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { api } from './store/api';
 import LoginView from './features/auth/LoginView';
 import LobbyView from './features/casino/LobbyView';
+import LandingView from './features/landing/LandingView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
 import { useAuthStore } from './store/useAuthStore';
@@ -141,40 +143,44 @@ function AppContent() {
       <SoundPlayer />
       {isAuthorized && <TransactionQueueIndicator />}
       <Routes>
+        <Route path="/landing" element={<LandingView />} />
         {!isAuthorized ? (
-          <Route path="*" element={<LoginView />} />
+          <>
+            <Route path="/" element={<Navigate to="/landing" replace />} />
+            <Route path="*" element={<LoginView />} />
+          </>
         ) : (
-          <Route path="/app" element={<Layout />}>
-            <Route path="performance" element={<PerformanceView />} />
-            <Route index element={<LobbyView />} />
-            <Route path="casino/:game" element={<CasinoView />} />
-            <Route path="casino/lobby" element={<RoomLobbyView />} />
-            <Route path="wallet" element={<WalletView />} />
-            <Route path="swap" element={<SwapView />} />
-            <Route path="shop" element={<ShopView />} />
-            <Route path="market" element={<MarketView />} />
-            <Route path="rewards" element={<RewardsView />} />
-            <Route path="rewards/submit" element={<SubmitRewardView />} />
-            <Route path="events" element={<AnnouncementCenter />} />
-            <Route path="leaderboard" element={<LeaderboardView />} />
-            <Route path="announcement" element={<AnnouncementCenter />} />
-            <Route path="support" element={<SupportView />} />
-            <Route path="inventory" element={<ChestView />} />
-            <Route path="collection" element={<Navigate to="/app/inventory" replace />} />
-            <Route path="admin" element={<AdminView />} />
-            <Route path="settings" element={<SettingsView />} />
-            <Route path="profile/setup" element={<ProfileSetup onComplete={() => window.location.reload()} />} />
-            <Route path="transactions" element={<Navigate to="/app/announcement" replace />} />
-            <Route path="dashboard/transactions" element={<TransactionsDashboardView />} />
-            <Route path="info/vip-levels" element={<VIPLevelsView />} />
-            <Route path="info/odds" element={<Navigate to="/app/info?tab=odds" replace />} />
-            <Route path="info" element={<InfoView />} />
-            <Route path="company" element={<CompanyView />} />
-            <Route path="room/:roomId/poker" element={<PokerRoomView />} />
-            <Route path="room/:roomId/bluffdice" element={<BluffDiceRoomView />} />
-          </Route>
+          <>
+            <Route path="/" element={<Navigate to="/app" replace />} />
+            <Route path="/app" element={<Layout />}>
+              <Route path="performance" element={<PerformanceView />} />
+              <Route index element={<LobbyView />} />
+              <Route path="casino/:game" element={<CasinoView />} />
+              <Route path="casino/lobby" element={<RoomLobbyView />} />
+              <Route path="wallet" element={<WalletView />} />
+              <Route path="swap" element={<SwapView />} />
+              <Route path="shop" element={<ShopView />} />
+              <Route path="market" element={<MarketView />} />
+              <Route path="rewards" element={<RewardsView />} />
+              <Route path="rewards/submit" element={<SubmitRewardView />} />
+              <Route path="events" element={<AnnouncementCenter />} />
+              <Route path="leaderboard" element={<LeaderboardView />} />
+              <Route path="announcement" element={<AnnouncementCenter />} />
+              <Route path="support" element={<SupportView />} />
+              <Route path="inventory" element={<ChestView />} />
+              <Route path="collection" element={<Navigate to="/app/inventory" replace />} />
+              <Route path="admin" element={<AdminView />} />
+              <Route path="settings" element={<SettingsView />} />
+              <Route path="profile/setup" element={<ProfileSetup onComplete={() => window.location.reload()} />} />
+              <Route path="transactions" element={<Navigate to="/app/announcement" replace />} />
+              <Route path="dashboard/transactions" element={<TransactionsDashboardView />} />
+              <Route path="info/vip-levels" element={<VIPLevelsView />} />
+              <Route path="info/odds" element={<Navigate to="/app/info?tab=odds" replace />} />
+              <Route path="info" element={<InfoView />} />
+              <Route path="company" element={<CompanyView />} />
+            </Route>
+          </>
         )}
-        {isAuthorized && <Route path="/" element={<Navigate to="/app" replace />} />}
       </Routes>
     </div>
   );
@@ -182,11 +188,13 @@ function AppContent() {
 
 function App() {
     return (
-        <QueryClientProvider client={queryClient}>
-            <Router>
-                <AppContent />
-            </Router>
-        </QueryClientProvider>
+        <HelmetProvider>
+            <QueryClientProvider client={queryClient}>
+                <Router>
+                    <AppContent />
+                </Router>
+            </QueryClientProvider>
+        </HelmetProvider>
     );
 }
 
