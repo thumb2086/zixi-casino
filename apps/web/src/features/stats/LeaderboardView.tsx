@@ -196,11 +196,6 @@ export default function LeaderboardView() {
       </header>
 
       <main className="app-shell pt-24">
-        {/* Kings banner — independent, outside tabs */}
-        <div className="mb-10">
-          <KingPodium kings={kingTop3} nf={nf} totalCount={data?.entries?.length} remainingTime={showTimeRemaining ? formatTimeRemaining(getPeriodEnd(filter).getTime() - Date.now()) : undefined} />
-        </div>
-
         {isLoading && (
           <section className="flex flex-col items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -217,6 +212,9 @@ export default function LeaderboardView() {
 
         {!isLoading && !error && (
           <>
+            <section className="mb-6">
+              <KingPodium kings={kingTop3} nf={nf} totalCount={data?.entries?.length} remainingTime={showTimeRemaining ? formatTimeRemaining(getPeriodEnd(filter).getTime() - Date.now()) : undefined} />
+            </section>
             <section className="flex gap-2">
               {categoryTabs.map((tab) => {
                 const Icon = tab.icon;
