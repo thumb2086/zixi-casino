@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
 import { MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -35,7 +36,9 @@ export default function Layout() {
             className="flex w-full flex-col gap-10 lg:flex-row lg:items-start"
           >
             <div className="min-w-0 flex-1 transition-all duration-300">
-              <Outlet />
+              <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>}>
+                <Outlet />
+              </Suspense>
             </div>
 
             {/* Desktop chat: slide in/out from right */}

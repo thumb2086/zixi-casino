@@ -113,6 +113,45 @@ export async function statsRoutes(fastify: FastifyInstance) {
     }
   });
 
+  typedFastify.get("/performance", async (request) => {
+    try {
+      const db = await requireDb();
+      const now = Date.now();
+      const uptimeSec = Math.floor((now - SERVER_STARTED_AT) / 1000);
+
+      // Count recent transactions (last 24h)
+      const dayAgo = new Date(now - 86400000).toISOString();
+      const recentTxCount = await db.$count(
+        (await import("@repo/infrastructure/db/schema.js")).walletLedgerEntries as any,
+        (await import("drizzle-orm")).sql`created_at >= ${dayAgo}::timestamp`
+      ).catch(() => 0);
+
+      // Count total users
+      const userCount = await db.$count(
+        (await import("@repo/infrastructure/db/schema.js")).users as any
+      ).catch(() => 0);
+
+      // Count total sessions
+      const sessionCount = await db.$count(
+        (await import("@repo/infrastructure/db/schema.js")).sessions as any
+      ).catch(() => 0);
+
+      return createApiEnvelope({
+        uptime: uptimeSec,
+        uptimeLabel: uptimeSec >= 3600
+          ? `${Math.floor(uptimeSec / 3600)}h ${Math.floor((uptimeSec % 3600) / 60)}m`
+          : `${Math.floor(uptimeSec / 60)}m`,
+        serverStartedAt: SERVER_STARTED_AT,
+        users: userCount,
+        activeSessions: sessionCount,
+        tx24h: recentTxCount,
+        timestamp: now,
+      }, request.id);
+    } catch (e: any) {
+      return createApiEnvelope(null, request.id, false, e.message);
+    }
+  });
+
   typedFastify.get("/recent-txs", async (request) => {
     try {
       const walletRepo = new WalletRepository();
