@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { User, ChevronRight, Coins, Sparkles } from 'lucide-react';
 import AppBottomNav from '../../components/AppBottomNav';
 import { useUserStore } from '../../store/useUserStore';
-import { ITEM_DROP_TABLES } from '@repo/shared';
+import { ITEM_DROP_TABLES, formatNumber } from '@repo/shared';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 
 const allItems = Object.values(ITEM_DROP_TABLES).flat();
 const avatarMap = Object.fromEntries(
@@ -14,6 +15,8 @@ const titleMap = Object.fromEntries(
 
 export default function StatusView() {
   const { address, username, balance, activeAvatar, activeTitle } = useUserStore();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const avatarItem = avatarMap[activeAvatar];
   const titleItem = titleMap[activeTitle];
 
@@ -46,7 +49,7 @@ export default function StatusView() {
               <Coins size={14} className="text-accent" />
               <span className="text-xs font-black uppercase tracking-widest text-secondary">ZXC 餘額</span>
             </div>
-            <p className="text-xl font-black italic text-accent">{Number(balance).toLocaleString()}</p>
+            <p className="text-xl font-black italic text-accent">{nf(Number(balance))}</p>
           </div>
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">

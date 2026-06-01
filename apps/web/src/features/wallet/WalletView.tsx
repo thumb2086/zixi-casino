@@ -159,9 +159,9 @@ export default function WalletView() {
                 <p className="text-3xl font-black italic text-accent mt-1">Lv.{profileData.level} <span className="text-sm font-bold text-secondary">{profileData.xpTierLabel || ''}</span></p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold text-white">{(profileData.xp || 0).toLocaleString()} XP</p>
+                <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-[10px] text-secondary mt-0.5">下一級 {Number(profileData.xpNextLevel).toLocaleString()} XP</p>
+                  <p className="text-[10px] text-secondary mt-0.5">下一級 {nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
