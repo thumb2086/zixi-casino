@@ -345,7 +345,7 @@ export default function AnnouncementCenter() {
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
       <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
-        <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
+        <div className="flex items-center justify-between px-6 py-4 ">
           <div className="flex items-center gap-4">
             <Megaphone className="text-accent" />
             <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">公告與活動</h1>
@@ -353,7 +353,7 @@ export default function AnnouncementCenter() {
         </div>
       </header>
 
-      <main className="pt-24 px-6 max-w-2xl mx-auto space-y-8">
+      <main className="pt-24 px-6 space-y-8">
         {/* Tabs */}
         <div className="flex bg-card p-1.5 rounded-xl border border-border/20">
           {(['ANNOUNCEMENT', 'EVENTS', 'TRANSACTIONS'] as const).map((entry) => (

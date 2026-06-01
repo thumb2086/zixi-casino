@@ -284,4 +284,72 @@ export async function marketRoutes(fastify: FastifyInstance) {
       return createApiEnvelope(null, request.id, false, e.message);
     }
   });
+
+  // ─── Admin Market Intervention ─────────────────────────────────────────────
+
+  typedFastify.post("/admin/set-price", {
+    schema: { body: z.object({ sessionId: z.string(), symbol: z.string(), priceMultiplier: z.number().min(0.1).max(10) }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { symbol, priceMultiplier } = request.body;
+    try {
+      const snapshot = marketManager.buildSnapshot();
+      const meta = snapshot.symbols?.[symbol];
+      if (!meta) return createApiEnvelope({ error: { code: "SYMBOL_NOT_FOUND" } }, request.id);
+      // Store override in KV
+      await kv.set(`market:override:price:${symbol}`, priceMultiplier);
+      return createApiEnvelope({ success: true, symbol, priceMultiplier }, request.id);
+    } catch (e: any) {
+      return createApiEnvelope(null, request.id, false, e.message);
+    }
+  });
+
+  typedFastify.post("/admin/set-volatility", {
+    schema: { body: z.object({ sessionId: z.string(), symbol: z.string(), volatility: z.number().min(0.01).max(0.5) }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { symbol, volatility } = request.body;
+    try {
+      await kv.set(`market:override:volatility:${symbol}`, volatility);
+      return createApiEnvelope({ success: true, symbol, volatility }, request.id);
+    } catch (e: any) {
+      return createApiEnvelope(null, request.id, false, e.message);
+    }
+  });
+
+  typedFastify.post("/admin/set-base-rate", {
+    schema: { body: z.object({ sessionId: z.string(), rate: z.number().min(0).max(0.2) }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { rate } = request.body;
+    try {
+      await kv.set("market:override:baseRate", rate);
+      return createApiEnvelope({ success: true, rate }, request.id);
+    } catch (e: any) {
+      return createApiEnvelope(null, request.id, false, e.message);
+    }
+  });
+
+  typedFastify.post("/admin/shock", {
+    schema: { body: z.object({ sessionId: z.string(), symbol: z.string(), direction: z.enum(["up", "down"]), magnitude: z.number().min(0.01).max(0.5) }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { symbol, direction, magnitude } = request.body;
+    try {
+      const shockKey = `market:shock:${symbol}`;
+      const existing = await kv.get<any>(shockKey);
+      const shock = { direction, magnitude, startedAt: Date.now(), durationMs: 300000 };
+      if (existing) {
+        shock.magnitude = Math.min(1, existing.magnitude + magnitude);
+      }
+      await kv.set(shockKey, shock);
+      return createApiEnvelope({ success: true, symbol, shock }, request.id);
+    } catch (e: any) {
+      return createApiEnvelope(null, request.id, false, e.message);
+    }
+  });
 }

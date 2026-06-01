@@ -23,7 +23,7 @@ export default function StatusView() {
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
       <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
-        <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
+        <div className="flex items-center justify-between px-6 py-4 ">
           <div className="flex items-center gap-3">
             <User className="text-accent" />
             <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">個人狀態</h1>
@@ -31,7 +31,7 @@ export default function StatusView() {
         </div>
       </header>
 
-      <main className="pt-20 px-6 max-w-2xl mx-auto space-y-6">
+      <main className="pt-20 px-6 space-y-6">
         {/* Avatar + Title */}
         <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6">
           <div className="text-5xl shrink-0">{avatarItem?.icon || '🧑'}</div>

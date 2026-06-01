@@ -30,7 +30,7 @@ export default function VIPLevelsView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 pt-24">
+      <main className="px-6 pt-24">
         {/* 等級總覽 */}
         <section className="mb-8 rounded-2xl border border-border/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
           <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">

@@ -93,7 +93,7 @@ export default function BluffDiceRoomView() {
         </div>
       </header>
 
-      <main className="pt-20 px-4 max-w-2xl mx-auto">
+      <main className="pt-20 px-4 ">
         {/* Dice display */}
         <section className="card-accent bg-card p-8 mb-6 border border-border/10 text-center">
           <div className="flex justify-center gap-3 mb-4">

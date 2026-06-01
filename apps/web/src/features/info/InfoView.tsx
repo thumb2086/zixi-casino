@@ -59,7 +59,7 @@ export default function InfoView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 pt-20">
+      <main className="px-6 pt-20">
         <div className="mb-6 flex gap-2">
           {TABS.map((tab) => {
             const Icon = tab.icon;

@@ -35,7 +35,7 @@ export default function CollectionView() {
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
       <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
-        <div className="flex items-center gap-3 px-6 py-4 max-w-2xl mx-auto">
+        <div className="flex items-center gap-3 px-6 py-4 ">
           <Link to="/app" className="text-secondary transition-colors hover:text-accent">
             <ChevronLeft size={24} />
           </Link>
@@ -44,7 +44,7 @@ export default function CollectionView() {
         </div>
       </header>
 
-      <main className="pt-20 px-6 max-w-2xl mx-auto">
+      <main className="pt-20 px-6 ">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
