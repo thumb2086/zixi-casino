@@ -1,35 +1,37 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { api } from './store/api';
-import CasinoView from './features/casino/CasinoView';
-import WalletView from './features/wallet/WalletView';
-import SwapView from './features/wallet/SwapView';
 import LoginView from './features/auth/LoginView';
-import { useAuthStore } from './store/useAuthStore';
-import { useUserStore } from './store/useUserStore';
-import MarketView from './features/market/MarketView';
-import RewardsView from './features/rewards/RewardsView';
-import SubmitRewardView from './features/rewards/SubmitRewardView';
-import AdminView from './features/admin/AdminView';
-import ChestView from './features/inventory/ChestView';
-import LeaderboardView from './features/stats/LeaderboardView';
-
-import RoomLobbyView from './features/casino/RoomLobbyView';
 import LobbyView from './features/casino/LobbyView';
-import SupportView from './features/support/SupportView';
-import ProfileSetup from './features/profile/ProfileSetup';
-import AnnouncementCenter from './features/announcement/AnnouncementCenter';
-import SettingsView from './features/settings/SettingsView';
-import ShopView from './features/shop/ShopView';
-import TransactionsDashboardView from './features/dashboard/TransactionsDashboardView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
+import { useAuthStore } from './store/useAuthStore';
+import { useUserStore } from './store/useUserStore';
 import { useSyncUser } from './hooks/useSyncUser';
 import Layout from './components/Layout';
-import VIPLevelsView from './features/info/VIPLevelsView';
-import InfoView from './features/info/InfoView';
-import CompanyView from './features/company/CompanyView';
+
+// Lazy-loaded pages
+const CasinoView = lazy(() => import('./features/casino/CasinoView'));
+const WalletView = lazy(() => import('./features/wallet/WalletView'));
+const SwapView = lazy(() => import('./features/wallet/SwapView'));
+const MarketView = lazy(() => import('./features/market/MarketView'));
+const RewardsView = lazy(() => import('./features/rewards/RewardsView'));
+const SubmitRewardView = lazy(() => import('./features/rewards/SubmitRewardView'));
+const AdminView = lazy(() => import('./features/admin/AdminView'));
+const ChestView = lazy(() => import('./features/inventory/ChestView'));
+const LeaderboardView = lazy(() => import('./features/stats/LeaderboardView'));
+const RoomLobbyView = lazy(() => import('./features/casino/RoomLobbyView'));
+const SupportView = lazy(() => import('./features/support/SupportView'));
+const ProfileSetup = lazy(() => import('./features/profile/ProfileSetup'));
+const AnnouncementCenter = lazy(() => import('./features/announcement/AnnouncementCenter'));
+const SettingsView = lazy(() => import('./features/settings/SettingsView'));
+const ShopView = lazy(() => import('./features/shop/ShopView'));
+const TransactionsDashboardView = lazy(() => import('./features/dashboard/TransactionsDashboardView'));
+const VIPLevelsView = lazy(() => import('./features/info/VIPLevelsView'));
+const InfoView = lazy(() => import('./features/info/InfoView'));
+const CompanyView = lazy(() => import('./features/company/CompanyView'));
+const PerformanceView = lazy(() => import('./features/stats/PerformanceView'));
 import { Loader2 } from 'lucide-react';
 import { useFontSizeStore } from './store/useFontSizeStore';
 
@@ -141,6 +143,7 @@ function AppContent() {
           <Route path="*" element={<LoginView />} />
         ) : (
           <Route path="/app" element={<Layout />}>
+            <Route path="performance" element={<PerformanceView />} />
             <Route index element={<LobbyView />} />
             <Route path="casino/:game" element={<CasinoView />} />
             <Route path="casino/lobby" element={<RoomLobbyView />} />
