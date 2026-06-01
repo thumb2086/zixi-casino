@@ -91,6 +91,22 @@ body {
   .layout-main-wide {
     @apply grid grid-cols-1 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_1fr_320px] gap-6;
   }
+  /* Card accent top borders */
+  .card-accent {
+    @apply border-t-4 border-accent rounded-2xl;
+  }
+  .card-info {
+    @apply border-t-4 border-info rounded-2xl;
+  }
+  .card-success {
+    @apply border-t-4 border-success rounded-2xl;
+  }
+  .card-warning {
+    @apply border-t-4 border-warning rounded-2xl;
+  }
+  .card-danger {
+    @apply border-t-4 border-danger rounded-2xl;
+  }
   /* Section heading with left accent bar */
   .section-title {
     @apply flex items-center gap-3 mb-4;

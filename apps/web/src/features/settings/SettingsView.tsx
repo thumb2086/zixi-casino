@@ -206,11 +206,11 @@ export default function SettingsView() {
 
       <main className="app-shell pt-24">
         <div className="content-grid">
-        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+        <section className="card-warning border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-start gap-4">
               <div className="rounded-2xl bg-elevated p-3">
-                <User className="text-accent" />
+                <User className="text-warning" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
@@ -285,9 +285,9 @@ export default function SettingsView() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+        <section className="card-info border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center gap-3">
-            <Volume2 className="text-accent" size={18} />
+            <Volume2 className="text-info" size={18} />
             <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
               {t('settings.display_audio')}
             </h3>
@@ -349,9 +349,9 @@ export default function SettingsView() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+        <section className="card-info border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center gap-3">
-            <Type className="text-accent" size={18} />
+            <Type className="text-info" size={18} />
             <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
                {t('settings.font_size')}
              </h3>
@@ -372,10 +372,10 @@ export default function SettingsView() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+        <section className="card-info border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Globe className="text-accent" size={18} />
+              <Globe className="text-info" size={18} />
               <div>
                 <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
                   {t('settings.language')}
