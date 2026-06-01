@@ -284,16 +284,16 @@ export default function MarketView() {
             <input type="range" min={1} max={20} value={futuresLeverage} onChange={(e) => setFuturesLeverage(Number(e.target.value))}
               className="w-full accent-[#fcc025]" />
           </div>
-          <div className="flex gap-2">
+          <div className="space-y-2">
             <input type="number" min={10} value={futuresMargin} onChange={(e) => setFuturesMargin(e.target.value)}
-              placeholder={t('market.margin')} className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none" />
+              placeholder={t('market.margin')} className="w-full rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none" />
             {summary?.cash > 0 && (
               <button type="button" onClick={() => {
                 const feeRate = 0.0008;
                 const maxMargin = Math.floor(Number(summary.cash) / (1 + futuresLeverage * feeRate));
                 setFuturesMargin(String(Math.max(0, maxMargin)));
               }}
-                className="text-xs font-bold text-accent px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10 shrink-0">
+                className="w-full text-xs font-bold text-accent py-2 rounded-lg border border-accent/30 hover:bg-accent/10">
                 {t('market.buy_all_in')}
               </button>
             )}
