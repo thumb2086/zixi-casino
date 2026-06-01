@@ -7,33 +7,33 @@
 :root {
   --base-font-size: 18px;
   /* Color system — rgb triplets for Tailwind opacity support */
-  --color-bg-rgb: 10, 10, 15;
+  --color-bg-rgb: 8, 8, 16;
   --color-bg: rgb(var(--color-bg-rgb));
-  --color-bg-card-rgb: 20, 20, 31;
+  --color-bg-card-rgb: 22, 22, 42;
   --color-bg-card: rgb(var(--color-bg-card-rgb));
-  --color-bg-elevated-rgb: 26, 25, 37;
+  --color-bg-elevated-rgb: 30, 30, 58;
   --color-bg-elevated: rgb(var(--color-bg-elevated-rgb));
-  --color-bg-surface-rgb: 14, 14, 14;
+  --color-bg-surface-rgb: 12, 12, 22;
   --color-bg-surface: rgb(var(--color-bg-surface-rgb));
-  --color-text-primary: #f0f0f0;
-  --color-text-secondary-rgb: 136, 136, 153;
+  --color-text-primary: #e8e8f0;
+  --color-text-secondary-rgb: 128, 128, 170;
   --color-text-secondary: rgb(var(--color-text-secondary-rgb));
-  --color-text-muted-rgb: 73, 72, 71;
+  --color-text-muted-rgb: 80, 80, 122;
   --color-text-muted: rgb(var(--color-text-muted-rgb));
-  --color-accent-rgb: 252, 192, 37;
+  --color-accent-rgb: 245, 166, 35;
   --color-accent: rgb(var(--color-accent-rgb));
-  --color-accent-dim: rgba(252, 192, 37, 0.15);
-  --color-success-rgb: 0, 230, 118;
+  --color-accent-dim: rgba(245, 166, 35, 0.15);
+  --color-success-rgb: 0, 200, 83;
   --color-success: rgb(var(--color-success-rgb));
-  --color-danger-rgb: 255, 82, 82;
+  --color-danger-rgb: 255, 23, 68;
   --color-danger: rgb(var(--color-danger-rgb));
-  --color-warning-rgb: 255, 171, 64;
+  --color-warning-rgb: 255, 145, 0;
   --color-warning: rgb(var(--color-warning-rgb));
-  --color-info-rgb: 64, 196, 255;
+  --color-info-rgb: 41, 121, 255;
   --color-info: rgb(var(--color-info-rgb));
-  --color-border-rgb: 42, 42, 58;
+  --color-border-rgb: 42, 42, 72;
   --color-border: rgb(var(--color-border-rgb));
-  --color-border-light: rgba(73, 72, 71, 0.15);
+  --color-border-light: rgba(80, 80, 122, 0.15);
   /* VIP gradients */
   --gradient-diamond: linear-gradient(90deg, #ff4fff, var(--color-accent));
   --gradient-gold: linear-gradient(90deg, #ffd700, var(--color-accent));
@@ -91,22 +91,17 @@ body {
   .layout-main-wide {
     @apply grid grid-cols-1 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_1fr_320px] gap-6;
   }
-  /* Card accent top borders */
-  .card-accent {
-    @apply border-t-4 border-accent rounded-2xl;
-  }
-  .card-info {
-    @apply border-t-4 border-info rounded-2xl;
-  }
-  .card-success {
-    @apply border-t-4 border-success rounded-2xl;
-  }
-  .card-warning {
-    @apply border-t-4 border-warning rounded-2xl;
-  }
-  .card-danger {
-    @apply border-t-4 border-danger rounded-2xl;
-  }
+  /* Card accent top bars (pseudo-element for visibility) */
+  .card-accent    { @apply relative overflow-hidden rounded-2xl; }
+  .card-accent::before  { content: ''; @apply absolute top-0 left-0 right-0 h-[3px] bg-accent; }
+  .card-info      { @apply relative overflow-hidden rounded-2xl; }
+  .card-info::before    { content: ''; @apply absolute top-0 left-0 right-0 h-[3px] bg-info; }
+  .card-success   { @apply relative overflow-hidden rounded-2xl; }
+  .card-success::before { content: ''; @apply absolute top-0 left-0 right-0 h-[3px] bg-success; }
+  .card-warning   { @apply relative overflow-hidden rounded-2xl; }
+  .card-warning::before { content: ''; @apply absolute top-0 left-0 right-0 h-[3px] bg-warning; }
+  .card-danger    { @apply relative overflow-hidden rounded-2xl; }
+  .card-danger::before  { content: ''; @apply absolute top-0 left-0 right-0 h-[3px] bg-danger; }
   /* Section heading with left accent bar */
   .section-title {
     @apply flex items-center gap-3 mb-4;

@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#fcc025',
-        background: '#0e0e0e',
+        primary: '#f5a623',
+        background: '#0c0c16',
         surface: 'rgba(var(--color-bg-surface-rgb), <alpha-value>)',
         card: 'rgba(var(--color-bg-card-rgb), <alpha-value>)',
         elevated: 'rgba(var(--color-bg-elevated-rgb), <alpha-value>)',
