@@ -7,7 +7,7 @@ import { usePreferencesStore } from '../../store/usePreferencesStore';
 import { useLeaderboard, type LeaderboardType } from '../../hooks/useLeaderboard';
 import AppBottomNav from '../../components/AppBottomNav';
 
-type LeaderboardCategory = 'kings' | 'xp' | 'asset';
+type LeaderboardCategory = 'kings' | 'xp' | 'season' | 'asset';
 type FilterLabel = 'WEEKLY' | 'MONTHLY' | 'SEASON' | 'ALL-TIME';
 
 const FILTER_MAP: Record<FilterLabel, string> = {
@@ -36,21 +36,23 @@ export default function LeaderboardView() {
 
   const currentType: LeaderboardType = useMemo(() => {
     if (category === 'asset') return 'asset';
+    if (category === 'season') return 'season' as any;
     return FILTER_MAP[filter] as any;
   }, [category, filter]);
 
-  const showTimeRemaining = filter !== 'ALL-TIME';
+  const showTimeRemaining = category === 'xp' && filter !== 'ALL-TIME';
 
   const { data, isLoading, error } = useLeaderboard(currentType, 50);
 
   const categoryTabs = [
     { id: 'kings' as LeaderboardCategory, icon: TrendingUp, label: '榜王排行' },
     { id: 'xp' as LeaderboardCategory, icon: Trophy, label: '經驗榜' },
+    { id: 'season' as LeaderboardCategory, icon: Target, label: '賽季榜' },
     { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產榜' },
   ];
 
-  const metricLabels: Record<LeaderboardCategory, string> = { kings: '經驗', xp: '經驗', asset: '資產' };
-  const units: Record<LeaderboardCategory, string> = { kings: 'XP', xp: 'XP', asset: 'ZXC' };
+  const metricLabels: Record<LeaderboardCategory, string> = { kings: '經驗', xp: '經驗', season: '經驗', asset: '資產' };
+  const units: Record<LeaderboardCategory, string> = { kings: 'XP', xp: 'XP', season: 'XP', asset: 'ZXC' };
   const metricLabel = metricLabels[category];
   const unit = units[category];
 
