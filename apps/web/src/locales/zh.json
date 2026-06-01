@@ -1376,15 +1376,15 @@
     "games": {
       "title": "遊戲列表",
       "subtitle": "9 款經典博弈遊戲，公平區塊鏈驗證",
-      "baccarat": "Baccarat",
-      "dragontiger": "Dragon Tiger",
-      "sicbo": "Sic Bo",
-      "bluffdice": "Bluff Dice",
-      "bingo": "Bingo",
-      "slots": "Slots",
-      "duel": "Duel",
-      "poker": "Poker",
-      "blackjack": "Blackjack"
+      "baccarat": "百家樂",
+      "dragontiger": "龍虎",
+      "sicbo": "骰寶",
+      "bluffdice": "吹牛骰子",
+      "bingo": "賓果",
+      "slots": "老虎機",
+      "duel": "決鬥",
+      "poker": "撲克",
+      "blackjack": "21點"
     },
     "token": {
       "title": "ZXC Token 經濟",

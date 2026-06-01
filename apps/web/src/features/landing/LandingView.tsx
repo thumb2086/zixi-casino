@@ -16,26 +16,19 @@ import {
   Sword,
   Crosshair,
   Diamond,
+  Flame,
 } from 'lucide-react';
 
-function FlameIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
-    </svg>
-  );
-}
-
 const games = [
-  { icon: Diamond, nameKey: 'landing.games.baccarat', zh: '百家樂' },
-  { icon: FlameIcon, nameKey: 'landing.games.dragontiger', zh: '龍虎' },
-  { icon: Dice5, nameKey: 'landing.games.sicbo', zh: '骰寶' },
-  { icon: Dice5, nameKey: 'landing.games.bluffdice', zh: '吹牛骰子' },
-  { icon: LayoutGrid, nameKey: 'landing.games.bingo', zh: '賓果' },
-  { icon: Star, nameKey: 'landing.games.slots', zh: '老虎機' },
-  { icon: Sword, nameKey: 'landing.games.duel', zh: '決鬥' },
-  { icon: Gem, nameKey: 'landing.games.poker', zh: '撲克' },
-  { icon: Crosshair, nameKey: 'landing.games.blackjack', zh: '21點' },
+  { icon: Diamond, nameKey: 'landing.games.baccarat' },
+  { icon: Flame, nameKey: 'landing.games.dragontiger' },
+  { icon: Dice5, nameKey: 'landing.games.sicbo' },
+  { icon: Dice5, nameKey: 'landing.games.bluffdice' },
+  { icon: LayoutGrid, nameKey: 'landing.games.bingo' },
+  { icon: Star, nameKey: 'landing.games.slots' },
+  { icon: Sword, nameKey: 'landing.games.duel' },
+  { icon: Gem, nameKey: 'landing.games.poker' },
+  { icon: Crosshair, nameKey: 'landing.games.blackjack' },
 ];
 
 const features = [
@@ -69,8 +62,7 @@ function GameCard({ icon: Icon, name }: { icon: React.ComponentType<{ className?
 }
 
 export default function LandingView() {
-  const { t, i18n } = useTranslation();
-  const isZh = i18n.language.startsWith('zh');
+  const { t } = useTranslation();
   const { isAuthorized } = useAuthStore();
 
   return (
@@ -151,7 +143,7 @@ export default function LandingView() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
             {games.map((g) => (
-              <GameCard key={g.nameKey} icon={g.icon} name={isZh ? g.zh : t(g.nameKey)} />
+              <GameCard key={g.nameKey} icon={g.icon} name={t(g.nameKey)} />
             ))}
           </div>
         </section>
