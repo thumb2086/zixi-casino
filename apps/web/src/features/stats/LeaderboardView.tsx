@@ -24,6 +24,38 @@ const getAvatarUrl = (seed: string) => `https://api.dicebear.com/7.x/avataaars/s
 const getDisplayName = (entry: { displayName: string | null; address: string }) =>
   entry.displayName || `${entry.address.slice(0, 6)}...${entry.address.slice(-4)}`;
 
+function getPeriodEnd(filter: string): Date {
+  const now = new Date();
+  if (filter === 'WEEKLY') {
+    // Next Sunday 03:00 UTC
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() + (7 - d.getUTCDay()) % 7);
+    d.setUTCHours(3, 0, 0, 0);
+    if (d <= now) d.setUTCDate(d.getUTCDate() + 7);
+    return d;
+  }
+  if (filter === 'MONTHLY') {
+    // End of current month 00:00 UTC next month 1st
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+    return d;
+  }
+  if (filter === 'SEASON') {
+    // End of current quarter
+    const q = Math.floor(now.getUTCMonth() / 3) * 3 + 3;
+    const d = new Date(Date.UTC(now.getUTCFullYear(), q, 1, 0, 0, 0));
+    return d;
+  }
+  return now;
+}
+
+function formatTimeRemaining(ms: number): string {
+  if (ms <= 0) return '—';
+  const days = Math.floor(ms / 86400000);
+  const hours = Math.floor((ms % 86400000) / 3600000);
+  if (days > 0) return `${days}d ${hours}h`;
+  return `${hours}h`;
+}
+
 function KingPodium({ kings, nf }: { kings: any[]; nf: (v: any) => string }) {
   if (!kings || kings.length === 0) return null;
   const ordered = kings.length < 3 ? kings : [kings[1], kings[0], kings[2]].filter(Boolean);
@@ -38,12 +70,12 @@ function KingPodium({ kings, nf }: { kings: any[]; nf: (v: any) => string }) {
         <Crown size={16} className="text-accent" />
         <span className="text-xs font-black uppercase tracking-widest text-accent">🏆 榜王前三</span>
       </div>
-      <div className="flex items-end justify-center gap-4">
+      <div className="flex items-end justify-center gap-4 pt-6">
         {podium.map((p, i) => p.item ? (
           <div key={i} className={`flex flex-col items-center space-y-3 ${p.extraCls}`}>
             <div className="relative">
-              {i === 0 && <div className="absolute left-1/2 -top-8 -translate-x-1/2">{p.icon}</div>}
-              <div className={`flex ${i === 0 ? 'h-20 w-20 border-4' : 'h-14 w-14 border-2'} items-center justify-center overflow-hidden rounded-2xl border-accent bg-elevated text-3xl`}>
+              <div className={`flex ${i === 0 ? 'h-20 w-20 border-4 mt-6' : 'h-14 w-14 border-2'} items-center justify-center overflow-hidden rounded-2xl border-accent bg-elevated text-3xl`}>
+                {i === 0 && <div className="absolute -top-6 left-1/2 -translate-x-1/2">{p.icon}</div>}
                 {p.item.avatarIcon || <img src={getAvatarUrl(p.item.name)} alt={p.item.name} className="w-full h-full object-cover" />}
               </div>
               <div className={`absolute -left-2 -top-2 flex h-6 w-6 items-center justify-center rounded-lg ${p.rankCls} font-black`}>
@@ -153,7 +185,7 @@ export default function LeaderboardView() {
 
       <main className="app-shell pt-24">
         {/* Kings banner — independent, outside tabs */}
-        <div className="mb-6">
+        <div className="mb-10">
           <KingPodium kings={kingTop3} nf={nf} />
         </div>
 
@@ -215,7 +247,7 @@ export default function LeaderboardView() {
                 <span className="text-xs font-bold uppercase tracking-[0.2em]">{showTimeRemaining ? '剩餘時間' : '共 ' + (data?.entries?.length || 0) + ' 人'}</span>
               </div>
               <div className="text-3xl font-black italic tracking-tighter text-white shadow-[0_0_30px_rgba(252,192,37,0.1)]">
-                {showTimeRemaining ? '—' : (data?.entries?.length || 0)}
+                {showTimeRemaining ? formatTimeRemaining(getPeriodEnd(filter).getTime() - Date.now()) : (data?.entries?.length || 0)}
               </div>
             </section>
 
