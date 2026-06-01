@@ -113,15 +113,23 @@ export default function LeaderboardView() {
   const [category, setCategory] = useState<LeaderboardCategory>('xp');
   const [filter, setFilter] = useState<FilterLabel>('ALL-TIME');
 
-  const currentType: LeaderboardType = useMemo(() => {
-    if (category === 'asset') return 'asset';
-    return FILTER_MAP[filter] as any;
-  }, [category, filter]);
-
   const showTimeRemaining = category === 'xp' && filter === 'WEEKLY';
 
-  const { data, isLoading, error } = useLeaderboard(currentType, 50);
+  // Pre-fetch ALL leaderboard types on mount so switching tabs is instant
+  const { data: xpAllData } = useLeaderboard('xp', 50);
+  const { data: assetData } = useLeaderboard('asset', 50);
   const { data: kingsData } = useLeaderboard('kings', 3);
+  const { data: weekData } = useLeaderboard('week' as any, 50);
+  const { data: monthData } = useLeaderboard('month' as any, 50);
+  const { data: seasonData } = useLeaderboard('season' as any, 50);
+
+  const data = category === 'asset' ? assetData
+    : filter === 'WEEKLY' ? weekData
+    : filter === 'MONTHLY' ? monthData
+    : filter === 'SEASON' ? seasonData
+    : xpAllData;
+
+  const isLoading = !data;
 
   const kingTop3 = useMemo(() => {
     return (kingsData?.entries || []).map((entry: any) => ({
