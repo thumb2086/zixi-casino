@@ -245,7 +245,7 @@ export default function WalletView() {
                       <p className={`text-xs font-black ${isCredit ? 'text-emerald-400' : 'text-danger'}`}>
                         {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {(tx.token === 'zhixi' ? 'ZXC' : tx.token === 'yjc' ? 'YJC' : tx.token || tx.tokenSymbol || 'ZXC')}
                       </p>
-                      <p className="text-[10px] text-secondary">{t('txStatus.' + tx.status, tx.status)}</p>
+                      <p className="text-[10px] text-secondary">{tx.status ? t('txStatus.' + tx.status, tx.status) : '已確認'}</p>
                     </div>
                   </div>
                 );

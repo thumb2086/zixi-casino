@@ -1324,6 +1324,7 @@
     "market_futures_close": "Futures Close",
     "market_futures_modify_tp_sl": "Modify TP/SL",
     "futures_pnl": "Futures PnL",
+    "market_settlement": "Market Settlement",
     "chest_open": "Open Chest",
     "buy": "Purchase"
   },
