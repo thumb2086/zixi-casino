@@ -106,7 +106,7 @@ export default function ItemsTab() {
 
   const filteredItems = useMemo(
     () =>
-      items.filter((item) => {
+      (items || []).filter((item) => {
         const itemName = item.name || item.label || item.id;
         if (filter !== 'all' && item.type !== filter) return false;
         if (rarityFilter !== 'all' && (item.rarity || 'common') !== rarityFilter) return false;
