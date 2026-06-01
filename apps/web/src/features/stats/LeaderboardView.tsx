@@ -40,9 +40,9 @@ function getPeriodEnd(filter: string): Date {
     return d;
   }
   if (filter === 'SEASON') {
-    // End of current quarter
-    const q = Math.floor(now.getUTCMonth() / 3) * 3 + 3;
-    const d = new Date(Date.UTC(now.getUTCFullYear(), q, 1, 0, 0, 0));
+    // End of current quarter (last day of quarter month)
+    const endMonth = Math.floor(now.getUTCMonth() / 3) * 3 + 2; // 2=Mar, 5=Jun, 8=Sep, 11=Dec
+    const d = new Date(Date.UTC(now.getUTCFullYear(), endMonth + 1, 1, 0, 0, 0)); // 1st of next month
     return d;
   }
   return now;
@@ -106,7 +106,7 @@ export default function LeaderboardView() {
     return FILTER_MAP[filter] as any;
   }, [category, filter]);
 
-  const showTimeRemaining = category === 'xp' && filter !== 'ALL-TIME';
+  const showTimeRemaining = category === 'xp' && filter === 'WEEKLY';
 
   const { data, isLoading, error } = useLeaderboard(currentType, 50);
   const { data: kingsData } = useLeaderboard('kings', 3);
