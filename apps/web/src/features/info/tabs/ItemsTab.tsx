@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Crown, Gift, Package, Search, Shield, Sparkles, Zap, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatNumber } from '@repo/shared';
@@ -55,74 +56,53 @@ const getHowToGet = (source?: string) => {
 export default function ItemsTab() {
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
-  const [items, setItems] = useState<CatalogItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'avatar' | 'title' | 'item' | 'buff'>('all');
   const [rarityFilter, setRarityFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    Promise.all([
-      api.get('/api/v1/rewards/catalog').catch(() => null),
-      api.get('/api/v1/chests/items').catch(() => null),
-    ])
-      .then(([catalogRes, chestItemsRes]) => {
-        const payload = catalogRes?.data?.data ?? {};
-        const avatars = (payload.avatars ?? []).map((item: any) => ({
-          ...item,
-          type: 'avatar' as const,
-          howToGet: getHowToGet(item.source),
+  // Cache catalog aggressively — it rarely changes
+  const { data: items, isLoading: loading } = useQuery({
+    queryKey: ['items-catalog'],
+    queryFn: async () => {
+      const [catalogRes, chestItemsRes] = await Promise.all([
+        api.get('/api/v1/rewards/catalog').catch(() => null),
+        api.get('/api/v1/chests/items').catch(() => null),
+      ]);
+      const payload = catalogRes?.data?.data ?? {};
+      const avatars = (payload.avatars ?? []).map((item: any) => ({
+        ...item, type: 'avatar' as const, howToGet: getHowToGet(item.source),
+      }));
+      const titles = (payload.titles ?? []).map((item: any) => ({
+        ...item, type: 'title' as const, howToGet: getHowToGet(item.source),
+      }));
+      const chestItems = (chestItemsRes?.data?.data ?? []).map((item: any) => {
+        const rawType = (item.type || item.id || '').toString();
+        const itemType = rawType.startsWith('avatar_') || item.type === 'avatar' ? 'avatar'
+          : rawType.startsWith('title_') || item.type === 'title' ? 'title'
+          : rawType.startsWith('buff_') || item.type === 'buff' ? 'buff'
+          : 'item';
+        return {
+          id: item.id, name: item.name || item.label, label: item.name || item.label,
+          description: item.description, icon: item.icon || '🎁', rarity: item.rarity,
+          source: item.source || 'chest', type: itemType, howToGet: getHowToGet(item.source || 'chest'),
+          effect: item.effect, price: item.price, meta: item.meta,
+        };
+      });
+      const shopItems = ((payload.customItems ?? []) as any[])
+        .filter((i: any) => i.source === 'shop')
+        .map((item: any) => ({
+          id: item.itemId, name: item.name, label: item.name, description: item.description || '',
+          icon: item.icon || '🎁', rarity: item.rarity || 'common', source: 'shop',
+          type: item.type === 'buff' ? 'buff' : item.type === 'avatar' ? 'avatar' : item.type === 'title' ? 'title' : 'item',
+          howToGet: '商城兌換', effect: item.effect, price: Number(item.price) || 0, meta: item.meta,
         }));
-        const titles = (payload.titles ?? []).map((item: any) => ({
-          ...item,
-          type: 'title' as const,
-          howToGet: getHowToGet(item.source),
-        }));
-        const chestItems = (chestItemsRes?.data?.data ?? []).map((item: any) => {
-          const rawType = (item.type || item.id || '').toString();
-          const itemType = rawType.startsWith('avatar_') || item.type === 'avatar' ? 'avatar'
-            : rawType.startsWith('title_') || item.type === 'title' ? 'title'
-            : rawType.startsWith('buff_') || item.type === 'buff' ? 'buff'
-            : 'item';
-          return {
-            id: item.id,
-            name: item.name || item.label,
-            label: item.name || item.label,
-            description: item.description,
-            icon: item.icon || '🎁',
-            rarity: item.rarity,
-            source: item.source || 'chest',
-            type: itemType,
-            howToGet: getHowToGet(item.source || 'chest'),
-            effect: item.effect,
-            price: item.price,
-            meta: item.meta,
-          };
-        });
-        const shopItems = ((payload.customItems ?? []) as any[])
-          .filter((i: any) => i.source === 'shop')
-          .map((item: any) => ({
-            id: item.itemId,
-            name: item.name,
-            label: item.name,
-            description: item.description || '',
-            icon: item.icon || '🎁',
-            rarity: item.rarity || 'common',
-            source: 'shop',
-            type: item.type === 'buff' ? 'buff' : item.type === 'avatar' ? 'avatar' : item.type === 'title' ? 'title' : 'item',
-            howToGet: '商城兌換',
-            effect: item.effect,
-            price: Number(item.price) || 0,
-            meta: item.meta,
-          }));
-        setItems(
-          [...avatars, ...titles, ...chestItems, ...shopItems].sort(
-            (a, b) => (RARITY_RANK[a.rarity ?? 'common'] ?? 4) - (RARITY_RANK[b.rarity ?? 'common'] ?? 4)
-          )
-        );
-      })
-      .finally(() => setLoading(false));
-  }, []);
+      return [...avatars, ...titles, ...chestItems, ...shopItems].sort(
+        (a, b) => (RARITY_RANK[a.rarity ?? 'common'] ?? 4) - (RARITY_RANK[b.rarity ?? 'common'] ?? 4)
+      );
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24h — catalog rarely changes
+    gcTime: 24 * 60 * 60 * 1000,
+  });
 
   const filteredItems = useMemo(
     () =>
