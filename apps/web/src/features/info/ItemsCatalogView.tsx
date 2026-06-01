@@ -89,7 +89,7 @@ export default function ItemsCatalogView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 pt-24">
+      <main className="px-6 pt-24">
         {/* 搜尋和篩選 */}
         <section className="mb-6 space-y-3">
           <div className="relative">

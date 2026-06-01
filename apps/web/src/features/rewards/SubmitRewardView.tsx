@@ -124,7 +124,7 @@ export default function SubmitRewardView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+      <main className="space-y-6 px-4 py-6">
         <section className="rounded-2xl border border-border/20 bg-card p-6">
           <h2 className="mb-3 text-sm font-black">{t('submitReward.new_submission')}</h2>
           <p className="mb-4 text-xs text-secondary">

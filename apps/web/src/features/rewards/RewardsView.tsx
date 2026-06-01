@@ -59,7 +59,7 @@ export default function RewardsView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-10 px-6 pt-24">
+      <main className="space-y-10 px-6 pt-24">
         <Link
           to="/app/events"
           className="flex items-center justify-between rounded-xl border border-accent/30 bg-gradient-to-r from-[#fcc025]/15 to-[#fcc025]/5 p-4 transition-all hover:from-[#fcc025]/25 hover:to-[#fcc025]/10"

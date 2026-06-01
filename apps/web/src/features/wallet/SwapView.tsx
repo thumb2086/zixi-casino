@@ -207,7 +207,7 @@ export default function SwapView() {
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
       <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
-        <div className="flex items-center justify-between px-6 py-4 max-w-2xl mx-auto">
+        <div className="flex items-center justify-between px-6 py-4 ">
           <div className="flex items-center gap-4">
             <ArrowDownUp className="text-accent" />
             <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">{t('swap.heading')}</h1>
@@ -215,7 +215,7 @@ export default function SwapView() {
         </div>
       </header>
 
-      <main className="pt-12 px-6 max-w-2xl mx-auto space-y-6">
+      <main className="pt-12 px-6 space-y-6">
         <section className="bg-card rounded-2xl p-6 border border-border/20 mt-16">
           <div className="flex items-center gap-2 mb-4">
             <Coins size={18} className="text-accent" />

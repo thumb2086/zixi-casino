@@ -319,7 +319,7 @@ export default function ChestView() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 pt-24 space-y-8">
+      <main className="px-6 pt-24 space-y-8">
         {/* Active Buffs */}
         {inventory.activeBuffs.length > 0 && (
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
