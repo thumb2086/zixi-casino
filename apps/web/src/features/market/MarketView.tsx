@@ -293,7 +293,7 @@ export default function MarketView() {
                 const maxMargin = Math.floor(Number(summary.cash) / (1 + futuresLeverage * feeRate));
                 setFuturesMargin(String(Math.max(0, maxMargin)));
               }}
-                className="text-xs font-bold text-accent px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10 whitespace-nowrap">
+                className="text-xs font-bold text-accent px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10 shrink-0">
                 {t('market.buy_all_in')}
               </button>
             )}
