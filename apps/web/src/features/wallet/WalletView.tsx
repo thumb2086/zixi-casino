@@ -152,7 +152,7 @@ export default function WalletView() {
 
         {/* XP Section */}
         {profileData?.level ? (
-          <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+          <section className="card-accent bg-card p-6 border border-border/10">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">經驗等級</p>
@@ -174,7 +174,7 @@ export default function WalletView() {
         ) : null}
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+          <div className="card-accent bg-card p-6 border border-border/10">
             <div className="flex items-center gap-3 mb-3">
               <Gift className="text-accent" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.daily_airdrop')}</h2>
@@ -221,7 +221,7 @@ export default function WalletView() {
             )}
           </div>
 
-          <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl md:col-span-2 lg:col-span-1">
+          <div className="card-info bg-card p-6 border border-border/10 md:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <History size={18} className="text-info" />
@@ -253,9 +253,9 @@ export default function WalletView() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
+          <div className="card-info bg-card p-6 border border-border/10">
             <div className="flex items-center gap-3 mb-3">
-              <Repeat2 className="text-accent" size={18} />
+              <Repeat2 className="text-info" size={18} />
               <h2 className="text-xs font-black uppercase tracking-[0.18em] text-white">{t('vault.transfer')}</h2>
             </div>
             <div className="grid gap-3">
