@@ -27,8 +27,8 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
             <Link
               key={item.key}
               to={item.to}
-              className={`flex min-w-0 flex-1 flex-col items-center justify-center px-1 transition-all ${
-                active ? 'text-accent drop-shadow-[0_0_8px_rgba(252,192,37,0.4)]' : 'text-secondary hover:text-white'
+              className={`flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-1 transition-all rounded-xl ${
+                active ? 'text-accent bg-accent/10 shadow-[0_0_12px_rgba(245,166,35,0.2)]' : 'text-secondary hover:text-white hover:bg-card'
               }`}
             >
               <Icon size={24} className="mb-1" />
