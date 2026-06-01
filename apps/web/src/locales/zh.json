@@ -1324,6 +1324,7 @@
     "market_futures_close": "期貨平倉",
     "market_futures_modify_tp_sl": "修改止盈止損",
     "futures_pnl": "合約損益",
+    "market_settlement": "市場結算",
     "chest_open": "開寶箱",
     "buy": "購買"
   },
