@@ -18,7 +18,7 @@ const DEFAULT_ROOMS: RoomState[] = [
 ];
 
 export class RoomManager {
-    private async getRoom(id: string): Promise<RoomState | null> {
+    async getRoom(id: string): Promise<RoomState | null> {
         const room = await kv.get(`room:${id}`) as RoomState | null;
         if (!room) {
             const defaultRoom = DEFAULT_ROOMS.find(r => r.id === id);
@@ -142,8 +142,8 @@ export class MultiplayerGameManager {
     private _evalBestHand(hole: any[], community: any[]): { rank: number; name: string; kickers: number[]; bestFive: any[] } {
         const allCards = [...hole, ...community];
         if (allCards.length < 5) {
-            // Fallback: evaluate with what we have
-            return this._evalHand(allCards.slice(0, 5));
+            const basic = this._evalHand(allCards.slice(0, 5));
+            return { ...basic, bestFive: allCards.slice(0, 5) };
         }
         let best: any = null;
         // Try all C(n,5) combinations

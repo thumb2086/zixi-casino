@@ -4,8 +4,8 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
-import { RoomManager, VipManager } from "@repo/domain";
-import { SessionRepository, UserRepository } from "@repo/infrastructure";
+import { RoomManager, VipManager, MultiplayerGameManager } from "@repo/domain";
+import { SessionRepository, UserRepository, kv } from "@repo/infrastructure";
 import { playShootDragonGateRound } from "./games/shoot-dragon-gate-shared.js";
 
 export async function gameRoutes(fastify: FastifyInstance) {
@@ -147,5 +147,92 @@ export async function gameRoutes(fastify: FastifyInstance) {
       const { game } = request.query as any;
       const rooms = await roomManager.getRooms(game);
       return createApiEnvelope({ rooms }, request.id);
+  });
+
+  // ─── Multiplayer Room Actions ──────────────────────────────────────────────
+
+  const mgr = new MultiplayerGameManager();
+
+  typedFastify.post("/rooms/poker/action", {
+    schema: {
+      body: z.object({
+        sessionId: z.string(),
+        roomId: z.string(),
+        action: z.enum(["init", "fold", "call", "raise", "check"]),
+        amount: z.number().optional(),
+      }),
+    },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { roomId, action, amount } = request.body;
+
+    const stateKey = `room:game:${roomId}`;
+    let state = await kv.get<any>(stateKey);
+
+    if (action === "init") {
+      const room = await roomManager.getRoom(roomId);
+      if (!room) return createApiEnvelope({ error: { code: "ROOM_NOT_FOUND" } }, request.id);
+      const players = room.players.map(p => ({
+        userId: p.userId,
+        displayName: p.displayName,
+        stack: 1000,
+        isBot: p.isBot,
+      }));
+      state = mgr.initPoker(players);
+      await kv.set(stateKey, state);
+      return createApiEnvelope({ state: { ...state, players: state.players.map((p: Record<string, any>) => ({ ...p, hand: p.hand.map(() => ({ rank: '?', suit: '?' })) })) } }, request.id);
+    }
+
+    if (!state) return createApiEnvelope({ error: { code: "GAME_NOT_STARTED" } }, request.id);
+
+    if (action === "fold") state = mgr.advancePoker(state, { type: "fold", userId: ctx.user.id });
+    else if (action === "call") state = mgr.advancePoker(state, { type: "call", userId: ctx.user.id });
+    else if (action === "raise" && amount) state = mgr.advancePoker(state, { type: "raise", userId: ctx.user.id, amount });
+    else if (action === "check") state = mgr.advancePoker(state, { type: "check", userId: ctx.user.id });
+
+    await kv.set(stateKey, state);
+    return createApiEnvelope({ state }, request.id);
+  });
+
+  typedFastify.post("/rooms/bluffdice/action", {
+    schema: {
+      body: z.object({
+        sessionId: z.string(),
+        roomId: z.string(),
+        action: z.enum(["bet", "call_bluff", "new_round"]),
+        quantity: z.number().optional(),
+        value: z.number().optional(),
+      }),
+    },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { roomId, action, quantity, value } = request.body;
+    const stateKey = `room:game:${roomId}`;
+
+    if (action === "new_round") {
+      const state = { phase: "betting", bets: [], dice: Array.from({ length: 5 }, () => Math.floor(Math.random() * 6) + 1), currentTurn: 0, winner: null };
+      await kv.set(stateKey, state);
+      return createApiEnvelope({ state }, request.id);
+    }
+
+    let state = await kv.get<any>(stateKey);
+    if (!state) return createApiEnvelope({ error: { code: "GAME_NOT_STARTED" } }, request.id);
+
+    if (action === "bet" && quantity && value) {
+      state.bets.push({ userId: ctx.user.id, displayName: ctx.user.displayName || ctx.user.username, quantity, value });
+    } else if (action === "call_bluff") {
+      const allDice = state.dice;
+      if (state.bets.length > 0) {
+        const lastBet = state.bets[state.bets.length - 1];
+        const actualCount = allDice.filter((d: number) => d === lastBet.value).length;
+        state.winner = actualCount < lastBet.quantity ? lastBet.userId : ctx.user.id;
+        state.phase = "result";
+      }
+    }
+
+    await kv.set(stateKey, state);
+    return createApiEnvelope({ state }, request.id);
   });
 }
