@@ -1,11 +1,15 @@
 import { Activity, Server, Users, Clock, Database, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { formatNumber } from '@repo/shared';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import { api } from '../../store/api';
 import AppBottomNav from '../../components/AppBottomNav';
 
 export default function PerformanceView() {
   const { t } = useTranslation();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
 
   const { data: perfData, isLoading } = useQuery({
     queryKey: ['performance-stats'],
@@ -29,9 +33,9 @@ export default function PerformanceView() {
 
   const metrics = [
     { icon: Clock, label: '伺服器運行', value: perfData?.uptimeLabel || '...', color: 'text-emerald-400' },
-    { icon: Users, label: '註冊用戶', value: perfData?.users?.toLocaleString() || '...', color: 'text-info' },
-    { icon: Activity, label: '活躍連線', value: perfData?.activeSessions?.toLocaleString() || '...', color: 'text-accent' },
-    { icon: Database, label: '24h 交易數', value: perfData?.tx24h?.toLocaleString() || '...', color: 'text-warning' },
+    { icon: Users, label: '註冊用戶', value: nf(perfData?.users || 0), color: 'text-info' },
+    { icon: Activity, label: '活躍連線', value: nf(perfData?.activeSessions || 0), color: 'text-accent' },
+    { icon: Database, label: '24h 交易數', value: nf(perfData?.tx24h || 0), color: 'text-warning' },
     { icon: Server, label: 'UPTIME', value: stats?.uptime ?? '...', color: 'text-emerald-400' },
     { icon: Zap, label: '失敗率', value: stats?.failureRate ?? '...', color: stats?.failureRate && parseFloat(stats.failureRate) > 5 ? 'text-danger' : 'text-accent' },
   ];
