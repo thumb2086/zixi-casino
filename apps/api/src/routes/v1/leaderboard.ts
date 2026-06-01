@@ -1,4 +1,5 @@
 // apps/api/src/routes/v1/leaderboard.ts
+import { randomUUID } from "crypto";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -174,19 +175,44 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
         ? await manager.getXpLeaderboardByPeriod(type, selfAddress, limit)
         : await manager.getXpLeaderboard(selfAddress, limit);
 
-      // Track king (#1 on period-based XP leaderboard, store in KV for simplicity)
+      // Track king (#1 on period-based XP leaderboard)
       if (isPeriodType && result.entries?.[0]) {
         try {
           const kingAddr = result.entries[0].address.toLowerCase();
           const kingName = result.entries[0].displayName;
-          const kingAmt = result.entries[0].amount;
-          const kingKey = `lb_kings:xp:${type}:${result.periodId}`;
-          // Always update if different address or not yet recorded
-          const current = await kv.get<string>(kingKey);
-          if (!current) {
-            await kv.set(kingKey, JSON.stringify({ address: kingAddr, displayName: kingName, amount: kingAmt, crownedAt: Date.now() }));
+          const db = await requireDb();
+          const kingUserId = result.entries[0].userId || (await db.query.users.findFirst({
+            where: (u: any, { eq }: any) => eq(u.address, kingAddr),
+            columns: { id: true },
+          }))?.id;
+          if (kingUserId) {
+            const existing = await db.query.leaderboardKings.findFirst({
+              where: (lk: any, { and, eq }: any) => and(eq(lk.category, type), eq(lk.periodId, result.periodId)),
+            });
+            if (!existing) {
+              await db.insert(schema.leaderboardKings).values({
+                id: randomUUID(),
+                category: type === 'week' ? 'weekly' : type,
+                userId: kingUserId,
+                address: kingAddr,
+                displayName: kingName,
+                winCount: 1,
+                lastWinAt: new Date(),
+                periodId: result.periodId,
+              }).onConflictDoNothing();
+            } else if (existing.address !== kingAddr) {
+              // New king for this period
+              await db.update(schema.leaderboardKings).set({
+                address: kingAddr,
+                displayName: kingName,
+                winCount: existing.winCount + 1,
+                lastWinAt: new Date(),
+              }).where(eq(schema.leaderboardKings.id, existing.id));
+            }
           }
-        } catch {}
+        } catch (e) {
+          console.error("[leaderboard] king tracking error:", e);
+        }
       }
 
       await enrichEntriesWithCosmetics(result.entries);
