@@ -56,7 +56,7 @@ function formatTimeRemaining(ms: number): string {
   return `${hours}h`;
 }
 
-function KingPodium({ kings, nf }: { kings: any[]; nf: (v: any) => string }) {
+function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf: (v: any) => string; totalCount?: number; remainingTime?: string }) {
   if (!kings || kings.length === 0) return null;
   const ordered = kings.length < 3 ? kings : [kings[1], kings[0], kings[2]].filter(Boolean);
   const podium = [
@@ -71,9 +71,16 @@ function KingPodium({ kings, nf }: { kings: any[]; nf: (v: any) => string }) {
           <Crown size={16} className="text-accent" />
           <span className="text-xs font-black uppercase tracking-widest text-accent">🏆 榜王前三</span>
         </div>
-        {kings.length === 0 && (
-          <span className="text-[10px] text-secondary">暫無資料</span>
-        )}
+        <div className="flex items-center gap-3">
+          {remainingTime ? (
+            <span className="text-[10px] text-accent/60">{remainingTime}</span>
+          ) : totalCount !== undefined ? (
+            <span className="text-[10px] text-secondary">共 {totalCount} 人</span>
+          ) : null}
+          {kings.length === 0 && (
+            <span className="text-[10px] text-secondary">暫無資料</span>
+          )}
+        </div>
       </div>
       <div className="flex items-end justify-center gap-4 pt-6">
         {podium.map((p, i) => p.item ? (
@@ -191,7 +198,7 @@ export default function LeaderboardView() {
       <main className="app-shell pt-24">
         {/* Kings banner — independent, outside tabs */}
         <div className="mb-10">
-          <KingPodium kings={kingTop3} nf={nf} />
+          <KingPodium kings={kingTop3} nf={nf} totalCount={data?.entries?.length} remainingTime={showTimeRemaining ? formatTimeRemaining(getPeriodEnd(filter).getTime() - Date.now()) : undefined} />
         </div>
 
         {isLoading && (
@@ -247,7 +254,7 @@ export default function LeaderboardView() {
               </div>
             )}
 
-            <section className="flex items-end justify-center gap-4 mt-10">
+            <section className="flex items-end justify-center gap-4 mt-16">
               {orderedTopThree[0] && (
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
