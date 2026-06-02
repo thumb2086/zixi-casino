@@ -2,12 +2,6 @@
   "buildCommand": "pnpm install && pnpm build:web",
   "installCommand": "pnpm install",
   "outputDirectory": "apps/web/dist",
-  "redirects": [
-    { "source": "/sitemap.xml", "destination": "/sitemap.xml", "statusCode": 200 },
-    { "source": "/robots.txt", "destination": "/robots.txt", "statusCode": 200 },
-    { "source": "/favicon.svg", "destination": "/favicon.svg", "statusCode": 200 },
-    { "source": "/manifest.webmanifest", "destination": "/manifest.webmanifest", "statusCode": 200 }
-  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
