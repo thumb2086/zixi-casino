@@ -100,7 +100,7 @@ export default function LandingView() {
             </div>
             <img
               src="/icon-512.png"
-              alt="子熙幣 ZIXI 頭像"
+              alt="子熙幣 ZIXI · 佑戩幣 YJC 頭像"
               width="120"
               height="120"
               className="mx-auto mb-6 rounded-2xl"

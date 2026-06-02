@@ -400,8 +400,8 @@
     "type_info": "資訊",
     "type_urgent": "緊急",
     "type_warning": "警告",
-    "welcome": "歡迎來到子熙！",
-    "welcome_desc": "模擬博弈平台",
+    "welcome": "歡迎來到子熙與佑戩！",
+    "welcome_desc": "雙 Token 鏈上博弈平台",
     "quick_tips": "快速提示",
     "tips_desc": "前往商店購買新手禮包...",
     "more_info": "更多資訊請至支援中心"
@@ -441,7 +441,7 @@
     "language": "語言",
     "switch_label": "切換",
     "github_repo": "GitHub 儲存庫",
-    "footer": "© 2026 子熙模擬器 v{{version}} — Aureum Edition"
+    "footer": "© 2026 子熙·佑戩 v{{version}} — Aureum Edition"
   },
   "inventory": {
     "title": "背包",
@@ -1208,7 +1208,7 @@
     "simulation_status": "模擬狀態",
     "operator_connected": "操作員已連線",
     "global_chat": "🌍 全域聊天",
-    "footer": "© 2026 子熙模擬器 v{{version}} — Aureum Edition"
+    "footer": "© 2026 子熙·佑戩 v{{version}} — Aureum Edition"
   },
   "game": {
     "coinflip": "猜硬幣",
@@ -1343,18 +1343,18 @@
   },
   "faq": {
     "meta": {
-      "title": "常見問題 FAQ — 子熙幣 ZIXI",
-      "description": "子熙幣 ZIXI 常見問題：什麼是子熙幣？遊戲怎麼驗證？ZXC 代幣用途？VIP 等級？公司系統？一次解答。"
+      "title": "常見問題 FAQ — 子熙幣 ZIXI · 佑戩幣 YJC",
+      "description": "子熙幣 ZIXI 與佑戩幣 YJC 常見問題：什麼是子熙幣／佑戩幣？遊戲怎麼驗證？ZXC／YJC 代幣用途？VIP 等級？公司系統？一次解答。"
     },
     "title": "常見問題",
-    "q1": "什麼是子熙幣 ZIXI？",
-    "a1": "子熙幣(ZIXI)是一個去中心化鏈上博弈娛樂平台，提供百家樂、龍虎、骰寶等 9 款遊戲，搭配 VIP 等級、公司經營、每日任務與 ZXC Token 經濟生態。",
+    "q1": "什麼是子熙幣 ZIXI 與佑戩幣 YJC？",
+    "a1": "子熙幣(ZIXI)與佑戩幣(YJC)是基於區塊鏈的雙 Token 博弈娛樂生態。子熙幣為主要品牌，提供百家樂、龍虎、骰寶等 9 款遊戲，搭配 VIP 等級、公司經營、每日任務與 ZXC+YJC 雙 Token 經濟生態。",
     "q2": "遊戲結果如何驗證？",
     "a2": "每局遊戲結果皆由 FNV-1a 雜湊函數計算產生，結合服務器種子與玩家種子，所有結果皆可在鏈上驗證，平台無法操控。",
     "q3": "有哪些遊戲可以玩？",
     "a3": "目前提供 9 款遊戲：百家樂、龍虎、骰寶、吹牛骰子、賓果、老虎機、決鬥、德州撲克、21 點。VIP 房間還有吹牛骰子和德州撲克多人版。",
-    "q4": "什麼是 ZXC 代幣？",
-    "a4": "ZXC 是 ZIXI 生態的核心代幣，總發行量 1,000 萬顆，用於遊戲下注、物品交易、VIP 升級、公司經營等場景。",
+    "q4": "什麼是 ZXC 與 YJC 代幣？",
+    "a4": "ZXC（子熙幣）是 ZIXI 生態的核心代幣，總發行量 1,000 萬顆，用於遊戲下注、物品交易、VIP 升級、公司經營等場景。YJC（佑戩幣）是生態輔助代幣，用於專屬兌換與社群獎勵，兩種代幣共同驅動生態經濟。",
     "q5": "如何開始遊玩？",
     "a5": "無需註冊，連接相容 EVM 的錢包即可開始。首次使用會自動建立帳號。",
     "q6": "VIP 等級如何運作？",
@@ -1370,17 +1370,17 @@
   },
   "whitepaper": {
     "meta": {
-      "title": "ZIXI 白皮書 — 子熙幣技術文檔",
-      "description": "ZIXI 去中心化鏈上博弈平台白皮書：Token 經濟、FNV-1a 公平性機制、遊戲系統、VIP 等級、公司經營、技術架構。"
+      "title": "ZIXI 白皮書 — 子熙幣與佑戩幣技術文檔",
+      "description": "ZIXI 去中心化鏈上博弈平台白皮書：雙 Token 經濟（ZXC+YJC）、FNV-1a 公平性機制、遊戲系統、VIP 等級、公司經營、技術架構。"
     },
     "title": "ZIXI 白皮書",
     "overview": {
       "title": "項目概述",
-      "body": "ZIXI 是一個基於區塊鏈技術的去中心化博弈娛樂平台，整合了多種經典博弈遊戲、VIP 會員體系、公司經營模擬與 ZXC Token 經濟。平台採用 FNV-1a 雜湊函數進行鏈上遊戲結果驗證，確保每一局都公平透明、不可竄改。"
+      "body": "ZIXI 是一個基於區塊鏈技術的去中心化博弈娛樂平台，整合了多種經典博弈遊戲、VIP 會員體系、公司經營模擬與 ZXC+YJC 雙 Token 經濟。平台採用 FNV-1a 雜湊函數進行鏈上遊戲結果驗證，確保每一局都公平透明、不可竄改。"
     },
     "token": {
       "title": "Token 經濟",
-      "body": "ZXC 是 ZIXI 生態的核心代幣，總發行量固定為 1,000 萬顆。ZXC 可用於：遊戲下注（所有遊戲唯一賭注代幣）、物品交易（市場買賣遊戲道具）、VIP 升級、公司經營（資本、研發、薪資）。經濟模型設計可持續，無通膨增發。"
+      "body": "ZXC（子熙幣）是 ZIXI 生態的核心代幣，總發行量固定為 1,000 萬顆。ZXC 可用於：遊戲下注（所有遊戲唯一賭注代幣）、物品交易（市場買賣遊戲道具）、VIP 升級、公司經營（資本、研發、薪資）。YJC（佑戩幣）為生態輔助代幣，用於專屬兌換、社群任務獎勵與特定活動。雙 Token 經濟模型設計可持續，無通膨增發。"
     },
     "fairness": {
       "title": "公平性機制",
@@ -1400,19 +1400,19 @@
     },
     "roadmap": {
       "title": "發展路線",
-      "body": "短期目標：持續優化遊戲體驗、新增更多遊戲類型、提升 VIP 系統深度。中期目標：擴展社群功能、整合更多 DeFi 應用場景。長期目標：建立完整的 ZIXI 生態系統，成為 Web3 博弈娛樂的領導品牌。"
+      "body": "短期目標：持續優化遊戲體驗、新增更多遊戲類型、提升 VIP 系統深度。中期目標：擴展社群功能、整合更多 DeFi 應用場景。長期目標：建立完整的 ZIXI·YouJian 生態系統，成為 Web3 博弈娛樂的領導品牌。"
     },
     "cta": "返回首頁"
   },
   "guides": {
     "meta": {
-      "title": "遊戲攻略 — 子熙幣 ZIXI",
-      "description": "ZIXI 遊戲攻略大全：新手入門、各遊戲技巧與策略、VIP 升級訣竅、公司經營心法。"
+      "title": "遊戲攻略 — 子熙幣 ZIXI · 佑戩幣 YJC",
+      "description": "ZIXI 遊戲攻略大全：新手入門、各遊戲技巧與策略、VIP 升級訣竅、公司經營心法、雙 Token 經濟指南。"
     },
     "title": "遊戲攻略",
     "gettingStarted": {
       "title": "新手入門",
-      "body": "開始玩 ZIXI 只需要一個 EVM 相容錢包。連接錢包後即可使用 ZXC 代幣在所有遊戲中下注。首次使用系統會自動建立帳號，無需繁瑣註冊流程。"
+      "body": "開始玩 ZIXI 只需要一個 EVM 相容錢包。連接錢包後即可使用 ZXC（子熙幣）代幣在所有遊戲中下注，YJC（佑戩幣）可用於專屬兌換與社群獎勵。首次使用系統會自動建立帳號，無需繁瑣註冊流程。"
     },
     "tips": {
       "title": "遊戲技巧"
@@ -1438,27 +1438,27 @@
   },
   "landing": {
     "meta": {
-      "title": "子熙幣 ZIXI - Web3 鏈上博弈娛樂平台",
-      "description": "子熙幣(ZIXI)是去中心化鏈上博弈平台，提供百家樂、龍虎、骰寶、吹牛骰子、賓果、老虎機、決鬥、撲克、21 點等多元遊戲，搭配 VIP 等級、公司經營、每日任務系統與 ZXC Token 經濟生態。"
+      "title": "子熙幣 ZIXI · 佑戩幣 YJC - Web3 鏈上博弈娛樂平台",
+      "description": "子熙幣(ZIXI)與佑戩幣(YJC)雙 Token 鏈上博弈平台，提供百家樂、龍虎、骰寶、吹牛骰子、賓果、老虎機、決鬥、撲克、21 點等多元遊戲，搭配 VIP 等級、公司經營、每日任務系統與 ZXC+YJC 雙 Token 經濟生態。"
     },
     "hero": {
-      "badge": "Web3 鏈上娛樂生態",
-      "title": "子熙幣 ZIXI",
-      "subtitle": "去中心化鏈上博弈娛樂平台",
-      "description": "整合 9 款經典博弈遊戲、VIP 會員體系、公司經營模擬與 ZXC Token 經濟，打造真正屬於玩家的 Web3 生態。",
+      "badge": "Web3 雙 Token 娛樂生態",
+      "title": "子熙幣 ZIXI · 佑戩幣 YJC",
+      "subtitle": "去中心化雙 Token 鏈上博弈平台",
+      "description": "整合 9 款經典博弈遊戲、VIP 會員體系、公司經營模擬與 ZXC+YJC 雙 Token 經濟，打造真正屬於玩家的 Web3 生態。",
       "cta": "開始遊玩",
       "enter": "進入大廳"
     },
     "features": {
       "title": "核心特色",
-      "subtitle": "為什麼選擇 ZIXI？",
+      "subtitle": "為什麼選擇 ZIXI · YouJian？",
       "games": {
         "title": "多元遊戲",
         "desc": "內建百家樂、龍虎、骰寶等 9 款遊戲，每局以 FNV-1a 雜湊鏈上驗證，確保公平可驗證。"
       },
       "token": {
-        "title": "Token 經濟",
-        "desc": "使用 ZXC 代幣作為生態核心貨幣，支援市場交易、物品典當、跨遊戲流通。"
+        "title": "雙 Token 經濟",
+        "desc": "ZXC（子熙幣）為生態核心貨幣，YJC（佑戩幣）作為生態輔助貨幣，雙 Token 流通支援市場交易、物品典當、跨遊戲結算。"
       },
       "vip": {
         "title": "VIP 等級",
@@ -1471,7 +1471,7 @@
     },
     "games": {
       "title": "遊戲列表",
-      "subtitle": "9 款經典博弈遊戲，公平區塊鏈驗證",
+      "subtitle": "9 款經典博弈遊戲，公平區塊鏈驗證，雙 Token 經濟",
       "baccarat": "百家樂",
       "dragontiger": "龍虎",
       "sicbo": "骰寶",
@@ -1483,17 +1483,17 @@
       "blackjack": "21點"
     },
     "token": {
-      "title": "ZXC Token 經濟",
-      "description": "ZXC 是子熙幣生態的核心代幣，可用於遊戲下注、物品交易、VIP 升級、公司經營等場景。總發行量固定，經濟模型可持續。",
+      "title": "ZXC · YJC 雙 Token 經濟",
+      "description": "ZXC（子熙幣）是生態核心代幣，YJC（佑戩幣）是生態輔助代幣。ZXC 用於遊戲下注、物品交易、VIP 升級、公司經營；YJC 用於專屬兌換、社群獎勵、特定活動。雙 Token 總發行量固定，經濟模型可持續。",
       "supply": "總發行量",
       "symbol": "代幣符號",
       "chain": "底層鏈",
       "chainName": "EVM 兼容鏈"
     },
     "cta": {
-      "title": "立即加入 ZIXI",
-      "description": "無需註冊，連接錢包即可開始暢玩。"
+      "title": "立即加入 ZIXI · YouJian",
+      "description": "無需註冊，連接錢包即可開始暢玩，體驗雙 Token 經濟。"
     },
-    "footer": "© 2026 ZIXI Casino. All rights reserved."
+    "footer": "© 2026 ZIXI · YouJian Casino. All rights reserved."
   }
 }

@@ -400,8 +400,8 @@
     "type_info": "INFO",
     "type_urgent": "URGENT",
     "type_warning": "WARNING",
-    "welcome": "Welcome to ZiXi!",
-    "welcome_desc": "A simulation gambling platform",
+    "welcome": "Welcome to ZiXi & YouJian!",
+    "welcome_desc": "Dual-Token on-chain gaming platform",
     "quick_tips": "Quick Tips",
     "tips_desc": "Visit the shop for starter packs",
     "more_info": "More info in Support"
@@ -441,7 +441,7 @@
     "language": "Language",
     "switch_label": "Switch",
     "github_repo": "GitHub Repository",
-    "footer": "© 2026 ZiXi Simulator v{{version}} — Aureum Edition"
+    "footer": "© 2026 ZiXi · YouJian v{{version}} — Aureum Edition"
   },
   "inventory": {
     "title": "Inventory",
@@ -1208,7 +1208,7 @@
     "simulation_status": "Simulation Status",
     "operator_connected": "Operator Connected",
     "global_chat": "🌍 Global Chat",
-    "footer": "© 2026 ZiXi Simulator v{{version}} — Aureum Edition"
+    "footer": "© 2026 ZiXi · YouJian v{{version}} — Aureum Edition"
   },
   "game": {
     "coinflip": "Coinflip",
@@ -1343,18 +1343,18 @@
   },
   "faq": {
     "meta": {
-      "title": "FAQ — ZIXI Casino",
-      "description": "Frequently asked questions about ZIXI: What is ZIXI? How are games verified? ZXC token, VIP system, company management."
+      "title": "FAQ — ZIXI · YouJian Casino",
+      "description": "Frequently asked questions about ZIXI and YouJian: What is ZIXI/YouJian? How are games verified? ZXC/YJC tokens, VIP system, company management."
     },
     "title": "Frequently Asked Questions",
-    "q1": "What is ZIXI?",
-    "a1": "ZIXI is a decentralized on-chain gaming platform featuring 9 classic casino games, VIP system, company management, and the ZXC token economy.",
+    "q1": "What is ZIXI and YouJian?",
+    "a1": "ZIXI (ZiXi Coin) and YouJian (YouJian Coin) form a dual-token blockchain gaming ecosystem. ZIXI is the main brand featuring 9 classic casino games, VIP system, company management, daily missions, and the ZXC+YJC dual-token economy.",
     "q2": "How are game results verified?",
     "a2": "Every game outcome is determined by FNV-1a hashing (server seed + player seed). All results are verifiable on-chain — the platform cannot manipulate outcomes.",
     "q3": "What games are available?",
     "a3": "9 games: Baccarat, Dragon Tiger, Sic Bo, Bluff Dice, Bingo, Slots, Duel, Texas Hold'em Poker, and Blackjack. VIP rooms feature multiplayer Bluff Dice and Poker.",
-    "q4": "What is the ZXC token?",
-    "a4": "ZXC is the core token of the ZIXI ecosystem with a fixed supply of 10 million. Used for betting, item trading, VIP upgrades, and company operations.",
+    "q4": "What are ZXC and YJC tokens?",
+    "a4": "ZXC (ZiXi Coin) is the core token with a fixed supply of 10 million, used for betting, item trading, VIP upgrades, and company operations. YJC (YouJian Coin) is the auxiliary token for exclusive redemptions and community rewards. Together they power the dual-token economy.",
     "q5": "How do I start playing?",
     "a5": "No registration needed. Connect an EVM-compatible wallet and start playing immediately. Your account is created automatically on first connection.",
     "q6": "How does the VIP system work?",
@@ -1370,17 +1370,17 @@
   },
   "whitepaper": {
     "meta": {
-      "title": "ZIXI Whitepaper — Technical Documentation",
-      "description": "ZIXI decentralized on-chain gaming platform whitepaper: Token economics, FNV-1a fairness mechanism, game system, VIP, company, tech architecture."
+      "title": "ZIXI Whitepaper — ZiXi & YouJian Technical Documentation",
+      "description": "ZIXI decentralized on-chain gaming platform whitepaper: Dual-token economics (ZXC+YJC), FNV-1a fairness mechanism, game system, VIP, company, tech architecture."
     },
     "title": "ZIXI Whitepaper",
     "overview": {
       "title": "Overview",
-      "body": "ZIXI is a blockchain-based decentralized gaming platform integrating classic casino games, VIP membership, company management simulation, and the ZXC Token economy. Every game outcome is verified on-chain via FNV-1a hashing for provable fairness."
+      "body": "ZIXI is a blockchain-based decentralized gaming platform integrating classic casino games, VIP membership, company management simulation, and the ZXC+YJC dual-token economy. Every game outcome is verified on-chain via FNV-1a hashing for provable fairness."
     },
     "token": {
       "title": "Token Economics",
-      "body": "ZXC is the core token with a fixed supply of 10 million. Use cases: game betting (exclusive currency), item trading (marketplace), VIP upgrades, company operations (capital, R&D, salaries). No inflation — the economic model is designed for sustainability."
+      "body": "ZXC (ZiXi Coin) is the core token with a fixed supply of 10 million. Use cases: game betting (exclusive currency), item trading (marketplace), VIP upgrades, company operations (capital, R&D, salaries). YJC (YouJian Coin) is the auxiliary token for exclusive redemptions, community task rewards, and special events. The dual-token model is designed for sustainability with no inflation."
     },
     "fairness": {
       "title": "Fairness Mechanism",
@@ -1400,19 +1400,19 @@
     },
     "roadmap": {
       "title": "Roadmap",
-      "body": "Short term: game experience optimization, new game types, deeper VIP features. Medium term: community features, DeFi integration. Long term: build a complete ZIXI ecosystem as a leading Web3 gaming brand."
+      "body": "Short term: game experience optimization, new game types, deeper VIP features. Medium term: community features, DeFi integration. Long term: build a complete ZIXI·YouJian ecosystem as a leading Web3 gaming brand."
     },
     "cta": "Back to Home"
   },
   "guides": {
     "meta": {
-      "title": "Game Guides — ZIXI Casino",
-      "description": "ZIXI game guides: getting started, tips for each game, VIP strategy, company management tips."
+      "title": "Game Guides — ZIXI · YouJian Casino",
+      "description": "ZIXI game guides: getting started, tips for each game, VIP strategy, company management tips, dual-token economy guide."
     },
     "title": "Game Guides",
     "gettingStarted": {
       "title": "Getting Started",
-      "body": "To play ZIXI, you only need an EVM-compatible wallet. Connect your wallet and start betting with ZXC tokens. Your account is created automatically — no registration required."
+      "body": "To play ZIXI, you only need an EVM-compatible wallet. Connect your wallet and start betting with ZXC (ZiXi Coin) tokens. YJC (YouJian Coin) is available for exclusive redemptions and community rewards. Your account is created automatically — no registration required."
     },
     "tips": {
       "title": "Game Tips"
@@ -1438,27 +1438,27 @@
   },
   "landing": {
     "meta": {
-      "title": "ZIXI Casino - Web3 On-Chain Gaming Platform",
-      "description": "ZIXI is a decentralized on-chain gaming platform featuring Baccarat, Dragon Tiger, Sic Bo, Bluff Dice, Bingo, Slots, Duel, Poker, Blackjack and more. VIP system, company management, daily missions, and ZXC Token economy."
+      "title": "ZIXI · YouJian - Web3 Dual-Token On-Chain Gaming Platform",
+      "description": "ZIXI and YouJian (YJC) is a decentralized dual-token on-chain gaming platform featuring Baccarat, Dragon Tiger, Sic Bo, Bluff Dice, Bingo, Slots, Duel, Poker, Blackjack and more. VIP system, company management, daily missions, and ZXC+YJC dual-token economy."
     },
     "hero": {
-      "badge": "Web3 Gaming Ecosystem",
-      "title": "ZIXI Casino",
-      "subtitle": "Decentralized On-Chain Gaming",
-      "description": "9 classic casino games, VIP membership, company simulation, and ZXC Token economy — a Web3 entertainment ecosystem built for players.",
+      "badge": "Web3 Dual-Token Ecosystem",
+      "title": "ZIXI · YouJian",
+      "subtitle": "Decentralized Dual-Token On-Chain Gaming",
+      "description": "9 classic casino games, VIP membership, company simulation, and ZXC+YJC dual-token economy — a Web3 entertainment ecosystem built for players.",
       "cta": "Play Now",
       "enter": "Enter Lobby"
     },
     "features": {
       "title": "Core Features",
-      "subtitle": "Why Choose ZIXI?",
+      "subtitle": "Why Choose ZIXI · YouJian?",
       "games": {
         "title": "Multiple Games",
         "desc": "9 built-in games including Baccarat, Dragon Tiger, Sic Bo. Every round is verified on-chain via FNV-1a hashing for provable fairness."
       },
       "token": {
-        "title": "Token Economy",
-        "desc": "ZXC token powers the ecosystem — used for betting, trading, pawning items, and cross-game circulation."
+        "title": "Dual-Token Economy",
+        "desc": "ZXC (ZiXi Coin) powers the core ecosystem — YJC (YouJian Coin) serves as the auxiliary token for exclusive redemptions, community rewards, and special events."
       },
       "vip": {
         "title": "VIP System",
@@ -1471,7 +1471,7 @@
     },
     "games": {
       "title": "Game Selection",
-      "subtitle": "9 classic games, provably fair on-chain",
+      "subtitle": "9 classic games, provably fair on-chain, dual-token economy",
       "baccarat": "Baccarat",
       "dragontiger": "Dragon Tiger",
       "sicbo": "Sic Bo",
@@ -1483,18 +1483,18 @@
       "blackjack": "Blackjack"
     },
     "token": {
-      "title": "ZXC Token Economy",
-      "description": "ZXC is the core token of the ZIXI ecosystem, used for game betting, item trading, VIP upgrades, company operations and more. Fixed total supply with sustainable economic model.",
+      "title": "ZXC · YJC Dual-Token Economy",
+      "description": "ZXC (ZiXi Coin) is the core token, YJC (YouJian Coin) is the auxiliary token. ZXC powers betting, item trading, VIP upgrades, and company operations. YJC is used for exclusive redemptions, community rewards, and special events. Fixed total supply with sustainable economic model.",
       "supply": "Total Supply",
       "symbol": "Token Symbol",
       "chain": "Blockchain",
       "chainName": "EVM Compatible"
     },
     "cta": {
-      "title": "Join ZIXI Now",
-      "description": "No registration needed. Connect your wallet and start playing."
+      "title": "Join ZIXI · YouJian Now",
+      "description": "No registration needed. Connect your wallet and start playing with dual-token economy."
     },
-    "footer": "© 2026 ZIXI Casino. All rights reserved."
+    "footer": "© 2026 ZIXI · YouJian Casino. All rights reserved."
   }
 }
 
