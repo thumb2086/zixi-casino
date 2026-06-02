@@ -25,7 +25,7 @@ async function transferOnChain(address: string, tokenKey: "zhixi" | "yjc", amoun
     if (!runtime.rpcUrl || !runtime.adminPrivateKey || !tokenCfg?.contractAddress) return;
     const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
     const svc = new SettlementServiceImpl(repo);
-    const chainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+    const chainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey);
     const treasury = getOnChainConfig().treasuryAddress;
 
     // Auto-mint to treasury (100京 = 10^18 units) if balance is low

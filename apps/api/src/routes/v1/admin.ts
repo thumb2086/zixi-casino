@@ -239,7 +239,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
       if (!runtime.rpcUrl || !runtime.adminPrivateKey) {
         return createApiEnvelope({ error: { message: "On-chain runtime is not configured" } }, request.id);
       }
-      chainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+      chainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey);
     } catch (e: any) {
       return createApiEnvelope({ error: { message: e.message } }, request.id);
     }

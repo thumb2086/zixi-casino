@@ -72,7 +72,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
         return fallbackBalance;
       }
 
-      const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+      const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey);
       const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
       const onchainBalance = client.formatUnits(
         await client.getBalance(address, tokenRuntime.contractAddress),

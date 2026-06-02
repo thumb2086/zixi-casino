@@ -137,6 +137,7 @@ describe('Onchain settlement', () => {
     vi.spyOn(onchainWallet, 'getRuntimeConfig').mockReturnValue({
       rpcUrl: 'http://localhost:8545',
       adminPrivateKey: '0xabc',
+      minterPrivateKey: '0xabc',
       tokens: {
         zhixi: {
           key: 'zhixi',
@@ -200,6 +201,7 @@ describe('Onchain settlement', () => {
     vi.spyOn(onchainWallet, 'getRuntimeConfig').mockReturnValue({
       rpcUrl: 'http://localhost:8545',
       adminPrivateKey: '0xabc',
+      minterPrivateKey: '0xabc',
       tokens: {
         zhixi: {
           key: 'zhixi',

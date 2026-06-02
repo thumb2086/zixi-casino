@@ -119,7 +119,7 @@ export class GameSettlementWrapper {
       const runtime = this.onchainWallet.getRuntimeConfig();
       const tokenRuntime = runtime.tokens[token];
       if (!tokenRuntime?.enabled || !runtime.rpcUrl || !runtime.adminPrivateKey) return "0";
-      const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+      const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey);
       const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
       const rawBalance = await client.getBalance(normalizedAddress, tokenRuntime.contractAddress);
       const balance = client.formatUnits(rawBalance, decimals);

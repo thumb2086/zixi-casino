@@ -39,7 +39,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         return (await walletRepo.getBalance(address, "zhixi")) || "0";
       }
 
-      const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+      const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey);
       const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
       const onchainBalance = client.formatUnits(
         await client.getBalance(address, tokenRuntime.contractAddress),
@@ -164,7 +164,7 @@ export async function authRoutes(fastify: FastifyInstance) {
       };
     }
 
-    const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+    const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey);
     const decimals = await client.getDecimals(tokenRuntime.contractAddress, 18);
     const onchainBalanceBefore = await client.getBalance(address, tokenRuntime.contractAddress);
     if (onchainBalanceBefore > 0n) {
