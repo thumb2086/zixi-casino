@@ -5,10 +5,6 @@ import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { api } from './store/api';
 import LoginView from './features/auth/LoginView';
 import LobbyView from './features/casino/LobbyView';
-import LandingView from './features/landing/LandingView';
-import FAQView from './features/info/FAQView';
-import WhitepaperView from './features/info/WhitepaperView';
-import GuidesView from './features/info/GuidesView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
 import { useAuthStore } from './store/useAuthStore';
@@ -37,8 +33,10 @@ const VIPLevelsView = lazy(() => import('./features/info/VIPLevelsView'));
 const InfoView = lazy(() => import('./features/info/InfoView'));
 const CompanyView = lazy(() => import('./features/company/CompanyView'));
 const PerformanceView = lazy(() => import('./features/stats/PerformanceView'));
-const PokerRoomView = lazy(() => import('./features/casino/PokerRoomView'));
-const BluffDiceRoomView = lazy(() => import('./features/casino/BluffDiceRoomView'));
+const LandingView = lazy(() => import('./features/landing/LandingView'));
+const FAQView = lazy(() => import('./features/info/FAQView'));
+const WhitepaperView = lazy(() => import('./features/info/WhitepaperView'));
+const GuidesView = lazy(() => import('./features/info/GuidesView'));
 import { Loader2 } from 'lucide-react';
 import { useFontSizeStore } from './store/useFontSizeStore';
 
@@ -156,6 +154,7 @@ function AppContent() {
       <FontSizeApplier />
       <SoundPlayer />
       {isAuthorized && <TransactionQueueIndicator />}
+      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>}>
       <Routes>
         <Route path="/landing" element={<LandingView />} />
         <Route path="/faq" element={<FAQView />} />
@@ -199,6 +198,7 @@ function AppContent() {
           </>
         )}
       </Routes>
+      </Suspense>
     </div>
   );
 }
