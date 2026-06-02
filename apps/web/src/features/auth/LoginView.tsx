@@ -192,7 +192,7 @@ export default function LoginView() {
           <div className="bg-card rounded-2xl border border-border/20 p-6 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-              <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-accent">
+               <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-white">
                 {t('nav.announcements')}
               </h2>
             </div>
@@ -205,7 +205,7 @@ export default function LoginView() {
                   </p>
                 </div>
                 <div className="rounded-xl bg-surface p-4 border border-border/10">
-                  <p className="text-xs font-bold text-white">?’¡ {t('announcement.quick_tips')}</p>
+                  <p className="text-xs font-bold text-white">?ï¿½ï¿½ {t('announcement.quick_tips')}</p>
                   <p className="text-xs text-secondary mt-1 leading-relaxed">
                     {t('announcement.tips_desc')}
                   </p>
@@ -319,7 +319,7 @@ export default function LoginView() {
                  )}
                  <div className="flex items-center justify-center gap-2 pt-2">
                      <QrCode size={12} className="text-accent" />
-                     <span className="text-xs text-accent/60 font-bold uppercase tracking-[0.2em]">{t('auth.encrypted_active')}</span>
+                     <span className="text-xs text-secondary font-bold uppercase tracking-[0.2em]">{t('auth.encrypted_active')}</span>
                  </div>
               </div>
             </motion.div>
@@ -471,6 +471,7 @@ export default function LoginView() {
     </div>
   );
 }
+
 
 
 
