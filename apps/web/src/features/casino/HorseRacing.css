@@ -35,7 +35,7 @@
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.85rem;
-    color: #ffcc00;
+    color: var(--color-accent);
 }
 
 .countdown-badge.closed {
@@ -74,7 +74,7 @@
 }
 
 .horse-choice.active {
-    border-color: #ffcc00;
+    border-color: var(--color-accent);
     background: rgba(255, 204, 0, 0.12);
 }
 
@@ -200,7 +200,7 @@
 }
 
 .horse-runner.winner .horse-icon {
-    filter: drop-shadow(0 0 12px var(--horse-color, #ffcc00));
+    filter: drop-shadow(0 0 12px var(--horse-color, var(--color-accent)));
     animation: horse-win 0.5s ease-in-out infinite alternate;
 }
 
@@ -248,12 +248,12 @@
 
 .pace-fill {
     height: 100%;
-    background: linear-gradient(90deg, #ffcc00, #ff8800);
+    background: linear-gradient(90deg, var(--color-accent), #ff8800);
     transition: width 0.08s linear;
 }
 
 .status-panel {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0,0,0,0.3);
     border-radius: 8px;
     padding: 12px;
     margin: 12px 0 0;
@@ -288,7 +288,7 @@
 
 .btn-bet {
     padding: 12px 30px;
-    background: linear-gradient(180deg, #ffcc00, #d4a017);
+    background: linear-gradient(180deg, var(--color-accent), var(--color-accent));
     color: #000;
     border: none;
     border-radius: 8px;
@@ -394,3 +394,5 @@
   .betting-controls { flex-direction: column; }
   .btn-bet { width: 100%; }
 }
+
+

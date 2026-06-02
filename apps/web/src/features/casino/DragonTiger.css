@@ -6,7 +6,7 @@
   align-items: center;
   gap: 3rem;
   padding: 3rem;
-  background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 100%);
+  background: linear-gradient(135deg, #7f1d1d 0%, var(--color-bg-surface) 100%);
   border-radius: 2rem;
   border: 1px solid rgba(248, 113, 113, 0.2);
   min-height: 550px;
@@ -67,7 +67,7 @@
   gap: 1rem;
 }
 
-.shot-area h3 { color: #94a3b8; font-size: 0.8rem; letter-spacing: 0.2em; }
+.shot-area h3 { color: var(--color-text-secondary); font-size: 0.8rem; letter-spacing: 0.2em; }
 
 .controls {
   display: flex;
@@ -88,7 +88,7 @@
 }
 
 .gate-btn { background: #eab308; color: #000; }
-.shoot-btn { background: #ef4444; color: white; animation: pulse 1s infinite; }
+.shoot-btn { background: var(--color-danger); color: white; animation: pulse 1s infinite; }
 
 @keyframes pulse {
     0% { transform: scale(1); }
@@ -100,13 +100,15 @@
   width: 100%;
   max-width: 560px;
   padding: 1rem 1.5rem;
-  background: rgba(15, 23, 42, 0.96);
+  background: rgba(var(--color-bg-surface-rgb), 0.96);
   border-radius: 1rem;
   border: 3px solid white;
   text-align: center;
   z-index: 2;
 }
 
-.result-banner.win { border-color: #22c55e; color: #22c55e; }
+.result-banner.win { border-color: var(--color-success); color: var(--color-success); }
 .result-banner.pillar { border-color: #eab308; color: #eab308; }
-.result-banner.lose { border-color: #ef4444; color: #ef4444; }
+.result-banner.lose { border-color: var(--color-danger); color: var(--color-danger); }
+
+

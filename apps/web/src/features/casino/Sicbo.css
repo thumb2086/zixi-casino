@@ -37,7 +37,7 @@
 }
 
 .bet-option {
-  background: #1a1a1a;
+  background: var(--color-bg-card);
   border: 2px solid #333;
   padding: 20px;
   border-radius: 16px;
@@ -51,7 +51,7 @@
 }
 
 .bet-option.active {
-  border-color: #ffcc00;
+  border-color: var(--color-accent);
   background: rgba(255, 204, 0, 0.1);
 }
 
@@ -62,7 +62,7 @@
 }
 
 .bet-odds {
-  color: #ffcc00;
+  color: var(--color-accent);
   font-size: 0.9rem;
 }
 
@@ -87,3 +87,4 @@
   .sicbo-controls { flex-direction: column; }
   .sicbo-controls button { width: 100%; min-height: 48px; }
 }
+
