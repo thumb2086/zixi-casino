@@ -932,7 +932,7 @@ export default function AdminView() {
                 <div className="flex gap-2">
                   {(['info', 'warning', 'urgent'] as const).map((t) => (
                     <button key={t} type="button" onClick={() => setAnnouncementType(t)}
-                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${announcementType === t ? 'bg-accent text-black' : 'bg-surface text-secondary border border-border/30'}`}>{t}</button>
+                      className={`flex-1 py-1.5 rounded-lg text-caption font-bold uppercase tracking-wider ${announcementType === t ? 'bg-accent text-black' : 'bg-surface text-secondary border border-border/30'}`}>{t}</button>
                   ))}
                 </div>
                 <label className="flex items-center gap-2 text-xs text-secondary"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />{t('admin.pin_on_publish')}</label>
@@ -2035,5 +2035,6 @@ export function AnnouncementManager() {
     </div>
   );
 }
+
 
 

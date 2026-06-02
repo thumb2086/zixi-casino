@@ -219,7 +219,7 @@ export default function PokerRoomView() {
         <div className="app-shell flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
             <div className="text-gradient-diamond text-sm font-black uppercase tracking-widest">??VIP ?²å?</div>
-            <span className="text-[10px] text-secondary">{roomId}</span>
+            <span className="text-caption text-secondary">{roomId}</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-accent">åº•æ? ${pot}</span>
@@ -301,3 +301,4 @@ export default function PokerRoomView() {
     </div>
   );
 }
+

@@ -205,13 +205,13 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
 
       <div className="flex items-center gap-3 bg-card rounded-2xl px-5 py-3 border border-border/10">
         <Clock size={14} className="text-accent" />
-        <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
+        <span className="text-caption font-bold text-secondary uppercase tracking-wider">
           ä¼ºæ??¨é?è¡?
         </span>
         <span className="text-xs font-bold text-emerald-400 ml-auto">
           {serviceStats?.serverUptimeLabel || '...'}
         </span>
-        <span className="text-[10px] font-bold text-secondary">
+        <span className="text-caption font-bold text-secondary">
           {serviceStats?.uptime ? `?¯ç”¨ ${serviceStats.uptime}` : ''}
         </span>
       </div>
@@ -508,5 +508,6 @@ export default function AnnouncementCenter() {
     </div>
   );
 }
+
 
 

@@ -168,12 +168,12 @@ export default function OddsTab() {
                 <h3 className="font-bold text-white">{chest.type}</h3>
                 <span className="text-xs font-bold text-accent">{chest.price}</span>
               </div>
-              <p className="text-[10px] font-bold text-secondary mb-2">{chest.pity}</p>
+              <p className="text-caption font-bold text-secondary mb-2">{chest.pity}</p>
               <div className="flex items-center gap-2">
                 {chest.w.map((pct, i) => pct > 0 && (
                   <div key={i} className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full" style={{ background: chest.colors[i] }} />
-                    <span className="text-[10px] font-bold text-secondary">{chest.labels[i]} {pct}%</span>
+                    <span className="text-caption font-bold text-secondary">{chest.labels[i]} {pct}%</span>
                   </div>
                 ))}
               </div>
@@ -189,4 +189,5 @@ export default function OddsTab() {
     </div>
   );
 }
+
 

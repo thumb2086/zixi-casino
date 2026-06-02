@@ -465,7 +465,7 @@ export default function ShopView() {
               <span className="text-sm font-black text-accent">{formatBalance(balance, numberMode)}</span>
             </div>
           </div>
-          <div className="text-center text-[10px] font-bold text-secondary mb-4 tracking-wider">
+          <div className="text-center text-caption font-bold text-secondary mb-4 tracking-wider">
             1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXC（固定匯?��?
           </div>
 
@@ -792,9 +792,9 @@ export default function ShopView() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-white">{stock.symbol}</p>
-                          {stock.name && <span className="text-[10px] text-secondary truncate">{stock.name}</span>}
+                          {stock.name && <span className="text-caption text-secondary truncate">{stock.name}</span>}
                           {stock.sector && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-[#494847]/20 px-1.5 py-0.5 rounded">{stock.sector}</span>
+                            <span className="text-caption font-bold uppercase tracking-wider text-secondary bg-[#494847]/20 px-1.5 py-0.5 rounded">{stock.sector}</span>
                           )}
                         </div>
                         <div className="flex items-center gap-3 mt-1">
@@ -813,7 +813,7 @@ export default function ShopView() {
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <span className="text-sm font-black text-emerald-400">+{formatNumber(totalPayout, numberMode)} ZXC</span>
-                        <span className="text-[10px] text-secondary">(70% 變現)</span>
+                        <span className="text-caption text-secondary">(70% 變現)</span>
                         <button
                           onClick={() => handleStockSell(stock.symbol, stock.qty)}
                           disabled={sellingStock === stock.symbol || !sessionId}
@@ -921,7 +921,7 @@ export default function ShopView() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white">{l.itemId}</p>
                     <p className="text-xs text-secondary">{l.quantity} ??· {formatNumber(Number(l.price), numberMode)} ZXC</p>
-                    <span className={`text-[10px] font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-secondary'}`}>{l.status}</span>
+                    <span className={`text-caption font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-secondary'}`}>{l.status}</span>
                   </div>
                   {l.status === 'active' && (
                     <button onClick={() => handleCancelListing(l.id)}
@@ -949,5 +949,6 @@ export default function ShopView() {
     </div>
   );
 }
+
 
 

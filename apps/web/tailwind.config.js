@@ -21,6 +21,12 @@ export default {
         info: 'rgba(var(--color-info-rgb), <alpha-value>)',
         border: 'rgba(var(--color-border-rgb), <alpha-value>)',
       },
+      fontSize: {
+        'caption': ['10px', { lineHeight: '14px' }],
+        'sub': ['12px', { lineHeight: '16px' }],
+        'body': ['14px', { lineHeight: '20px' }],
+        'h4': ['16px', { lineHeight: '22px' }],
+      },
       fontFamily: {
         sans: ['Manrope', 'sans-serif'],
       },

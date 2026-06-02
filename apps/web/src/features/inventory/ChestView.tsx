@@ -227,7 +227,7 @@ export default function ChestView() {
 
   const useAllTokens = async () => {
     setUsingAllTokens(true);
-    setUseStatusMessage('�?��?��??�部�?��...');
+    setUseStatusMessage('�?��?��??�部�?��...');
     try {
       const res = await api.post('/api/v1/inventory/use-all-tokens', {});
       if (res.data?.success) {
@@ -250,7 +250,7 @@ export default function ChestView() {
   };
 
   const useItem = async (itemId: string, quantity: number = 1) => {
-    setUseStatusMessage('�?��?��?...');
+    setUseStatusMessage('�?��?��?...');
     try {
       const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
@@ -282,7 +282,7 @@ export default function ChestView() {
 
   const itemTypeLabels: Record<string, string> = {
     chest_key: '?��?',
-    token: '�?��',
+    token: '�?��',
     buff: '?��?',
     avatar: '?��?',
     title: '稱�?',
@@ -300,12 +300,12 @@ export default function ChestView() {
                 ?��?中�?
               </h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-                ?��??��?�?
+                ?��??��?�?
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary">空�?</p>
+            <p className="text-caption font-bold uppercase tracking-widest text-secondary">空�?</p>
             <p className="text-sm font-black text-white">
               {status?.inventorySlotsUsed || 0}
               <span className="mx-1 text-muted">/</span>
@@ -326,7 +326,7 @@ export default function ChestView() {
                     {buff.type === 'prevent_loss' ? <Shield size={16} /> : <Zap size={16} />}
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-secondary">
+                    <p className="text-caption font-bold uppercase tracking-wider text-secondary">
                       {t(`chest.buff_type_${buff.type}`)}
                     </p>
                     <p className="text-xs font-bold text-white">
@@ -334,7 +334,7 @@ export default function ChestView() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-2 text-[10px] font-bold text-secondary opacity-60">
+                <div className="mt-2 text-caption font-bold text-secondary opacity-60">
                   {buff.expiresAt ? formatExpires(buff.expiresAt, t) : t('chest.buff_active')}
                 </div>
               </div>
@@ -352,7 +352,7 @@ export default function ChestView() {
                 invTab === tab ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary hover:bg-[#494847]/30'
               }`}
             >
-              {{ chests: '寶箱', tokens: '�?��', buffs: '?��?', collection: '?��?' }[tab]}
+              {{ chests: '寶箱', tokens: '�?��', buffs: '?��?', collection: '?��?' }[tab]}
             </button>
           ))}
         </div>
@@ -360,7 +360,7 @@ export default function ChestView() {
         {/* Tab: Chests */}
         {invTab === 'chests' && (
         <section className="space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">?��??�寶�?/h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">?��??�寶�?/h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {chests.map((chest) => {
@@ -376,7 +376,7 @@ export default function ChestView() {
                     <div>
                       <h3 className="text-lg font-black text-white">{chest.name}</h3>
                       <div className="mt-1 flex items-center gap-2">
-                        <span className="rounded bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
+                        <span className="rounded bg-accent/10 px-2 py-0.5 text-caption font-bold uppercase tracking-wider text-accent">
                           {keys} ?�鑰??
                         </span>
                       </div>
@@ -385,7 +385,7 @@ export default function ChestView() {
                   </div>
 
                   <div className="mb-4 space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-secondary">
+                    <div className="flex justify-between text-caption font-bold uppercase tracking-widest text-secondary">
                       <span>保�??�度</span>
                       <span className="text-accent">{currentPity} / {chest.pityThreshold}</span>
                     </div>
@@ -401,7 +401,7 @@ export default function ChestView() {
                   <div className="flex items-center justify-center gap-2 mb-3">
                     {[1, 5, 10, 100].map((q) => (
                       <button key={q} onClick={() => setOpenQtys(p => ({ ...p, [chest.id]: String(q) }))}
-                        className={`rounded-md px-2 py-1 text-[10px] font-bold transition-all ${parseInt(chestOpenQty, 10) === q ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary'}`}>x{q}</button>
+                        className={`rounded-md px-2 py-1 text-caption font-bold transition-all ${parseInt(chestOpenQty, 10) === q ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary'}`}>x{q}</button>
                     ))}
                     <input type="text" inputMode="numeric" value={chestOpenQty}
                       onChange={(e) => setOpenQtys(p => ({ ...p, [chest.id]: e.target.value }))}
@@ -418,7 +418,7 @@ export default function ChestView() {
                         : 'bg-[#494847]/20 text-muted cursor-not-allowed border border-border/10'
                     }`}
                   >
-                    {opening ? '�??�?..' : `?��? ${openQtyNum} ?�`}
+                    {opening ? '�??�?..' : `?��? ${openQtyNum} ?�`}
                   </button>
                 </div>
               );
@@ -431,7 +431,7 @@ export default function ChestView() {
         {invTab === 'tokens' && (
           <section className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">�?��</h2>
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">�?��</h2>
               {(() => {
                 const tokenItems = groupedItems['token'] || [];
                 const totalTokens = tokenItems.reduce((sum, i) => sum + (i.effect?.value || 0) * i.quantity, 0);
@@ -441,23 +441,23 @@ export default function ChestView() {
                     disabled={usingAllTokens}
                     className="text-xs font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
                   >
-                    {usingAllTokens ? '?��?�?..' : `?�部使用 (??{totalTokens.toLocaleString()} ZXC)`}
+                    {usingAllTokens ? '?��?�?..' : `?�部使用 (??{totalTokens.toLocaleString()} ZXC)`}
                   </button>
                 ) : null;
               })()}
             </div>
             {(!groupedItems['token'] || groupedItems['token'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?�無�?��?��?</p>
+              <p className="text-sm text-secondary text-center py-8">?�無�?��?��?</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['token'].map((item) => (
                   <div key={item.id} className="flex flex-col rounded-xl border border-border/20 bg-card p-3">
                     <div className="mb-2 flex items-start justify-between">
                       <span className="text-2xl">{item.icon}</span>
-                      <span className="rounded bg-elevated px-1.5 py-0.5 text-[10px] font-bold text-secondary">x{item.quantity}</span>
+                      <span className="rounded bg-elevated px-1.5 py-0.5 text-caption font-bold text-secondary">x{item.quantity}</span>
                     </div>
                     <h4 className="mb-1 truncate text-xs font-bold text-white">{item.name}</h4>
-                    <p className="mb-3 text-[10px] font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
+                    <p className="mb-3 text-caption font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
                       <input type="text" inputMode="numeric"
                         value={useQty[item.id] ?? '1'}
@@ -470,7 +470,7 @@ export default function ChestView() {
                         className="w-12 bg-surface border border-border/40 rounded-lg text-white font-bold text-xs text-center focus:outline-none focus:border-accent"
                       />
                       <button onClick={() => setUseQty(p => ({ ...p, [item.id]: String(item.quantity) }))}
-                        className="text-[10px] font-bold bg-[#494847]/20 text-secondary px-1.5 py-1 rounded-lg hover:bg-[#494847]/40">Max</button>
+                        className="text-caption font-bold bg-[#494847]/20 text-secondary px-1.5 py-1 rounded-lg hover:bg-[#494847]/40">Max</button>
                       <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
                         className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
@@ -495,10 +495,10 @@ export default function ChestView() {
                   <div key={item.id} className="flex flex-col rounded-xl border border-border/20 bg-card p-3">
                     <div className="mb-2 flex items-start justify-between">
                       <span className="text-2xl">{item.icon}</span>
-                      <span className="rounded bg-elevated px-1.5 py-0.5 text-[10px] font-bold text-secondary">x{item.quantity}</span>
+                      <span className="rounded bg-elevated px-1.5 py-0.5 text-caption font-bold text-secondary">x{item.quantity}</span>
                     </div>
                     <h4 className="mb-1 truncate text-xs font-bold text-white">{item.name}</h4>
-                    <p className="mb-3 text-[10px] font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
+                    <p className="mb-3 text-caption font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
                     <div className="mt-auto flex flex-wrap gap-2">
                       <input type="text" inputMode="numeric"
                         value={useQty[item.id] ?? '1'}
@@ -538,11 +538,11 @@ export default function ChestView() {
                         <div className="mb-2 flex items-start justify-between">
                           <span className="text-2xl">{item.icon}</span>
                           {(type === 'chest_key' || item.quantity > 1) && (
-                            <span className="rounded bg-elevated px-1.5 py-0.5 text-[10px] font-bold text-secondary">x{item.quantity}</span>
+                            <span className="rounded bg-elevated px-1.5 py-0.5 text-caption font-bold text-secondary">x{item.quantity}</span>
                           )}
                         </div>
                         <h4 className="mb-1 truncate text-xs font-bold text-white">{item.name}</h4>
-                        <p className="mb-3 text-[10px] font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
+                        <p className="mb-3 text-caption font-bold text-secondary leading-relaxed min-h-[2.4em]">{item.description}</p>
                         {(type === 'avatar' || type === 'title') && (
                           <div className="mt-auto flex gap-2">
                             <button onClick={() => useItem(item.id)}
@@ -566,7 +566,7 @@ export default function ChestView() {
 
       <AppBottomNav current="none" />
 
-      {/* Toast — handled globally by ToastProvider */}
+      {/* Toast ??handled globally by ToastProvider */}
       </AnimatePresence>
 
       {/* Result Modal */}
@@ -786,5 +786,6 @@ export default function ChestView() {
     </div>
   );
 }
+
 
 
