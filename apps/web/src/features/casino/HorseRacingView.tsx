@@ -165,9 +165,7 @@ export const HorseRacingView: React.FC = () => {
       horseId: selectedHorseId,
     }).then(() => {
       queryClient.invalidateQueries({ queryKey: ['my-profile'] });
-    }).catch((err: any) => {
-      console.error('[horse] bet failed:', err);
-    });
+    }).catch(() => {});
   };
 
   // Start race when round closes (with or without bets)

@@ -147,8 +147,8 @@ export default function ChestView() {
     try {
       const res = await api.get("/api/v1/gift/recipients");
       if (res.data?.success) setRecipients(res.data.data.users);
-    } catch (err) {
-      console.error("Failed to fetch recipients:", err);
+    } catch {
+      // silently ignore
     }
   }, []);
 
@@ -156,8 +156,8 @@ export default function ChestView() {
     try {
       const res = await api.get('/api/v1/chests/status');
       if (res.data?.success) setStatus(res.data.data);
-    } catch (err) {
-      console.error('Failed to fetch chest status:', err);
+    } catch {
+      // silently ignore
     }
   }, []);
 
@@ -165,8 +165,8 @@ export default function ChestView() {
     try {
       const res = await api.get('/api/v1/inventory');
       if (res.data?.success) setInventory(res.data.data);
-    } catch (err) {
-      console.error('Failed to fetch inventory:', err);
+    } catch {
+      // silently ignore
     }
   }, []);
 
@@ -176,8 +176,8 @@ export default function ChestView() {
       try {
         const res = await api.get('/api/v1/chests');
         if (res.data?.success) setChests(res.data.data);
-      } catch (err) {
-        console.error('Failed to fetch chests:', err);
+        } catch {
+        // silently ignore
       }
     })();
     refreshStatus();

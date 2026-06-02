@@ -111,7 +111,7 @@ body {
     @apply block w-1 h-5 rounded-full shrink-0;
   }
   .section-title-text {
-    @apply text-xs font-black uppercase tracking-widest;
+    @apply text-xs font-bold uppercase tracking-widest;
   }
   .section-title-accent::before  { @apply bg-accent; }
   .section-title-accent .section-title-text { @apply text-accent; }

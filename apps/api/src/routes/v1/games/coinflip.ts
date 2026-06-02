@@ -1,4 +1,5 @@
 // apps/api/src/routes/v1/games/coinflip.ts
+import { randomUUID } from "crypto";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -47,7 +48,7 @@ export async function coinflipRoutes(fastify: FastifyInstance) {
       return createApiEnvelope({ success: false, error: "ADDRESS_NOT_FOUND" }, request.id, false);
     }
 
-    const roundId = `coinflip_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const roundId = `coinflip_${randomUUID()}`;
     const amountStr = betAmount.toString();
 
     // 1. Validate and deduct balance

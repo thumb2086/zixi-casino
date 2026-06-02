@@ -30,7 +30,7 @@ export default function SoundPlayer() {
       .then((res) => {
         const payload = res.data;
         if (payload?.success === false) {
-          console.warn('[SoundPlayer] API returned error, using defaults:', payload?.error);
+
           replacePrefs({});
           return;
         }
@@ -40,8 +40,7 @@ export default function SoundPlayer() {
           replacePrefs({});
         }
       })
-      .catch((err) => {
-        console.warn('[SoundPlayer] Failed to load prefs, using defaults:', err);
+      .catch(() => {
         replacePrefs({});
       });
   }, [sessionId, isAuthorized, replacePrefs, hydrated]);

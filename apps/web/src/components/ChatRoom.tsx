@@ -28,8 +28,8 @@ export default function ChatRoom() {
 
   // SSE stream for real-time updates
   useEffect(() => {
-    if (!isAuthorized) return;
-    const url = `${API_BASE}/api/v1/support/chat/stream`;
+    if (!isAuthorized || !sessionId) return;
+    const url = `${API_BASE}/api/v1/support/chat/stream?sessionId=${encodeURIComponent(sessionId)}`;
     const source = new EventSource(url);
 
     source.onmessage = (event) => {

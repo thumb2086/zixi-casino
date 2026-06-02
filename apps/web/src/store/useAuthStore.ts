@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface AuthState {
   address: string | null;
@@ -9,6 +9,19 @@ interface AuthState {
   setAuth: (address: string, sessionId: string, publicKey: string) => void;
   clearAuth: () => void;
 }
+
+const sessionStorageWrapper = {
+  getItem: (name: string) => {
+    const val = sessionStorage.getItem(name);
+    return val;
+  },
+  setItem: (name: string, value: string) => {
+    sessionStorage.setItem(name, value);
+  },
+  removeItem: (name: string) => {
+    sessionStorage.removeItem(name);
+  },
+};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -20,6 +33,6 @@ export const useAuthStore = create<AuthState>()(
       setAuth: (address, sessionId, publicKey) => set({ address, sessionId, publicKey, isAuthorized: true }),
       clearAuth: () => set({ address: null, sessionId: null, publicKey: null, isAuthorized: false }),
     }),
-    { name: 'auth-storage' }
+    { name: 'auth-storage', storage: createJSONStorage(() => sessionStorageWrapper) }
   )
 );

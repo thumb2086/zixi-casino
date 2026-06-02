@@ -117,7 +117,7 @@ function SwapPanel({
         </button>
 
         {result && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white animate-[fadeIn_0.3s_ease-out] whitespace-nowrap">
+          <div className="mt-4 px-6 py-3 rounded-xl bg-card border border-accent/40 shadow-lg shadow-black/50 text-sm font-bold text-white whitespace-nowrap text-center">
             {result}
           </div>
         )}

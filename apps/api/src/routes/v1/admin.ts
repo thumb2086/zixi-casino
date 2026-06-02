@@ -37,43 +37,22 @@ export async function adminRoutes(fastify: FastifyInstance) {
   const submissionRepo = new RewardSubmissionRepository();
   const campaignRepo = new RewardCampaignRepository();
 
-  // Default admin wallet (hardcoded fallback). Override with ADMIN_ADDRESS env var if needed.
-  const DEFAULT_ADMIN_ADDRESS = "0x0da1c7e7a1d5135c69a02d04f8ab230bc6a78ad0";
-  const ADMIN_ADDRESS = (process.env.ADMIN_ADDRESS || DEFAULT_ADMIN_ADDRESS).toLowerCase();
+  const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS ? process.env.ADMIN_ADDRESS.toLowerCase() : "";
 
   // Returns the admin context when the requester is an admin. Otherwise returns
-  // null and (in dev / staging) logs a one-line reason so we can tell apart
-  // "no session", "session expired", "wrong wallet", and "ADMIN_ADDRESS env not
-  // set". Public endpoints don't need this — only admin endpoints call it.
+  // null.
   const getAdminContext = async (req: any) => {
     const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
-    if (!sessionId) {
-      console.warn("[admin] auth failed: no session id");
-      return null;
-    }
-    if (!ADMIN_ADDRESS) {
-      console.warn("[admin] auth failed: ADMIN_ADDRESS env var not configured");
-      return null;
-    }
+    if (!sessionId) return null;
+    if (!ADMIN_ADDRESS) return null;
     const session = await sessionRepo.getSessionById(sessionId as string);
-    if (!session) {
-      console.warn(`[admin] auth failed: session ${sessionId} not found`);
-      return null;
-    }
-    if (session.status !== "authorized") {
-      console.warn(`[admin] auth failed: session ${sessionId} status=${session.status}`);
-      return null;
-    }
-    if (session.address.toLowerCase() !== ADMIN_ADDRESS) {
-      console.warn(`[admin] auth failed: ${session.address.toLowerCase()} != ADMIN_ADDRESS`);
-      return null;
-    }
+    if (!session || session.status !== "authorized") return null;
+    if (session.address.toLowerCase() !== ADMIN_ADDRESS) return null;
     const user = await userRepo.getUserById(session.userId);
     return { session, user };
   };
 
-  // Returns the reason auth failed, suitable for the error envelope so the
-  // admin UI can show a concrete message instead of an empty list.
+  // Returns the reason auth failed, suitable for the error envelope.
   const getAdminAuthFailureReason = async (req: any): Promise<{ code: string; message: string }> => {
     const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
     if (!sessionId) return { code: "NO_SESSION", message: "未提供 session" };
@@ -86,6 +65,17 @@ export async function adminRoutes(fastify: FastifyInstance) {
     }
     return { code: "UNKNOWN", message: "未知錯誤" };
   };
+
+  // PreHandler: attach admin context for all admin routes (except public ops/health)
+  typedFastify.addHook('preHandler', async (request: any) => {
+    if (request.url?.includes('/ops/health')) return;
+    const ctx = await getAdminContext(request);
+    if (!ctx) {
+      const reason = await getAdminAuthFailureReason(request);
+      throw { statusCode: 401, error: createApiEnvelope({ error: { code: "UNAUTHORIZED", reason: reason.code, message: reason.message } }, request.id) };
+    }
+    request.adminCtx = ctx;
+  });
 
   // ─── System Controls ──────────────────────────────────────────────────────
 
@@ -276,11 +266,25 @@ export async function adminRoutes(fastify: FastifyInstance) {
       }
 
       const deficit = (kvBal - onChainBal).toFixed(4);
+
+      // Daily sync cap per address (prevent unlimited mint)
+      const today = new Date().toISOString().slice(0, 10);
+      const syncCapKey = `sync:daily-cap:${normalized}:${today}`;
+      const DAILY_SYNC_CAP = 1_000_000; // per address per day
+      const usedToday = parseFloat(await kv.get<string>(syncCapKey) || "0");
+      const deficitNum = parseFloat(deficit);
+      if (usedToday + deficitNum > DAILY_SYNC_CAP) {
+        return createApiEnvelope({ error: { message: `Daily sync cap (${DAILY_SYNC_CAP}) exceeded for ${normalized}` } }, request.id);
+      }
+
       const deficitWei = chainClient.parseUnits(deficit, decimals);
       const tx = await chainClient.mint(normalized, deficitWei, tokenRuntime.contractAddress);
       const receipt = await tx.wait();
 
       if (receipt && receipt.status === 1) {
+        // Track daily sync usage
+        await kv.set(syncCapKey, String(usedToday + deficitNum), { ex: 86400 });
+
         await opsRepo.logEvent({
           channel: "admin",
           severity: "important",
@@ -905,9 +909,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     const grantIntentId = randomUUID();
     const bundleSummary: any = { items: body.items || [], avatars: body.avatars || [], titles: body.titles || [] };
     if (typeof body.zxc === "number" && body.zxc !== 0) {
-      const current = await gameSettlement.getBalance(normalized, "zhixi");
-      const next = Math.max(0, Number(current) + body.zxc).toFixed(4);
-      await gameSettlement.setBalance(normalized, "zhixi", next);
+      await walletRepo.adjustBalanceAtomic(normalized, body.zxc > 0 ? `+${body.zxc}` : `${body.zxc}`, "zhixi");
       bundleSummary.zxc = body.zxc;
       const grantIntent: any = walletManager.createTxIntent(user.id, "ZXC", "admin_credit", String(Math.abs(body.zxc)));
       grantIntent.address = normalized;
@@ -915,9 +917,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
       await walletRepo.saveTxIntent(grantIntent);
     }
     if (typeof body.yjc === "number" && body.yjc !== 0) {
-      const current = await gameSettlement.getBalance(normalized, "yjc");
-      const next = Math.max(0, Number(current) + body.yjc).toFixed(4);
-      await gameSettlement.setBalance(normalized, "yjc", next);
+      await walletRepo.adjustBalanceAtomic(normalized, body.yjc > 0 ? `+${body.yjc}` : `${body.yjc}`, "yjc");
       bundleSummary.yjc = body.yjc;
       const grantIntent: any = walletManager.createTxIntent(user.id, "YJC", "admin_credit", String(Math.abs(body.yjc)));
       grantIntent.address = normalized;

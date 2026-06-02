@@ -323,6 +323,13 @@ export async function authRoutes(fastify: FastifyInstance) {
     const { sessionId } = request.query;
     const session = await sessionRepo.getSessionById(sessionId);
     if (!session) return createApiEnvelope({ status: "expired" }, request.id);
+    // Check session TTL (7 days max)
+    if (session.createdAt) {
+      const age = Date.now() - new Date(session.createdAt).getTime();
+      if (age > 7 * 24 * 60 * 60 * 1000) {
+        return createApiEnvelope({ status: "expired", reason: "session_ttl" }, request.id);
+      }
+    }
     return createApiEnvelope({ status: session.status, address: session.address, publicKey: session.publicKey }, request.id);
   });
 

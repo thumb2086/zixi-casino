@@ -68,7 +68,7 @@ export async function duelRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const roundId = `duel_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const roundId = `duel_${crypto.randomUUID().slice(0, 8)}`;
 
     // 1. Validate and deduct balance
     const validation = await gameSettlement.validateAndDeductBalance(

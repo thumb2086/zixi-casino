@@ -61,7 +61,7 @@ export async function slotsRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const roundId = `slots_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const roundId = `slots_${crypto.randomUUID().slice(0, 8)}`;
 
     // 1. Validate and deduct balance (synchronous, required)
     const validation = await gameSettlement.validateAndDeductBalance(

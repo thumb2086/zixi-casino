@@ -185,10 +185,8 @@ typedFastify.post("/buy", {
     const totalPrice = unitPrice * quantity;
 
     const state = await loadInventoryState(ctx.userId);
-    const balanceBefore = await gameSettlement.getBalance(ctx.address, "zhixi");
-    const balanceBeforeNum = parseFloat(balanceBefore) || 0;
-
-    if (balanceBeforeNum < totalPrice) {
+    const balanceBefore = await walletRepo.adjustBalanceAtomic(ctx.address, `-${totalPrice}`, "zhixi");
+    if (balanceBefore === null) {
       return createApiEnvelope(
         { success: false },
         request.id,
@@ -197,7 +195,7 @@ typedFastify.post("/buy", {
       );
     }
 
-    await gameSettlement.setBalance(ctx.address, "zhixi", (balanceBeforeNum - totalPrice).toString());
+    const balanceBeforeNum = parseFloat(balanceBefore) + totalPrice;
 
     // Create tx_intent for the purchase so the chain balance is synced
     const buyIntent: any = walletManager.createTxIntent(ctx.userId, "ZXC", "admin_debit", totalPrice.toString());
@@ -266,6 +264,15 @@ typedFastify.post(
       let previousFreeChestAt: string | null = null;
       let freeMarked = false;
       const freeChestLockKey = `chest:free-lock:${ctx.userId}`;
+      const openLockKey = `chest:open-lock:${ctx.userId}`;
+
+      // Atomic lock to prevent concurrent chest open (key TOCTOU)
+      if (!free) {
+        const acquired = await kv.claimSlot(openLockKey, 10, Date.now().toString());
+        if (!acquired) {
+          return createApiEnvelope({ success: false }, request.id, false, "正在處理中，請稍後再試");
+        }
+      }
 
       if (free) {
         if (chestType !== DAILY_FREE_CHEST_TYPE) {
@@ -324,9 +331,9 @@ typedFastify.post(
         const customTables = await buildCustomDropTables();
         outcome = await openChestForUser(ctx.userId, ctx.address, chestType, customTables);
         if (outcome.compensationZXC > 0) {
-          const bal = await gameSettlement.getBalance(ctx.address, "zhixi");
-          await gameSettlement.setBalance(ctx.address, "zhixi", (Number(bal) + outcome.compensationZXC).toString());
-          const compIntent: any = walletManager.createTxIntent(ctx.userId, "ZXC", "admin_credit", outcome.compensationZXC.toString());
+          const compAmount = outcome.compensationZXC.toString();
+          const compNewBalance = await walletRepo.adjustBalanceAtomic(ctx.address, `+${compAmount}`, "zhixi");
+          const compIntent: any = walletManager.createTxIntent(ctx.userId, "ZXC", "admin_credit", compAmount);
           compIntent.address = ctx.address;
           compIntent.meta = { source: "chest_compensation", chestType };
           await walletRepo.saveTxIntent(compIntent);
@@ -336,9 +343,9 @@ typedFastify.post(
             address: ctx.address,
             token: "zhixi",
             type: "chest_compensation",
-            amount: outcome.compensationZXC.toString(),
-            balanceBefore: bal,
-            balanceAfter: (Number(bal) + outcome.compensationZXC).toFixed(4),
+            amount: compAmount,
+            balanceBefore: compNewBalance ? (parseFloat(compNewBalance) - outcome.compensationZXC).toFixed(4) : "0",
+            balanceAfter: compNewBalance || "0",
             meta: { chestType, source: "chest_compensation" },
             createdAt: new Date(),
           });
@@ -351,7 +358,6 @@ typedFastify.post(
         if (freeMarked) {
           try {
             await restoreDailyFreeChestMark(ctx.userId, previousFreeChestAt);
-            await kv.del(freeChestLockKey);
           } catch (restoreErr: any) {
             await opsRepo.logEvent({
               channel: "rewards",
@@ -362,6 +368,8 @@ typedFastify.post(
               address: ctx.address,
               message: `Failed to restore free-chest cooldown: ${restoreErr?.message || "unknown"}`,
             });
+          } finally {
+            await kv.del(freeChestLockKey).catch(() => {});
           }
         }
         return createApiEnvelope(
@@ -544,8 +552,7 @@ typedFastify.post("/open-bulk", {
   await persistInventoryState(ctx.userId, state);
 
   if (totalComp > 0) {
-    const bal = await gameSettlement.getBalance(ctx.address, "zhixi");
-    await gameSettlement.setBalance(ctx.address, "zhixi", (Number(bal) + totalComp).toString());
+    const bal = (await walletRepo.adjustBalanceAtomic(ctx.address, `+${totalComp}`, "zhixi")) || "0";
     const compIntent: any = walletManager.createTxIntent(ctx.userId, "ZXC", "admin_credit", totalComp.toString());
     compIntent.address = ctx.address;
     compIntent.meta = { source: "chest_compensation_bulk", chestType, quantity };
@@ -557,8 +564,8 @@ typedFastify.post("/open-bulk", {
       token: "zhixi",
       type: "chest_compensation",
       amount: totalComp.toString(),
-      balanceBefore: bal,
-      balanceAfter: (Number(bal) + totalComp).toFixed(4),
+      balanceBefore: (parseFloat(bal) - totalComp).toFixed(4),
+      balanceAfter: bal,
       meta: { chestType, quantity, source: "chest_compensation_bulk" },
       createdAt: new Date(),
     });

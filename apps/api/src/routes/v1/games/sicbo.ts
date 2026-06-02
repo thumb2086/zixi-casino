@@ -64,7 +64,7 @@ export async function sicboRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const roundId = `sicbo_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const roundId = `sicbo_${crypto.randomUUID().slice(0, 8)}`;
     const amountStr = betAmount.toString();
 
     // 1. Validate and deduct balance

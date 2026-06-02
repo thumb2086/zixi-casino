@@ -77,7 +77,7 @@ export async function pokerRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const roundId = `poker_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const roundId = `poker_${crypto.randomUUID().slice(0, 8)}`;
 
     // 1. Validate and deduct balance
     const validation = await gameSettlement.validateAndDeductBalance(

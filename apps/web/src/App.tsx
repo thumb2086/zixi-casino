@@ -42,6 +42,17 @@ const BluffDiceRoomView = lazy(() => import('./features/casino/BluffDiceRoomView
 import { Loader2 } from 'lucide-react';
 import { useFontSizeStore } from './store/useFontSizeStore';
 
+function AdminGuard({ children }: { children: React.ReactNode }) {
+  const [ok, setOk] = useState(false);
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    api.get('/api/v1/admin/ops/health').then(() => setOk(true)).catch(() => setOk(false)).finally(() => setDone(true));
+  }, []);
+  if (!done) return <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-[#fcc025]" /></div>;
+  if (!ok) return <Navigate to="/app" replace />;
+  return <>{children}</>;
+}
+
 const queryClient = new QueryClient();
 
 // 快速登入：直接 call /auth/me 驗證 session + 取得使用者資料（省去一次 round trip）
@@ -175,7 +186,7 @@ function AppContent() {
               <Route path="support" element={<SupportView />} />
               <Route path="inventory" element={<ChestView />} />
               <Route path="collection" element={<Navigate to="/app/inventory" replace />} />
-              <Route path="admin" element={<AdminView />} />
+              <Route path="admin" element={<AdminGuard><AdminView /></AdminGuard>} />
               <Route path="settings" element={<SettingsView />} />
               <Route path="profile/setup" element={<ProfileSetup onComplete={() => window.location.reload()} />} />
               <Route path="transactions" element={<Navigate to="/app/announcement" replace />} />

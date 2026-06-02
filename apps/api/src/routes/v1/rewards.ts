@@ -8,6 +8,7 @@ import { RewardManager, TITLES } from "@repo/domain";
 import {
   SessionRepository,
   UserRepository,
+  WalletRepository,
   kv,
   OpsRepository,
   MetaRepository,
@@ -19,6 +20,8 @@ import { requireDb } from "@repo/infrastructure";
 import { randomUUID } from "crypto";
 import {
   grantBundleToUser,
+  rollbackGrantBundle,
+  loadInventoryState,
   ALL_ITEMS,
 } from "../../utils/inventory.js";
 
@@ -28,6 +31,7 @@ export async function rewardRoutes(fastify: FastifyInstance) {
   const rewardManager = new RewardManager();
   const sessionRepo = new SessionRepository();
   const userRepo = new UserRepository();
+  const walletRepo = new WalletRepository();
   const opsRepo = new OpsRepository();
   const metaRepo = new MetaRepository();
   const rewardCatalogRepo = new RewardCatalogRepository();
@@ -197,17 +201,12 @@ export async function rewardRoutes(fastify: FastifyInstance) {
     const address = ctx.session.address;
     
     // Check balance via DB
-    const { gameSettlement } = await import("../../utils/game-settlement.js");
     const prices = { bronze: 1000, silver: 5000, gold: 25000 };
     const price = prices[chestType];
-    const balance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-
-    if (balance < price) {
+    const newBalance = await walletRepo.adjustBalanceAtomic(address, `-${price}`, "zhixi");
+    if (newBalance === null) {
       return createApiEnvelope({ error: { message: "Insufficient balance" } }, request.id);
     }
-
-    // Deduct
-    await gameSettlement.setBalance(address, "zhixi", (balance - price).toString());
 
     // Logic for randomized reward (stubbed in RewardManager for now)
     const seed = `${address}:${Date.now()}:${Math.random()}`;
@@ -224,7 +223,7 @@ export async function rewardRoutes(fastify: FastifyInstance) {
       meta: { chestType, price, result }
     });
 
-    return createApiEnvelope({ success: true, result, balance: (balance - price).toString() }, request.id);
+    return createApiEnvelope({ success: true, result, balance: newBalance }, request.id);
   });
 
   // ─── Select Title/Avatar ───────────────────────────────────────────────────
@@ -334,31 +333,32 @@ export async function rewardRoutes(fastify: FastifyInstance) {
         titles: (rewards.titles || []).map((t: string) => ({ id: t, name: resolveName(t) })),
       };
       let grantErr: Error | null = null;
+      let preGrantState = await loadInventoryState(handlerCtx.user.id);
       try {
         if (rewards.items?.length || rewards.avatars?.length || rewards.titles?.length) {
           await grantBundleToUser(handlerCtx.user.id, { items: rewards.items, avatars: rewards.avatars, titles: rewards.titles }, address);
         }
         if (typeof rewards.zxc === "number" && rewards.zxc > 0) {
-          const { gameSettlement } = await import("../../utils/game-settlement.js");
-          const current = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-          await gameSettlement.setBalance(address, "zhixi", (current + rewards.zxc).toString());
+          await walletRepo.adjustBalanceAtomic(address, `+${rewards.zxc}`, "zhixi");
           bundleSummary.zxc = rewards.zxc;
         }
         if (typeof rewards.yjc === "number" && rewards.yjc > 0) {
-          const { gameSettlement } = await import("../../utils/game-settlement.js");
-          const current = parseFloat(await gameSettlement.getBalance(address, "yjc"));
-          await gameSettlement.setBalance(address, "yjc", (current + rewards.yjc).toString());
+          await walletRepo.adjustBalanceAtomic(address, `+${rewards.yjc}`, "yjc");
           bundleSummary.yjc = rewards.yjc;
         }
       } catch (grantErrInner: any) {
         grantErr = grantErrInner;
         // Rollback claim row so user can retry
         try {
-          const rollbackConn = await requireDb();
-          await rollbackConn.execute?.(
+          const db = await requireDb();
+          await db.execute(
             `DELETE FROM reward_grants WHERE campaign_id = $1 AND user_id = $2 AND source = 'campaign'`,
             [campaignId, handlerCtx.user.id]
           );
+        } catch {}
+        // Rollback granted items to pre-grant state
+        try {
+          await rollbackGrantBundle(handlerCtx.user.id, preGrantState, address);
         } catch {}
       }
       if (grantErr) {
