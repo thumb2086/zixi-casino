@@ -118,7 +118,7 @@ export default function PublicTransactionsView() {
 
   return (
     <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center gap-3 py-4">
           <Activity className="text-accent" />
           <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
@@ -255,4 +255,5 @@ export default function PublicTransactionsView() {
     </div>
   );
 }
+
 

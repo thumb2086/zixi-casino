@@ -399,7 +399,7 @@ export default function MarketView() {
 
   return (
     <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <TrendingUp className="text-accent" />
@@ -632,7 +632,7 @@ export default function MarketView() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {stockSymbols.map((quote) => (
                 <button key={quote.symbol} type="button" onClick={() => { setSelectedSymbol(quote.symbol); }}
-                  className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-accent/55 bg-[#121212]' : 'border-border/10 bg-[#141414] hover:border-accent/20'}`}>
+                  className={`rounded-xl border p-3 text-left transition-all ${selectedSymbol === quote.symbol ? 'border-accent/40 bg-[#121212]' : 'border-border/10 bg-[#141414] hover:border-accent/20'}`}>
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
@@ -680,7 +680,7 @@ export default function MarketView() {
       {/* Draggable floating stock chart */}
       {selectedQuote && stockHistory.length > 1 && showFloatingChart && (
         <div ref={chartElRef}
-          className="fixed z-40 w-80 rounded-xl border border-border/15 bg-card/95 backdrop-blur-xl shadow-2xl lg:w-96 cursor-grab active:cursor-grabbing select-none touch-none"
+          className="fixed z-40 w-80 rounded-xl border border-border/20 bg-card/95 backdrop-blur-xl shadow-2xl lg:w-96 cursor-grab active:cursor-grabbing select-none touch-none"
           style={{ right: 16, bottom: 96, transform: `translate(${chartPos.x}px, ${chartPos.y}px)` }}
           onMouseDown={onChartMouseDown}
           onTouchStart={onChartTouchStart}>
@@ -720,4 +720,5 @@ export default function MarketView() {
     </div>
   );
 }
+
 

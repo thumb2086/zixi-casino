@@ -77,7 +77,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   placeholder={t('profile.nickname_placeholder')}
-                  className="w-full bg-surface border border-border/20 rounded-xl pl-14 pr-6 py-5 text-white text-lg focus:border-accent/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold tracking-tight"
+                  className="w-full bg-surface border border-border/20 rounded-xl pl-14 pr-6 py-5 text-white text-lg focus:border-accent/40 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold tracking-tight"
                   maxLength={20}
                   required
                 />
@@ -115,4 +115,5 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
     </div>
   );
 }
+
 

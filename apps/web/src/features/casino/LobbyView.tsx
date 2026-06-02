@@ -180,7 +180,7 @@ export default function LobbyView() {
 
   return (
     <div className="min-h-screen bg-surface pb-24 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between gap-4 py-4">
           <div className="min-w-0 flex items-center gap-4">
             <motion.div whileTap={{ scale: 0.9 }}>
@@ -449,5 +449,6 @@ export default function LobbyView() {
     </div>
   );
 }
+
 
 

@@ -152,7 +152,7 @@ export default function XpTab() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-accent/50 bg-gradient-to-r from-[#fcc025]/10 to-transparent p-4">
+        <div className="rounded-xl border border-accent/40 bg-gradient-to-r from-[#fcc025]/10 to-transparent p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-sm font-black text-black">2</div>
@@ -182,4 +182,5 @@ export default function XpTab() {
     </div>
   );
 }
+
 

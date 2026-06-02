@@ -94,7 +94,7 @@ export default function CompanyView() {
   if (!company && !createMode) {
     return (
       <div className="min-h-screen bg-surface text-white pb-32">
-        <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+        <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
           <div className="app-shell flex items-center py-4"><h1 className="text-xl font-black text-accent">{t("title")}</h1></div>
         </header>
         <main className="app-shell pt-24 flex flex-col items-center gap-6">
@@ -110,7 +110,7 @@ export default function CompanyView() {
   if (createMode) {
     return (
       <div className="min-h-screen bg-surface text-white pb-32">
-        <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+        <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
           <div className="app-shell flex items-center py-4"><h1 className="text-xl font-black text-accent">{t("create_company")}</h1></div>
         </header>
         <main className="app-shell pt-24 flex flex-col gap-6 max-w-md mx-auto">
@@ -132,7 +132,7 @@ export default function CompanyView() {
 
   return (
     <div className="min-h-screen bg-surface text-white pb-32 font-manrope-emoji">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <Link to="/app/casino/lobby" className="text-secondary"><ArrowLeft size={20} /></Link>
@@ -373,4 +373,5 @@ function InvestView({ sessionId }: { sessionId: string }) {
     </div>
   );
 }
+
 

@@ -114,7 +114,7 @@ export default function WalletView() {
 
   return (
     <div className="min-h-screen bg-surface pb-40 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <WalletIcon className="text-accent" />
@@ -336,5 +336,6 @@ export default function WalletView() {
     </div>
   );
 }
+
 
 

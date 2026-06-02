@@ -16,7 +16,7 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-[90] h-[calc(5rem+env(safe-area-inset-bottom))] border-t border-border/15 bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
+    <nav className="fixed inset-x-0 bottom-0 z-[90] h-[calc(5rem+env(safe-area-inset-bottom))] border-t border-border/20 bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
       <div className="app-shell flex h-20 items-center justify-around">
         {items.map((item) => {
           const Icon = item.icon;
@@ -39,3 +39,4 @@ export default function AppBottomNav({ current }: { current: NavKey }) {
     </nav>
   );
 }
+

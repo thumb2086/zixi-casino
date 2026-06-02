@@ -108,7 +108,7 @@ export default function RoomLobbyView() {
 
   return (
     <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-4">
             <LayoutGrid className="text-accent" />
@@ -158,12 +158,12 @@ export default function RoomLobbyView() {
                 key={game.id}
                 className={`group relative overflow-hidden rounded-2xl border p-6 transition-all ${
                   game.vipOnly
-                    ? 'border-accent/15 bg-[#151515] hover:bg-[#1c1b1b]'
+                    ? 'border-accent/20 bg-[#151515] hover:bg-[#1c1b1b]'
                     : 'border-border/10 bg-card hover:bg-elevated'
                 }`}
               >
                 {game.vipOnly && (
-                  <div className="absolute left-3 top-3 rounded-full border border-accent/25 bg-accent/10 px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-accent">
+                  <div className="absolute left-3 top-3 rounded-full border border-accent/20 bg-accent/10 px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-accent">
                     {t('lobby.vip')}
                   </div>
                 )}
@@ -179,7 +179,7 @@ export default function RoomLobbyView() {
                         {game.icon.map((label) => (
                           <span
                             key={label}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-accent/25 bg-[#161616] shadow-[0_0_12px_rgba(252,192,37,0.08)]"
+                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-accent/20 bg-[#161616] shadow-[0_0_12px_rgba(252,192,37,0.08)]"
                           >
                             {label}
                           </span>
@@ -234,4 +234,5 @@ export default function RoomLobbyView() {
     </div>
   );
 }
+
 

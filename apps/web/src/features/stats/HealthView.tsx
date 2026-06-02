@@ -26,7 +26,7 @@ export default function HealthView() {
 
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/20">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-4">
              <HeartPulse className="text-accent" />
@@ -105,7 +105,7 @@ export default function HealthView() {
                    </div>
                  )}
                  {recentLogs.map((ev: any, i: number) => (
-                    <div key={ev.id || i} className="bg-surface rounded-xl p-4 border border-border/5 space-y-2 group hover:border-accent/30 transition-all">
+                    <div key={ev.id || i} className="bg-surface rounded-xl p-4 border border-border/10 space-y-2 group hover:border-accent/30 transition-all">
                        <div className="flex items-center justify-between">
                           <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${ev.severity === 'error' || ev.severity === 'fatal' ? 'bg-red-500/10 text-red-500' : ev.severity === 'warn' ? 'bg-amber-500/10 text-amber-400' : 'bg-accent/10 text-accent'}`}>[{ev.kind}]</span>
                           <span className="text-[8px] font-bold text-muted">{new Date(ev.createdAt).toLocaleTimeString([], { hour12: false })}</span>
@@ -122,5 +122,6 @@ export default function HealthView() {
     </div>
   );
 }
+
 
 
