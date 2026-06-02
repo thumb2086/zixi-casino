@@ -49,7 +49,7 @@ function getPeriodEnd(filter: string): Date {
 }
 
 function formatTimeRemaining(ms: number): string {
-  if (ms <= 0) return '—';
+  if (ms <= 0) return '??;
   const days = Math.floor(ms / 86400000);
   const hours = Math.floor((ms % 86400000) / 3600000);
   if (days > 0) return `${days}d ${hours}h`;
@@ -69,16 +69,16 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Crown size={16} className="text-accent" />
-          <span className="text-xs font-black uppercase tracking-widest text-accent">🏆 榜王前三</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-accent">?? 榜�??��?</span>
         </div>
         <div className="flex items-center gap-3">
           {remainingTime ? (
             <span className="text-sm font-bold text-accent/60">{remainingTime}</span>
           ) : totalCount !== undefined ? (
-            <span className="text-sm font-bold text-secondary">共 {totalCount} 人</span>
+            <span className="text-sm font-bold text-secondary">??{totalCount} �?/span>
           ) : null}
           {kings.length === 0 && (
-            <span className="text-[10px] text-secondary">暫無資料</span>
+            <span className="text-[10px] text-secondary">?�無資�?</span>
           )}
         </div>
       </div>
@@ -95,8 +95,8 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
               </div>
             </div>
             <div className={`flex flex-col items-center justify-center rounded-t-xl border-t p-2 text-center ${p.cls}`}>
-              <p className="w-full truncate text-xs font-black text-white">{p.item.name}</p>
-              <p className="mt-0.5 text-xs font-black text-accent">{nf(p.item.amount)} 次</p>
+              <p className="w-full truncate text-xs font-bold text-white">{p.item.name}</p>
+              <p className="mt-0.5 text-xs font-bold text-accent">{nf(p.item.amount)} �?/p>
             </div>
           </div>
         ) : null)}
@@ -141,11 +141,11 @@ export default function LeaderboardView() {
   }, [kingsData]);
 
   const categoryTabs = [
-    { id: 'xp' as LeaderboardCategory, icon: Trophy, label: '經驗榜' },
-    { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產榜' },
+    { id: 'xp' as LeaderboardCategory, icon: Trophy, label: '經�?�? },
+    { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產�? },
   ];
 
-  const metricLabels: Record<LeaderboardCategory, string> = { xp: '經驗', asset: '資產' };
+  const metricLabels: Record<LeaderboardCategory, string> = { xp: '經�?', asset: '資產' };
   const units: Record<LeaderboardCategory, string> = { xp: 'XP', asset: 'ZXC' };
   const metricLabel = metricLabels[category];
   const unit = units[category];
@@ -230,7 +230,7 @@ export default function LeaderboardView() {
                     }`}
                   >
                     <Icon size={16} />
-                    <span className="text-xs font-black">{tab.label}</span>
+                    <span className="text-xs font-bold">{tab.label}</span>
                   </button>
                 );
               })}
@@ -247,7 +247,7 @@ export default function LeaderboardView() {
                       filter === entry ? 'bg-accent text-black shadow-lg' : 'text-secondary hover:text-white'
                     }`}
                   >
-                    {entry === 'ALL-TIME' ? '總累計' : entry}
+                    {entry === 'ALL-TIME' ? '總累�? : entry}
                   </button>
                 ))}
               </div>
@@ -260,19 +260,19 @@ export default function LeaderboardView() {
                     <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-slate-400 bg-elevated text-3xl">
                       {orderedTopThree[0].avatarIcon || <img src={orderedTopThree[0].avatar} alt={orderedTopThree[0].name} />}
                     </div>
-                    <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-lg bg-slate-400 text-xs font-black text-black">
+                    <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-lg bg-slate-400 text-xs font-bold text-black">
                       {orderedTopThree[0].rank}
                     </div>
                   </div>
                   <div className="flex h-24 w-20 flex-col items-center justify-center rounded-t-xl border-t border-slate-400/30 bg-gradient-to-t from-[#1a1919] to-slate-400/20 p-2 text-center">
-                    <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[0].name}</p>
+                    <p className="w-full truncate text-xs font-bold text-white">{orderedTopThree[0].name}</p>
                     {orderedTopThree[0].vipLevel && (
                       <p className="w-full truncate text-[8px] font-bold text-emerald-400">{orderedTopThree[0].vipLevel}</p>
                     )}
                     {orderedTopThree[0].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-accent">{orderedTopThree[0].titleLabel}</p>
                     )}
-                    <p className="mt-1 text-xs font-black text-slate-400">
+                    <p className="mt-1 text-xs font-bold text-slate-400">
                       {nf(orderedTopThree[0].amount)} {unit}
                     </p>
                   </div>
@@ -293,7 +293,7 @@ export default function LeaderboardView() {
                     </div>
                   </div>
                   <div className="flex h-32 w-28 flex-col items-center justify-center rounded-t-2xl border-t border-accent/30 bg-gradient-to-t from-[#1a1919] to-[#fcc025]/20 p-4 text-center">
-                    <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[1].name}</p>
+                    <p className="w-full truncate text-xs font-bold text-white">{orderedTopThree[1].name}</p>
                     {orderedTopThree[1].vipLevel && (
                       <p className="w-full truncate text-[8px] font-bold text-emerald-400">{orderedTopThree[1].vipLevel}</p>
                     )}
@@ -313,19 +313,19 @@ export default function LeaderboardView() {
                     <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-amber-700 bg-elevated text-3xl">
                       {orderedTopThree[2].avatarIcon || <img src={orderedTopThree[2].avatar} alt={orderedTopThree[2].name} />}
                     </div>
-                    <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-lg bg-amber-700 text-xs font-black text-white">
+                    <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-lg bg-amber-700 text-xs font-bold text-white">
                       {orderedTopThree[2].rank}
                     </div>
                   </div>
                   <div className="flex h-20 w-20 flex-col items-center justify-center rounded-t-xl border-t border-amber-700/30 bg-gradient-to-t from-[#1a1919] to-amber-700/20 p-2 text-center">
-                    <p className="w-full truncate text-xs font-black text-white">{orderedTopThree[2].name}</p>
+                    <p className="w-full truncate text-xs font-bold text-white">{orderedTopThree[2].name}</p>
                     {orderedTopThree[2].vipLevel && (
                       <p className="w-full truncate text-[8px] font-bold text-emerald-400">{orderedTopThree[2].vipLevel}</p>
                     )}
                     {orderedTopThree[2].titleLabel && (
                       <p className="mt-0.5 w-full truncate text-[8px] font-bold text-amber-500">{orderedTopThree[2].titleLabel}</p>
                     )}
-                    <p className="mt-1 text-xs font-black text-amber-500">
+                    <p className="mt-1 text-xs font-bold text-amber-500">
                       {nf(orderedTopThree[2].amount)} {unit}
                     </p>
                   </div>
@@ -346,7 +346,7 @@ export default function LeaderboardView() {
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    <span className={`w-6 text-xs font-black ${player.isSelf ? 'text-accent' : 'text-muted'}`}>
+                    <span className={`w-6 text-xs font-bold ${player.isSelf ? 'text-accent' : 'text-muted'}`}>
                       {player.rank}
                     </span>
                     <div
@@ -359,7 +359,7 @@ export default function LeaderboardView() {
                       {player.avatarIcon || player.name.charAt(0)}
                     </div>
                     <div>
-                      <p className={`text-xs font-black ${player.isSelf ? 'text-accent' : 'text-white'}`}>
+                      <p className={`text-xs font-bold ${player.isSelf ? 'text-accent' : 'text-white'}`}>
                         {player.name}
                       </p>
                       {player.vipLevel && (
@@ -387,17 +387,17 @@ export default function LeaderboardView() {
               {selfEntry && !otherPlayers.some((player) => player.isSelf) && (
                 <div className="relative flex items-center justify-between overflow-hidden rounded-xl border-2 border-accent bg-card p-5 shadow-[0_0_30px_rgba(252,192,37,0.1)] md:col-span-2">
                   <div className="absolute right-0 top-0 p-2">
-                    <span className="rounded-sm bg-accent px-1.5 py-0.5 text-[8px] font-black uppercase text-black">
+                    <span className="rounded-sm bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase text-black">
                       {t('leaderboard.you')}
                     </span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="w-6 text-xs font-black text-accent">{selfEntry.rank}</span>
+                    <span className="w-6 text-xs font-bold text-accent">{selfEntry.rank}</span>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent/30 bg-elevated text-xs font-bold uppercase text-accent">
                       {selfEntry.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-xs font-black uppercase text-white">{selfEntry.name}</p>
+                      <p className="text-xs font-bold uppercase text-white">{selfEntry.name}</p>
                       {selfEntry.vipLevel && <p className="text-[10px] font-bold text-emerald-400">{selfEntry.vipLevel}</p>}
                       {selfEntry.titleLabel && <p className="text-[10px] font-bold text-accent">{selfEntry.titleLabel}</p>}
                     </div>
@@ -427,3 +427,4 @@ export default function LeaderboardView() {
     </div>
   );
 }
+

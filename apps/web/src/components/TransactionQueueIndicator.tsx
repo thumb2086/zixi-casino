@@ -60,7 +60,7 @@ export default function TransactionQueueIndicator() {
     <div className="fixed bottom-24 right-4 z-[100]">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-widest shadow-lg transition-all ${
+        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-widest shadow-lg transition-all ${
           failed > 0 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-card text-accent border border-accent/20'
         }`}
       >
@@ -71,7 +71,7 @@ export default function TransactionQueueIndicator() {
       {open && (
         <div className="absolute bottom-full right-0 mb-2 w-72 rounded-xl bg-card border border-border/20 shadow-2xl p-3">
           <div className="flex items-center justify-between mb-2 pb-2 border-b border-border/20">
-            <span className="text-xs font-black uppercase tracking-widest text-white">{t('transactionQueue.title')}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-white">{t('transactionQueue.title')}</span>
             <button
               onClick={clearCompleted}
               className="text-xs text-secondary hover:text-white"
@@ -94,3 +94,4 @@ export default function TransactionQueueIndicator() {
     </div>
   );
 }
+

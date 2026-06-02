@@ -198,7 +198,7 @@ export default function SettingsView() {
               {t('settings.title')}
             </h1>
           </div>
-          <div className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
             {saving ? t('settings.syncing') : `v${APP_VERSION}`}
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function SettingsView() {
                 <User className="text-warning" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
                   {t('settings.profile')}
                 </p>
                 <p className="mt-1 text-xs font-bold text-[#6f6f6f]">{t('settings.name_hint')}</p>
@@ -229,7 +229,7 @@ export default function SettingsView() {
                       <button
                         type="button"
                         onClick={saveDisplayName}
-                        className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-xs font-black uppercase tracking-widest text-black"
+                        className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-xs font-bold uppercase tracking-widest text-black"
                       >
                         <Check size={14} />
                         {t('common.save')}
@@ -240,7 +240,7 @@ export default function SettingsView() {
                           setDisplayNameDraft(username || '');
                           setIsEditingName(false);
                         }}
-                        className="rounded-xl border border-border/20 bg-elevated px-4 py-2 text-xs font-black uppercase tracking-widest text-white"
+                        className="rounded-xl border border-border/20 bg-elevated px-4 py-2 text-xs font-bold uppercase tracking-widest text-white"
                       >
                         {t('common.cancel')}
                       </button>
@@ -257,7 +257,7 @@ export default function SettingsView() {
                     <button
                       type="button"
                       onClick={() => setIsEditingName(true)}
-                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-elevated px-3 py-2 text-xs font-black uppercase tracking-widest text-accent hover:bg-[#313131]"
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-elevated px-3 py-2 text-xs font-bold uppercase tracking-widest text-accent hover:bg-[#313131]"
                     >
                       <Edit2 size={12} />
                       {t('settings.edit_name')}
@@ -278,7 +278,7 @@ export default function SettingsView() {
           </div>
 
           <div className="mt-5 rounded-2xl border border-border/10 bg-surface p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
               {t('settings.balance_preview')}
             </p>
             <p className="mt-2 text-3xl font-black italic tracking-tight text-accent">{previewBalance}</p>
@@ -288,7 +288,7 @@ export default function SettingsView() {
         <section className="card-info border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center gap-3">
             <Volume2 className="text-info" size={18} />
-            <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-white">
               {t('settings.display_audio')}
             </h3>
           </div>
@@ -303,7 +303,7 @@ export default function SettingsView() {
                   <button
                     type="button"
                     onClick={() => persistPrefs({ amountDisplay: 'compact' })}
-                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider ${
+                    className={`rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider ${
                       amountDisplay === 'compact' ? 'bg-accent text-black' : 'bg-elevated text-white'
                     }`}
                   >
@@ -312,7 +312,7 @@ export default function SettingsView() {
                   <button
                     type="button"
                     onClick={() => persistPrefs({ amountDisplay: 'full' })}
-                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wider ${
+                    className={`rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wider ${
                       amountDisplay === 'full' ? 'bg-accent text-black' : 'bg-elevated text-white'
                     }`}
                   >
@@ -352,7 +352,7 @@ export default function SettingsView() {
         <section className="card-info border border-border/10 bg-card p-6 shadow-2xl">
           <div className="flex items-center gap-3">
             <Type className="text-info" size={18} />
-            <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
+            <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-white">
                {t('settings.font_size')}
              </h3>
           </div>
@@ -362,7 +362,7 @@ export default function SettingsView() {
                 key={level}
                 type="button"
                 onClick={() => setFontSize(level)}
-                className={`flex-1 rounded-xl px-4 py-3 text-xs font-black uppercase tracking-wider ${
+                className={`flex-1 rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-wider ${
                   fontSize === level ? 'bg-accent text-black' : 'bg-elevated text-white'
                 }`}
               >
@@ -377,7 +377,7 @@ export default function SettingsView() {
             <div className="flex items-center gap-3">
               <Globe className="text-info" size={18} />
               <div>
-                <h3 className="text-xs font-black uppercase tracking-[0.18em] text-white">
+                <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-white">
                   {t('settings.language')}
                 </h3>
                 <p className="text-xs font-bold uppercase tracking-[0.12em] text-secondary">
@@ -388,7 +388,7 @@ export default function SettingsView() {
             <button
               type="button"
               onClick={() => i18n.changeLanguage(isZh ? 'en' : 'zh')}
-              className="rounded-xl border border-accent/20 bg-elevated px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-accent"
+              className="rounded-xl border border-accent/20 bg-elevated px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-accent"
             >
               {t('settings.switch_label')}
             </button>
@@ -435,7 +435,9 @@ export default function SettingsView() {
       </main>
 
       <AppBottomNav current="settings" />
-      <footer className="pb-4 text-center text-xs font-black uppercase tracking-[0.5em] text-muted">{t('settings.footer', { version: APP_VERSION })}</footer>
+      <footer className="pb-4 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted">{t('settings.footer', { version: APP_VERSION })}</footer>
     </div>
   );
 }
+
+

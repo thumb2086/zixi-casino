@@ -55,7 +55,7 @@ function SwapPanel({
     <section className="bg-card rounded-2xl p-6 border border-accent/20">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('swap.title')}</h2>
-        <p className="text-xs font-black uppercase tracking-widest text-accent">
+        <p className="text-xs font-bold uppercase tracking-widest text-accent">
           {t('swap.fixed_rate', { rate: ZXC_PER_YJC.toLocaleString() })}
         </p>
       </div>
@@ -67,7 +67,7 @@ function SwapPanel({
       <form onSubmit={handleSwap} className="space-y-4">
         <div className="bg-surface rounded-xl p-4 border border-border/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.pay')}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">{t('swap.pay')}</span>
             <span className="text-xs text-secondary">{t('swap.balance', { amount: formatBalance(fromBalance), symbol: fromSymbol })}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ function SwapPanel({
 
         <div className="bg-surface rounded-xl p-4 border border-border/20">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.receive')}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">{t('swap.receive')}</span>
             <span className="text-xs text-secondary">{t('swap.balance', { amount: formatBalance(toBalance), symbol: toSymbol })}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -223,11 +223,11 @@ export default function SwapView() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-surface rounded-xl p-4 border border-border/20">
-              <p className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.zxc_label')}</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary">{t('swap.zxc_label')}</p>
               <p className="text-xl font-black italic mt-2 text-accent">{formatBalance(zxcBalance)}</p>
             </div>
             <div className="bg-surface rounded-xl p-4 border border-border/20">
-              <p className="text-xs font-black uppercase tracking-widest text-secondary">{t('swap.yjc_label')}</p>
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary">{t('swap.yjc_label')}</p>
               <p className="text-xl font-black italic mt-2 text-accent">{formatBalance(yjcBalance)}</p>
             </div>
           </div>
@@ -251,3 +251,4 @@ export default function SwapView() {
     </div>
   );
 }
+

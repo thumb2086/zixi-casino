@@ -75,16 +75,16 @@ export default function RewardsView() {
           <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-accent bg-card shadow-[0_0_50px_rgba(252,192,37,0.2)]">
             <Star size={64} fill="#fcc025" className="text-accent" />
           </div>
-          <div className="mt-4 rounded-full bg-accent px-4 py-1 text-xs font-black uppercase tracking-widest text-black shadow-xl">
+          <div className="mt-4 rounded-full bg-accent px-4 py-1 text-xs font-bold uppercase tracking-widest text-black shadow-xl">
             {t('rewards.tier_platinum4')}
           </div>
-          <p className="mt-8 text-xs font-bold uppercase tracking-[0.3em] text-secondary">
+          <p className="mt-8 text-xs font-bold uppercase tracking-[0.1em] text-secondary">
             {t('rewards.vip_progress')}
           </p>
           <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full border border-border/20 bg-card">
             <div className="h-full w-[65%] bg-accent shadow-[0_0_10px_#fcc025]" />
           </div>
-          <div className="mt-2 flex w-full justify-between text-xs font-black uppercase text-muted">
+          <div className="mt-2 flex w-full justify-between text-xs font-bold uppercase text-muted">
             <span>{t('rewards.progress_gold')}</span>
             <span>{t('rewards.progress_platinum')}</span>
           </div>
@@ -109,11 +109,11 @@ export default function RewardsView() {
                       : 'border-border/10 bg-card'
                 }`}
               >
-                <span className="text-[8px] font-black uppercase text-secondary">{t('rewards.day', { number: reward.day })}</span>
-                <div className="text-xs font-black italic">{reward.amount}</div>
+                <span className="text-[8px] font-bold uppercase text-secondary">{t('rewards.day', { number: reward.day })}</span>
+                <div className="text-xs font-bold italic">{reward.amount}</div>
                 {reward.status === 'CLAIMED' && <CheckCircle2 size={12} className="text-emerald-500" />}
                 {reward.status === 'AVAILABLE' && (
-                  <button type="button" className="rounded-sm bg-accent px-1.5 py-0.5 text-[7px] font-black uppercase tracking-tighter text-black">
+                  <button type="button" className="rounded-sm bg-accent px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-tighter text-black">
                     {t('rewards.claim')}
                   </button>
                 )}
@@ -149,7 +149,7 @@ export default function RewardsView() {
                 <button
                   type="button"
                   onClick={() => claimMutation.mutate(campaign.id)}
-                  className="rounded-lg bg-accent px-6 py-2 text-xs font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
+                  className="rounded-lg bg-accent px-6 py-2 text-xs font-bold uppercase tracking-widest text-black transition-colors hover:bg-white"
                 >
                   {t('rewards.claim_reward')}
                 </button>
@@ -169,3 +169,5 @@ export default function RewardsView() {
     </div>
   );
 }
+
+

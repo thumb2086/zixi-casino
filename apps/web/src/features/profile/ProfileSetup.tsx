@@ -62,7 +62,7 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
 
           <div className="space-y-2">
             <h1 className="text-3xl font-extrabold text-accent tracking-tighter uppercase italic">{t('profile.identity_sync')}</h1>
-            <p className="text-secondary font-bold uppercase text-xs tracking-[0.3em] leading-relaxed">{t('profile.sync_instruction')}</p>
+            <p className="text-secondary font-bold uppercase text-xs tracking-[0.1em] leading-relaxed">{t('profile.sync_instruction')}</p>
           </div>
 
           <form onSubmit={handleSave} className="w-full space-y-6 pt-4">
@@ -108,10 +108,11 @@ export default function ProfileSetup({ onComplete }: { onComplete: () => void })
 
           <div className="pt-4 flex items-center gap-2 opacity-30">
             <ShieldCheck size={14} className="text-secondary" />
-            <span className="text-[8px] font-bold uppercase tracking-[0.4em] text-secondary">{t('profile.secure_protocol')}</span>
+            <span className="text-[8px] font-bold uppercase tracking-[0.15em] text-secondary">{t('profile.secure_protocol')}</span>
           </div>
         </div>
       </motion.div>
     </div>
   );
 }
+

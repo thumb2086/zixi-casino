@@ -8,14 +8,14 @@ import { useAuth } from '../auth/useAuth';
 import AppBottomNav from '../../components/AppBottomNav';
 
 const SUIT_SYMBOLS: Record<string, string> = {
-  '♠': '♠', '♥': '♥', '♦': '♦', '♣': '♣',
+  '??: '??, '??: '??, '??: '??, '??: '??,
 };
 
 function CardView({ card, hidden }: { card?: any; hidden?: boolean }) {
   if (!card || hidden) {
     return <div className="flex h-16 w-12 items-center justify-center rounded-lg border-2 border-accent/40 bg-gradient-to-b from-accent/10 to-accent/5 text-accent font-black text-lg shadow-[0_0_10px_rgba(245,166,35,0.2)]">?</div>;
   }
-  const isRed = card.suit === '♥' || card.suit === '♦';
+  const isRed = card.suit === '?? || card.suit === '??;
   return (
     <div className="flex h-16 w-12 flex-col items-center justify-center rounded-lg border border-border bg-card text-sm font-black shadow-lg">
       <span className={isRed ? 'text-danger' : 'text-white'}>{SUIT_SYMBOLS[card.suit] || card.suit}</span>
@@ -42,7 +42,7 @@ function PlayerSeat({ player, isMe, isTurn, communityCards, isDealer }: {
     <div className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
       isTurn ? 'ring-2 ring-accent shadow-[0_0_20px_rgba(245,166,35,0.3)]' : ''
     } ${player.folded ? 'opacity-40' : ''}`}>
-      {isDealer && <span className="text-[8px] font-black text-accent uppercase tracking-widest">DEALER</span>}
+      {isDealer && <span className="text-[8px] font-bold text-accent uppercase tracking-widest">DEALER</span>}
       <div className="flex gap-1">
         {player.hand?.map((card: any, i: number) => (
           <CardView key={i} card={card} hidden={!isMe && !player.showCards} />
@@ -50,12 +50,12 @@ function PlayerSeat({ player, isMe, isTurn, communityCards, isDealer }: {
       </div>
       <div className="text-center">
         <p className={`text-xs font-bold ${isMe ? 'text-accent' : 'text-white'} truncate max-w-20`}>
-          {player.displayName} {isMe ? '(你)' : ''}
+          {player.displayName} {isMe ? '(�?' : ''}
         </p>
         <p className="text-[9px] text-secondary">${player.stack}</p>
         {player.bet > 0 && <p className="text-[9px] text-accent font-black">${player.bet}</p>}
         {player.allIn && <p className="text-[9px] text-warning font-black">ALL IN</p>}
-        {player.folded && <p className="text-[9px] text-muted">蓋牌</p>}
+        {player.folded && <p className="text-[9px] text-muted">?��?</p>}
         {!player.folded && bestHand && (
           <p className="text-[8px] text-info font-bold">{bestHand.name}</p>
         )}
@@ -85,21 +85,21 @@ export default function PokerRoomView() {
 
   const me = useMemo(() => ({
     userId: session?.id || 'local',
-    displayName: '你',
+    displayName: '�?,
     stack: 1000,
     isBot: false,
     hand: [
-      { rank: 'A', suit: '♠' },
-      { rank: 'K', suit: '♠' },
+      { rank: 'A', suit: '?? },
+      { rank: 'K', suit: '?? },
     ],
     bet: 0, totalBet: 0, folded: false, allIn: false,
   }), [session]);
 
   const botPlayers = useMemo(() => [
-    { userId: 'bot1', displayName: 'AI_雷克斯', stack: 800, isBot: true, hand: [{ rank: 'Q', suit: '♥' }, { rank: 'Q', suit: '♦' }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot2', displayName: 'AI_鋼鐵', stack: 1200, isBot: true, hand: [{ rank: '10', suit: '♣' }, { rank: 'J', suit: '♣' }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot3', displayName: 'AI_暗影', stack: 950, isBot: true, hand: [{ rank: '2', suit: '♠' }, { rank: '7', suit: '♠' }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot4', displayName: 'AI_鳳凰', stack: 1100, isBot: true, hand: [{ rank: 'A', suit: '♥' }, { rank: '3', suit: '♥' }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot1', displayName: 'AI_?��???, stack: 800, isBot: true, hand: [{ rank: 'Q', suit: '?? }, { rank: 'Q', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot2', displayName: 'AI_?�鐵', stack: 1200, isBot: true, hand: [{ rank: '10', suit: '?? }, { rank: 'J', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot3', displayName: 'AI_?�影', stack: 950, isBot: true, hand: [{ rank: '2', suit: '?? }, { rank: '7', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot4', displayName: 'AI_鳳凰', stack: 1100, isBot: true, hand: [{ rank: 'A', suit: '?? }, { rank: '3', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
   ], []);
 
   const allPlayers = useMemo(() => [me, ...botPlayers], [me, botPlayers]);
@@ -195,13 +195,13 @@ export default function PokerRoomView() {
   const advancePhase = useCallback(() => {
     if (phase === 'preflop') {
       setPhase('flop');
-      setCommunity([{ rank: 'J', suit: '♠' }, { rank: '7', suit: '♦' }, { rank: '3', suit: '♣' }]);
+      setCommunity([{ rank: 'J', suit: '?? }, { rank: '7', suit: '?? }, { rank: '3', suit: '?? }]);
     } else if (phase === 'flop') {
       setPhase('turn');
-      setCommunity(prev => [...prev, { rank: 'K', suit: '♦' }]);
+      setCommunity(prev => [...prev, { rank: 'K', suit: '?? }]);
     } else if (phase === 'turn') {
       setPhase('river');
-      setCommunity(prev => [...prev, { rank: '5', suit: '♠' }]);
+      setCommunity(prev => [...prev, { rank: '5', suit: '?? }]);
     } else if (phase === 'river') {
       setWinner(allPlayers[0]?.userId || '');
       setPhase('showdown');
@@ -218,12 +218,12 @@ export default function PokerRoomView() {
       <header className="fixed top-0 z-50 w-full border-b border-accent/20 bg-gradient-to-r from-[#0a0a0f] via-[#14141f] to-[#0a0a0f] backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <div className="text-gradient-diamond text-sm font-black uppercase tracking-widest">♠ VIP 撲克</div>
+            <div className="text-gradient-diamond text-sm font-black uppercase tracking-widest">??VIP ?��?</div>
             <span className="text-[10px] text-secondary">{roomId}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-accent">底池 ${pot}</span>
-            <span className="text-xs text-secondary">{allPlayers.filter(p => !p.folded).length}/{allPlayers.length} 人</span>
+            <span className="text-xs font-bold text-accent">底�? ${pot}</span>
+            <span className="text-xs text-secondary">{allPlayers.filter(p => !p.folded).length}/{allPlayers.length} �?/span>
           </div>
         </div>
       </header>
@@ -257,7 +257,7 @@ export default function PokerRoomView() {
             {winner && (
               <div className="mt-6 text-center">
                 <span className="text-gradient-diamond text-sm font-black uppercase tracking-widest">
-                  🏆 {allPlayers.find(p => p.userId === winner)?.displayName || winner} 贏得 ${pot}！
+                  ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} 贏�? ${pot}�?
                 </span>
               </div>
             )}
@@ -267,23 +267,23 @@ export default function PokerRoomView() {
           {isMyTurn && !winner && (
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button onClick={() => doAction('fold')}
-                className="px-6 py-3 rounded-xl bg-danger/20 text-danger border border-danger/30 text-xs font-black uppercase tracking-widest hover:bg-danger/30 transition-all">
-                蓋牌
+                className="px-6 py-3 rounded-xl bg-danger/20 text-danger border border-danger/30 text-xs font-bold uppercase tracking-widest hover:bg-danger/30 transition-all">
+                ?��?
               </button>
               <button onClick={() => doAction('check')}
-                className="px-6 py-3 rounded-xl bg-accent/10 text-accent border border-accent/30 text-xs font-black uppercase tracking-widest hover:bg-accent/20 transition-all">
-                過牌
+                className="px-6 py-3 rounded-xl bg-accent/10 text-accent border border-accent/30 text-xs font-bold uppercase tracking-widest hover:bg-accent/20 transition-all">
+                ?��?
               </button>
               <button onClick={() => doAction('call')}
-                className="px-6 py-3 rounded-xl bg-accent text-black text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-[0_0_20px_rgba(245,166,35,0.3)]">
+                className="px-6 py-3 rounded-xl bg-accent text-black text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-[0_0_20px_rgba(245,166,35,0.3)]">
                 跟注 ${lastRaise}
               </button>
               <div className="flex items-center gap-2">
                 <input type="number" value={betInput} onChange={e => setBetInput(e.target.value)}
                   className="w-20 rounded-xl bg-surface border border-border px-3 py-2.5 text-xs font-bold text-white text-center" />
                 <button onClick={() => doAction('raise', parseInt(betInput) || 40)}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-accent to-warning text-black text-xs font-black uppercase tracking-widest hover:brightness-110 transition-all">
-                加注 ${betInput}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-accent to-warning text-black text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all">
+                ?�注 ${betInput}
                 </button>
               </div>
             </div>
@@ -291,7 +291,7 @@ export default function PokerRoomView() {
 
           {!isMyTurn && !winner && currentPlayer?.isBot && (
             <div className="mt-6 text-center text-xs text-secondary">
-              🤖 {currentPlayer?.displayName} 思考中...
+              ?? {currentPlayer?.displayName} ?�考中...
             </div>
           )}
         </div>

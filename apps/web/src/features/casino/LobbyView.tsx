@@ -98,7 +98,7 @@ export default function LobbyView() {
     staleTime: 60000,
   });
   const isAdmin = Boolean(profileData?.isAdmin);
-  const vipLevel = profileData?.vipLevel || '普通會員';
+  const vipLevel = profileData?.vipLevel || '?�通�???;
 
   const { data: missionsData } = useQuery({
     queryKey: ['missions'],
@@ -205,14 +205,14 @@ export default function LobbyView() {
 
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-accent">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-accent">
                 {t('lobby.operator_identified')}
               </p>
               <h2 className="text-4xl font-extrabold uppercase italic tracking-tight">
                 {username || (address ? address.slice(0, 8) : t('lobby.anonymous'))}
               </h2>
               <div className="mt-2 flex items-center gap-3">
-                <span className="rounded-lg bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-emerald-400">
+                <span className="rounded-lg bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-400">
                   {vipLevel}
                 </span>
                 <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary">
@@ -258,7 +258,7 @@ export default function LobbyView() {
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-[10px] text-secondary mt-0.5">下一級 {nf(profileData.xpNextLevel)} XP</p>
+                  <p className="text-[10px] text-secondary mt-0.5">下�?�?{nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
@@ -276,8 +276,8 @@ export default function LobbyView() {
           <div className="card-success bg-card p-6 md:col-span-2 lg:col-span-3 border border-border/10">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <span className="text-xl">🎯</span>
-                <h2 className="section-title-text text-success">每日任務</h2>
+                <span className="text-xl">?��</span>
+                <h2 className="section-title-text text-success">每日任�?</h2>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -289,8 +289,8 @@ export default function LobbyView() {
                   <div key={m.id} className={`rounded-xl border ${locked ? 'border-border/10 opacity-50' : done ? 'border-accent/40' : 'border-border/20'} bg-surface p-4`}>
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-xs font-bold text-white">{locked ? '🔒 ' : ''}{m.name}</p>
-                        <p className="text-[10px] text-secondary mt-0.5">{locked ? `需要 VIP ${m.vip} 以上` : m.desc}</p>
+                        <p className="text-xs font-bold text-white">{locked ? '?? ' : ''}{m.name}</p>
+                        <p className="text-[10px] text-secondary mt-0.5">{locked ? `?��?VIP ${m.vip} 以�?` : m.desc}</p>
                       </div>
                       <span className="text-[10px] font-bold text-accent shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
                     </div>
@@ -300,7 +300,7 @@ export default function LobbyView() {
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-secondary">{locked ? '-' : `${m.progress}/${m.target}`}</span>
                       {locked ? null : done ? (
-                        <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">領取</button>
+                        <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">?��?</button>
                       ) : null}
                     </div>
                   </div>
@@ -312,7 +312,7 @@ export default function LobbyView() {
             to="/app/announcement"
             icon={CalendarClock}
             title={t('lobby.events')}
-            subtitle={pinnedCount > 0 ? `${pinnedCount} 則置頂` : t('lobby.events_subtitle')}
+            subtitle={pinnedCount > 0 ? `${pinnedCount} ?�置?�` : t('lobby.events_subtitle')}
           >
             <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-secondary">
               {!recentTxs || recentTxs.length === 0 ? (
@@ -411,7 +411,7 @@ export default function LobbyView() {
             icon={Building2}
             title={t('lobby.my_company')}
             subtitle={t('lobby.ai_chip_simulation')}>
-            <div className="absolute top-2 right-2 bg-accent text-[#0e0e0e] text-[8px] font-black px-2 py-0.5 rounded-full">BETA</div>
+            <div className="absolute top-2 right-2 bg-accent text-[#0e0e0e] text-[8px] font-bold px-2 py-0.5 rounded-full">BETA</div>
             <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-secondary">
               {t('lobby.company_description')}
             </p>
@@ -449,3 +449,5 @@ export default function LobbyView() {
     </div>
   );
 }
+
+

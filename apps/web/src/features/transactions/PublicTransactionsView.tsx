@@ -130,7 +130,7 @@ export default function PublicTransactionsView() {
       <main className="app-shell pt-24">
         <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6 mb-6">
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-black text-white truncate">{username || 'æœªè¨­å®š'}</p>
+            <p className="text-lg font-black text-white truncate">{username || '?ªè¨­å®?}</p>
             <p className="text-xs font-bold text-secondary truncate mt-1">{displayAddress || ''}</p>
           </div>
           <div className="text-right">
@@ -142,13 +142,13 @@ export default function PublicTransactionsView() {
         <div className="flex items-center gap-3 mb-6 bg-card rounded-2xl px-5 py-3 border border-border/10">
           <Clock size={14} className="text-accent" />
           <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
-            ä¼ºæœå™¨é‹è¡Œ
+            ä¼ºæ??¨é?è¡?
           </span>
-          <span className="text-xs font-black text-emerald-400 ml-auto">
+          <span className="text-xs font-bold text-emerald-400 ml-auto">
             {serviceStats?.serverUptimeLabel || '...'}
           </span>
           <span className="text-[10px] font-bold text-secondary">
-            {serviceStats?.uptime ? `å¯ç”¨ ${serviceStats.uptime}` : ''}
+            {serviceStats?.uptime ? `?¯ç”¨ ${serviceStats.uptime}` : ''}
           </span>
         </div>
 
@@ -156,7 +156,7 @@ export default function PublicTransactionsView() {
         {serviceStats?.last24h?.success && (
           <div className="bg-card rounded-2xl p-5 border border-border/10 mb-6">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">24h æœå‹™ç‹€æ…‹</span>
+              <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">24h ?å??€??/span>
               <span className="text-[10px] font-bold text-secondary">{serviceStats.uptime || ''}</span>
             </div>
             <div className="flex items-end gap-[2px] h-16">
@@ -174,7 +174,7 @@ export default function PublicTransactionsView() {
             </div>
             <div className="flex justify-between mt-1 text-[8px] text-muted">
               <span>-24h</span>
-              <span>ç¾åœ¨</span>
+              <span>?¾åœ¨</span>
             </div>
           </div>
         )}
@@ -183,29 +183,29 @@ export default function PublicTransactionsView() {
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-accent" />
-              <span className="text-xs font-black uppercase tracking-widest text-secondary">ç¸½äº¤æ˜“</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">ç¸½äº¤??/span>
             </div>
             <p className="text-xl font-black italic text-accent">{nf(summary?.total ?? 0)}</p>
           </div>
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-emerald-400" />
-              <span className="text-xs font-black uppercase tracking-widest text-secondary">æˆåŠŸ</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">?å?</span>
             </div>
             <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
           </div>
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <HeartPulse size={14} className="text-accent" />
-              <span className="text-xs font-black uppercase tracking-widest text-secondary">æˆåŠŸç‡</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">?å???/span>
             </div>
             <p className="text-xl font-black italic text-accent">{summary?.total ? `${successRatePct}%` : '0%'}</p>
           </div>
         </div>
 
         <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl mb-6">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-secondary">
-            æœ€æ–°å¸‚å ´èˆ‡éŒ¢åŒ…å‹•æ…‹
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
+            ?€?°å??´è??¢å??•æ?
           </p>
           <div className="mt-4 space-y-3">
             {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}
@@ -218,11 +218,11 @@ export default function PublicTransactionsView() {
               <div key={item.id} className="rounded-xl border border-border/10 bg-surface p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-black tracking-[0.14em] text-white">
-                      {`${t('txType.' + item.type, item.type)} â€¢ ${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
+                    <p className="text-xs font-bold tracking-[0.14em] text-white">
+                      {`${t('txType.' + item.type, item.type)} ??${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
                     </p>
                     <p className="mt-1 text-xs font-bold tracking-[0.12em] text-secondary">
-                      {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'â€¦' : String(item.roundId)}
+                      {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'?? : String(item.roundId)}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
@@ -237,15 +237,15 @@ export default function PublicTransactionsView() {
 
         <section className="mb-6 rounded-2xl border border-border/20 bg-card divide-y divide-[#494847]/10">
           <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">é“å…·èƒŒåŒ…</span>
+            <span className="text-sm font-bold">?“å…·?Œå?</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">ç‰©å“åœ–é‘‘</span>
+            <span className="text-sm font-bold">?©å??–é?</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">è¨­å®š</span>
+            <span className="text-sm font-bold">è¨­å?</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
         </section>
@@ -255,3 +255,4 @@ export default function PublicTransactionsView() {
     </div>
   );
 }
+

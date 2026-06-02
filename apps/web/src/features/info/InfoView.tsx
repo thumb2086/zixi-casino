@@ -9,9 +9,9 @@ import XpTab from './tabs/XpTab';
 type TabId = 'items' | 'odds' | 'xp';
 
 const TABS = [
-  { id: 'items' as TabId, label: '物品圖鑑', icon: Package },
-  { id: 'xp' as TabId, label: '經驗等級', icon: TrendingUp },
-  { id: 'odds' as TabId, label: '遊戲機率', icon: Calculator },
+  { id: 'items' as TabId, label: '?��??��?', icon: Package },
+  { id: 'xp' as TabId, label: '經�?等�?', icon: TrendingUp },
+  { id: 'odds' as TabId, label: '?�戲機�?', icon: Calculator },
 ];
 
 export default function InfoView() {
@@ -33,7 +33,7 @@ export default function InfoView() {
   }, [location.search]);
 
   const activeLabel = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.label ?? '說明中心',
+    () => TABS.find((tab) => tab.id === activeTab)?.label ?? '說�?中�?',
     [activeTab],
   );
 
@@ -52,7 +52,7 @@ export default function InfoView() {
             </Link>
             <Sparkles className="text-accent" />
             <div>
-              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">說明中心</h1>
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">說�?中�?</h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">{activeLabel}</p>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function InfoView() {
                 }`}
               >
                 <Icon size={18} />
-                <span className="text-xs font-black tracking-wide">{tab.label}</span>
+                <span className="text-xs font-bold tracking-wide">{tab.label}</span>
               </button>
             );
           })}
@@ -91,3 +91,4 @@ export default function InfoView() {
     </div>
   );
 }
+

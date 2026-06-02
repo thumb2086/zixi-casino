@@ -161,11 +161,11 @@ export default function AdminView() {
   const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
 
   const CHEST_KEY_ITEMS = [
-    { id: 'chest_key_common', name: t('admin.chest_key_common_name'), icon: 'üóùÔ∏è', rarity: 'common', type: 'chest_key' },
-    { id: 'chest_key_rare', name: t('admin.chest_key_rare_name'), icon: 'üóùÔ∏è', rarity: 'rare', type: 'chest_key' },
-    { id: 'chest_key_epic', name: t('admin.chest_key_epic_name'), icon: 'üóùÔ∏è', rarity: 'epic', type: 'chest_key' },
-    { id: 'chest_key_legendary', name: t('admin.chest_key_legendary_name'), icon: 'üóùÔ∏è', rarity: 'legendary', type: 'chest_key' },
-    { id: 'chest_key_mythic', name: t('admin.chest_key_mythic_name'), icon: 'üóùÔ∏è', rarity: 'mythic', type: 'chest_key' },
+    { id: 'chest_key_common', name: t('admin.chest_key_common_name'), icon: '??Ô∏?, rarity: 'common', type: 'chest_key' },
+    { id: 'chest_key_rare', name: t('admin.chest_key_rare_name'), icon: '??Ô∏?, rarity: 'rare', type: 'chest_key' },
+    { id: 'chest_key_epic', name: t('admin.chest_key_epic_name'), icon: '??Ô∏?, rarity: 'epic', type: 'chest_key' },
+    { id: 'chest_key_legendary', name: t('admin.chest_key_legendary_name'), icon: '??Ô∏?, rarity: 'legendary', type: 'chest_key' },
+    { id: 'chest_key_mythic', name: t('admin.chest_key_mythic_name'), icon: '??Ô∏?, rarity: 'mythic', type: 'chest_key' },
   ];
 
   useEffect(() => {
@@ -307,7 +307,7 @@ export default function AdminView() {
       const res = await api.get('/api/v1/admin/blacklist', { params: { sessionId } });
       if (res?.data?.data?.blacklist) setBlacklist(res.data.data.blacklist);
     } catch {
-      // swallow ‚Äî UI shows empty list
+      // swallow ??UI shows empty list
     }
   }
 
@@ -675,7 +675,7 @@ export default function AdminView() {
 
   async function handleCampaignToggle(c: any) {
     try {
-      // Preserve startAt / endAt / requiredLevel when toggling isActive ‚Äî without
+      // Preserve startAt / endAt / requiredLevel when toggling isActive ??without
       // these the backend upsert stores null and wipes the time window.
       await api.post('/api/v1/admin/campaigns', {
         sessionId,
@@ -801,7 +801,7 @@ export default function AdminView() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-black tracking-wide transition-all ${
+                className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold tracking-wide transition-all ${
                   active
                     ? 'bg-accent text-black'
                     : 'border border-border/30 bg-card text-secondary'
@@ -830,7 +830,7 @@ export default function AdminView() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {healthCards.map((s) => (
                   <div key={s.label} className="bg-card rounded-2xl p-4 border border-border/20">
-                    <p className="text-xs font-black tracking-wide text-secondary">{s.label}</p>
+                    <p className="text-xs font-bold tracking-wide text-secondary">{s.label}</p>
                     <p className="text-2xl font-black italic tracking-tighter text-accent mt-2">{s.value}</p>
                   </div>
                 ))}
@@ -854,7 +854,7 @@ export default function AdminView() {
                   {events.map((evt, i) => (
                     <li key={evt.id || i} className="border-l-2 border-accent/40 pl-3 py-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs font-black uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-accent/10 text-accent' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                        <span className={`text-xs font-bold uppercase px-1 rounded ${evt.severity === 'error' ? 'bg-red-500/10 text-red-400' : evt.severity === 'warn' || evt.severity === 'important' ? 'bg-accent/10 text-accent' : 'bg-emerald-500/10 text-emerald-400'}`}>
                           {({ error: t('admin.severity_error'), warn: t('admin.severity_warn'), info: t('admin.severity_info'), important: t('admin.severity_important') } as Record<string, string>)[evt.severity] || evt.severity || t('admin.severity_info')}
                         </span>
                         <span className="text-xs font-bold text-secondary">
@@ -921,7 +921,7 @@ export default function AdminView() {
               <p className="text-xs text-secondary mb-3">{t('admin.maintenance_desc')}<span className={`ml-2 font-black ${maintenanceOn ? 'text-red-400' : 'text-emerald-400'}`}>{maintenanceOn ? t('admin.enabled') : t('admin.disabled')}</span></p>
               <form onSubmit={handleMaintenance} className="space-y-3">
                 <input type="text" value={maintenanceMessage} onChange={(e) => setMaintenanceMessage(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.maintenance_message_placeholder')} maxLength={200} />
-                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-black tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-accent text-[#0e0e0e]'}`}>{maintenanceOn ? t('admin.disable_maintenance') : t('admin.enable_maintenance')}</button>
+                <button type="submit" className={`w-full py-2 rounded-lg text-xs font-bold tracking-wide ${maintenanceOn ? 'bg-[#494847] text-white' : 'bg-accent text-[#0e0e0e]'}`}>{maintenanceOn ? t('admin.disable_maintenance') : t('admin.enable_maintenance')}</button>
               </form>
             </div>
             <div className="bg-card rounded-2xl p-6 border border-border/20">
@@ -937,9 +937,9 @@ export default function AdminView() {
                 </div>
                 <label className="flex items-center gap-2 text-xs text-secondary"><input type="checkbox" checked={announcementPinned} onChange={(e) => setAnnouncementPinned(e.target.checked)} />{t('admin.pin_on_publish')}</label>
                 <div className="flex gap-2">
-                  <button type="submit" className="flex-1 py-2 bg-accent text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">{editingAnnouncement ? t('admin.update_announcement') : t('admin.publish_announcement')}</button>
+                  <button type="submit" className="flex-1 py-2 bg-accent text-[#0e0e0e] rounded-lg text-xs font-bold tracking-wide">{editingAnnouncement ? t('admin.update_announcement') : t('admin.publish_announcement')}</button>
                   {editingAnnouncement && (
-                    <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementTitle(''); setAnnouncementContent(''); setAnnouncementType('info'); setAnnouncementPinned(false); }} className="px-4 border border-border/30 text-secondary rounded-lg text-xs font-black">{t('common.cancel')}</button>
+                    <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementTitle(''); setAnnouncementContent(''); setAnnouncementType('info'); setAnnouncementPinned(false); }} className="px-4 border border-border/30 text-secondary rounded-lg text-xs font-bold">{t('common.cancel')}</button>
                   )}
                 </div>
               </form>
@@ -977,13 +977,13 @@ export default function AdminView() {
               <h3 className="text-sm font-black tracking-wide text-white">{t('admin.user_query')}</h3>
               <div className="flex gap-2">
                 <input type="text" value={userQueryAddress} onChange={(e) => setUserQueryAddress(e.target.value)} placeholder={t('admin.user_query_placeholder')} className="flex-1 rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none" />
-                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-accent px-4 text-xs font-black text-black hover:brightness-110">{t('admin.query')}</button>
+                <button type="button" onClick={handleUserInspect} className="rounded-lg bg-accent px-4 text-xs font-bold text-black hover:brightness-110">{t('admin.query')}</button>
               </div>
               {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
               {userInspect && (
                 <div className="space-y-3 rounded-lg border border-border/20 bg-elevated p-4">
-                  <div className="text-xs text-secondary"><span className="text-muted">{t('admin.address')}Ôºö</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
-                  {userInspect.user.displayName && <div className="text-xs text-secondary"><span className="text-muted">{t('admin.display_name')}Ôºö</span><span className="text-white">{userInspect.user.displayName}</span></div>}
+                  <div className="text-xs text-secondary"><span className="text-muted">{t('admin.address')}Ôº?/span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
+                  {userInspect.user.displayName && <div className="text-xs text-secondary"><span className="text-muted">{t('admin.display_name')}Ôº?/span><span className="text-white">{userInspect.user.displayName}</span></div>}
                   {userInspect.balances && (
                     <div className="grid grid-cols-3 gap-2 rounded-lg bg-card p-3">
                       <div><p className="text-xs text-muted">{t('admin.zxc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p></div>
@@ -994,8 +994,8 @@ export default function AdminView() {
                   <div className="text-xs text-secondary"><span className="text-muted">{t('admin.current_win_bias')}</span><span className="text-accent font-black">{userInspect.profile?.winBias != null ? userInspect.profile.winBias : t('admin.win_bias_not_set')}</span></div>
                   <div className="flex gap-2">
                     <input type="text" value={userBiasInput} onChange={(e) => setUserBiasInput(e.target.value)} placeholder={t('admin.win_bias_placeholder')} className="flex-1 rounded-lg border border-border/30 bg-card px-3 py-2 text-xs text-white focus:border-accent focus:outline-none" />
-                    <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-accent px-3 text-xs font-black text-black hover:brightness-110"><Sliders size={12} /> {t('admin.apply')}</button>
-                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-border/40 bg-card px-3 text-xs font-black text-secondary hover:border-red-400/60 hover:text-red-300">{t('admin.clear')}</button>
+                    <button type="button" onClick={handleSetWinBias} className="flex items-center gap-1 rounded-lg bg-accent px-3 text-xs font-bold text-black hover:brightness-110"><Sliders size={12} /> {t('admin.apply')}</button>
+                    <button type="button" onClick={handleClearWinBias} className="rounded-lg border border-border/40 bg-card px-3 text-xs font-bold text-secondary hover:border-red-400/60 hover:text-red-300">{t('admin.clear')}</button>
                   </div>
                   <div className="space-y-2 border-t border-border/20 pt-3">
                     <p className="text-xs text-secondary">{t('admin.vip_level')}<span className="ml-1 font-black text-accent">{typeof userInspect.vipLevel === 'number' ? userInspect.vipLevel : 0}</span></p>
@@ -1015,14 +1015,14 @@ export default function AdminView() {
               <form onSubmit={handleBlacklist} className="space-y-3">
                 <input type="text" value={blacklistAddress} onChange={(e) => setBlacklistAddress(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_address_placeholder')} />
                 <input type="text" value={blacklistReason} onChange={(e) => setBlacklistReason(e.target.value)} className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm" placeholder={t('admin.blacklist_reason_placeholder')} maxLength={200} />
-                <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">{t('admin.add_to_blacklist')}</button>
+                <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold tracking-wide">{t('admin.add_to_blacklist')}</button>
               </form>
               <div className="mt-6 pt-4 border-t border-border/30">
-                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-black tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-accent hover:underline">{t('admin.refresh')}</button></div>
+                <div className="flex items-center justify-between mb-2"><h4 className="text-xs font-bold tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4><button type="button" onClick={refreshBlacklist} className="text-xs text-accent hover:underline">{t('admin.refresh')}</button></div>
                 {blacklist.length === 0 ? <p className="text-xs text-secondary">{t('admin.no_blacklist_records')}</p> : (
                   <ul className="space-y-2 max-h-64 overflow-y-auto">{blacklist.map((b: any, i: number) => (
                     <li key={b.address || b.key || i} className="flex items-center justify-between bg-surface rounded-lg px-3 py-2 text-xs">
-                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}‚Ä¶</div>{b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}</div>
+                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}??/div>{b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}</div>
                       <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show(t('admin.removed_from_blacklist')); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">{t('admin.remove')}</button>
                     </li>
                   ))}</ul>
@@ -1057,7 +1057,7 @@ export default function AdminView() {
                 <option value="">{t('admin.grant_title_select')}</option>{allTitles.map((t) => (<option key={t.id} value={t.id}>{t.icon || ''} {t.name || t.label || t.id}</option>))}
               </select>
               <input type="text" value={grantNote} onChange={(e) => setGrantNote(e.target.value)} placeholder={t('admin.grant_note_placeholder')} className="w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-xs text-white focus:border-accent focus:outline-none" />
-              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-xs font-black text-black hover:brightness-110"><Send size={12} /> {t('admin.grant_submit')}</button>
+              <button type="button" onClick={handleGrantSubmit} className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-xs font-bold text-black hover:brightness-110"><Send size={12} /> {t('admin.grant_submit')}</button>
             </div>
           </section>
         )}
@@ -1084,14 +1084,14 @@ export default function AdminView() {
                 placeholder={t('admin.blacklist_reason_placeholder')}
                 maxLength={200}
               />
-              <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-black tracking-wide">
+              <button type="submit" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold tracking-wide">
                 {t('admin.add_to_blacklist')}
               </button>
             </form>
 
             <div className="mt-6 pt-4 border-t border-border/30">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-xs font-black tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4>
+                <h4 className="text-xs font-bold tracking-wide text-white">{t('admin.current_blacklist', { count: blacklist.length })}</h4>
                 <button
                   type="button"
                   onClick={refreshBlacklist}
@@ -1111,7 +1111,7 @@ export default function AdminView() {
                     >
                       <div>
                         <div className="text-white font-mono">
-                          {String(b.address || b.key || '').slice(0, 10)}‚Ä¶
+                          {String(b.address || b.key || '').slice(0, 10)}??
                         </div>
                         {b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}
                       </div>
@@ -1159,7 +1159,7 @@ export default function AdminView() {
               <button
                 type="button"
                 onClick={handleUserInspect}
-                className="rounded-lg bg-accent px-4 text-xs font-black text-black hover:brightness-110"
+                className="rounded-lg bg-accent px-4 text-xs font-bold text-black hover:brightness-110"
               >
                 {t('admin.query')}
               </button>
@@ -1168,12 +1168,12 @@ export default function AdminView() {
             {userInspect && (
               <div className="space-y-3 rounded-lg border border-border/20 bg-elevated p-4">
                 <div className="text-xs text-secondary">
-                  <span className="text-muted">{t('admin.address')}Ôºö</span>
+                  <span className="text-muted">{t('admin.address')}Ôº?/span>
                   <span className="font-mono text-white break-all">{userInspect.user.address}</span>
                 </div>
                 {userInspect.user.displayName && (
                   <div className="text-xs text-secondary">
-                    <span className="text-muted">{t('admin.display_name')}Ôºö</span>
+                    <span className="text-muted">{t('admin.display_name')}Ôº?/span>
                     <span className="text-white">{userInspect.user.displayName}</span>
                   </div>
                 )}
@@ -1210,14 +1210,14 @@ export default function AdminView() {
                   <button
                     type="button"
                     onClick={handleSetWinBias}
-                    className="flex items-center gap-1 rounded-lg bg-accent px-3 text-xs font-black text-black hover:brightness-110"
+                    className="flex items-center gap-1 rounded-lg bg-accent px-3 text-xs font-bold text-black hover:brightness-110"
                   >
                     <Sliders size={12} /> {t('admin.apply')}
                   </button>
                   <button
                     type="button"
                     onClick={handleClearWinBias}
-                    className="rounded-lg border border-border/40 bg-card px-3 text-xs font-black text-secondary hover:border-red-400/60 hover:text-red-300"
+                    className="rounded-lg border border-border/40 bg-card px-3 text-xs font-bold text-secondary hover:border-red-400/60 hover:text-red-300"
                   >
                     {t('admin.clear')}
                   </button>
@@ -1236,7 +1236,7 @@ export default function AdminView() {
                         key={lv}
                         type="button"
                         onClick={() => handleSetVipLevel(lv)}
-                        className="rounded-lg border border-border/30 bg-card px-3 py-1.5 text-xs font-black text-white hover:border-accent/60 hover:text-accent"
+                        className="rounded-lg border border-border/30 bg-card px-3 py-1.5 text-xs font-bold text-white hover:border-accent/60 hover:text-accent"
                       >
                         VIP {lv}
                       </button>
@@ -1248,7 +1248,7 @@ export default function AdminView() {
                   <button
                     type="button"
                     onClick={handleResetTotalBet}
-                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-black text-red-300 hover:bg-red-500/20"
+                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-300 hover:bg-red-500/20"
                   >
                     {t('admin.reset_total_bet_btn')}
                   </button>
@@ -1327,7 +1327,7 @@ export default function AdminView() {
                   placeholder={t('admin.item_desc_placeholder')}
                   maxLength={500}
                 />
-                <button type="submit" className="w-full py-2 bg-accent text-[#0e0e0e] rounded-lg text-xs font-black tracking-wide">
+                <button type="submit" className="w-full py-2 bg-accent text-[#0e0e0e] rounded-lg text-xs font-bold tracking-wide">
                   {t('admin.save_item')}
                 </button>
               </form>
@@ -1346,11 +1346,11 @@ export default function AdminView() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-lg">{item.icon || (item.type === 'avatar' ? 'üë§' : 'üè∑Ô∏è')}</span>
+                            <span className="text-lg">{item.icon || (item.type === 'avatar' ? '?ë§' : '?è∑Ô∏?)}</span>
                             <p className={`text-sm font-bold ${item.isActive ? 'text-white' : 'text-muted line-through'}`}>
                               {item.name}
                             </p>
-                            <span className="text-xs font-black tracking-widest uppercase text-accent">
+                            <span className="text-xs font-bold tracking-widest uppercase text-accent">
                               {t(`admin.type_${item.type}`) || item.type} ¬∑ {t(`admin.rarity_${item.rarity}`) || item.rarity}
                             </span>
                           </div>
@@ -1399,7 +1399,7 @@ export default function AdminView() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card text-2xl">
-                          {sub.icon || (sub.type === 'avatar' ? 'üë§' : 'üè∑')}
+                          {sub.icon || (sub.type === 'avatar' ? '?ë§' : '?è∑')}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -1469,7 +1469,7 @@ export default function AdminView() {
             </div>
 
             <div className="rounded-lg border border-border/20 bg-elevated p-4 space-y-3">
-              <div className="text-xs font-black text-accent">{t('admin.add_edit_campaign')}</div>
+              <div className="text-xs font-bold text-accent">{t('admin.add_edit_campaign')}</div>
               <input
                 type="text"
                 value={campaignDraftId}
@@ -1588,14 +1588,14 @@ export default function AdminView() {
               <button
                 type="button"
                 onClick={handleCampaignSave}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-xs font-black text-black hover:brightness-110"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-black hover:brightness-110"
               >
                 <CalendarClock size={12} /> {t('admin.save_campaign')}
               </button>
             </div>
 
             <div>
-              <h4 className="mb-2 text-xs font-black text-white">{t('admin.current_campaigns', { count: campaigns.length })}</h4>
+              <h4 className="mb-2 text-xs font-bold text-white">{t('admin.current_campaigns', { count: campaigns.length })}</h4>
               {campaigns.length === 0 ? (
                 <p className="text-xs text-secondary">{t('admin.no_campaigns')}</p>
               ) : (
@@ -1608,7 +1608,7 @@ export default function AdminView() {
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-black text-white">{c.title}</span>
+                            <span className="text-xs font-bold text-white">{c.title}</span>
                             <span
                               className={`text-xs font-bold px-2 py-0.5 rounded ${
                                 c.isActive
@@ -1791,7 +1791,7 @@ export default function AdminView() {
             <button
               type="button"
               onClick={handleGrantSubmit}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-xs font-black text-black hover:brightness-110"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 text-xs font-bold text-black hover:brightness-110"
             >
               <Send size={12} /> {t('admin.grant_submit')}
             </button>
@@ -1826,7 +1826,7 @@ export default function AdminView() {
               <button
                 type="button"
                 onClick={refreshTickets}
-                className="rounded-lg bg-accent px-4 text-xs font-black text-black hover:brightness-110"
+                className="rounded-lg bg-accent px-4 text-xs font-bold text-black hover:brightness-110"
               >
                 {t('admin.query')}
               </button>
@@ -1841,12 +1841,12 @@ export default function AdminView() {
                       <div>
                         <p className="text-sm font-black text-white">{t.title || t('admin.no_title')}</p>
                         <p className="text-xs text-secondary">
-                          {t.category || t('admin.other')} ¬∑ {t.address ? `${String(t.address).slice(0, 10)}‚Ä¶` : t('admin.anonymous')}
+                          {t.category || t('admin.other')} ¬∑ {t.address ? `${String(t.address).slice(0, 10)}?¶` : t('admin.anonymous')}
                           {t.createdAt && ` ¬∑ ${new Date(t.createdAt).toLocaleString()}`}
                         </p>
                       </div>
                       <span
-                        className={`text-xs font-black uppercase tracking-wide px-2 py-1 rounded ${
+                        className={`text-xs font-bold uppercase tracking-wide px-2 py-1 rounded ${
                           t.status === 'open'
                             ? 'bg-red-500/20 text-red-300'
                             : t.status === 'in_progress'
@@ -1870,7 +1870,7 @@ export default function AdminView() {
                     {t.message && <p className="text-xs text-white whitespace-pre-wrap break-words">{t.message}</p>}
                     {t.adminUpdate && (
                       <div className="rounded bg-accent/10 border border-accent/30 p-2">
-                        <p className="text-xs font-black text-accent mb-1">{t('admin.admin_reply')}</p>
+                        <p className="text-xs font-bold text-accent mb-1">{t('admin.admin_reply')}</p>
                         <p className="text-xs text-white whitespace-pre-wrap break-words">{t.adminUpdate}</p>
                       </div>
                     )}
@@ -1900,7 +1900,7 @@ export default function AdminView() {
                               show(errMsg(err));
                             }
                           }}
-                          className={`text-xs font-black px-2 py-1 rounded border ${
+                          className={`text-xs font-bold px-2 py-1 rounded border ${
                             t.status === s
                               ? 'border-accent bg-accent/10 text-accent'
                               : 'border-border/40 text-secondary hover:border-accent/60 hover:text-accent'
@@ -2035,3 +2035,4 @@ export function AnnouncementManager() {
     </div>
   );
 }
+

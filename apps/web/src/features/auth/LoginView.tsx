@@ -192,20 +192,20 @@ export default function LoginView() {
           <div className="bg-card rounded-2xl border border-border/15 p-6 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
-              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-accent">
+              <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-accent">
                 {t('nav.announcements')}
               </h2>
             </div>
             {announcements.length === 0 ? (
               <div className="space-y-4">
                 <div className="rounded-xl bg-surface p-4 border border-border/10">
-                  <p className="text-xs font-bold text-white">ðŸŽ‰ {t('announcement.welcome')}</p>
+                  <p className="text-xs font-bold text-white">?? {t('announcement.welcome')}</p>
                   <p className="text-xs text-secondary mt-1 leading-relaxed">
                     {t('announcement.welcome_desc')}
                   </p>
                 </div>
                 <div className="rounded-xl bg-surface p-4 border border-border/10">
-                  <p className="text-xs font-bold text-white">ðŸ’¡ {t('announcement.quick_tips')}</p>
+                  <p className="text-xs font-bold text-white">?’¡ {t('announcement.quick_tips')}</p>
                   <p className="text-xs text-secondary mt-1 leading-relaxed">
                     {t('announcement.tips_desc')}
                   </p>
@@ -216,7 +216,7 @@ export default function LoginView() {
                 {announcements.filter(a => a.isPinned).map((a: any) => (
                   <div key={a.id} className="rounded-xl bg-accent/5 border border-accent/20 p-4">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[8px] font-black bg-accent text-black px-1.5 py-0.5 rounded">{t('announcement.type_urgent')}</span>
+                      <span className="text-[8px] font-bold bg-accent text-black px-1.5 py-0.5 rounded">{t('announcement.type_urgent')}</span>
                       <p className="text-xs font-bold text-white truncate">{a.title}</p>
                     </div>
                     <p className="text-xs text-secondary leading-relaxed">{a.content}</p>
@@ -231,7 +231,7 @@ export default function LoginView() {
               </div>
             )}
             <div className="pt-2 border-t border-border/10">
-              <p className="text-[8px] font-bold text-muted uppercase tracking-[0.3em]">
+              <p className="text-[8px] font-bold text-muted uppercase tracking-[0.1em]">
                 {t('announcement.more_info')}
               </p>
             </div>
@@ -242,7 +242,7 @@ export default function LoginView() {
         {announcements.filter(a => a.isPinned).length > 0 && (
           <div className="lg:hidden w-full max-w-md">
             <div className="bg-accent/5 rounded-xl border border-accent/20 p-3 flex items-start gap-2">
-              <span className="text-[8px] font-black bg-accent text-black px-1.5 py-0.5 rounded shrink-0 mt-0.5">{t('announcement.type_urgent')}</span>
+              <span className="text-[8px] font-bold bg-accent text-black px-1.5 py-0.5 rounded shrink-0 mt-0.5">{t('announcement.type_urgent')}</span>
               <p className="text-xs text-secondary leading-relaxed">
                 {announcements.filter(a => a.isPinned)[0].title}
               </p>
@@ -267,7 +267,7 @@ export default function LoginView() {
                 <Fingerprint size={42} className="text-accent" />
             </motion.div>
             <h1 className="text-4xl font-extrabold text-accent tracking-tighter uppercase italic">{t('auth.identity_title')}</h1>
-            <p className="text-secondary text-xs font-bold uppercase tracking-[0.4em] leading-relaxed">{t('auth.identity_subtitle')}</p>
+            <p className="text-secondary text-xs font-bold uppercase tracking-[0.15em] leading-relaxed">{t('auth.identity_subtitle')}</p>
         </header>
 
         <div className="flex bg-surface p-1.5 rounded-xl border border-border/20">
@@ -312,7 +312,7 @@ export default function LoginView() {
                  {deepLinkUrl && (
                    <a
                      href={deepLinkUrl}
-                     className="inline-flex items-center justify-center mt-2 px-4 py-2 rounded-lg bg-elevated border border-accent/20 text-accent text-xs font-black uppercase tracking-widest hover:bg-[#2c2c2c] transition-all"
+                     className="inline-flex items-center justify-center mt-2 px-4 py-2 rounded-lg bg-elevated border border-accent/20 text-accent text-xs font-bold uppercase tracking-widest hover:bg-[#2c2c2c] transition-all"
                    >
                      {t('auth.open_app')}
                    </a>
@@ -464,10 +464,12 @@ export default function LoginView() {
       </motion.div>
       </div>
 
-      <p className="mt-12 text-xs font-bold text-muted uppercase tracking-[0.5em] flex items-center gap-3">
+      <p className="mt-12 text-xs font-bold text-muted uppercase tracking-[0.2em] flex items-center gap-3">
           <ShieldCheck size={12} className="text-accent/30" />
           {t('auth.powered_by')}
       </p>
     </div>
   );
 }
+
+

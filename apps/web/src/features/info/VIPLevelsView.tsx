@@ -31,9 +31,9 @@ export default function VIPLevelsView() {
       </header>
 
       <main className="px-6 pt-24">
-        {/* 等級總覽 */}
+        {/* 等�?總覽 */}
         <section className="mb-8 rounded-2xl border border-border/10 bg-gradient-to-br from-[#1a1919] to-[#141414] p-6 shadow-2xl">
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
             {t('info.vip_system_overview')}
           </h2>
           <p className="mt-3 text-sm font-bold text-secondary leading-relaxed">
@@ -57,9 +57,9 @@ export default function VIPLevelsView() {
           </div>
         </section>
 
-        {/* 特權說明 */}
+        {/* ?��?說�? */}
         <section className="mb-6 rounded-2xl border border-border/10 bg-card p-6">
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">
+          <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
             {t('info.vip_perks_title')}
           </h2>
           <div className="mt-4 space-y-4">
@@ -110,9 +110,9 @@ export default function VIPLevelsView() {
           </div>
         </section>
 
-        {/* 等級列表 */}
+        {/* 等�??�表 */}
         <section className="space-y-3">
-          <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-secondary">
+          <h2 className="px-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
             {t('info.full_level_list')}
           </h2>
           {LEVEL_TIERS.map((tier, index) => (
@@ -191,3 +191,4 @@ export default function VIPLevelsView() {
     </div>
   );
 }
+

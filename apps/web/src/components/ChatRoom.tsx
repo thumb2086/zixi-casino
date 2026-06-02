@@ -52,10 +52,10 @@ export default function ChatRoom() {
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
       const res = await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
-      if (!res.data.success) throw new Error(res.data.data?.error?.message || '發送失敗');
+      if (!res.data.success) throw new Error(res.data.data?.error?.message || '?�送失??);
     },
     onError: (_err) => {
-      // Message failed to send — SSE won't confirm it either
+      // Message failed to send ??SSE won't confirm it either
     },
   });
 
@@ -68,7 +68,7 @@ export default function ChatRoom() {
   return (
     <div className="flex h-[400px] flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-900/80 shadow-2xl">
       <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950 p-3">
-        <span className="text-xs font-black uppercase tracking-widest text-blue-400">
+        <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
           {t('chat.title')}
         </span>
         <span className="text-xs text-slate-600">{t('chat.global')}</span>
@@ -76,10 +76,10 @@ export default function ChatRoom() {
 
       <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-4">
         {loading && (
-          <div className="text-xs text-slate-600 text-center py-8">載入中...</div>
+          <div className="text-xs text-slate-600 text-center py-8">載入�?..</div>
         )}
         {!loading && messages.length === 0 && (
-          <div className="text-xs text-slate-600 text-center py-8">暫無訊息</div>
+          <div className="text-xs text-slate-600 text-center py-8">?�無訊息</div>
         )}
         {[...messages].reverse().map((m: any) => {
           const isOwn = m.address?.toLowerCase() === address?.toLowerCase();
@@ -122,3 +122,4 @@ export default function ChatRoom() {
     </div>
   );
 }
+
