@@ -64,7 +64,7 @@ export default function XpTab() {
           <div className="text-right">
             <p className="text-xs text-secondary">{t('info.exp_value')}</p>
             <p className="text-sm font-black text-white">{Number(userXp).toLocaleString()} XP</p>
-            {nextLevelXp > 0 && <p className="text-[10px] text-secondary mt-0.5">{t('info.next_level_xp', { xp: Number(nextLevelXp).toLocaleString() })}</p>}
+            {nextLevelXp > 0 && <p className="text-caption text-secondary mt-0.5">{t('info.next_level_xp', { xp: Number(nextLevelXp).toLocaleString() })}</p>}
           </div>
         </div>
         {xpProgress > 0 && (
@@ -106,7 +106,7 @@ export default function XpTab() {
                     {label || '??}
                   </span>
                 </div>
-                <span className="text-[10px] font-bold text-secondary">{xp.toLocaleString()} XP</span>
+                <span className="text-caption font-bold text-secondary">{xp.toLocaleString()} XP</span>
               </div>
             );
           })}
@@ -182,5 +182,6 @@ export default function XpTab() {
     </div>
   );
 }
+
 
 

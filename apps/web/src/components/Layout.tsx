@@ -96,7 +96,7 @@ export default function Layout() {
             <div className="flex-1 min-w-0">
               <span className="text-xs font-bold text-blue-400">{t('layout.global_chat')}</span>
               {lastMessage && (
-                <p className="text-[10px] text-secondary truncate mt-0.5">
+                <p className="text-caption text-secondary truncate mt-0.5">
                   <span className="font-bold text-accent">{lastMessage.displayName || t('lobby.anonymous')}: </span>
                   {lastMessage.text}
                 </p>
@@ -109,5 +109,6 @@ export default function Layout() {
     </div>
   );
 }
+
 
 

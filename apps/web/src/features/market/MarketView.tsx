@@ -354,7 +354,7 @@ export default function MarketView() {
               onClick={() => runAction({ type: 'bank_withdraw', amount: cashMoveAmount }, t('market.withdraw_success'))}
               className="rounded-xl bg-amber-600 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
-          <div className="rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-[10px] text-secondary leading-relaxed">
+          <div className="rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-caption text-secondary leading-relaxed">
             <p>?è¶ ?ÄË°åÂπ¥?©Á? <span className="text-emerald-400 font-bold">2% APY</span>ÔºàÊ?ÂØ¶È??ÅÊ??ÇÈ?Ë§áÂà©Ôº?/p>
             <p>?í∞ Ë≤∏Ê¨æÂπ¥Âà©??<span className="text-amber-400 font-bold">4% APR</span>ÔºàÊ?ÂØ¶È??üÊ¨æ?ÇÈ?Ë®àÊÅØÔº?/p>
           </div>
@@ -517,7 +517,7 @@ export default function MarketView() {
                     );
                   })()}
                 </svg>
-                <div className="flex justify-between mt-1 text-[10px] text-muted">
+                <div className="flex justify-between mt-1 text-caption text-muted">
                   <span>{(marketSnapshot?.updatedAt ? new Date(marketSnapshot.updatedAt).getTime() - 48 * 60000 : Date.now() - 48 * 60000).toLocaleString()}</span>
                   <span>{marketSnapshot?.updatedAt ? new Date(marketSnapshot.updatedAt).toLocaleString() : ''}</span>
                 </div>
@@ -720,5 +720,6 @@ export default function MarketView() {
     </div>
   );
 }
+
 
 

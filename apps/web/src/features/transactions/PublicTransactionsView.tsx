@@ -141,13 +141,13 @@ export default function PublicTransactionsView() {
         {/* Server Status Bar */}
         <div className="flex items-center gap-3 mb-6 bg-card rounded-2xl px-5 py-3 border border-border/10">
           <Clock size={14} className="text-accent" />
-          <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">
+          <span className="text-caption font-bold text-secondary uppercase tracking-wider">
             ä¼ºæ??¨é?è¡?
           </span>
           <span className="text-xs font-bold text-emerald-400 ml-auto">
             {serviceStats?.serverUptimeLabel || '...'}
           </span>
-          <span className="text-[10px] font-bold text-secondary">
+          <span className="text-caption font-bold text-secondary">
             {serviceStats?.uptime ? `?¯ç”¨ ${serviceStats.uptime}` : ''}
           </span>
         </div>
@@ -156,8 +156,8 @@ export default function PublicTransactionsView() {
         {serviceStats?.last24h?.success && (
           <div className="bg-card rounded-2xl p-5 border border-border/10 mb-6">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">24h ?å??€??/span>
-              <span className="text-[10px] font-bold text-secondary">{serviceStats.uptime || ''}</span>
+              <span className="text-caption font-bold text-secondary uppercase tracking-wider">24h ?å??€??/span>
+              <span className="text-caption font-bold text-secondary">{serviceStats.uptime || ''}</span>
             </div>
             <div className="flex items-end gap-[2px] h-16">
               {serviceStats.last24h.success.map((s: number, i: number) => {
@@ -255,5 +255,6 @@ export default function PublicTransactionsView() {
     </div>
   );
 }
+
 
 

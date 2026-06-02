@@ -78,7 +78,7 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
             <span className="text-sm font-bold text-secondary">??{totalCount} äº?/span>
           ) : null}
           {kings.length === 0 && (
-            <span className="text-[10px] text-secondary">?«ç„¡è³‡æ?</span>
+            <span className="text-caption text-secondary">?«ç„¡è³‡æ?</span>
           )}
         </div>
       </div>
@@ -363,10 +363,10 @@ export default function LeaderboardView() {
                         {player.name}
                       </p>
                       {player.vipLevel && (
-                        <p className="mt-0.5 text-[10px] font-bold text-emerald-400">{player.vipLevel}</p>
+                        <p className="mt-0.5 text-caption font-bold text-emerald-400">{player.vipLevel}</p>
                       )}
                       {player.titleLabel && (
-                        <p className="mt-0.5 inline-block rounded bg-elevated px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                        <p className="mt-0.5 inline-block rounded bg-elevated px-1.5 py-0.5 text-caption font-bold text-accent">
                           {player.titleLabel}
                         </p>
                       )}
@@ -398,8 +398,8 @@ export default function LeaderboardView() {
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase text-white">{selfEntry.name}</p>
-                      {selfEntry.vipLevel && <p className="text-[10px] font-bold text-emerald-400">{selfEntry.vipLevel}</p>}
-                      {selfEntry.titleLabel && <p className="text-[10px] font-bold text-accent">{selfEntry.titleLabel}</p>}
+                      {selfEntry.vipLevel && <p className="text-caption font-bold text-emerald-400">{selfEntry.vipLevel}</p>}
+                      {selfEntry.titleLabel && <p className="text-caption font-bold text-accent">{selfEntry.titleLabel}</p>}
                     </div>
                   </div>
                   <div className="text-right">
@@ -427,5 +427,6 @@ export default function LeaderboardView() {
     </div>
   );
 }
+
 
 

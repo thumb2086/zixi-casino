@@ -157,19 +157,19 @@ export default function CompanyView() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-card p-4 border border-border/10">
-                <p className="text-[10px] text-secondary font-bold">{t(company?.companyType === "ai" ? "company_type_ai" : "company_type_chip")}</p>
+                <p className="text-caption text-secondary font-bold">{t(company?.companyType === "ai" ? "company_type_ai" : "company_type_chip")}</p>
                 <p className="text-lg font-black text-accent">{t("level_label", { level: company?.level })}</p>
               </div>
               <div className="rounded-2xl bg-card p-4 border border-border/10">
-                <p className="text-[10px] text-secondary font-bold">{t("operating_cash")}</p>
+                <p className="text-caption text-secondary font-bold">{t("operating_cash")}</p>
                 <p className="text-lg font-black text-accent">{nf(sum?.cash || 0)} ZXC</p>
               </div>
               <div className="rounded-2xl bg-card p-4 border border-border/10">
-                <p className="text-[10px] text-secondary font-bold">{t("revenue_per_tick")}</p>
+                <p className="text-caption text-secondary font-bold">{t("revenue_per_tick")}</p>
                 <p className="text-lg font-black text-emerald-400">+{sum?.revenuePerTick || 0}</p>
               </div>
               <div className="rounded-2xl bg-card p-4 border border-border/10">
-                <p className="text-[10px] text-secondary font-bold">{t("salary_per_tick")}</p>
+                <p className="text-caption text-secondary font-bold">{t("salary_per_tick")}</p>
                 <p className="text-lg font-black text-red-400">-{sum?.costPerTick || 0}</p>
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function CompanyView() {
             {sum?.teamDetails?.length > 0 && (
               <div className="rounded-2xl bg-card p-4 border border-border/10">
                 <p className="text-xs font-bold text-secondary mb-2">{t("team_bonus")}</p>
-                <div className="flex gap-2 text-[10px] flex-wrap">
+                <div className="flex gap-2 text-caption flex-wrap">
                   <span className="text-emerald-400">{t("synergy")} +{sum.teamSynergy}%</span>
                   {sum.teamConflict > 0 && <span className="text-red-400">{t("conflict")} -{sum.teamConflict}%</span>}
                   <span className="text-blue-400">{t("leadership")} +{sum.teamLeadership}%</span>
@@ -185,7 +185,7 @@ export default function CompanyView() {
                 </div>
                 <div className="mt-2 space-y-1">
                   {sum.teamDetails?.slice(0, 3).map((d: string, i: number) => (
-                    <p key={i} className="text-[10px] text-secondary">{d}</p>
+                    <p key={i} className="text-caption text-secondary">{d}</p>
                   ))}
                 </div>
               </div>
@@ -195,17 +195,17 @@ export default function CompanyView() {
             <div className="rounded-2xl bg-card p-4 border border-border/10">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold text-secondary">{t("employees", { count: sum?.employeeCount })}</span>
-                <button onClick={() => setTab("hire")} className="text-[10px] text-accent">{t("hire_btn")}</button>
+                <button onClick={() => setTab("hire")} className="text-caption text-accent">{t("hire_btn")}</button>
               </div>
               <div className="space-y-2">
                 {sum?.employees?.map((emp: any) => (
                   <div key={emp.id} className="flex items-center justify-between bg-surface rounded-xl p-3">
                     <div>
                       <p className="text-xs font-bold">{emp.name}</p>
-                      <p className="text-[10px] text-secondary">{t("role_" + emp.role)} · {t("productivity")} {emp.productivity.toFixed(2)} · {t("salary")} {emp.salary}</p>
+                      <p className="text-caption text-secondary">{t("role_" + emp.role)} · {t("productivity")} {emp.productivity.toFixed(2)} · {t("salary")} {emp.salary}</p>
                       <p className="text-[9px] text-secondary">{t("leadership")} {emp.leadership.toFixed(2)} · {t("traits")} {emp.traits?.join("??)}</p>
                     </div>
-                    <button onClick={() => fire.mutate(emp.id)} className="text-[10px] text-red-400">{t("fire")}</button>
+                    <button onClick={() => fire.mutate(emp.id)} className="text-caption text-red-400">{t("fire")}</button>
                   </div>
                 ))}
                 {(!sum?.employees || sum.employees.length === 0) && <p className="text-xs text-muted text-center py-4">{t("no_employees")}</p>}
@@ -220,7 +220,7 @@ export default function CompanyView() {
                   <div key={p.id} className="flex items-center justify-between bg-surface rounded-xl p-3">
                     <div>
                       <p className="text-xs font-bold">{p.name}</p>
-                      <p className="text-[10px] text-secondary">{t("base_revenue")} {p.baseRevenue}</p>
+                      <p className="text-caption text-secondary">{t("base_revenue")} {p.baseRevenue}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <input type="range" min={0.3} max={5} step={0.1} value={p.priceMultiplier}
@@ -346,7 +346,7 @@ function InvestView({ sessionId }: { sessionId: string }) {
         <div key={c.id} className="rounded-2xl bg-card p-4 border border-border/10 space-y-3">
           <div>
             <p className="text-sm font-bold">{c.companyName}</p>
-            <p className="text-[10px] text-secondary">{t("company_info", { type: t(c.companyType === "ai" ? "company_type_ai" : "company_type_chip"), level: c.level, cash: c.data?.cash?.toLocaleString() || 0 })}</p>
+            <p className="text-caption text-secondary">{t("company_info", { type: t(c.companyType === "ai" ? "company_type_ai" : "company_type_chip"), level: c.level, cash: c.data?.cash?.toLocaleString() || 0 })}</p>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -373,5 +373,6 @@ function InvestView({ sessionId }: { sessionId: string }) {
     </div>
   );
 }
+
 
 

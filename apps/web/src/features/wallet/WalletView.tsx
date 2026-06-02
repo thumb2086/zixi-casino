@@ -161,7 +161,7 @@ export default function WalletView() {
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-[10px] text-secondary mt-0.5">ä¸‹ä?ç´?{nf(profileData.xpNextLevel)} XP</p>
+                  <p className="text-caption text-secondary mt-0.5">ä¸‹ä?ç´?{nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
@@ -182,7 +182,7 @@ export default function WalletView() {
             <div className="flex items-center gap-3 mb-3">
               <div className="flex flex-col items-center bg-surface rounded-xl px-4 py-2">
                 <span className="text-2xl font-black italic text-accent">{checkinStreak}</span>
-                <span className="text-[10px] font-bold text-secondary">???å¤©æ•¸</span>
+                <span className="text-caption font-bold text-secondary">???å¤©æ•¸</span>
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold text-secondary">{t('vault.next_available')}{nextAirdropLabel}</p>
@@ -227,7 +227,7 @@ export default function WalletView() {
                 <History size={18} className="text-info" />
                 <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white">äº¤æ?ç´€??/h2>
               </div>
-              <Link to="/app/transactions" className="text-[10px] font-bold text-accent hover:underline">?¥ç??¨éƒ¨</Link>
+              <Link to="/app/transactions" className="text-caption font-bold text-accent hover:underline">?¥ç??¨éƒ¨</Link>
             </div>
             <div className="space-y-2">
               {summary.isLoading && <div className="text-xs text-secondary">è¼‰å…¥ä¸?..</div>}
@@ -239,13 +239,13 @@ export default function WalletView() {
                   <div key={tx.id} className="flex items-center justify-between rounded-xl border border-border/10 bg-surface px-4 py-3">
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-white truncate">{t('txType.' + tx.type, tx.type)}</p>
-                      <p className="text-[10px] text-secondary mt-0.5">{new Date(tx.createdAt).toLocaleString('zh-TW')}</p>
+                      <p className="text-caption text-secondary mt-0.5">{new Date(tx.createdAt).toLocaleString('zh-TW')}</p>
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className={`text-xs font-bold ${isCredit ? 'text-emerald-400' : 'text-danger'}`}>
                         {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {(tx.token === 'zhixi' ? 'ZXC' : tx.token === 'yjc' ? 'YJC' : tx.token || tx.tokenSymbol || 'ZXC')}
                       </p>
-                      <p className="text-[10px] text-secondary">{tx.status ? t('txStatus.' + tx.status, tx.status) : 'å·²ç¢ºèª?}</p>
+                      <p className="text-caption text-secondary">{tx.status ? t('txStatus.' + tx.status, tx.status) : 'å·²ç¢ºèª?}</p>
                     </div>
                   </div>
                 );
@@ -336,6 +336,7 @@ export default function WalletView() {
     </div>
   );
 }
+
 
 
 

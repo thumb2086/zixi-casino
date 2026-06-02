@@ -215,7 +215,7 @@ export default function LobbyView() {
                 <span className="rounded-lg bg-emerald-500/20 border border-emerald-500/30 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-400">
                   {vipLevel}
                 </span>
-                <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-secondary">
+                <span className="flex items-center gap-1 text-caption font-bold uppercase tracking-wider text-secondary">
                   <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
                   {t('lobby.encryption_active')}
                 </span>
@@ -258,7 +258,7 @@ export default function LobbyView() {
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-[10px] text-secondary mt-0.5">ä¸‹ä?ç´?{nf(profileData.xpNextLevel)} XP</p>
+                  <p className="text-caption text-secondary mt-0.5">ä¸‹ä?ç´?{nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
@@ -290,17 +290,17 @@ export default function LobbyView() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className="text-xs font-bold text-white">{locked ? '?? ' : ''}{m.name}</p>
-                        <p className="text-[10px] text-secondary mt-0.5">{locked ? `?€è¦?VIP ${m.vip} ä»¥ä?` : m.desc}</p>
+                        <p className="text-caption text-secondary mt-0.5">{locked ? `?€è¦?VIP ${m.vip} ä»¥ä?` : m.desc}</p>
                       </div>
-                      <span className="text-[10px] font-bold text-accent shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
+                      <span className="text-caption font-bold text-accent shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-card mb-2">
                       <div className="h-full rounded-full bg-gradient-to-r from-[#fcc025] to-[#e6ad03]" style={{ width: `${locked ? 0 : pct}%` }} />
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-secondary">{locked ? '-' : `${m.progress}/${m.target}`}</span>
+                      <span className="text-caption text-secondary">{locked ? '-' : `${m.progress}/${m.target}`}</span>
                       {locked ? null : done ? (
-                        <button onClick={() => claimMission(m.id)} className="text-[10px] font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">?˜å?</button>
+                        <button onClick={() => claimMission(m.id)} className="text-caption font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">?˜å?</button>
                       ) : null}
                     </div>
                   </div>
@@ -417,7 +417,7 @@ export default function LobbyView() {
             </p>
             <div className="mt-2 flex items-center gap-2">
               <TrendingUp className="h-3 w-3 text-emerald-400" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+              <span className="text-caption font-bold uppercase tracking-widest text-emerald-400">
                 {t('lobby.simulation_label')}
               </span>
             </div>
@@ -449,6 +449,7 @@ export default function LobbyView() {
     </div>
   );
 }
+
 
 
 
