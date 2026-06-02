@@ -76,7 +76,7 @@ export default function LandingView() {
 
       <div className="min-h-screen bg-surface">
         {/* Nav */}
-        <nav className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-surface/80 backdrop-blur-xl">
+        <nav className="fixed inset-x-0 top-0 z-50 border-b border-border/40 bg-surface/80 backdrop-blur-xl">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-sm font-black text-black">Z</div>
@@ -100,7 +100,7 @@ export default function LandingView() {
             </div>
             <img
               src="/icon-512.png"
-              alt="子熙幣 ZIXI · 佑戩幣 YJC 頭像"
+              alt="子�?�?ZIXI · 佑戩�?YJC ?��?"
               width="120"
               height="120"
               className="mx-auto mb-6 rounded-2xl"
@@ -195,10 +195,11 @@ export default function LandingView() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border/50 py-8 text-center">
+        <footer className="border-t border-border/40 py-8 text-center">
           <p className="text-sm text-muted">{t('landing.footer')}</p>
         </footer>
       </div>
     </>
   );
 }
+

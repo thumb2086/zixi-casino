@@ -144,7 +144,7 @@ export default function SupportView() {
 
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/20">
         <div className="flex items-center justify-between px-6 py-4 ">
           <div className="flex items-center gap-4">
             <LifeBuoy className="text-accent" />
@@ -166,7 +166,7 @@ export default function SupportView() {
           ) : (
             <ul className="space-y-3">
               {announcements.slice(0, 3).map((a) => (
-                <li key={a.id} className="border-l-2 border-accent/50 pl-3">
+                <li key={a.id} className="border-l-2 border-accent/40 pl-3">
                   <div className="flex items-center gap-2">
                     {a.isPinned && <span className="text-xs font-bold uppercase text-accent">{t('support.pinned')}</span>}
                     <h3 className="text-sm font-bold text-white">{a.title}</h3>
@@ -193,7 +193,7 @@ export default function SupportView() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/40 focus:outline-none"
                   placeholder={t('support.title_placeholder')}
                   maxLength={100}
                 />
@@ -203,7 +203,7 @@ export default function SupportView() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/40 focus:outline-none"
                 >
                   {CATEGORIES(t).map((c) => (
                     <option key={c.value} value={c.value}>{c.label}</option>
@@ -215,7 +215,7 @@ export default function SupportView() {
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none min-h-24"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/40 focus:outline-none min-h-24"
                   placeholder={t('support.content_placeholder')}
                   maxLength={2000}
                 />
@@ -226,7 +226,7 @@ export default function SupportView() {
                   type="text"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
-                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/50 focus:outline-none"
+                  className="w-full bg-surface border border-border/30 rounded-lg px-3 py-2 text-sm focus:border-accent/40 focus:outline-none"
                   placeholder={t('support.contact_placeholder')}
                   maxLength={200}
                 />
@@ -255,4 +255,5 @@ export default function SupportView() {
     </div>
   );
 }
+
 

@@ -136,7 +136,7 @@ export default function ItemsTab() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="?œå??­å??ç¨±?Ÿæ??¶è???
-            className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:border-accent/50 focus:outline-none"
+            className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:border-accent/40 focus:outline-none"
           />
         </div>
 
@@ -316,4 +316,5 @@ export default function ItemsTab() {
     </div>
   );
 }
+
 

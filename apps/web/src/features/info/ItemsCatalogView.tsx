@@ -75,7 +75,7 @@ export default function ItemsCatalogView() {
 
   return (
     <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <Link to="/app" className="text-secondary transition-colors hover:text-accent">
@@ -99,7 +99,7 @@ export default function ItemsCatalogView() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="?œå??©å??ç¨±..."
-              className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:outline-none focus:border-accent/50"
+              className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:outline-none focus:border-accent/40"
             />
           </div>
           
@@ -247,4 +247,5 @@ export default function ItemsCatalogView() {
     </div>
   );
 }
+
 

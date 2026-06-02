@@ -34,7 +34,7 @@ export default function CollectionView() {
 
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/20">
         <div className="flex items-center gap-3 px-6 py-4 ">
           <Link to="/app" className="text-secondary transition-colors hover:text-accent">
             <ChevronLeft size={24} />
@@ -63,7 +63,7 @@ export default function CollectionView() {
                 className="rounded-2xl border-2 bg-card p-6 text-center transition-transform hover:scale-[1.02]"
                 style={{ borderColor: RARITY_COLORS[item.rarity] || '#494847' }}
               >
-                <div className="text-5xl mb-3">{item.icon || 'ðŸ“¦'}</div>
+                <div className="text-5xl mb-3">{item.icon || '?“¦'}</div>
                 <h3 className="font-bold text-sm mb-1">{item.name}</h3>
                 <p className="text-xs text-secondary">{item.description || ''}</p>
                 <span
@@ -85,3 +85,4 @@ export default function CollectionView() {
     </div>
   );
 }
+

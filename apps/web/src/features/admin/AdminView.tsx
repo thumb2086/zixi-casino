@@ -767,7 +767,7 @@ export default function AdminView() {
 
   return (
     <div className="min-h-screen bg-surface text-white font-manrope-emoji pb-32">
-      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/15">
+      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/20">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
             <ShieldAlert className="text-accent" />
@@ -2035,4 +2035,5 @@ export function AnnouncementManager() {
     </div>
   );
 }
+
 

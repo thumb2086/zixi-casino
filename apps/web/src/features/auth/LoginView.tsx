@@ -189,7 +189,7 @@ export default function LoginView() {
           animate={{ opacity: 1, x: 0 }}
           className="hidden lg:flex flex-col w-80 shrink-0"
         >
-          <div className="bg-card rounded-2xl border border-border/15 p-6 space-y-4">
+          <div className="bg-card rounded-2xl border border-border/20 p-6 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
               <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-accent">
@@ -253,7 +253,7 @@ export default function LoginView() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md bg-card rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-border/15 p-10 space-y-10 relative overflow-hidden"
+          className="w-full max-w-md bg-card rounded-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-border/20 p-10 space-y-10 relative overflow-hidden"
         >
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#fcc025] to-transparent opacity-40" />
 
@@ -359,7 +359,7 @@ export default function LoginView() {
                           value={username}
                           onChange={e => setUsername(e.target.value)}
                           placeholder={t('auth.operator_id_placeholder')}
-                          className="w-full bg-surface border border-border/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-accent/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold"
+                          className="w-full bg-surface border border-border/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-accent/40 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold"
                           required
                       />
                     </div>
@@ -375,7 +375,7 @@ export default function LoginView() {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder={t('auth.password_placeholder')}
-                            className="w-full bg-surface border border-border/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-accent/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold"
+                            className="w-full bg-surface border border-border/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-accent/40 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold"
                             required
                         />
                     </div>
@@ -393,7 +393,7 @@ export default function LoginView() {
                               value={confirmPassword}
                               onChange={e => setConfirmPassword(e.target.value)}
                               placeholder={t('auth.confirm_password_placeholder')}
-                              className="w-full bg-surface border border-border/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-accent/50 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold"
+                              className="w-full bg-surface border border-border/30 rounded-xl pl-14 pr-5 py-4 text-white text-sm focus:border-accent/40 focus:ring-4 focus:ring-[#fcc025]/5 outline-none transition-all placeholder:text-muted font-bold"
                               required
                           />
                       </div>
@@ -408,7 +408,7 @@ export default function LoginView() {
                     className={`flex h-5 w-5 items-center justify-center rounded border transition-all ${
                       rememberMe
                         ? 'border-accent bg-accent'
-                        : 'border-border/50 bg-transparent'
+                        : 'border-border/40 bg-transparent'
                     }`}
                   >
                     {rememberMe && <Check size={14} className="text-black" />}
@@ -471,5 +471,6 @@ export default function LoginView() {
     </div>
   );
 }
+
 
 

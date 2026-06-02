@@ -67,7 +67,7 @@ export default function CasinoView() {
 
   return (
     <div className="min-h-screen bg-surface pb-32 font-manrope-emoji text-white">
-      <header className="fixed top-0 z-50 w-full border-b border-border/15 bg-surface/90 backdrop-blur-xl">
+      <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-4">
             <Link to="/app/casino/lobby" className="text-secondary transition-colors hover:text-accent">
@@ -87,3 +87,4 @@ export default function CasinoView() {
     </div>
   );
 }
+
