@@ -3,6 +3,10 @@
   "installCommand": "pnpm install",
   "outputDirectory": "apps/web/dist",
   "routes": [
+    { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
+    { "src": "/robots.txt", "dest": "/robots.txt" },
+    { "src": "/favicon.svg", "dest": "/favicon.svg" },
+    { "src": "/manifest.webmanifest", "dest": "/manifest.webmanifest" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
