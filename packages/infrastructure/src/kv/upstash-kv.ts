@@ -136,4 +136,14 @@ export class UpstashKV implements KVClient {
       return false;
     }
   }
+
+  async incr(key: string): Promise<number> {
+    if (!this.redis) return 0;
+    try { return await this.redis.incr(key); } catch { return 0; }
+  }
+
+  async incrby(key: string, increment: number): Promise<number> {
+    if (!this.redis) return 0;
+    try { return await this.redis.incrby(key, increment); } catch { return 0; }
+  }
 }

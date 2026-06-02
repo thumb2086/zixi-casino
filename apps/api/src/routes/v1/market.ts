@@ -115,6 +115,17 @@ export async function marketRoutes(fastify: FastifyInstance) {
     return { session, user };
   };
 
+  const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS?.toLowerCase() || "";
+  const getAdminContext = async (req: any) => {
+    const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
+    if (!sessionId || !ADMIN_ADDRESS) return null;
+    const session = await sessionRepo.getSessionById(sessionId as string);
+    if (!session || session.status !== "authorized") return null;
+    if (session.address.toLowerCase() !== ADMIN_ADDRESS) return null;
+    const user = await userRepo.getUserById(session.userId);
+    return { session, user };
+  };
+
   typedFastify.get("/snapshot", async (request) => {
     const snapshot = marketManager.buildSnapshot();
     await marketRepo.saveMarketSnapshot(snapshot);
@@ -324,7 +335,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
   typedFastify.post("/admin/set-price", {
     schema: { body: z.object({ sessionId: z.string(), symbol: z.string(), priceMultiplier: z.number().min(0.1).max(10) }) },
   }, async (request) => {
-    const ctx = await getContext(request);
+    const ctx = await getAdminContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { symbol, priceMultiplier } = request.body;
     try {
@@ -342,7 +353,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
   typedFastify.post("/admin/set-volatility", {
     schema: { body: z.object({ sessionId: z.string(), symbol: z.string(), volatility: z.number().min(0.01).max(0.5) }) },
   }, async (request) => {
-    const ctx = await getContext(request);
+    const ctx = await getAdminContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { symbol, volatility } = request.body;
     try {
@@ -356,7 +367,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
   typedFastify.post("/admin/set-base-rate", {
     schema: { body: z.object({ sessionId: z.string(), rate: z.number().min(0).max(0.2) }) },
   }, async (request) => {
-    const ctx = await getContext(request);
+    const ctx = await getAdminContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { rate } = request.body;
     try {
@@ -370,7 +381,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
   typedFastify.post("/admin/shock", {
     schema: { body: z.object({ sessionId: z.string(), symbol: z.string(), direction: z.enum(["up", "down"]), magnitude: z.number().min(0.01).max(0.5) }) },
   }, async (request) => {
-    const ctx = await getContext(request);
+    const ctx = await getAdminContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { symbol, direction, magnitude } = request.body;
     try {

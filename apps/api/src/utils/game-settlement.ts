@@ -698,18 +698,10 @@ export class GameSettlementWrapper {
     const { kv } = await import("@repo/infrastructure");
     const today = new Date().toISOString().slice(0, 10);
     const addr = address.toLowerCase();
-    const prevBet = await kv.get<number>(`mission:bet:${addr}:${today}`);
-    await kv.set(`mission:bet:${addr}:${today}`, (prevBet || 0) + betAmount);
-    const prevPlay = await kv.get<number>(`mission:play:${addr}:${today}`);
-    await kv.set(`mission:play:${addr}:${today}`, (prevPlay || 0) + 1);
-    if (winAmount > 0) {
-      const prevWin = await kv.get<number>(`mission:win:${addr}:${today}`);
-      await kv.set(`mission:win:${addr}:${today}`, (prevWin || 0) + 1);
-    }
-    if (game) {
-      const prevGame = await kv.get<number>(`mission:game:${game}:${addr}:${today}`);
-      await kv.set(`mission:game:${game}:${addr}:${today}`, (prevGame || 0) + 1);
-    }
+    await kv.incrby(`mission:bet:${addr}:${today}`, betAmount);
+    await kv.incr(`mission:play:${addr}:${today}`);
+    if (winAmount > 0) await kv.incr(`mission:win:${addr}:${today}`);
+    if (game) await kv.incr(`mission:game:${game}:${addr}:${today}`);
   }
 
   async getLuckBias(userId: string): Promise<number> {
@@ -749,19 +741,24 @@ export class GameSettlementWrapper {
 
     const { xpGained } = grantXp(0, 1, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
 
-    const [result] = await db.execute(sql`
-      INSERT INTO user_profiles (user_id, xp, level, updated_at)
-      VALUES (${userId}, ${xpGained}, 1, NOW())
-      ON CONFLICT (user_id) DO UPDATE SET xp = user_profiles.xp + ${xpGained}, updated_at = NOW()
-      RETURNING xp
+    const [prev] = await db.execute(sql`
+      SELECT xp, level FROM user_profiles WHERE user_id = ${userId}
     `);
-    const newTotalXp = Number(result?.xp || 0);
-    const newLevel = levelForXp(newTotalXp);
-    const [prev] = await db.execute(sql`SELECT level FROM user_profiles WHERE user_id = ${userId}`);
+    const prevXp = Number(prev?.[0]?.xp || 0);
     const prevLevel = Number(prev?.[0]?.level || 1);
-    if (newLevel > prevLevel) {
-      await db.execute(sql`UPDATE user_profiles SET level = ${newLevel} WHERE user_id = ${userId}`);
-      if (address) await this.checkAndUnlockTitles(userId, address, newLevel);
+    const newTotalXp = prevXp + xpGained;
+    const newLevel = levelForXp(newTotalXp);
+
+    await db.execute(sql`
+      INSERT INTO user_profiles (user_id, xp, level, updated_at)
+      VALUES (${userId}, ${xpGained}, ${newLevel}, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET
+        xp = user_profiles.xp + ${xpGained},
+        level = GREATEST(user_profiles.level, ${newLevel}),
+        updated_at = NOW()
+    `);
+    if (newLevel > prevLevel && address) {
+      await this.checkAndUnlockTitles(userId, address, newLevel);
     }
   }
 

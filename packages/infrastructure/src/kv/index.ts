@@ -26,6 +26,8 @@ export interface KVClient {
   expire?(key: string, seconds: number): Promise<number>;
   ttl?(key: string): Promise<number>;
   ping?(): Promise<boolean>;
+  incr(key: string): Promise<number>;
+  incrby(key: string, increment: number): Promise<number>;
 }
 
 /**
@@ -102,6 +104,20 @@ class PostgresKV implements KVClient {
     if (existing !== null) return false;
     await this.set(key, value, { ex: ttlSeconds });
     return true;
+  }
+
+  async incr(key: string): Promise<number> {
+    return this.incrby(key, 1);
+  }
+
+  async incrby(key: string, increment: number): Promise<number> {
+    if (!db) return 0;
+    try {
+      const current = await this.get<number>(key) || 0;
+      const newVal = current + increment;
+      await this.set(key, newVal);
+      return newVal;
+    } catch { return 0; }
   }
 }
 
