@@ -209,7 +209,7 @@ export default function ItemsCatalogView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">商店購買</h3>
-                <p className="text-xs font-bold text-secondary">使用子熙幣在獎勵商店購買限定頭像與稱號</p>
+                <p className="text-xs font-bold text-secondary">使用子熙幣(ZXC)與佑戩幣(YJC)在獎勵商店購買限定頭像與稱號</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
