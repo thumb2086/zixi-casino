@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '@repo/shared';
 import { usePreferencesStore } from '../../store/usePreferencesStore';
+import { useToastStore } from '../../store/useToastStore';
 import AppBottomNav from '../../components/AppBottomNav';
 import { api } from '../../store/api';
 
@@ -123,18 +124,13 @@ export default function ChestView() {
   const [invTab, setInvTab] = useState<'chests' | 'tokens' | 'buffs' | 'collection'>('chests');
   const [useStatusMessage, setUseStatusMessage] = useState<string | null>(null);
   const [usingAllTokens, setUsingAllTokens] = useState(false);
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const showToast = useToastStore((s) => s.showToast);
   const [useQty, setUseQty] = useState<Record<string, string>>({});
   const [giftDialog, setGiftDialog] = useState<{ itemId: string; name: string; maxQty: number } | null>(null);
   const [giftAddress, setGiftAddress] = useState('');
   const [giftQty, setGiftQty] = useState('1');
   const [giftSending, setGiftSending] = useState(false);
   const [recipients, setRecipients] = useState<Array<{ address: string; displayName: string }>>([]);
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
-  };
 
   const pity = status?.chestPity || {};
   const keyCounts = status?.keyCounts || {};
@@ -220,10 +216,10 @@ export default function ChestView() {
         await refreshInventory();
         await refreshStatus();
       } else {
-        showToast(res.data?.error || '?‹å?å¤±æ?');
+        showToast(res.data?.error || '?ï¿½ï¿½?å¤±ï¿½?');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || 'ç¶²è·¯?¯èª¤');
+      showToast(err?.response?.data?.error || 'ç¶²è·¯?ï¿½èª¤');
     } finally {
       setOpening(false);
     }
@@ -231,7 +227,7 @@ export default function ChestView() {
 
   const useAllTokens = async () => {
     setUsingAllTokens(true);
-    setUseStatusMessage('æ­?œ¨?Œæ??¨éƒ¨ä»?¹£...');
+    setUseStatusMessage('ï¿½?ï¿½ï¿½?ï¿½ï¿½??ï¿½éƒ¨ï¿½?ï¿½ï¿½...');
     try {
       const res = await api.post('/api/v1/inventory/use-all-tokens', {});
       if (res.data?.success) {
@@ -239,14 +235,14 @@ export default function ChestView() {
         const parts: string[] = [];
         if (d.totalZxc > 0) parts.push(`${d.totalZxc.toLocaleString()} ZXC`);
         if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
-        showToast(`?å?ä½¿ç”¨ ${d.itemCount} ?‹ç‰©?ï??²å? ${parts.join(' + ')}`);
+        showToast(`?ï¿½ï¿½?ä½¿ç”¨ ${d.itemCount} ?ï¿½ç‰©?ï¿½ï¿½??ï¿½ï¿½? ${parts.join(' + ')}`);
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
-        showToast(res.data?.error || '?Œæ?å¤±æ?');
+        showToast(res.data?.error || '?ï¿½ï¿½?å¤±ï¿½?');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '?Œæ?å¤±æ?');
+      showToast(err?.response?.data?.error || '?ï¿½ï¿½?å¤±ï¿½?');
     } finally {
       setUsingAllTokens(false);
       setUseStatusMessage(null);
@@ -254,25 +250,25 @@ export default function ChestView() {
   };
 
   const useItem = async (itemId: string, quantity: number = 1) => {
-    setUseStatusMessage('æ­?œ¨?•ç?...');
+    setUseStatusMessage('ï¿½?ï¿½ï¿½?ï¿½ï¿½?...');
     try {
       const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
         const d = res.data.data;
         if (d.currencyGranted > 0) {
-          showToast(`?²å? ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
+          showToast(`?ï¿½ï¿½? ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
         } else if (d.effectSummary) {
           showToast(d.effectSummary);
         } else {
-          showToast(`?å?ä½¿ç”¨ ${quantity} ?‹ç‰©?`);
+          showToast(`?ï¿½ï¿½?ä½¿ç”¨ ${quantity} ?ï¿½ç‰©?ï¿½`);
         }
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
-        showToast(res.data?.error || 'ä½¿ç”¨å¤±æ?');
+        showToast(res.data?.error || 'ä½¿ç”¨å¤±ï¿½?');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || 'ä½¿ç”¨å¤±æ?');
+      showToast(err?.response?.data?.error || 'ä½¿ç”¨å¤±ï¿½?');
     } finally {
       setUseStatusMessage(null);
     }
@@ -285,12 +281,12 @@ export default function ChestView() {
   }, {} as Record<string, InventoryEntry[]>);
 
   const itemTypeLabels: Record<string, string> = {
-    chest_key: '?°å?',
-    token: 'ä»?¹£',
-    buff: '? æ?',
-    avatar: '?­å?',
-    title: 'ç¨±è?',
-    collectible: '?¶è???,
+    chest_key: '?ï¿½ï¿½?',
+    token: 'ï¿½?ï¿½ï¿½',
+    buff: '?ï¿½ï¿½?',
+    avatar: '?ï¿½ï¿½?',
+    title: 'ç¨±ï¿½?',
+    collectible: '?ï¿½ï¿½???,
   };
 
   return (
@@ -301,15 +297,15 @@ export default function ChestView() {
             <Package className="text-accent" />
             <div>
               <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
-                ?©è?ä¸­å?
+                ?ï¿½ï¿½?ä¸­ï¿½?
               </h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-                ?Œå??‡è?çµ?
+                ?ï¿½ï¿½??ï¿½ï¿½?ï¿½?
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary">ç©ºé?</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-secondary">ç©ºï¿½?</p>
             <p className="text-sm font-black text-white">
               {status?.inventorySlotsUsed || 0}
               <span className="mx-1 text-muted">/</span>
@@ -356,7 +352,7 @@ export default function ChestView() {
                 invTab === tab ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary hover:bg-[#494847]/30'
               }`}
             >
-              {{ chests: 'å¯¶ç®±', tokens: 'ä»?¹£', buffs: '? æ?', collection: '?¶è?' }[tab]}
+              {{ chests: 'å¯¶ç®±', tokens: 'ï¿½?ï¿½ï¿½', buffs: '?ï¿½ï¿½?', collection: '?ï¿½ï¿½?' }[tab]}
             </button>
           ))}
         </div>
@@ -364,7 +360,7 @@ export default function ChestView() {
         {/* Tab: Chests */}
         {invTab === 'chests' && (
         <section className="space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">?¯é??Ÿå¯¶ç®?/h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">?ï¿½ï¿½??ï¿½å¯¶ï¿½?/h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {chests.map((chest) => {
@@ -381,16 +377,16 @@ export default function ChestView() {
                       <h3 className="text-lg font-black text-white">{chest.name}</h3>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="rounded bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
-                          {keys} ?Šé‘°??
+                          {keys} ?ï¿½é‘°??
                         </span>
                       </div>
                     </div>
-                    <div className="text-4xl">?“¦</div>
+                    <div className="text-4xl">?ï¿½ï¿½</div>
                   </div>
 
                   <div className="mb-4 space-y-2">
                     <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-secondary">
-                      <span>ä¿å??²åº¦</span>
+                      <span>ä¿ï¿½??ï¿½åº¦</span>
                       <span className="text-accent">{currentPity} / {chest.pityThreshold}</span>
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
@@ -422,7 +418,7 @@ export default function ChestView() {
                         : 'bg-[#494847]/20 text-muted cursor-not-allowed border border-border/10'
                     }`}
                   >
-                    {opening ? 'è§??ä¸?..' : `?‹å? ${openQtyNum} ?‹`}
+                    {opening ? 'ï¿½??ï¿½?..' : `?ï¿½ï¿½? ${openQtyNum} ?ï¿½`}
                   </button>
                 </div>
               );
@@ -435,7 +431,7 @@ export default function ChestView() {
         {invTab === 'tokens' && (
           <section className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">ä»?¹£</h2>
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">ï¿½?ï¿½ï¿½</h2>
               {(() => {
                 const tokenItems = groupedItems['token'] || [];
                 const totalTokens = tokenItems.reduce((sum, i) => sum + (i.effect?.value || 0) * i.quantity, 0);
@@ -445,13 +441,13 @@ export default function ChestView() {
                     disabled={usingAllTokens}
                     className="text-xs font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
                   >
-                    {usingAllTokens ? '?•ç?ä¸?..' : `?¨éƒ¨ä½¿ç”¨ (??{totalTokens.toLocaleString()} ZXC)`}
+                    {usingAllTokens ? '?ï¿½ï¿½?ï¿½?..' : `?ï¿½éƒ¨ä½¿ç”¨ (??{totalTokens.toLocaleString()} ZXC)`}
                   </button>
                 ) : null;
               })()}
             </div>
             {(!groupedItems['token'] || groupedItems['token'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?«ç„¡ä»?¹£?©å?</p>
+              <p className="text-sm text-secondary text-center py-8">?ï¿½ç„¡ï¿½?ï¿½ï¿½?ï¿½ï¿½?</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['token'].map((item) => (
@@ -478,7 +474,7 @@ export default function ChestView() {
                       <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
                         className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">ä½¿ç”¨</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">è´ˆé€?/button>
+                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">è´ˆï¿½?/button>
                     </div>
                   </div>
                 ))}
@@ -490,9 +486,9 @@ export default function ChestView() {
         {/* Tab: Buffs */}
         {invTab === 'buffs' && (
           <section className="space-y-4">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">? æ??©å?</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">?ï¿½ï¿½??ï¿½ï¿½?</h2>
             {(!groupedItems['buff'] || groupedItems['buff'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?«ç„¡? æ??©å?</p>
+              <p className="text-sm text-secondary text-center py-8">?ï¿½ç„¡?ï¿½ï¿½??ï¿½ï¿½?</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['buff'].map((item) => (
@@ -517,7 +513,7 @@ export default function ChestView() {
                       <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
                         className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">ä½¿ç”¨</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">è´ˆé€?/button>
+                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">è´ˆï¿½?/button>
                     </div>
                   </div>
                 ))}
@@ -529,7 +525,7 @@ export default function ChestView() {
         {/* Tab: Collection */}
         {invTab === 'collection' && (
           <section className="space-y-6">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">?¶è?</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">?ï¿½ï¿½?</h2>
             {(['avatar', 'title', 'collectible', 'chest_key'] as const).map((type) => {
               const items = groupedItems[type] || [];
               if (items.length === 0) return null;
@@ -550,9 +546,9 @@ export default function ChestView() {
                         {(type === 'avatar' || type === 'title') && (
                           <div className="mt-auto flex gap-2">
                             <button onClick={() => useItem(item.id)}
-                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent hover:text-black">è£å?</button>
+                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent hover:text-black">è£ï¿½?</button>
                             <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">è´ˆé€?/button>
+                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">è´ˆï¿½?/button>
                           </div>
                         )}
                       </div>
@@ -562,7 +558,7 @@ export default function ChestView() {
               );
             })}
             {['avatar', 'title', 'collectible', 'chest_key'].every(t => !groupedItems[t]?.length) && (
-              <p className="text-sm text-secondary text-center py-8">?«ç„¡?¶è??©å?</p>
+              <p className="text-sm text-secondary text-center py-8">?ï¿½ç„¡?ï¿½ï¿½??ï¿½ï¿½?</p>
             )}
           </section>
         )}
@@ -570,18 +566,7 @@ export default function ChestView() {
 
       <AppBottomNav current="none" />
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toastMsg && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] bg-accent text-black px-6 py-3 rounded-full font-black shadow-2xl"
-          >
-            {toastMsg}
-          </motion.div>
-        )}
+      {/* Toast â€” handled globally by ToastProvider */}
       </AnimatePresence>
 
       {/* Result Modal */}
@@ -599,7 +584,7 @@ export default function ChestView() {
               className="max-w-3xl w-full max-h-[75vh] flex flex-col"
             >
               <h2 className="text-3xl font-black italic text-center text-accent mb-6">
-                ?­å??²å?!
+                ?ï¿½ï¿½??ï¿½ï¿½?!
               </h2>
 
               <div className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 pr-1 scrollbar-thin">
@@ -651,10 +636,10 @@ export default function ChestView() {
                 <div className="text-center mb-4">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-br from-[#fcc025]/20 to-[#e6ad03]/10 border border-accent/40 rounded-2xl px-6 py-4 shadow-lg shadow-[#fcc025]/5">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fcc025] to-[#e6ad03] flex items-center justify-center shadow-lg">
-                       <span className="text-lg">?’°</span>
+                       <span className="text-lg">?ï¿½ï¿½</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">?è?è£œå?</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">?ï¿½ï¿½?è£œï¿½?</p>
                       <p className="text-lg font-black italic text-accent">+{nf(openCompensation)} ZXC</p>
                     </div>
                   </div>
@@ -670,7 +655,7 @@ export default function ChestView() {
                   className="bg-[#494847] hover:bg-[#5a5858] text-white font-bold px-8 py-3
                     rounded-xl transition-colors inline-flex items-center gap-2"
                 >
-                  ç¹¼ç?
+                  ç¹¼ï¿½?
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
@@ -697,20 +682,20 @@ export default function ChestView() {
               className="bg-card rounded-2xl p-6 max-w-sm w-full border border-border/30"
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-black">è´ˆé€?{giftDialog.name}</h2>
+                <h2 className="text-lg font-black">è´ˆï¿½?{giftDialog.name}</h2>
                 <button onClick={() => setGiftDialog(null)}>
                   <X className="w-5 h-5 text-secondary" />
                 </button>
               </div>
 
-              <label className="block text-sm font-bold text-secondary mb-1">?¥æ”¶??/label>
+              <label className="block text-sm font-bold text-secondary mb-1">?ï¿½æ”¶??/label>
               <select
                 value={giftAddress}
                 onChange={(e) => setGiftAddress(e.target.value)}
                 className="w-full bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-sm
                   focus:outline-none focus:border-accent mb-4"
               >
-                <option value="">?¸æ??¥æ”¶??..</option>
+                <option value="">?ï¿½ï¿½??ï¿½æ”¶??..</option>
                 {recipients.map(r => (
                   <option key={r.address} value={r.address}>
                     {r.displayName} ({r.address.slice(0, 6)}...{r.address.slice(-4)})
@@ -718,7 +703,7 @@ export default function ChestView() {
                 ))}
               </select>
 
-              <label className="block text-sm font-bold text-secondary mb-1">?¸é?</label>
+              <label className="block text-sm font-bold text-secondary mb-1">?ï¿½ï¿½?</label>
               <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => setGiftQty(String(Math.max(1, (parseInt(giftQty || '1', 10) || 1) - 1)))}
@@ -759,7 +744,7 @@ export default function ChestView() {
                   onClick={() => setGiftDialog(null)}
                   className="flex-1 border border-border/40 text-secondary font-bold text-sm py-2 rounded-lg hover:bg-[#494847]/20"
                 >
-                  ?–æ?
+                  ?ï¿½ï¿½?
                 </button>
                 <button
                   disabled={giftSending || !giftAddress.trim()}
@@ -773,7 +758,7 @@ export default function ChestView() {
                         quantity: parseInt(giftQty || '1', 10) || 1,
                       });
                       if (res.data?.success) {
-                        showToast('è´ˆé€æ??Ÿï?');
+                        showToast('è´ˆé€ï¿½??ï¿½ï¿½?');
                         setGiftDialog(null);
                         setGiftAddress('');
                         setGiftQty('1');
@@ -790,7 +775,7 @@ export default function ChestView() {
                   className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg
                     disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6ad03]"
                 >
-                  {giftSending ? '?¼é€ä¸­...' : 'ç¢ºè?è´ˆé€?}
+                  {giftSending ? '?ï¿½é€ä¸­...' : 'ç¢ºï¿½?è´ˆï¿½?}
                 </button>
               </div>
             </motion.div>
