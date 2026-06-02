@@ -95,7 +95,7 @@ export default function ShopView() {
   const [ownedTitles, setOwnedTitles] = useState<string[]>([]);
   const [purchasedBundles, setPurchasedBundles] = useState<string[]>([]);
 
-  // â”€â”€ Pawn state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ?€?€ Pawn state ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
   const [invItems, setInvItems] = useState<any[]>([]);
   const [pawnLoading, setPawnLoading] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
@@ -104,7 +104,7 @@ export default function ShopView() {
   const [stockHistory, setStockHistory] = useState<Record<string, number[]>>({});
   const [sellingStock, setSellingStock] = useState<string | null>(null);
 
-  // â”€â”€ Market state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ?€?€ Market state ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
   const [listings, setListings] = useState<any[]>([]);
   const [myListings, setMyListings] = useState<any[]>([]);
   const [marketLoading, setMarketLoading] = useState(false);
@@ -116,7 +116,7 @@ export default function ShopView() {
   const [sellPrice, setSellPrice] = useState('');
   const [showSellForm, setShowSellForm] = useState(false);
 
-  // â”€â”€ YJC exchange state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ?€?€ YJC exchange state ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
   const [yjcBalance, setYjcBalance] = useState('0');
   const [convertZxc, setConvertZxc] = useState('');
   const [convertYjc, setConvertYjc] = useState('');
@@ -167,24 +167,24 @@ export default function ShopView() {
 
   async function handleBuyChest(chestType: string, quantity: number = 1) {
     if (!sessionId) return;
-    const label = ({ common:'æ™®é€š', rare:'ç¨€æœ‰', epic:'å²è©©', legendary:'å‚³å¥‡', mythic:'ç¥è©±', chaos:'æ··æ²Œ', abyss:'æ·±æ·µ', oracle:'ç¥è«­' } as Record<string,string>)[chestType] || chestType;
+    const label = ({ common:'?®é€?, rare:'ç¨€??, epic:'?²è©©', legendary:'?³å?', mythic:'ç¥è©±', chaos:'æ··æ?', abyss:'æ·±æ·µ', oracle:'ç¥è«­' } as Record<string,string>)[chestType] || chestType;
     setBuyingChest(chestType);
     setMsg(null);
     try {
       const res = await api.post('/api/v1/chests/buy', { sessionId, chestType, quantity });
       if (res.data?.success) {
         const d = res.data.data;
-        const discountText = d.discount > 0 ? ` (çœ ${(d.discount * 100).toFixed(0)}%)` : '';
-        setMsg(`âœ… ${quantity} x ${label}å¯¶ç®± å·²æ”¾å…¥èƒŒåŒ…ï¼${discountText}`);
+        const discountText = d.discount > 0 ? ` (??${(d.discount * 100).toFixed(0)}%)` : '';
+        setMsg(`??${quantity} x ${label}å¯¶ç®± å·²æ”¾?¥è??…ï?${discountText}`);
         if (d.balanceAfter) setBalance(d.balanceAfter);
         fetchItems();
         setTimeout(() => setMsg(null), 3000);
       } else {
-        setMsg(`âŒ ${res.data?.error || 'è³¼è²·å¤±æ•—'}`);
+        setMsg(`??${res.data?.error || 'è³¼è²·å¤±æ?'}`);
         setTimeout(() => setMsg(null), 3000);
       }
     } catch (err: any) {
-      setMsg(`âŒ ${err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ•—'}`);
+      setMsg(`??${err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ?'}`);
       setTimeout(() => setMsg(null), 3000);
     } finally {
       setBuyingChest(null);
@@ -195,7 +195,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const yjcInput = parseFloat(convertZxc);
     if (!yjcInput || yjcInput <= 0) {
-      setMsg('âŒ è«‹è¼¸å…¥å¤§æ–¼ 0 çš„ YJC æ•¸é‡');
+      setMsg('??è«‹è¼¸?¥å¤§??0 ??YJC ?¸é?');
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -205,14 +205,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(zxcNeeded) });
       if (res.data?.success) {
-        setMsg(`âœ… æˆåŠŸå…Œæ› ${res.data.data?.yjcAmount || yjcInput} YJC`);
+        setMsg(`???å??Œæ? ${res.data.data?.yjcAmount || yjcInput} YJC`);
         setConvertZxc('');
         fetchItems();
       } else {
-        setMsg(`âŒ ${res.data?.error?.message || res.data?.error || 'å…Œæ›å¤±æ•—'}`);
+        setMsg(`??${res.data?.error?.message || res.data?.error || '?Œæ?å¤±æ?'}`);
       }
     } catch (err: any) {
-      setMsg(`âŒ ${err?.response?.data?.error?.message || err?.message || 'å…Œæ›å¤±æ•—'}`);
+      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?Œæ?å¤±æ?'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -224,7 +224,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const yjcNum = parseFloat(convertYjc);
     if (!yjcNum || yjcNum <= 0) {
-      setMsg('âŒ è«‹è¼¸å…¥å¤§æ–¼ 0 çš„ YJC æ•¸é‡');
+      setMsg('??è«‹è¼¸?¥å¤§??0 ??YJC ?¸é?');
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -233,14 +233,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', { sessionId, yjcAmount: String(yjcNum) });
       if (res.data?.success) {
-        setMsg(`âœ… æˆåŠŸå…Œæ› ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
+        setMsg(`???å??Œæ? ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
         setConvertYjc('');
         fetchItems();
       } else {
-        setMsg(`âŒ ${res.data?.error?.message || res.data?.error || 'å…Œæ›å¤±æ•—'}`);
+        setMsg(`??${res.data?.error?.message || res.data?.error || '?Œæ?å¤±æ?'}`);
       }
     } catch (err: any) {
-      setMsg(`âŒ ${err?.response?.data?.error?.message || err?.message || 'å…Œæ›å¤±æ•—'}`);
+      setMsg(`??${err?.response?.data?.error?.message || err?.message || '?Œæ?å¤±æ?'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -254,15 +254,15 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/inventory/buy', { sessionId, itemId });
       if (res.data?.success) {
-        setMsg(`${res.data.data?.name || itemId} è³¼è²·æˆåŠŸï¼`);
+        setMsg(`${res.data.data?.name || itemId} è³¼è²·?å?ï¼`);
         const newBal = res.data.data?.balanceAfter;
         if (newBal) setBalance(newBal);
         fetchItems();
       } else {
-        setMsg(res.data?.error || 'è³¼è²·å¤±æ•—');
+        setMsg(res.data?.error || 'è³¼è²·å¤±æ?');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ•—');
+      setMsg(err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ?');
     } finally {
       setBuyingId(null);
     }
@@ -275,20 +275,20 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/sell', { sessionId, itemId, quantity });
       if (res.data?.success) {
-        setMsg(`å…¸ç•¶æˆåŠŸï¼ç²å¾— +${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`?¸ç•¶?å?ï¼ç²å¾?+${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(res.data?.error || 'å…¸ç•¶å¤±æ•—');
+        setMsg(res.data?.error || '?¸ç•¶å¤±æ?');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || 'å…¸ç•¶å¤±æ•—');
+      setMsg(err?.response?.data?.data?.error || err?.message || '?¸ç•¶å¤±æ?');
     } finally {
       setSellingId(null);
     }
   }
 
-  // â”€â”€ Market handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ?€?€ Market handlers ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
   const fetchListings = async () => {
     setMarketLoading(true);
     try {
@@ -314,17 +314,17 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/market-listings', { sessionId, itemId: sellItemId, quantity: sellQty, price: Number(sellPrice) });
       if (res.data?.success) {
-        setMarketMsg('âœ… æ›è³£æˆåŠŸï¼');
+        setMarketMsg('???›è³£?å?ï¼?);
         setSellItemId('');
         setSellPrice('');
         setSellQty(1);
         setShowSellForm(false);
         fetchListings();
       } else {
-        setMarketMsg(`âŒ ${res.data?.error || 'æ›è³£å¤±æ•—'}`);
+        setMarketMsg(`??${res.data?.error || '?›è³£å¤±æ?'}`);
       }
     } catch (err: any) {
-      setMarketMsg(`âŒ ${err?.response?.data?.data?.error || err?.message || 'æ›è³£å¤±æ•—'}`);
+      setMarketMsg(`??${err?.response?.data?.data?.error || err?.message || '?›è³£å¤±æ?'}`);
     } finally {
       setMarketLoading(false);
       setTimeout(() => setMarketMsg(null), 4000);
@@ -337,14 +337,14 @@ export default function ShopView() {
     try {
       const res = await api.post(`/api/v1/market-listings/${listingId}/buy`, { sessionId });
       if (res.data?.success) {
-        setMsg(`âœ… è³¼è²·æˆåŠŸï¼`);
+        setMsg(`??è³¼è²·?å?ï¼`);
         fetchListings();
         fetchItems();
       } else {
-        setMsg(`âŒ ${res.data?.error || 'è³¼è²·å¤±æ•—'}`);
+        setMsg(`??${res.data?.error || 'è³¼è²·å¤±æ?'}`);
       }
     } catch (err: any) {
-      setMsg(`âŒ ${err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ•—'}`);
+      setMsg(`??${err?.response?.data?.data?.error || err?.message || 'è³¼è²·å¤±æ?'}`);
     } finally {
       setBuyingListing(null);
       setTimeout(() => setMsg(null), 4000);
@@ -356,13 +356,13 @@ export default function ShopView() {
     try {
       const res = await api.delete(`/api/v1/market-listings/${listingId}`, { data: { sessionId } });
       if (res.data?.success) {
-        setMsg('âœ… å·²å–æ¶ˆæ›è³£');
+        setMsg('??å·²å?æ¶ˆæ?è³?);
         fetchMyListings();
       } else {
-        setMsg(`âŒ ${res.data?.error || 'å–æ¶ˆå¤±æ•—'}`);
+        setMsg(`??${res.data?.error || '?–æ?å¤±æ?'}`);
       }
     } catch (err: any) {
-      setMsg(`âŒ ${err?.response?.data?.data?.error || err?.message || 'å–æ¶ˆå¤±æ•—'}`);
+      setMsg(`??${err?.response?.data?.data?.error || err?.message || '?–æ?å¤±æ?'}`);
     }
   };
 
@@ -373,14 +373,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/stock-sell', { sessionId, symbol, quantity: qty });
       if (res.data?.success) {
-        setMsg(`âœ… æˆåŠŸå‡ºå”® ${qty} è‚¡ ${symbol}ï¼Œç²å¾— +${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`???å??ºå”® ${qty} ??${symbol}ï¼Œç²å¾?+${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(`âŒ ${res.data?.error || 'å‡ºå”®å¤±æ•—'}`);
+        setMsg(`??${res.data?.error || '?ºå”®å¤±æ?'}`);
       }
     } catch (err: any) {
-      setMsg(`âŒ ${err?.response?.data?.data?.error || err?.message || 'å‡ºå”®å¤±æ•—'}`);
+      setMsg(`??${err?.response?.data?.data?.error || err?.message || '?ºå”®å¤±æ?'}`);
     } finally {
       setSellingStock(null);
       setTimeout(() => setMsg(null), 4000);
@@ -413,7 +413,7 @@ export default function ShopView() {
               <ChevronLeft size={24} />
             </Link>
             <ShoppingBag className="text-accent" />
-            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">å•†åº—</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">?†å?</h1>
           </div>
         </div>
         <div className="flex app-shell gap-4">
@@ -421,29 +421,29 @@ export default function ShopView() {
             onClick={() => setTab('shop')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
-            å•†åŸ
+            ?†å?
           </button>
           <button
             onClick={() => setTab('pawn')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
-            ç•¶èˆ–
+            ?¶è?
           </button>
           <button
             onClick={() => setTab('market')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'market' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
-            äº¤æ˜“å¸‚å ´
+            äº¤æ?å¸‚å ´
           </button>
         </div>
       </header>
 
       <main className="pt-28 app-shell">
-        {/* Balance â€” full width at top */}
+        {/* Balance ??full width at top */}
         <section className="bg-card rounded-2xl p-4 border border-border flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-accent" />
-            <span className="text-sm font-black uppercase tracking-widest text-secondary">ZXC é¤˜é¡</span>
+            <span className="text-sm font-black uppercase tracking-widest text-secondary">ZXC é¤˜é?</span>
           </div>
             <span className="text-lg font-black italic text-accent">{formatBalance(balance, numberMode)}</span>
         </section>
@@ -452,72 +452,72 @@ export default function ShopView() {
         {/* YJC Exchange */}
         <section className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">ğŸ’</span>
-            <span className="text-sm font-black uppercase tracking-widest text-secondary">ä½‘æˆ©å¹£ YJC</span>
+            <span className="text-lg">??</span>
+            <span className="text-sm font-black uppercase tracking-widest text-secondary">ä½‘æˆ©å¹?YJC</span>
           </div>
           <div className="bg-surface rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-bold text-secondary">å¯ç”¨ YJC</span>
+              <span className="text-xs font-bold text-secondary">?¯ç”¨ YJC</span>
               <span className="text-sm font-black text-info">{formatBalance(yjcBalance, numberMode)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-secondary">å¯ç”¨ ZXC</span>
+              <span className="text-xs font-bold text-secondary">?¯ç”¨ ZXC</span>
               <span className="text-sm font-black text-accent">{formatBalance(balance, numberMode)}</span>
             </div>
           </div>
           <div className="text-center text-[10px] font-bold text-secondary mb-4 tracking-wider">
-            1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXCï¼ˆå›ºå®šåŒ¯ç‡ï¼‰
+            1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXCï¼ˆå›ºå®šåŒ¯?‡ï?
           </div>
 
-          {/* ZXC â†’ YJC */}
+          {/* ZXC ??YJC */}
           <div className="rounded-xl bg-surface p-4 mb-3">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-black uppercase tracking-widest text-white">ç”¨ ZXC è³¼è²· YJC</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-white">??ZXC è³¼è²· YJC</span>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="number" min="0.0001" step="0.0001"
-                placeholder="è¼¸å…¥ YJC æ•¸é‡"
+                placeholder="è¼¸å…¥ YJC ?¸é?"
                 value={convertZxc}
                 onChange={e => setConvertZxc(e.target.value)}
                 className="flex-1 bg-card text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-border/30 outline-none focus:border-[#4fc3f7] placeholder:text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <span className="shrink-0 text-xs font-bold text-info whitespace-nowrap">
-                â‰ˆ {formatNumber(parseFloat(convertZxc || '0') * CONVERSION_RATE, numberMode)} ZXC
+                ??{formatNumber(parseFloat(convertZxc || '0') * CONVERSION_RATE, numberMode)} ZXC
               </span>
             </div>
             <button
               onClick={handleConvertYjc}
               disabled={converting || !convertZxc || !sessionId}
-              className="mt-2 w-full rounded-xl bg-[#4fc3f7] py-2.5 text-xs font-black uppercase tracking-widest text-[#0e0e0e] transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
+              className="mt-2 w-full rounded-xl bg-[#4fc3f7] py-2.5 text-xs font-bold uppercase tracking-widest text-[#0e0e0e] transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
             >
               {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : 'è³¼è²· YJC'}
             </button>
           </div>
 
-          {/* YJC â†’ ZXC */}
+          {/* YJC ??ZXC */}
           <div className="rounded-xl bg-surface p-4">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-black uppercase tracking-widest text-white">ç”¨ YJC æ›å› ZXC</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-white">??YJC ?›å? ZXC</span>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="number" min="0.0001" step="0.0001"
-                placeholder="YJC æ•¸é‡"
+                placeholder="YJC ?¸é?"
                 value={convertYjc}
                 onChange={e => setConvertYjc(e.target.value)}
                 className="flex-1 bg-card text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-border/30 outline-none focus:border-accent placeholder:text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <span className="shrink-0 text-xs font-bold text-accent whitespace-nowrap">
-                â‰ˆ {formatNumber(parseFloat(convertYjc || '0') * CONVERSION_RATE, numberMode)} ZXC
+                ??{formatNumber(parseFloat(convertYjc || '0') * CONVERSION_RATE, numberMode)} ZXC
               </span>
             </div>
             <button
               onClick={handleConvertZxcFromYjc}
               disabled={converting || !convertYjc || !sessionId}
-              className="mt-2 w-full rounded-xl bg-accent py-2.5 text-xs font-black uppercase tracking-widest text-black transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
+              className="mt-2 w-full rounded-xl bg-accent py-2.5 text-xs font-bold uppercase tracking-widest text-black transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
             >
-              {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : 'ç¢ºèªæ›å› ZXC'}
+              {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : 'ç¢ºè??›å? ZXC'}
             </button>
           </div>
         </section>
@@ -540,7 +540,7 @@ export default function ShopView() {
                   <Gift className="w-8 h-8 mx-auto mb-2 text-accent" />
                   <p className="text-sm font-bold text-white text-center truncate">{chest.name}</p>
                   <div className="flex items-center justify-center gap-2 mt-2">
-                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String(Math.max(1, (parseInt(p[chest.id] || '1', 10) || 1) - 1)) }))} className="text-accent font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-card">âˆ’</button>
+                    <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String(Math.max(1, (parseInt(p[chest.id] || '1', 10) || 1) - 1)) }))} className="text-accent font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-card">??/button>
                     <input
                       type="text"
                       inputMode="numeric"
@@ -563,7 +563,7 @@ export default function ShopView() {
                     disabled={boughtHere}
                     className="mt-2 w-full bg-accent text-black text-sm font-bold py-2 rounded-lg hover:brightness-110 disabled:opacity-50"
                   >
-                    {boughtHere ? 'è³¼è²·ä¸­...' : 'è³¼è²·'}
+                    {boughtHere ? 'è³¼è²·ä¸?..' : 'è³¼è²·'}
                   </button>
                 </div>
               );
@@ -573,7 +573,7 @@ export default function ShopView() {
 
         <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">å•†åŸå•†å“</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">?†å??†å?</h2>
             <button onClick={fetchItems} className="text-secondary hover:text-white transition-colors">
               <RefreshCw size={14} />
             </button>
@@ -586,7 +586,7 @@ export default function ShopView() {
           )}
 
           {!loading && visibleItems.length === 0 && (
-            <p className="text-sm text-secondary text-center py-8">ç›®å‰æš«ç„¡å•†å“</p>
+            <p className="text-sm text-secondary text-center py-8">?®å??«ç„¡?†å?</p>
           )}
 
           <div className="space-y-3">
@@ -599,7 +599,7 @@ export default function ShopView() {
 
               return (
                 <div key={item.itemId} className="flex items-center gap-4 bg-surface rounded-xl p-4 border border-border/20">
-                  <div className="text-2xl shrink-0">{item.icon || 'ğŸ“¦'}</div>
+                  <div className="text-2xl shrink-0">{item.icon || '?“¦'}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{item.name}</p>
                     <p className="text-sm text-secondary truncate">{item.description || ''}</p>
@@ -608,7 +608,7 @@ export default function ShopView() {
                         {item.rarity}
                       </span>
                       {bundle && (
-                        <span className="text-sm font-bold text-emerald-400">ğŸ“¦ çµ„åˆåŒ…</span>
+                        <span className="text-sm font-bold text-emerald-400">?“¦ çµ„å???/span>
                       )}
                     </div>
                     {bundle && (
@@ -629,9 +629,9 @@ export default function ShopView() {
                             }
                             return (
                               <div key={i} className="flex items-center gap-1.5 text-sm">
-                                <span className="shrink-0">{info?.icon || 'â€¢'}</span>
+                                <span className="shrink-0">{info?.icon || '??}</span>
                                 <span className="text-white font-medium">{info?.name || sub.id}</span>
-                                {(sub.qty || 1) > 1 && <span className="text-secondary">Ã—{sub.qty}</span>}
+                                {(sub.qty || 1) > 1 && <span className="text-secondary">?{sub.qty}</span>}
                                 {computedValue != null ? <span className="text-sm font-bold text-emerald-400 ml-auto">+{formatNumber(computedValue, numberMode)} ZXC</span>
                                   : hasDiscount && totalValue > 0 && bundle.length > 1 && (
                                     <span className="text-sm text-secondary ml-auto">~{formatNumber(Math.round(totalValue / bundle.length), numberMode)} ZXC</span>
@@ -676,28 +676,28 @@ export default function ShopView() {
         <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
             <Trash2 size={16} className="text-accent" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">ç•¶èˆ–</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">?¶è?</h2>
           </div>
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => setPawnTab('items')}
               className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'items' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}
             >
-              é“å…·
+              ?“å…·
             </button>
             <button
               onClick={() => setPawnTab('stocks')}
               className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg transition-colors ${pawnTab === 'stocks' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}
             >
-              è‚¡ç¥¨
+              ?¡ç¥¨
             </button>
           </div>
 
           {pawnTab === 'items' && (
           <>
-          <p className="text-sm text-secondary mb-4">å°‡ä¸éœ€è¦çš„é“å…·å…¸ç•¶æ›å– ZXC</p>
+          <p className="text-sm text-secondary mb-4">å°‡ä??€è¦ç??“å…·?¸ç•¶?›å? ZXC</p>
           {invItems.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">æš«ç„¡å¯å…¸ç•¶çš„é“å…·</p>
+            <p className="text-sm text-secondary text-center py-8">?«ç„¡?¯å…¸?¶ç??“å…·</p>
           ) : (
             <div className="space-y-3">
               {invItems.map((item: any) => {
@@ -705,7 +705,7 @@ export default function ShopView() {
                 const price = def ? getItemPawnValue(def) : 0;
                 return (
                   <div key={item.id} className="flex items-center gap-4 bg-surface rounded-xl p-4 border border-border/20">
-                    <div className="text-2xl shrink-0">{item.icon || 'ğŸ“¦'}</div>
+                    <div className="text-2xl shrink-0">{item.icon || '?“¦'}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white truncate">{item.name}</p>
                       <p className="text-sm text-secondary truncate">{item.description || ''}</p>
@@ -713,7 +713,7 @@ export default function ShopView() {
                         <span className="text-sm font-bold uppercase" style={{ color: RARITY_COLORS[item.rarity] || '#b0b0b0' }}>
                           {item.rarity}
                         </span>
-                        <span className="text-sm text-secondary">Ã—{item.quantity}</span>
+                        <span className="text-sm text-secondary">?{item.quantity}</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -723,7 +723,7 @@ export default function ShopView() {
                         disabled={sellingId === item.id || !sessionId}
                         className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
                       >
-                        {sellingId === item.id ? <Loader2 size={10} className="animate-spin" /> : 'å…¸ç•¶'}
+                        {sellingId === item.id ? <Loader2 size={10} className="animate-spin" /> : '?¸ç•¶'}
                       </button>
                     </div>
                   </div>
@@ -736,14 +736,14 @@ export default function ShopView() {
 
           {pawnTab === 'stocks' && (
           <>
-          <p className="text-sm text-secondary mb-4">ä»¥å¸‚åƒ¹ 70% å‡ºå”®è‚¡ç¥¨ï¼Œç«‹å³è®Šç¾ ZXC</p>
+          <p className="text-sm text-secondary mb-4">ä»¥å???70% ?ºå”®?¡ç¥¨ï¼Œç??³è???ZXC</p>
           {stockHoldings.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">æš«ç„¡æŒè‚¡</p>
+            <p className="text-sm text-secondary text-center py-8">?«ç„¡?è‚¡</p>
           ) : (
             <>
-            {/* â”€â”€ Portfolio Summary â”€â”€ */}
+            {/* ?€?€ Portfolio Summary ?€?€ */}
             <div className="bg-surface rounded-xl p-4 border border-border/20 mb-4">
-              <div className="text-xs font-black uppercase tracking-widest text-secondary mb-2">æŒå€‰ç¸½è¦½</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-secondary mb-2">?å€‰ç¸½è¦?/div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {(() => {
                   const totalValue = stockHoldings.reduce((s, st) => s + (st.price || 0) * st.qty, 0);
@@ -753,21 +753,21 @@ export default function ShopView() {
                   return (
                     <>
                       <div>
-                        <span className="text-secondary">å¸‚å€¼</span>
+                        <span className="text-secondary">å¸‚å€?/span>
                         <p className="font-black text-white">{formatNumber(totalValue, numberMode)} ZXC</p>
                       </div>
                       <div>
-                        <span className="text-secondary">å³æ™‚è®Šç¾</span>
+                        <span className="text-secondary">?³æ?è®Šç¾</span>
                         <p className="font-black text-emerald-400">{formatNumber(totalPayout, numberMode)} ZXC</p>
                       </div>
                       <div>
-                        <span className="text-secondary">æç›Š</span>
+                        <span className="text-secondary">?ç?</span>
                         <p className={`font-black ${totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {totalPnl >= 0 ? '+' : ''}{formatNumber(totalPnl, numberMode)} ZXC
                         </p>
                       </div>
                       <div>
-                        <span className="text-secondary">æˆæœ¬</span>
+                        <span className="text-secondary">?æœ¬</span>
                         <p className="font-black text-secondary">{formatNumber(totalCost, numberMode)} ZXC</p>
                       </div>
                     </>
@@ -788,7 +788,7 @@ export default function ShopView() {
                 return (
                   <div key={stock.symbol} className="bg-surface rounded-xl p-4 border border-border/20">
                     <div className="flex items-center gap-3">
-                      <div className="text-2xl shrink-0">ğŸ“ˆ</div>
+                      <div className="text-2xl shrink-0">??</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-white">{stock.symbol}</p>
@@ -799,16 +799,16 @@ export default function ShopView() {
                         </div>
                         <div className="flex items-center gap-3 mt-1">
                           <span className="text-sm font-black text-white">{formatNumber(marketPrice, numberMode)} ZXC</span>
-                          <span className={`text-xs font-black ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {isUp ? 'â–²' : 'â–¼'} {Math.abs(dayChange).toFixed(2)}%
+                          <span className={`text-xs font-bold ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {isUp ? '?? : '??} {Math.abs(dayChange).toFixed(2)}%
                           </span>
-                          <span className="text-xs text-secondary">{stock.qty} è‚¡</span>
+                          <span className="text-xs text-secondary">{stock.qty} ??/span>
                         </div>
                         <div className="flex items-center gap-3 mt-0.5">
                           <span className={`text-xs font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             {pnl >= 0 ? '+' : ''}{formatNumber(pnl, numberMode)} ZXC ({pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%)
                           </span>
-                          <span className="text-xs text-secondary">å‡åƒ¹ {formatNumber(Number(stock.avgPrice || 0), numberMode)}</span>
+                          <span className="text-xs text-secondary">?‡åƒ¹ {formatNumber(Number(stock.avgPrice || 0), numberMode)}</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
@@ -819,7 +819,7 @@ export default function ShopView() {
                           disabled={sellingStock === stock.symbol || !sessionId}
                           className="text-sm font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-red-500/30 transition-colors"
                         >
-                          {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : 'å‡ºå”®'}
+                          {sellingStock === stock.symbol ? <Loader2 size={10} className="animate-spin" /> : '?ºå”®'}
                         </button>
                       </div>
                     </div>
@@ -839,44 +839,44 @@ export default function ShopView() {
         </section>
         )}
 
-        {/* â”€â”€ Trading Market Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ?€?€ Trading Market Tab ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€ */}
         {tab === 'market' && (
         <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">ğŸª</span>
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">äº¤æ˜“å¸‚å ´</h2>
+            <span className="text-lg">?ª</span>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">äº¤æ?å¸‚å ´</h2>
           </div>
           <div className="flex gap-2 mb-4">
             <button onClick={() => { setMarketTab('browse'); fetchListings(); }}
-              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'browse' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}>ç€è¦½</button>
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'browse' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}>?è¦½</button>
             <button onClick={() => { setMarketTab('mine'); fetchMyListings(); }}
-              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'mine' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}>æˆ‘çš„æ›è³£</button>
+              className={`text-sm font-black uppercase tracking-widest px-3 py-1 rounded-lg ${marketTab === 'mine' ? 'bg-accent text-black' : 'bg-[#494847]/30 text-secondary'}`}>?‘ç??›è³£</button>
           </div>
 
           {marketTab === 'browse' && (
           <>
           <button onClick={() => setShowSellForm(o => !o)}
             className="w-full mb-4 text-sm font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg hover:bg-emerald-500/30">
-            {showSellForm ? 'æ”¶èµ·' : '+ æˆ‘è¦è³£'}
+            {showSellForm ? '?¶èµ·' : '+ ?‘è?è³?}
           </button>
 
           {showSellForm && (
             <div className="bg-surface rounded-xl p-4 border border-border/20 mb-4 space-y-3">
               <select value={sellItemId} onChange={e => setSellItemId(e.target.value)}
                 className="w-full bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent">
-                <option value="">é¸æ“‡é“å…·</option>
+                <option value="">?¸æ??“å…·</option>
                 {invItems.map((item: any) => (
                   <option key={item.id} value={item.id}>{item.name} (x{item.quantity})</option>
                 ))}
               </select>
               <div className="flex gap-2">
-                <input type="number" min={1} placeholder="æ•¸é‡" value={sellQty} onChange={e => setSellQty(parseInt(e.target.value) || 1)}
+                <input type="number" min={1} placeholder="?¸é?" value={sellQty} onChange={e => setSellQty(parseInt(e.target.value) || 1)}
                   className="w-20 bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent" />
-                <input type="number" min={1} placeholder="åƒ¹æ ¼ (ZXC)" value={sellPrice} onChange={e => setSellPrice(e.target.value)}
+                <input type="number" min={1} placeholder="?¹æ ¼ (ZXC)" value={sellPrice} onChange={e => setSellPrice(e.target.value)}
                   className="flex-1 bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent" />
               </div>
               <button onClick={handleCreateListing} disabled={!sellItemId || !sellPrice}
-                className="w-full bg-accent text-black font-black text-sm py-2 rounded-lg disabled:opacity-50">æ›è³£</button>
+                className="w-full bg-accent text-black font-black text-sm py-2 rounded-lg disabled:opacity-50">?›è³£</button>
               {marketMsg && <p className="text-xs font-bold text-emerald-400">{marketMsg}</p>}
             </div>
           )}
@@ -884,20 +884,20 @@ export default function ShopView() {
           {marketLoading ? (
             <Loader2 size={16} className="animate-spin mx-auto text-accent" />
           ) : listings.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">ç›®å‰ç„¡äººåœ¨è³£</p>
+            <p className="text-sm text-secondary text-center py-8">?®å??¡äºº?¨è³£</p>
           ) : (
             <div className="space-y-3">
               {listings.map((l: any) => (
                 <div key={l.id} className="flex items-center gap-3 bg-surface rounded-xl p-4 border border-border/20">
-                  <span className="text-2xl shrink-0">{l.itemIcon || 'ğŸ“¦'}</span>
+                  <span className="text-2xl shrink-0">{l.itemIcon || '?“¦'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{l.itemName || l.itemId}</p>
-                    <p className="text-xs text-secondary">{l.quantity} å€‹ Â· {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
+                    <p className="text-xs text-secondary">{l.quantity} ??Â· {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="text-sm font-black text-accent">{formatNumber(Number(l.price), numberMode)} ZXC</span>
                     <button onClick={() => handleBuyListing(l.id)} disabled={buyingListing === l.id}
-                      className="text-xs font-black uppercase tracking-widest bg-accent text-black px-3 py-1.5 rounded-lg disabled:opacity-50">
+                      className="text-xs font-bold uppercase tracking-widest bg-accent text-black px-3 py-1.5 rounded-lg disabled:opacity-50">
                       {buyingListing === l.id ? <Loader2 size={10} className="animate-spin" /> : 'è³¼è²·'}
                     </button>
                   </div>
@@ -910,22 +910,22 @@ export default function ShopView() {
 
           {marketTab === 'mine' && (
           <>
-          <p className="text-sm text-secondary mb-4">ä½ å¯ä»¥åœ¨é€™è£¡ç®¡ç†ä½ çš„æ›è³£ç‰©å“</p>
+          <p className="text-sm text-secondary mb-4">ä½ å¯ä»¥åœ¨?™è£¡ç®¡ç?ä½ ç??›è³£?©å?</p>
           {myListings.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">å°šç„¡æ›è³£</p>
+            <p className="text-sm text-secondary text-center py-8">å°šç„¡?›è³£</p>
           ) : (
             <div className="space-y-3">
               {myListings.map((l: any) => (
                 <div key={l.id} className="flex items-center gap-3 bg-surface rounded-xl p-4 border border-border/20">
-                  <span className="text-2xl shrink-0">ğŸ“¦</span>
+                  <span className="text-2xl shrink-0">?“¦</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white">{l.itemId}</p>
-                    <p className="text-xs text-secondary">{l.quantity} å€‹ Â· {formatNumber(Number(l.price), numberMode)} ZXC</p>
+                    <p className="text-xs text-secondary">{l.quantity} ??Â· {formatNumber(Number(l.price), numberMode)} ZXC</p>
                     <span className={`text-[10px] font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-secondary'}`}>{l.status}</span>
                   </div>
                   {l.status === 'active' && (
                     <button onClick={() => handleCancelListing(l.id)}
-                      className="text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg">å–æ¶ˆ</button>
+                      className="text-xs font-bold uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg">?–æ?</button>
                   )}
                 </div>
               ))}
@@ -949,3 +949,4 @@ export default function ShopView() {
     </div>
   );
 }
+

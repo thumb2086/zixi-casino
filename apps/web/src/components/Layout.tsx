@@ -54,11 +54,11 @@ export default function Layout() {
                       className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-left hover:bg-elevated transition-colors"
                     >
                       <MessageCircle size={16} className="text-info shrink-0" />
-                      <span className="text-xs font-black uppercase tracking-widest text-info">{t('layout.global_chat')}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-info">{t('layout.global_chat')}</span>
                   </button>
                   <ChatRoom />
                   <footer className="py-4 text-center">
-                    <p className="text-xs font-black uppercase tracking-[0.5em] text-muted">
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted">
                       {t('layout.footer', { version: APP_VERSION })}
                     </p>
                   </footer>
@@ -80,7 +80,7 @@ export default function Layout() {
         {chatOpen ? (
           <div className="mx-2 mb-2">
             <div className="flex items-center justify-between bg-card rounded-t-xl border border-border/20 px-4 py-2">
-              <span className="text-xs font-black uppercase tracking-widest text-blue-400">{t('layout.global_chat')}</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-blue-400">{t('layout.global_chat')}</span>
               <button onClick={() => setChatOpen(false)} className="text-secondary hover:text-white">
                 <ChevronRight size={18} />
               </button>
@@ -109,3 +109,5 @@ export default function Layout() {
     </div>
   );
 }
+
+

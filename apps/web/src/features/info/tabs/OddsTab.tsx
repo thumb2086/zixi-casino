@@ -71,7 +71,7 @@ export default function OddsTab() {
       </section>
 
       <section className="rounded-2xl border border-border/10 bg-card p-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">{t('info.what_is_rtp')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">{t('info.what_is_rtp')}</h2>
         <p className="mt-3 text-sm font-bold leading-relaxed text-secondary">
           {t('info.rtp_explanation_detail')}
         </p>
@@ -84,24 +84,24 @@ export default function OddsTab() {
       </section>
 
       <section className="rounded-2xl border border-border/10 bg-card p-6">
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-secondary">{t('info.fee_title')}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">{t('info.fee_title')}</h2>
         <p className="mt-3 text-sm font-bold leading-relaxed text-secondary">
-          {t('info.fee_formula_label')}<span className="text-emerald-400">{t('info.fee_formula')}</span>。
+          {t('info.fee_formula_label')}<span className="text-emerald-400">{t('info.fee_formula')}</span>??
         </p>
         <p className="mt-1 text-sm font-bold leading-relaxed text-secondary">
           {t('info.fee_max_discount_prefix')}<span className="text-accent">100%</span>{t('info.fee_max_discount_suffix')}
         </p>
         <ul className="mt-3 space-y-2 text-xs font-bold text-secondary">
-          <li>• {t('info.fee_discount_detail_normal')}</li>
-          <li>• {t('info.fee_discount_detail_silver')}</li>
-          <li>• {t('info.fee_discount_detail_gold')}</li>
-          <li>• {t('info.fee_discount_detail_platinum')}</li>
-          <li>• {t('info.fee_discount_detail_diamond')}</li>
+          <li>??{t('info.fee_discount_detail_normal')}</li>
+          <li>??{t('info.fee_discount_detail_silver')}</li>
+          <li>??{t('info.fee_discount_detail_gold')}</li>
+          <li>??{t('info.fee_discount_detail_platinum')}</li>
+          <li>??{t('info.fee_discount_detail_diamond')}</li>
         </ul>
       </section>
 
       <section className="space-y-3">
-        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-secondary">{t('info.game_probabilities')}</h2>
+        <h2 className="px-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">{t('info.game_probabilities')}</h2>
         {GAME_ODDS.map((game) => (
           <div key={game.key} className="rounded-xl border border-border/10 bg-card p-4">
             <button
@@ -153,7 +153,7 @@ export default function OddsTab() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="px-2 text-xs font-black uppercase tracking-[0.2em] text-secondary flex items-center gap-2">
+        <h2 className="px-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary flex items-center gap-2">
           <Gift size={14} />{t('info.chest_probabilities_title')}
         </h2>
 
@@ -189,3 +189,4 @@ export default function OddsTab() {
     </div>
   );
 }
+

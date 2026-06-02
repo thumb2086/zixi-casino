@@ -168,7 +168,7 @@ export default function SupportView() {
               {announcements.slice(0, 3).map((a) => (
                 <li key={a.id} className="border-l-2 border-accent/50 pl-3">
                   <div className="flex items-center gap-2">
-                    {a.isPinned && <span className="text-xs font-black uppercase text-accent">{t('support.pinned')}</span>}
+                    {a.isPinned && <span className="text-xs font-bold uppercase text-accent">{t('support.pinned')}</span>}
                     <h3 className="text-sm font-bold text-white">{a.title}</h3>
                   </div>
                   <p className="text-xs text-secondary mt-1 whitespace-pre-wrap">{a.content}</p>
@@ -188,7 +188,7 @@ export default function SupportView() {
           ) : (
             <form onSubmit={handleSubmitTicket} className="space-y-3">
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.title_label')}</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-1">{t('support.title_label')}</label>
                 <input
                   type="text"
                   value={title}
@@ -199,7 +199,7 @@ export default function SupportView() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.category_label')}</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-1">{t('support.category_label')}</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
@@ -211,7 +211,7 @@ export default function SupportView() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.content_label')}</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-1">{t('support.content_label')}</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -221,7 +221,7 @@ export default function SupportView() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-widest text-secondary mb-1">{t('support.contact_label')}</label>
+                <label className="block text-xs font-bold uppercase tracking-widest text-secondary mb-1">{t('support.contact_label')}</label>
                 <input
                   type="text"
                   value={contact}
@@ -255,3 +255,4 @@ export default function SupportView() {
     </div>
   );
 }
+

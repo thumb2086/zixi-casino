@@ -38,19 +38,19 @@ export default function HealthView() {
       <main className="app-shell space-y-10 pt-24">
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
            <div className="bg-card p-6 rounded-2xl border border-border/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em]">UPTIME</span>
+              <span className="text-[8px] font-bold text-muted uppercase tracking-[0.1em]">UPTIME</span>
               <span className="text-xl font-black italic text-emerald-500">{stats?.uptime ?? (isLoading ? '...' : '--')}</span>
            </div>
            <div className="bg-card p-6 rounded-2xl border border-border/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em]">FAILURE RATE</span>
+              <span className="text-[8px] font-bold text-muted uppercase tracking-[0.1em]">FAILURE RATE</span>
               <span className="text-xl font-black italic text-accent">{stats?.failureRate ?? (isLoading ? '...' : '--')}</span>
            </div>
            <div className="bg-card p-6 rounded-2xl border border-border/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em]">NODES</span>
+              <span className="text-[8px] font-bold text-muted uppercase tracking-[0.1em]">NODES</span>
               <span className="text-xl font-black italic text-white">{stats?.nodes ?? (isLoading ? '...' : '--')}</span>
            </div>
            <div className="bg-card p-6 rounded-2xl border border-border/10 flex flex-col gap-2">
-              <span className="text-[8px] font-black text-muted uppercase tracking-[0.3em]">SECURE LAYER</span>
+              <span className="text-[8px] font-bold text-muted uppercase tracking-[0.1em]">SECURE LAYER</span>
               <span className="text-xl font-black italic text-accent">{stats?.secureLayer ?? '--'}</span>
            </div>
         </section>
@@ -62,7 +62,7 @@ export default function HealthView() {
                     <Activity size={16} className="text-accent" />
                     <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">SIMULATION THROUGHPUT</h3>
                  </div>
-                 <div className="flex items-center gap-4 text-[8px] font-black uppercase">
+                 <div className="flex items-center gap-4 text-[8px] font-bold uppercase">
                     <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20 border border-emerald-500" /> SUCCESS</div>
                     <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-red-500/60 border border-red-500" /> FAILURE</div>
                  </div>
@@ -86,7 +86,7 @@ export default function HealthView() {
                    </div>
                  )}
               </div>
-              <div className="flex justify-between text-[8px] font-black text-muted uppercase tracking-[0.3em]">
+              <div className="flex justify-between text-[8px] font-bold text-muted uppercase tracking-[0.1em]">
                  <span>24 HOURS AGO</span>
                  <span>SYNCHRONIZED NOW</span>
               </div>
@@ -101,13 +101,13 @@ export default function HealthView() {
                  {recentLogs.length === 0 && (
                    <div className="flex flex-col items-center justify-center py-20 opacity-20 space-y-4">
                       <Database size={40} />
-                      <p className="text-xs font-black uppercase tracking-[0.5em]">No recent traces detected</p>
+                      <p className="text-xs font-bold uppercase tracking-[0.2em]">No recent traces detected</p>
                    </div>
                  )}
                  {recentLogs.map((ev: any, i: number) => (
                     <div key={ev.id || i} className="bg-surface rounded-xl p-4 border border-border/5 space-y-2 group hover:border-accent/30 transition-all">
                        <div className="flex items-center justify-between">
-                          <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-sm ${ev.severity === 'error' || ev.severity === 'fatal' ? 'bg-red-500/10 text-red-500' : ev.severity === 'warn' ? 'bg-amber-500/10 text-amber-400' : 'bg-accent/10 text-accent'}`}>[{ev.kind}]</span>
+                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-sm ${ev.severity === 'error' || ev.severity === 'fatal' ? 'bg-red-500/10 text-red-500' : ev.severity === 'warn' ? 'bg-amber-500/10 text-amber-400' : 'bg-accent/10 text-accent'}`}>[{ev.kind}]</span>
                           <span className="text-[8px] font-bold text-muted">{new Date(ev.createdAt).toLocaleTimeString([], { hour12: false })}</span>
                        </div>
                        <p className="text-xs font-bold text-white leading-relaxed uppercase italic tracking-tight">{ev.message}</p>
@@ -122,3 +122,5 @@ export default function HealthView() {
     </div>
   );
 }
+
+

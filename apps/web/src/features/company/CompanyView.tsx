@@ -147,7 +147,7 @@ export default function CompanyView() {
         <div className="flex gap-1 rounded-xl bg-card p-1">
           {(["dashboard", "hire", "invest"] as const).map((tb) => (
             <button key={tb} onClick={() => setTab(tb)}
-              className={`flex-1 py-2 text-xs font-black rounded-lg ${tab === tb ? "bg-accent text-black" : "text-secondary"}`}>
+              className={`flex-1 py-2 text-xs font-bold rounded-lg ${tab === tb ? "bg-accent text-black" : "text-secondary"}`}>
               {tb === "dashboard" ? t("tab_dashboard") : tb === "hire" ? t("tab_hire") : t("tab_invest")}
             </button>
           ))}
@@ -181,7 +181,7 @@ export default function CompanyView() {
                   <span className="text-emerald-400">{t("synergy")} +{sum.teamSynergy}%</span>
                   {sum.teamConflict > 0 && <span className="text-red-400">{t("conflict")} -{sum.teamConflict}%</span>}
                   <span className="text-blue-400">{t("leadership")} +{sum.teamLeadership}%</span>
-                  <span className="text-accent">{t("total")} ×{sum.effectiveMultiplier}</span>
+                  <span className="text-accent">{t("total")} ?{sum.effectiveMultiplier}</span>
                 </div>
                 <div className="mt-2 space-y-1">
                   {sum.teamDetails?.slice(0, 3).map((d: string, i: number) => (
@@ -203,7 +203,7 @@ export default function CompanyView() {
                     <div>
                       <p className="text-xs font-bold">{emp.name}</p>
                       <p className="text-[10px] text-secondary">{t("role_" + emp.role)} · {t("productivity")} {emp.productivity.toFixed(2)} · {t("salary")} {emp.salary}</p>
-                      <p className="text-[9px] text-secondary">{t("leadership")} {emp.leadership.toFixed(2)} · {t("traits")} {emp.traits?.join("、")}</p>
+                      <p className="text-[9px] text-secondary">{t("leadership")} {emp.leadership.toFixed(2)} · {t("traits")} {emp.traits?.join("??)}</p>
                     </div>
                     <button onClick={() => fire.mutate(emp.id)} className="text-[10px] text-red-400">{t("fire")}</button>
                   </div>
@@ -236,11 +236,11 @@ export default function CompanyView() {
             {/* Actions */}
             <div className="flex gap-2">
               <button onClick={() => upgrade.mutate()} disabled={upgrade.isPending}
-                className="flex-1 bg-accent/10 text-accent border border-accent/30 py-3 rounded-xl text-xs font-black">
+                className="flex-1 bg-accent/10 text-accent border border-accent/30 py-3 rounded-xl text-xs font-bold">
                 {t("upgrade", { level: company?.level + 1, cost: sum?.level * 5000 })}
               </button>
               <button onClick={() => research.mutate()} disabled={research.isPending}
-                className="flex-1 bg-purple-500/10 text-purple-400 border border-purple-500/30 py-3 rounded-xl text-xs font-black">
+                className="flex-1 bg-purple-500/10 text-purple-400 border border-purple-500/30 py-3 rounded-xl text-xs font-bold">
                 {t("research", { progress: sum?.research })}
               </button>
             </div>
@@ -250,11 +250,11 @@ export default function CompanyView() {
               <p className="text-xs font-bold text-secondary mb-3">{t("equipment")}</p>
               <div className="flex gap-2">
                 <button onClick={() => buyEquipment.mutate("gpu")} disabled={buyEquipment.isPending || (sum?.cash || 0) < 5000}
-                  className="flex-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 py-3 rounded-xl text-xs font-black">
+                  className="flex-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 py-3 rounded-xl text-xs font-bold">
                   {t("gpu", { count: sum?.equipment?.gpu || 0 })}
                 </button>
                 <button onClick={() => buyEquipment.mutate("supercomputer")} disabled={buyEquipment.isPending || (sum?.cash || 0) < 50000}
-                  className="flex-1 bg-violet-500/10 text-violet-400 border border-violet-500/30 py-3 rounded-xl text-xs font-black">
+                  className="flex-1 bg-violet-500/10 text-violet-400 border border-violet-500/30 py-3 rounded-xl text-xs font-bold">
                   {t("supercomputer", { count: sum?.equipment?.supercomputer || 0 })}
                 </button>
               </div>
@@ -262,7 +262,7 @@ export default function CompanyView() {
 
             {company?.companyType === "chip" && (
               <button onClick={() => upgradeFab.mutate()} disabled={upgradeFab.isPending || (sum?.cash || 0) < (sum?.fabLevel || 1) * 10000}
-                className="w-full bg-amber-600/20 text-amber-400 border border-amber-600/30 py-3 rounded-xl text-xs font-black">
+                className="w-full bg-amber-600/20 text-amber-400 border border-amber-600/30 py-3 rounded-xl text-xs font-bold">
                 {t("fab_level", { level: sum?.fabLevel, cost: (sum?.fabLevel || 1) * 10000 })}
               </button>
             )}
@@ -298,7 +298,7 @@ export default function CompanyView() {
                   <div><span className="text-secondary">{t("productivity")}</span><p className="font-black">{candidate.productivity.toFixed(2)}</p></div>
                   <div><span className="text-secondary">{t("leadership")}</span><p className="font-black">{candidate.leadership.toFixed(2)}</p></div>
                   <div><span className="text-secondary">{t("salary")}</span><p className="font-black">{candidate.salary}</p></div>
-                  <div><span className="text-secondary">{t("traits")}</span><p className="font-black">{candidate.traits?.join("、")}</p></div>
+                  <div><span className="text-secondary">{t("traits")}</span><p className="font-black">{candidate.traits?.join("??)}</p></div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => setCandidate(null)} className="flex-1 border border-border/30 py-3 rounded-xl text-xs">{t("discard")}</button>
@@ -373,3 +373,4 @@ function InvestView({ sessionId }: { sessionId: string }) {
     </div>
   );
 }
+
