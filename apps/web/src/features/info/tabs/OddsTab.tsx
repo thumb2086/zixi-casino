@@ -127,7 +127,7 @@ export default function OddsTab() {
               <div className="mt-4 space-y-3 border-t border-border/10 pt-4">
                 <p className="text-sm font-bold text-secondary">{game.description}</p>
                 <div className="rounded-lg bg-surface p-3">
-                  <p className="text-xs font-bold text-accent">{t('info.payout_rules_label')}{game.payout}</p>
+                  <p className="text-xs font-bold text-secondary">{t('info.payout_rules_label')}{game.payout}</p>
                   <p className="mt-1 text-xs font-bold text-secondary">{t('info.probability_highlight_label')}{game.probability}</p>
                 </div>
                 <div className="rounded-lg bg-emerald-500/10 p-3">
@@ -166,7 +166,7 @@ export default function OddsTab() {
             <div key={chest.key} className="mb-3 last:mb-0 rounded-lg border border-border/10 bg-surface p-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-bold text-white">{chest.type}</h3>
-                <span className="text-xs font-bold text-accent">{chest.price}</span>
+                <span className="text-xs font-bold text-secondary">{chest.price}</span>
               </div>
               <p className="text-caption font-bold text-secondary mb-2">{chest.pity}</p>
               <div className="flex items-center gap-2">
@@ -189,5 +189,6 @@ export default function OddsTab() {
     </div>
   );
 }
+
 
 

@@ -69,7 +69,7 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Crown size={16} className="text-accent" />
-          <span className="text-xs font-bold uppercase tracking-widest text-accent">?? Ê¶úÁ??ç‰?</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-secondary">?? Ê¶úÁ??ç‰?</span>
         </div>
         <div className="flex items-center gap-3">
           {remainingTime ? (
@@ -96,7 +96,7 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
             </div>
             <div className={`flex flex-col items-center justify-center rounded-t-xl border-t p-2 text-center ${p.cls}`}>
               <p className="w-full truncate text-xs font-bold text-white">{p.item.name}</p>
-              <p className="mt-0.5 text-xs font-bold text-accent">{nf(p.item.amount)} Ê¨?/p>
+              <p className="mt-0.5 text-xs font-bold text-secondary">{nf(p.item.amount)} Ê¨?/p>
             </div>
           </div>
         ) : null)}
@@ -195,7 +195,7 @@ export default function LeaderboardView() {
       <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
-            <Trophy className="text-accent" />
+            <Trophy className="text-secondary" />
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
               {t('leaderboard.title')}
             </h1>
@@ -392,7 +392,7 @@ export default function LeaderboardView() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="w-6 text-xs font-bold text-accent">{selfEntry.rank}</span>
+                    <span className="w-6 text-xs font-bold text-secondary">{selfEntry.rank}</span>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent/30 bg-elevated text-xs font-bold uppercase text-accent">
                       {selfEntry.name.charAt(0)}
                     </div>
@@ -427,6 +427,8 @@ export default function LeaderboardView() {
     </div>
   );
 }
+
+
 
 
 

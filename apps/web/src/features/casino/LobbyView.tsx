@@ -98,7 +98,7 @@ export default function LobbyView() {
     staleTime: 60000,
   });
   const isAdmin = Boolean(profileData?.isAdmin);
-  const vipLevel = profileData?.vipLevel || '?ÆÈÄöÊ???;
+  const vipLevel = profileData?.vipLevel || '?ÔøΩÈÄöÔøΩ???;
 
   const { data: missionsData } = useQuery({
     queryKey: ['missions'],
@@ -194,7 +194,7 @@ export default function LobbyView() {
             to="/app/transactions"
             className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-accent/20 shadow-[0_0_15px_rgba(252,192,37,0.1)] flex items-center justify-center bg-card"
           >
-            <User size={20} className="text-accent" />
+            <User size={20} className="text-secondary" />
           </Link>
         </div>
       </header>
@@ -205,7 +205,7 @@ export default function LobbyView() {
 
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-bold uppercase tracking-[0.1em] text-accent">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-secondary">
                 {t('lobby.operator_identified')}
               </p>
               <h2 className="text-4xl font-extrabold uppercase italic tracking-tight">
@@ -258,7 +258,7 @@ export default function LobbyView() {
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-caption text-secondary mt-0.5">‰∏ã‰?Á¥?{nf(profileData.xpNextLevel)} XP</p>
+                  <p className="text-caption text-secondary mt-0.5">‰∏ãÔøΩ?ÔøΩ?{nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
@@ -276,8 +276,8 @@ export default function LobbyView() {
           <div className="card-success bg-card p-6 md:col-span-2 lg:col-span-3 border border-border/10">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <span className="text-xl">?éØ</span>
-                <h2 className="section-title-text text-success">ÊØèÊó•‰ªªÂ?</h2>
+                <span className="text-xl">?ÔøΩÔøΩ</span>
+                <h2 className="section-title-text text-success">ÊØèÊó•‰ªªÔøΩ?</h2>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -290,7 +290,7 @@ export default function LobbyView() {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className="text-xs font-bold text-white">{locked ? '?? ' : ''}{m.name}</p>
-                        <p className="text-caption text-secondary mt-0.5">{locked ? `?ÄË¶?VIP ${m.vip} ‰ª•‰?` : m.desc}</p>
+                        <p className="text-caption text-secondary mt-0.5">{locked ? `?ÔøΩÔøΩ?VIP ${m.vip} ‰ª•ÔøΩ?` : m.desc}</p>
                       </div>
                       <span className="text-caption font-bold text-accent shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
                     </div>
@@ -300,7 +300,7 @@ export default function LobbyView() {
                     <div className="flex justify-between items-center">
                       <span className="text-caption text-secondary">{locked ? '-' : `${m.progress}/${m.target}`}</span>
                       {locked ? null : done ? (
-                        <button onClick={() => claimMission(m.id)} className="text-caption font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">?òÂ?</button>
+                        <button onClick={() => claimMission(m.id)} className="text-caption font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">?ÔøΩÔøΩ?</button>
                       ) : null}
                     </div>
                   </div>
@@ -312,7 +312,7 @@ export default function LobbyView() {
             to="/app/announcement"
             icon={CalendarClock}
             title={t('lobby.events')}
-            subtitle={pinnedCount > 0 ? `${pinnedCount} ?áÁΩÆ?Ç` : t('lobby.events_subtitle')}
+            subtitle={pinnedCount > 0 ? `${pinnedCount} ?ÔøΩÁΩÆ?ÔøΩ` : t('lobby.events_subtitle')}
           >
             <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-secondary">
               {!recentTxs || recentTxs.length === 0 ? (
@@ -434,7 +434,7 @@ export default function LobbyView() {
               </p>
               <div className="mt-4 flex items-center gap-2">
                 <div className="h-1 w-1 animate-pulse rounded-full bg-accent" />
-                <span className="text-xs font-bold uppercase tracking-widest text-accent">
+                <span className="text-xs font-bold uppercase tracking-widest text-secondary">
                   {t('lobby.system_secure')}
                 </span>
               </div>
@@ -449,6 +449,7 @@ export default function LobbyView() {
     </div>
   );
 }
+
 
 
 

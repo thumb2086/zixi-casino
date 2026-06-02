@@ -412,8 +412,8 @@ export default function ShopView() {
             <Link to="/app" className="text-secondary transition-colors hover:text-accent">
               <ChevronLeft size={24} />
             </Link>
-            <ShoppingBag className="text-accent" />
-            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">?†å?</h1>
+            <ShoppingBag className="text-secondary" />
+            <h1 className="font-extrabold tracking-tight text-xl text-white uppercase italic">?†å?</h1>
           </div>
         </div>
         <div className="flex app-shell gap-4">
@@ -508,7 +508,7 @@ export default function ShopView() {
                 onChange={e => setConvertYjc(e.target.value)}
                 className="flex-1 bg-card text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-border/30 outline-none focus:border-accent placeholder:text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="shrink-0 text-xs font-bold text-accent whitespace-nowrap">
+              <span className="shrink-0 text-xs font-bold text-secondary whitespace-nowrap">
                 ??{formatNumber(parseFloat(convertYjc || '0') * CONVERSION_RATE, numberMode)} ZXC
               </span>
             </div>
@@ -537,7 +537,7 @@ export default function ShopView() {
               const unitPrice = Math.round(chest.price * (1 - discount));
               return (
                 <div key={chest.id} className="bg-surface rounded-xl p-4 border border-border/20 flex flex-col">
-                  <Gift className="w-8 h-8 mx-auto mb-2 text-accent" />
+                  <Gift className="w-8 h-8 mx-auto mb-2 text-secondary" />
                   <p className="text-sm font-bold text-white text-center truncate">{chest.name}</p>
                   <div className="flex items-center justify-center gap-2 mt-2">
                     <button onClick={() => setChestQty(p => ({ ...p, [chest.id]: String(Math.max(1, (parseInt(p[chest.id] || '1', 10) || 1) - 1)) }))} className="text-accent font-bold text-sm w-6 h-6 flex items-center justify-center rounded bg-card">??/button>
@@ -949,6 +949,8 @@ export default function ShopView() {
     </div>
   );
 }
+
+
 
 
 

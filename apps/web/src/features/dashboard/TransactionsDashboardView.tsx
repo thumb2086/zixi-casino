@@ -90,7 +90,7 @@ export default function TransactionsDashboardView() {
     <div className="min-h-screen bg-surface pb-28 text-white">
       <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
-          <h1 className="text-lg font-black uppercase tracking-[0.1em] text-accent">äº¤æ?ç´€??/h1>
+          <h1 className="text-lg font-black uppercase tracking-[0.1em] text-secondary">äº¤æ?ç´€??/h1>
           <Link to="/app" className="text-xs font-bold text-secondary hover:text-accent">è¿”å?</Link>
         </div>
       </header>
@@ -177,4 +177,5 @@ export default function TransactionsDashboardView() {
     </div>
   );
 }
+
 

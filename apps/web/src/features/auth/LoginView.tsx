@@ -349,7 +349,7 @@ export default function LoginView() {
 
               <form onSubmit={mode === 'login' ? handleCustodyLogin : handleCustodyRegister} className="space-y-6">
                 <div className="space-y-2">
-                    <label className="text-xs font-bold text-accent uppercase ml-1 tracking-widest">{t('auth.username')}</label>
+                    <label className="text-xs font-bold text-secondary uppercase ml-1 tracking-widest">{t('auth.username')}</label>
                     <div className="relative">
                       <div className="absolute left-5 top-1/2 -translate-y-1/2 text-accent/40">
                         <Monitor size={16} />
@@ -365,7 +365,7 @@ export default function LoginView() {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <label className="text-xs font-bold text-accent uppercase ml-1 tracking-widest">{t('auth.password')}</label>
+                    <label className="text-xs font-bold text-secondary uppercase ml-1 tracking-widest">{t('auth.password')}</label>
                     <div className="relative">
                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-accent/40">
                           <Monitor size={16} />
@@ -383,7 +383,7 @@ export default function LoginView() {
 
                 {mode === 'register' && (
                   <div className="space-y-2">
-                      <label className="text-xs font-bold text-accent uppercase ml-1 tracking-widest">{t('auth.confirm_password')}</label>
+                      <label className="text-xs font-bold text-secondary uppercase ml-1 tracking-widest">{t('auth.confirm_password')}</label>
                       <div className="relative">
                          <div className="absolute left-5 top-1/2 -translate-y-1/2 text-accent/40">
                             <Monitor size={16} />
@@ -471,6 +471,7 @@ export default function LoginView() {
     </div>
   );
 }
+
 
 
 

@@ -163,7 +163,7 @@ export default function RoomLobbyView() {
                 }`}
               >
                 {game.vipOnly && (
-                  <div className="absolute left-3 top-3 rounded-full border border-accent/20 bg-accent/10 px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-accent">
+                  <div className="absolute left-3 top-3 rounded-full border border-accent/20 bg-accent/10 px-2 py-1 text-[8px] font-bold uppercase tracking-widest text-secondary">
                     {t('lobby.vip')}
                   </div>
                 )}
@@ -208,7 +208,7 @@ export default function RoomLobbyView() {
                       type="button"
                       disabled={locked || joinRoomMutation.isPending}
                       onClick={() => handleVipEnter(game.id)}
-                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-accent/30 bg-[#121212] px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mt-1 inline-flex items-center gap-2 rounded-lg border border-accent/30 bg-[#121212] px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-secondary disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {locked ? <Lock size={12} /> : <ChevronRight size={12} />}
                       {joinRoomMutation.isPending ? t('casino.entering') : t('casino.enter_room')}
@@ -234,5 +234,6 @@ export default function RoomLobbyView() {
     </div>
   );
 }
+
 
 

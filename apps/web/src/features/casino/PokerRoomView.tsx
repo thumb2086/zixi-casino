@@ -222,7 +222,7 @@ export default function PokerRoomView() {
             <span className="text-caption text-secondary">{roomId}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-accent">åº•æ? ${pot}</span>
+            <span className="text-xs font-bold text-secondary">åº•æ? ${pot}</span>
             <span className="text-xs text-secondary">{allPlayers.filter(p => !p.folded).length}/{allPlayers.length} äº?/span>
           </div>
         </div>
@@ -301,4 +301,5 @@ export default function PokerRoomView() {
     </div>
   );
 }
+
 

@@ -770,8 +770,8 @@ export default function AdminView() {
       <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-border/20">
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <ShieldAlert className="text-accent" />
-            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">{t('admin.title')}</h1>
+            <ShieldAlert className="text-secondary" />
+            <h1 className="font-extrabold tracking-tight text-xl text-white uppercase italic">{t('admin.title')}</h1>
           </div>
           <button onClick={refresh} className="p-2 rounded-lg border border-border/30 hover:bg-elevated" aria-label={t('admin.refresh')}>
             <RefreshCw size={16} className={loading ? 'animate-spin text-accent' : 'text-secondary'} />
@@ -1469,7 +1469,7 @@ export default function AdminView() {
             </div>
 
             <div className="rounded-lg border border-border/20 bg-elevated p-4 space-y-3">
-              <div className="text-xs font-bold text-accent">{t('admin.add_edit_campaign')}</div>
+              <div className="text-xs font-bold text-secondary">{t('admin.add_edit_campaign')}</div>
               <input
                 type="text"
                 value={campaignDraftId}
@@ -1870,7 +1870,7 @@ export default function AdminView() {
                     {t.message && <p className="text-xs text-white whitespace-pre-wrap break-words">{t.message}</p>}
                     {t.adminUpdate && (
                       <div className="rounded bg-accent/10 border border-accent/30 p-2">
-                        <p className="text-xs font-bold text-accent mb-1">{t('admin.admin_reply')}</p>
+                        <p className="text-xs font-bold text-secondary mb-1">{t('admin.admin_reply')}</p>
                         <p className="text-xs text-white whitespace-pre-wrap break-words">{t.adminUpdate}</p>
                       </div>
                     )}
@@ -1963,7 +1963,7 @@ export function AnnouncementManager() {
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="bg-card p-4 rounded-xl border border-border/30 space-y-3">
-        <h3 className="text-sm font-black text-accent">{editing ? t('admin.edit_announcement') : t('admin.new_announcement_title')}</h3>
+        <h3 className="text-sm font-black text-white">{editing ? t('admin.edit_announcement') : t('admin.new_announcement_title')}</h3>
         <input
           value={form.title}
           onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
@@ -2035,6 +2035,8 @@ export function AnnouncementManager() {
     </div>
   );
 }
+
+
 
 
 
