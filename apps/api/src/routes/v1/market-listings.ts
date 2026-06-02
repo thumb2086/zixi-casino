@@ -87,22 +87,37 @@ export async function marketListingRoutes(fastify: FastifyInstance) {
 
     const { itemId, quantity, price, token } = request.body as { itemId: string; quantity: number; price: number; token: string };
 
-    // Check item exists in inventory
-    const state = await loadInventoryState(ctx.userId);
-    const owned = state.inventory[itemId] || 0;
-    if (owned < quantity) {
-      return createApiEnvelope({ success: false }, request.id, false, "道具數量不足");
-    }
-
     const def = ALL_ITEMS[itemId];
     if (!def) {
       return createApiEnvelope({ success: false }, request.id, false, "未知道具");
     }
 
-    // Deduct from inventory
-    const nextState = { ...state, inventory: { ...state.inventory } };
-    nextState.inventory[itemId] = owned - quantity;
-    if (nextState.inventory[itemId] <= 0) delete nextState.inventory[itemId];
+    const state = await loadInventoryState(ctx.userId);
+    const isAvatarOrTitle = def.type === "avatar" || def.type === "title";
+    const owned = isAvatarOrTitle
+      ? (def.type === "avatar" && state.ownedAvatars.includes(itemId) ? 1 : 0)
+      : (state.inventory[itemId] || 0);
+    if (owned < quantity) {
+      return createApiEnvelope({ success: false }, request.id, false, "道具數量不足");
+    }
+
+    // Deduct from inventory (or ownedAvatars/ownedTitles for avatar/title types)
+    const nextState = {
+      ...state,
+      inventory: { ...state.inventory },
+      ownedAvatars: [...state.ownedAvatars],
+      ownedTitles: [...state.ownedTitles],
+    };
+    if (isAvatarOrTitle) {
+      if (def.type === "avatar") {
+        nextState.ownedAvatars = nextState.ownedAvatars.filter((id: string) => id !== itemId);
+      } else {
+        nextState.ownedTitles = nextState.ownedTitles.filter((id: string) => id !== itemId);
+      }
+    } else {
+      nextState.inventory[itemId] = owned - quantity;
+      if (nextState.inventory[itemId] <= 0) delete nextState.inventory[itemId];
+    }
     await persistInventoryState(ctx.userId, nextState);
 
     // Create listing
@@ -153,7 +168,17 @@ export async function marketListingRoutes(fastify: FastifyInstance) {
 
     // Return items to seller
     const state = await loadInventoryState(ctx.userId);
-    state.inventory[listing.itemId] = (state.inventory[listing.itemId] || 0) + listing.quantity;
+    const cancelDef = ALL_ITEMS[listing.itemId];
+    const isAvatarOrTitleCancel = cancelDef && (cancelDef.type === "avatar" || cancelDef.type === "title");
+    if (isAvatarOrTitleCancel) {
+      if (cancelDef.type === "avatar") {
+        if (!state.ownedAvatars.includes(listing.itemId)) state.ownedAvatars.push(listing.itemId);
+      } else {
+        if (!state.ownedTitles.includes(listing.itemId)) state.ownedTitles.push(listing.itemId);
+      }
+    } else {
+      state.inventory[listing.itemId] = (state.inventory[listing.itemId] || 0) + listing.quantity;
+    }
     await persistInventoryState(ctx.userId, state);
 
     // Update listing status

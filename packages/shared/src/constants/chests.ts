@@ -530,6 +530,17 @@ export const SPECIAL_ITEMS: ItemDefinition[] = [
     tradable: false,
     consumable: false,
   },
+  {
+    id: "avatar_zixi",
+    name: "子熙頭像",
+    nameEn: "ZiXi Avatar",
+    type: "avatar",
+    rarity: "transcendent",
+    description: "子熙品牌象徵頭像，限量發行",
+    icon: "🔯",
+    tradable: true,
+    consumable: false,
+  },
 ];
 
 // Pawn / Sell pricing

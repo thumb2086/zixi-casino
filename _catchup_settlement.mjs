@@ -1,72 +1,83 @@
 /**
  * 補發歷史清算上鏈轉帳
- * 找出 wallet_ledger_entries 中 type='market_settlement' 且 amount>0
- * 但沒有對應 confirmed TxIntent 的記錄，逐筆觸發 adminTransfer
- *
- * 用法: set DATABASE_URL=... && node _catchup_settlement.mjs
+ * Usage: node _catchup_settlement.mjs
+ * Env needs: POSTGRES_URL_NON_POOLING, RPC_URL(or PRC), ADMIN_PRIVATE_KEY
  */
-import { randomUUID } from 'crypto';
-import pkg from './node_modules/.pnpm/@neondatabase+serverless@0.10.4/node_modules/@neondatabase/serverless/index.js';
-const { neon } = pkg;
 
-const sql = neon(process.env.DATABASE_URL);
-const RPC_URL = process.env.RPC_URL;
+import { randomUUID } from 'node:crypto';
+
+// Resolve pnpm virtual store path (this script lives at repo root)
+const scriptDir = new URL('.', import.meta.url).pathname.replace(/\/$/, '');
+const pnpmStore = `${scriptDir}/node_modules/.pnpm`;
+
+const { neon } = await import(`${pnpmStore}/@neondatabase+serverless@0.10.4/node_modules/@neondatabase/serverless/index.mjs`);
+const { ethers } = await import(`${pnpmStore}/ethers@6.16.0/node_modules/ethers/lib.esm/index.js`);
+
+// ── Env ──
+const DB_URL = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL;
+const RPC_URL = process.env.RPC_URL || process.env.PRC;
 const ADMIN_KEY = process.env.ADMIN_PRIVATE_KEY;
-const CONTRACT = process.env.ZHIXI_CONTRACT; // ZXC contract address
-const TREASURY = process.env.TREASURY_ADDRESS;
+const CONTRACT = process.env.ZXC_CONTRACT_ADDRESS || process.env.CONTRACT_ADDRESS || '0xe3d9af5f15857cb01e0614fa281fcc3256f62050';
 
-if (!RPC_URL || !ADMIN_KEY || !CONTRACT || !TREASURY) {
-  console.error('Missing env: RPC_URL, ADMIN_PRIVATE_KEY, ZHIXI_CONTRACT, TREASURY_ADDRESS');
+if (!DB_URL || !RPC_URL || !ADMIN_KEY) {
+  console.error('Missing env vars.');
   process.exit(1);
 }
 
-// 1. Find market_settlement entries without confirmed TxIntents
+const sql = neon(DB_URL);
+
+// 1. Find unsettled entries
+console.log('Querying unsettled entries...');
 const entries = await sql`
   SELECT le.* FROM wallet_ledger_entries le
   WHERE le.type = 'market_settlement'
-  AND CAST(le.amount AS numeric) > 0
-  AND NOT EXISTS (
-    SELECT 1 FROM tx_intents ti
-    WHERE ti.address = le.address
-    AND ti.status = 'confirmed'
-    AND ti.meta->>'source' = 'market_liquidation'
-    AND ABS(CAST(ti.amount AS numeric) - CAST(le.amount AS numeric)) < 1
-  )
+    AND CAST(le.amount AS numeric) > 0
+    AND NOT EXISTS (
+      SELECT 1 FROM tx_intents ti
+      WHERE ti.user_id = le.user_id
+        AND ti.address = le.address
+        AND ti.status = 'confirmed'
+        AND ti.meta->>'source' LIKE 'market_liquidation%'
+        AND ABS(CAST(ti.amount AS numeric) - CAST(le.amount AS numeric)) < 1
+    )
   ORDER BY le.created_at ASC
 `;
 
-console.log(`Found ${entries.length} unsettled market settlements`);
+console.log(`Found ${entries.length} unsettled entries`);
 
 if (entries.length === 0) {
   console.log('Nothing to replay. Exiting.');
   process.exit(0);
 }
 
-// 2. For each entry, fire adminTransfer
-import { ethers } from 'ethers';
+// 2. Send transfers
 const provider = new ethers.JsonRpcProvider(RPC_URL);
-const wallet = new ethers.Wallet(ADMIN_KEY, provider);
+const wallet = new ethers.Wallet(ADMIN_KEY.startsWith('0x') ? ADMIN_KEY : `0x${ADMIN_KEY}`, provider);
 const token = new ethers.Contract(CONTRACT, [
   'function transfer(address to, uint256 amount) returns (bool)',
   'function decimals() view returns (uint8)',
-  'function balanceOf(address) view returns (uint256)',
 ], wallet);
 
 const decimals = await token.decimals();
+console.log(`Token decimals: ${decimals}`);
+
 let success = 0, fail = 0;
 
 for (const entry of entries) {
-  const amountWei = ethers.parseUnits(String(Math.abs(Number(entry.amount))), decimals);
+  const amountNum = Math.abs(Number(entry.amount));
+  const amountWei = ethers.parseUnits(String(amountNum), decimals);
   try {
-    console.log(`  Transferring ${entry.amount} ZXC to ${entry.address}...`);
-    const tx = await token.transfer(entry.address, amountWei);
+    console.log(`  Sending ${amountNum.toLocaleString()} ZXC to ${entry.address.slice(0, 10)}...`);
+    const tx = await token.transfer(entry.address, amountWei, { gasLimit: 100000 });
     const receipt = await tx.wait();
     if (receipt.status === 1) {
-      console.log(`    ✅ confirmed tx: ${receipt.hash}`);
-      // Record TxIntent
+      console.log(`    ✅ confirmed: ${receipt.hash}`);
       await sql`
         INSERT INTO tx_intents (id, user_id, address, token, type, amount, status, tx_hash, meta, created_at, updated_at)
-        VALUES (${randomUUID()}, ${entry.user_id}, ${entry.address}, 'ZXC', 'admin_credit', ${String(Math.abs(Number(entry.amount)))}, 'confirmed', ${receipt.hash}, ${JSON.stringify({ source: 'market_liquidation_catchup', originalLedgerId: entry.id })}, NOW(), NOW())
+        VALUES (${randomUUID()}, ${entry.user_id}, ${entry.address}, 'ZXC', 'admin_credit',
+                ${String(amountNum)}, 'confirmed', ${receipt.hash},
+                ${JSON.stringify({ source: 'market_liquidation_catchup', originalLedgerId: entry.id })},
+                NOW(), NOW())
       `;
       success++;
     } else {
