@@ -27,7 +27,7 @@
 }
 
 .player-card.active {
-  border-color: #ffcc00;
+  border-color: var(--color-accent);
   box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
 }
 
@@ -41,7 +41,7 @@
 .player-score {
   font-size: 3rem;
   font-weight: bold;
-  color: #ffcc00;
+  color: var(--color-accent);
   margin: 10px 0;
 }
 
@@ -54,7 +54,7 @@
 
 .stake-tier {
   padding: 15px 30px;
-  background: #1a1a1a;
+  background: var(--color-bg-card);
   border: 2px solid #333;
   border-radius: 12px;
   cursor: pointer;
@@ -63,9 +63,9 @@
 }
 
 .stake-tier.active {
-  border-color: #ffcc00;
+  border-color: var(--color-accent);
   background: rgba(255, 204, 0, 0.1);
-  color: #ffcc00;
+  color: var(--color-accent);
 }
 
 .duel-logs {
@@ -86,3 +86,4 @@
 .log-entry:last-child {
   border-bottom: none;
 }
+

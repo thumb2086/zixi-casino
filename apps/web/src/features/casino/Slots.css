@@ -6,7 +6,7 @@
 }
 
 .slots-board {
-  background: #1a1a1a;
+  background: var(--color-bg-card);
   border: 3px solid #444;
   border-radius: 16px;
   padding: 12px;
@@ -21,7 +21,7 @@
 }
 
 .slot-cell {
-  background: #2a2a2a;
+  background: var(--color-bg-card);
   aspect-ratio: 1;
   border-radius: 8px;
   display: flex;
@@ -58,7 +58,7 @@
 
 .btn-spin {
   flex: 1;
-  background: linear-gradient(180deg, #ffcc00, #d4a017);
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent));
   color: black;
   border: none;
   border-radius: 8px;
@@ -91,3 +91,4 @@
   .slot-controls { flex-direction: column; padding: 12px; }
   .btn-spin { width: 100%; padding: 0.8rem 1rem; font-size: 1rem; }
 }
+

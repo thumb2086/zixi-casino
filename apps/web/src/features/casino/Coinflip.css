@@ -30,11 +30,11 @@
   align-items: center;
   justify-content: center;
   font-size: 5rem;
-  border: 8px solid #d4a017;
+  border: 8px solid var(--color-accent);
 }
 
 .coin-front {
-  background: #ffcc00;
+  background: var(--color-accent);
   z-index: 2;
 }
 
@@ -61,7 +61,7 @@
   padding: 15px;
   border-radius: 12px;
   border: 2px solid #333;
-  background: #1a1a1a;
+  background: var(--color-bg-card);
   color: white;
   font-weight: bold;
   cursor: pointer;
@@ -69,14 +69,14 @@
 }
 
 .btn-choice.active {
-  border-color: #ffcc00;
+  border-color: var(--color-accent);
   background: rgba(255, 204, 0, 0.1);
 }
 
 .btn-play {
   padding: 15px;
   border-radius: 12px;
-  background: linear-gradient(180deg, #ffcc00, #d4a017);
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent));
   color: black;
   font-weight: bold;
   border: none;
@@ -117,3 +117,4 @@
     font-size: 1.05rem;
   }
 }
+
