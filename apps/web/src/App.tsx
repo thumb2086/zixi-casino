@@ -7,6 +7,7 @@ import LoginView from './features/auth/LoginView';
 import LobbyView from './features/casino/LobbyView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
+import ToastProvider from './components/ToastProvider';
 import { useAuthStore } from './store/useAuthStore';
 import { useUserStore } from './store/useUserStore';
 import { useSyncUser } from './hooks/useSyncUser';
@@ -154,6 +155,7 @@ function AppContent() {
       <FontSizeApplier />
       <SoundPlayer />
       {isAuthorized && <TransactionQueueIndicator />}
+      <ToastProvider />
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>}>
       <Routes>
         <Route path="/landing" element={<LandingView />} />
