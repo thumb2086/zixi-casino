@@ -36,7 +36,7 @@ export default function UnifiedInfoView() {
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">32 ?‹ç?ç´?Â· å°ˆå±¬?¹æ? Â· ç´¯ç?è§??</p>
             </div>
             <div className="ml-auto">
-              <span className="inline-block rounded border border-accent/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent">
+              <span className="inline-block rounded border border-accent/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-secondary">
                 32 ?Žç?ç´?
               </span>
             </div>
@@ -102,4 +102,5 @@ export default function UnifiedInfoView() {
     </div>
   );
 }
+
 

@@ -226,7 +226,7 @@ export default function CompanyView() {
                       <input type="range" min={0.3} max={5} step={0.1} value={p.priceMultiplier}
                         onChange={(e) => setPrice.mutate({ productId: p.id, multiplier: Number(e.target.value) })}
                         className="w-20 accent-[#fcc025]" />
-                      <span className="text-xs font-bold text-accent w-8 text-right">{p.priceMultiplier.toFixed(1)}x</span>
+                      <span className="text-xs font-bold text-secondary w-8 text-right">{p.priceMultiplier.toFixed(1)}x</span>
                     </div>
                   </div>
                 ))}
@@ -373,6 +373,7 @@ function InvestView({ sessionId }: { sessionId: string }) {
     </div>
   );
 }
+
 
 
 

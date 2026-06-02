@@ -249,7 +249,7 @@ export default function MarketView() {
             className="w-full rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none" />
           {selectedQuote?.price && summary?.cash > 0 && (
             <button type="button" onClick={() => { const raw = Number(summary.cash / selectedQuote.price) * 0.998; setTradeQuantity(raw > 0 ? String(Math.floor(raw)) : '0'); }}
-              className="w-full text-xs font-bold text-accent py-2 rounded-lg border border-accent/30 hover:bg-accent/10">
+              className="w-full text-xs font-bold text-secondary py-2 rounded-lg border border-accent/30 hover:bg-accent/10">
               {t('market.buy_all_in')}
             </button>
           )}
@@ -279,7 +279,7 @@ export default function MarketView() {
           <div>
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-bold text-secondary">{t('market.leverage')}</span>
-              <span className="text-xs font-bold text-accent">{futuresLeverage}x</span>
+              <span className="text-xs font-bold text-secondary">{futuresLeverage}x</span>
             </div>
             <input type="range" min={1} max={20} value={futuresLeverage} onChange={(e) => setFuturesLeverage(Number(e.target.value))}
               className="w-full accent-[#fcc025]" />
@@ -293,7 +293,7 @@ export default function MarketView() {
                 const maxMargin = Math.floor(Number(summary.cash) / (1 + futuresLeverage * feeRate));
                 setFuturesMargin(String(Math.max(0, maxMargin)));
               }}
-                className="w-full text-xs font-bold text-accent py-2 rounded-lg border border-accent/30 hover:bg-accent/10">
+                className="w-full text-xs font-bold text-secondary py-2 rounded-lg border border-accent/30 hover:bg-accent/10">
                 {t('market.buy_all_in')}
               </button>
             )}
@@ -342,7 +342,7 @@ export default function MarketView() {
             <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
               placeholder={t('market.amount')} className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none" />
             <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.cash || 0))))}
-              className="text-xs font-bold text-accent px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10">?¨éƒ¨å­˜å…¥</button>
+              className="text-xs font-bold text-secondary px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10">?¨éƒ¨å­˜å…¥</button>
             <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.bankBalance || 0))))}
               className="text-xs font-bold text-emerald-400 px-3 py-1 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10">?¨éƒ¨?˜å‡º</button>
           </div>
@@ -402,8 +402,8 @@ export default function MarketView() {
       <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <TrendingUp className="text-accent" />
-            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">{t('market.title')}</h1>
+            <TrendingUp className="text-secondary" />
+            <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-white">{t('market.title')}</h1>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={() => setMobileDrawerOpen(o => !o)} className="lg:hidden text-xs font-bold uppercase tracking-[0.18em] text-accent">
@@ -468,7 +468,7 @@ export default function MarketView() {
               <CircleDollarSign className="text-accent" size={18} />
               <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">{t('market.market_pulse')}</h2>
               <button onClick={() => setShowIndexChart(!showIndexChart)}
-                className="ml-auto text-xs font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-lg hover:bg-accent/20 transition-colors">
+                className="ml-auto text-xs font-bold text-secondary bg-accent/10 px-2.5 py-1 rounded-lg hover:bg-accent/20 transition-colors">
                 <LineChart size={14} className="inline mr-1" />{showIndexChart ? '?±è?' : '?–è¡¨'}
               </button>
             </div>
@@ -720,6 +720,8 @@ export default function MarketView() {
     </div>
   );
 }
+
+
 
 
 

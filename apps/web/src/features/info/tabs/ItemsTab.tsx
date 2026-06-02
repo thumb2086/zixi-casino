@@ -225,7 +225,7 @@ export default function ItemsTab() {
                   </div>
                   <p className="mt-1 line-clamp-2 text-xs font-bold text-secondary">{item.description || '?«ç„¡èªªæ?'}</p>
                   {item.effect?.type === 'currency' && (
-                    <p className="mt-1 text-xs font-bold text-accent">
+                    <p className="mt-1 text-xs font-bold text-secondary">
                       {item.effect.currency === 'yjc' ? `?? ${item.effect.value} YJC` : `?’° ${nf(Number(item.effect.value))} ZXC`}
                     </p>
                   )}
@@ -242,7 +242,7 @@ export default function ItemsTab() {
                     <p className="mt-1 text-xs font-bold text-secondary">?? VIP è©¦ç”¨{item.effect.duration ? ` Â· ${item.effect.duration}h` : ''}</p>
                   )}
                   {item.price && item.price > 0 && (
-                    <p className="mt-1 text-xs font-bold text-accent">?? {nf(item.price)} ZXC</p>
+                    <p className="mt-1 text-xs font-bold text-secondary">?? {nf(item.price)} ZXC</p>
                   )}
                   {item.meta?.bundle && (
                     <p className="mt-1 text-xs font-bold text-emerald-400">
@@ -263,7 +263,7 @@ export default function ItemsTab() {
                         ? '?“å…·'
                         : item.type}
                     </span>
-                    <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-accent">{item.howToGet}</span>
+                    <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">{item.howToGet}</span>
                   </div>
                 </div>
               </div>
@@ -316,5 +316,6 @@ export default function ItemsTab() {
     </div>
   );
 }
+
 
 

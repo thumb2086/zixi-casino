@@ -257,7 +257,7 @@ export default function SettingsView() {
                     <button
                       type="button"
                       onClick={() => setIsEditingName(true)}
-                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-elevated px-3 py-2 text-xs font-bold uppercase tracking-widest text-accent hover:bg-[#313131]"
+                      className="mt-3 inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-elevated px-3 py-2 text-xs font-bold uppercase tracking-widest text-secondary hover:bg-[#313131]"
                     >
                       <Edit2 size={12} />
                       {t('settings.edit_name')}
@@ -439,6 +439,7 @@ export default function SettingsView() {
     </div>
   );
 }
+
 
 
 

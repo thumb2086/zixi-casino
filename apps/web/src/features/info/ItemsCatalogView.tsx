@@ -186,7 +186,7 @@ export default function ItemsCatalogView() {
                          item.type === 'title' ? 'ç¨±è?' : 
                          item.type === 'buff' ? 'å¢žç?' : '?“å…·'}
                       </span>
-                      <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-accent">
+                      <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                         {item.howToGet}
                       </span>
                     </div>
@@ -247,5 +247,6 @@ export default function ItemsCatalogView() {
     </div>
   );
 }
+
 
 

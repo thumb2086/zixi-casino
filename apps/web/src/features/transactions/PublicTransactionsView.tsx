@@ -226,7 +226,7 @@ export default function PublicTransactionsView() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-accent">{t('txStatus.' + item.status, item.status)}</p>
+                    <p className="text-xs font-bold text-secondary">{t('txStatus.' + item.status, item.status)}</p>
                     <p className="mt-1 text-xs font-bold text-secondary">{new Date(item.createdAt).toLocaleString('zh-TW')}</p>
                   </div>
                 </div>
@@ -255,6 +255,7 @@ export default function PublicTransactionsView() {
     </div>
   );
 }
+
 
 
 

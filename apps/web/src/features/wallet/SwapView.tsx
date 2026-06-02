@@ -55,7 +55,7 @@ function SwapPanel({
     <section className="bg-card rounded-2xl p-6 border border-accent/20">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-black uppercase tracking-widest text-white">{t('swap.title')}</h2>
-        <p className="text-xs font-bold uppercase tracking-widest text-accent">
+        <p className="text-xs font-bold uppercase tracking-widest text-secondary">
           {t('swap.fixed_rate', { rate: ZXC_PER_YJC.toLocaleString() })}
         </p>
       </div>
@@ -251,5 +251,6 @@ export default function SwapView() {
     </div>
   );
 }
+
 
 

@@ -37,7 +37,7 @@ export default function StatusView() {
           <div className="text-5xl shrink-0">{avatarItem?.icon || '??'}</div>
           <div className="flex-1 min-w-0">
             <p className="text-lg font-black text-white truncate">{username || '?ªè¨­å®?}</p>
-            {titleItem && <p className="text-xs font-bold text-accent">{titleItem.icon} {titleItem.name}</p>}
+            {titleItem && <p className="text-xs font-bold text-secondary">{titleItem.icon} {titleItem.name}</p>}
             <p className="text-xs font-bold text-secondary truncate mt-1">{address || ''}</p>
           </div>
         </section>
@@ -81,5 +81,6 @@ export default function StatusView() {
     </div>
   );
 }
+
 
 

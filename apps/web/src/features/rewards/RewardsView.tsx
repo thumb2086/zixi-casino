@@ -139,7 +139,7 @@ export default function RewardsView() {
                   <h4 className="text-sm font-bold uppercase tracking-tight text-white transition-colors group-hover:text-accent">
                     {campaign.title}
                   </h4>
-                  <p className="text-xs font-bold uppercase tracking-widest text-accent">
+                  <p className="text-xs font-bold uppercase tracking-widest text-secondary">
                     {t('rewards.reward_amount', { amount: campaign.rewards.tokens })}
                   </p>
                   <div className="mt-4 h-1 w-48 overflow-hidden rounded-full bg-surface">
@@ -169,6 +169,7 @@ export default function RewardsView() {
     </div>
   );
 }
+
 
 
 
