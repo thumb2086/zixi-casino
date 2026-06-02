@@ -14,3 +14,18 @@ services:
       - key: DATABASE_URL
         sync: false
 
+  # Uncomment below on a paid Render plan to run the tx-intent worker as a
+  # separate service:
+  # - type: worker
+  #   name: zixi-casino-worker
+  #   env: node
+  #   plan: starter
+  #   region: oregon
+  #   buildCommand: npx --yes pnpm@10.33.0 install && npx --yes pnpm@10.33.0 --filter @repo/worker... build
+  #   startCommand: node apps/worker/dist/index.js
+  #   envVars:
+  #     - key: NODE_ENV
+  #       value: production
+  #     - key: DATABASE_URL
+  #       sync: false
+

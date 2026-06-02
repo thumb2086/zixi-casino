@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
-import { SessionRepository, OpsRepository, requireDb } from "@repo/infrastructure";
+import { SessionRepository, OpsRepository, WalletRepository, requireDb } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, ALL_ITEMS } from "../../utils/inventory.js";
@@ -17,6 +17,7 @@ export async function marketListingRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
   const sessionRepo = new SessionRepository();
   const opsRepo = new OpsRepository();
+  const walletRepo = new WalletRepository();
 
   const getContext = (req: any) => getSessionContext(req, sessionRepo);
 
@@ -231,19 +232,14 @@ export async function marketListingRoutes(fastify: FastifyInstance) {
     const fee = Math.round(price * PLATFORM_FEE_RATE);
     const sellerPayout = price - fee;
 
-    // Check buyer balance
+    // Deduct buyer balance atomically
     const paymentToken = listing.token === "yjc" ? "yjc" as const : "zhixi" as const;
-    const buyerBal = parseFloat(await gameSettlement.getBalance(ctx.address, paymentToken)) || 0;
-    if (buyerBal < price) {
+    if (await walletRepo.adjustBalanceAtomic(ctx.address, `-${price}`, paymentToken) === null) {
       return createApiEnvelope({ success: false }, request.id, false, "餘額不足");
     }
 
-    // Deduct buyer balance
-    await gameSettlement.setBalance(ctx.address, paymentToken, (buyerBal - price).toString());
-
-    // Credit seller balance
-    const sellerBal = parseFloat(await gameSettlement.getBalance(listing.sellerAddress, paymentToken)) || 0;
-    await gameSettlement.setBalance(listing.sellerAddress, paymentToken, (sellerBal + sellerPayout).toString());
+    // Credit seller balance atomically
+    await walletRepo.adjustBalanceAtomic(listing.sellerAddress, `+${sellerPayout}`, paymentToken);
 
     // Grant item to buyer
     const buyerState = await loadInventoryState(ctx.userId);

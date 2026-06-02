@@ -3,8 +3,7 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope, getItemPawnValue } from "@repo/shared";
 import { MarketManager } from "@repo/domain";
-import { SessionRepository, OpsRepository, MarketRepository } from "@repo/infrastructure";
-import { gameSettlement } from "../../utils/game-settlement.js";
+import { SessionRepository, OpsRepository, MarketRepository, WalletRepository } from "@repo/infrastructure";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, ALL_ITEMS } from "../../utils/inventory.js";
 
@@ -14,6 +13,7 @@ export async function pawnRoutes(fastify: FastifyInstance) {
   const opsRepo = new OpsRepository();
   const marketRepo = new MarketRepository();
   const marketManager = new MarketManager();
+  const walletRepo = new WalletRepository();
 
   const getContext = (req: any) => getSessionContext(req, sessionRepo);
 
@@ -57,9 +57,7 @@ export async function pawnRoutes(fastify: FastifyInstance) {
       if (nextState.inventory[itemId] <= 0) delete nextState.inventory[itemId];
       await persistInventoryState(ctx.userId, nextState);
 
-      const currentBal = parseFloat(await gameSettlement.getBalance(ctx.address, "zhixi")) || 0;
-      const newBal = (currentBal + totalPayout).toString();
-      await gameSettlement.setBalance(ctx.address, "zhixi", newBal);
+      const newBal = await walletRepo.adjustBalanceAtomic(ctx.address, `+${totalPayout}`, "zhixi");
 
       await opsRepo.logEvent({
         channel: "rewards",
@@ -162,9 +160,7 @@ export async function pawnRoutes(fastify: FastifyInstance) {
     account.updatedAt = now;
     await marketRepo.saveAccount(address, ctx.userId, account);
 
-    const currentBal = parseFloat(await gameSettlement.getBalance(ctx.address, "zhixi")) || 0;
-    const newBal = (currentBal + totalPayout).toString();
-    await gameSettlement.setBalance(ctx.address, "zhixi", newBal);
+    const newBal = await walletRepo.adjustBalanceAtomic(ctx.address, `+${totalPayout}`, "zhixi");
 
     await opsRepo.logEvent({
       channel: "market",

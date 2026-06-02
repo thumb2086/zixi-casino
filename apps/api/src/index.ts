@@ -43,6 +43,7 @@ import { giftRoutes } from "./routes/v1/gift.js";
 import { missionRoutes } from "./routes/v1/missions.js";
 import postgres from "postgres";
 import { registerCachePlugin } from "./plugins/cache.js";
+import { SessionRepository, UserRepository } from "@repo/infrastructure";
 
 const fastify = Fastify({
   logger: true,
@@ -91,37 +92,28 @@ fastify.setErrorHandler((error, request, reply) => {
   });
 });
 
-// Enhanced Diagnostic Route
-fastify.get("/api/diag", async () => {
+// Global preHandler: resolve session context for all routes
+const _sessionRepo = new SessionRepository();
+const _userRepo = new UserRepository();
+fastify.addHook('preHandler', async (request: any) => {
+  const sessionId = request.headers?.["x-session-id"] || request.query?.sessionId || request.body?.sessionId;
+  if (!sessionId) return;
+  const session = await _sessionRepo.getSessionById(String(sessionId));
+  if (!session || session.status !== "authorized") return;
+  const user = await _userRepo.getUserById(session.userId);
+  if (!user) return;
+  request.ctx = { session, user };
+});
+
+// Internal health check (limited info, no auth required)
+fastify.get("/api/diag", async (request) => {
     const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
     let dbStatus = "unknown";
-    let tables: string[] = [];
-    let dbHost: string | null = null;
-    let dbName: string | null = null;
-    let sessionsExists = false;
-
-    const mask = (value: string | null) => {
-        if (!value) return null;
-        if (value.length <= 8) return value;
-        return `${value.slice(0, 4)}...${value.slice(-4)}`;
-    };
-
-    if (connectionString) {
-        try {
-            const parsed = new URL(connectionString);
-            dbHost = parsed.hostname || null;
-            dbName = parsed.pathname?.replace(/^\/+/, "") || null;
-        } catch (e) {
-            dbStatus = "error: invalid_database_url";
-        }
-    }
 
     if (connectionString) {
         try {
             const sql = postgres(connectionString, { ssl: 'require', connect_timeout: 5 });
-            const result = await sql`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public'`;
-            tables = result.map(r => r.tablename);
-            sessionsExists = tables.includes("sessions");
+            await sql`SELECT 1`;
             dbStatus = "connected";
             await sql.end();
         } catch (e: any) {
@@ -137,83 +129,15 @@ fastify.get("/api/diag", async () => {
         timestamp: new Date().toISOString(),
         db: {
             status: dbStatus,
-            tables: tables,
-            tables_count: tables.length,
-            sessions_exists: sessionsExists,
-            url_present: !!connectionString,
-            host: mask(dbHost),
-            database: dbName
         }
     };
 });
 
 fastify.get("/api/diag-thumb", async () => {
-    const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
-    let dbStatus = "unknown";
-    let dbHost: string | null = null;
-    let dbName: string | null = null;
-    let custodyAccountsThumbCount = 0;
-    let custodyUsersThumbCount = 0;
-
-    const mask = (value: string | null) => {
-        if (!value) return null;
-        if (value.length <= 8) return value;
-        return `${value.slice(0, 4)}...${value.slice(-4)}`;
-    };
-
-    if (connectionString) {
-        try {
-            const parsed = new URL(connectionString);
-            dbHost = parsed.hostname || null;
-            dbName = parsed.pathname?.replace(/^\/+/, "") || null;
-        } catch (e) {
-            dbStatus = "error: invalid_database_url";
-        }
-    }
-
-    if (!connectionString) {
-        dbStatus = "missing_env";
-    } else {
-        try {
-            const sql = postgres(connectionString, { ssl: 'require', connect_timeout: 5 });
-            const custodyAccountRows = await sql`
-                SELECT COUNT(*)::int AS count
-                FROM custody_accounts
-                WHERE lower(username) = 'thumb'
-            `;
-
-            const legacyTable = await sql`
-                SELECT to_regclass('public.custody_users') AS table_name
-            `;
-
-            if (legacyTable[0]?.table_name) {
-                const custodyUserRows = await sql`
-                    SELECT COUNT(*)::int AS count
-                    FROM custody_users
-                    WHERE lower(username) = 'thumb'
-                `;
-                custodyUsersThumbCount = custodyUserRows[0]?.count || 0;
-            }
-
-            custodyAccountsThumbCount = custodyAccountRows[0]?.count || 0;
-            dbStatus = "connected";
-            await sql.end();
-        } catch (e: any) {
-            dbStatus = `error: ${e.message}`;
-        }
-    }
-
     return {
         status: "ok",
         env: process.env.NODE_ENV,
         timestamp: new Date().toISOString(),
-        db: {
-            status: dbStatus,
-            host: mask(dbHost),
-            database: dbName,
-            thumb_in_custody_accounts: custodyAccountsThumbCount,
-            thumb_in_custody_users: custodyUsersThumbCount
-        }
     };
 });
 
@@ -285,6 +209,38 @@ const port = Number(process.env.PORT) || 3000;
 const start = async () => {
   try {
     console.log("Starting server...");
+
+    // Background: session cleanup every hour
+    const cleanupInterval = setInterval(async () => {
+      try {
+        const { lte } = await import("drizzle-orm");
+        const { sessions } = await import("@repo/infrastructure/db/schema.js");
+        const { requireDb } = await import("@repo/infrastructure");
+        const db = await requireDb();
+        await db.delete(sessions).where(lte(sessions.expiresAt, new Date())).catch(() => {});
+      } catch {}
+    }, 60 * 60 * 1000);
+    cleanupInterval.unref();
+
+    // Background: process pending on-chain tx intents (worker emulation).
+    // For full intents processing, deploy `apps/worker` as a Render worker service.
+    const WORKER_INTERVAL_MS = Number(process.env.WORKER_INTERVAL_MS) || 0;
+    if (WORKER_INTERVAL_MS > 0) {
+      const workerTimer = setInterval(async () => {
+        try {
+          const { WalletRepository } = await import("@repo/infrastructure");
+          const [pending, failed] = await Promise.all([
+            new WalletRepository().getPendingIntents(),
+            new WalletRepository().getFailedIntents(),
+          ]);
+          if (pending.length > 0 || failed.length > 0) {
+            console.log(`[worker] ${pending.length} pending, ${failed.length} failed intents`);
+          }
+        } catch {}
+      }, WORKER_INTERVAL_MS);
+      workerTimer.unref();
+    }
+
     await fastify.listen({ port, host: "0.0.0.0" });
     console.log(`🚀 Server ready at http://localhost:${port}`);
   } catch (err: any) {

@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
-import { SessionRepository, UserRepository, OpsRepository, kv } from "@repo/infrastructure";
+import { SessionRepository, UserRepository, WalletRepository, OpsRepository, kv } from "@repo/infrastructure";
 import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, ALL_ITEMS, grantBundleToUser } from "../../utils/inventory.js";
@@ -38,6 +38,13 @@ export async function giftRoutes(fastify: FastifyInstance) {
       const sender = await userRepo.getUserById(ctx.userId);
       const senderName = sender?.displayName || fromAddr.slice(0, 6);
 
+      // Atomic lock to prevent concurrent gift send (double-spend)
+      const lockKey = `gift:lock:${fromAddr}`;
+      const lockAcquired = await kv.claimSlot(lockKey, 10, Date.now().toString());
+      if (!lockAcquired) {
+        return createApiEnvelope({ error: { message: "正在處理中，請稍後再試" } }, request.id);
+      }
+
       if (toAddr === fromAddr) {
         return createApiEnvelope({ error: { message: "不能贈送給自己" } }, request.id);
       }
@@ -55,35 +62,24 @@ export async function giftRoutes(fastify: FastifyInstance) {
         return createApiEnvelope({ error: { message: "請至少贈送 ZXC、YJC 或道具" } }, request.id);
       }
 
+      const walletRepo = new WalletRepository();
       const bundleSummary: string[] = [];
 
       if (hasYjc) {
-        const senderYjc = await gameSettlement.getBalance(fromAddr, "yjc");
-        if (Number(senderYjc) < body.yjc) {
-          return createApiEnvelope({ error: { message: `YJC 餘額不足，目前 ${Number(senderYjc).toLocaleString()}` } }, request.id);
+        const newSenderYjc = await walletRepo.adjustBalanceAtomic(fromAddr, `-${body.yjc}`, "yjc");
+        if (newSenderYjc === null) {
+          return createApiEnvelope({ error: { message: `YJC 餘額不足` } }, request.id);
         }
-        const newSenderYjc = (Number(senderYjc) - body.yjc).toFixed(4);
-        await gameSettlement.setBalance(fromAddr, "yjc", newSenderYjc);
-
-        const recipientYjc = await gameSettlement.getBalance(toAddr, "yjc");
-        const newRecipientYjc = (Number(recipientYjc) + body.yjc).toFixed(4);
-        await gameSettlement.setBalance(toAddr, "yjc", newRecipientYjc);
-
+        await walletRepo.adjustBalanceAtomic(toAddr, `+${body.yjc}`, "yjc");
         bundleSummary.push(`${body.yjc.toLocaleString()} YJC`);
       }
 
       if (hasZxc) {
-        const senderBalance = await gameSettlement.getBalance(fromAddr, "zhixi");
-        if (Number(senderBalance) < body.zxc) {
-          return createApiEnvelope({ error: { message: `ZXC 餘額不足，目前 ${Number(senderBalance).toLocaleString()}` } }, request.id);
+        const newSender = await walletRepo.adjustBalanceAtomic(fromAddr, `-${body.zxc}`, "zhixi");
+        if (newSender === null) {
+          return createApiEnvelope({ error: { message: `ZXC 餘額不足` } }, request.id);
         }
-        const newSender = (Number(senderBalance) - body.zxc).toFixed(4);
-        await gameSettlement.setBalance(fromAddr, "zhixi", newSender);
-
-        const recipientBalance = await gameSettlement.getBalance(toAddr, "zhixi");
-        const newRecipient = (Number(recipientBalance) + body.zxc).toFixed(4);
-        await gameSettlement.setBalance(toAddr, "zhixi", newRecipient);
-
+        await walletRepo.adjustBalanceAtomic(toAddr, `+${body.zxc}`, "zhixi");
         bundleSummary.push(`${body.zxc.toLocaleString()} ZXC`);
       }
 
@@ -147,11 +143,18 @@ export async function giftRoutes(fastify: FastifyInstance) {
     }
   });
 
-  typedFastify.get("/recipients", async (request) => {
+  typedFastify.get("/recipients", {
+    schema: {
+      querystring: z.object({
+        search: z.string().max(60).optional(),
+      }),
+    },
+  }, async (request) => {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
 
-    const users = await userRepo.listUsers({ limit: 1000 });
+    const { search } = request.query as { search?: string };
+    const users = await userRepo.listUsers({ search, limit: 50 });
     const list = (users || []).map((u: any) => ({
       address: u.address,
       displayName: u.displayName || u.address.slice(0, 8),

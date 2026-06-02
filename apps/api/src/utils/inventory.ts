@@ -131,14 +131,23 @@ async function saveChestMeta(userId: string, meta: ChestMeta): Promise<void> {
   } as any);
 }
 
+// Per-request cache for loadInventoryState (cleared after each response)
+const inventoryCache = new Map<string, { state: ProfileInventoryState; ts: number }>();
+const INVENTORY_CACHE_TTL = 500; // ms — covers multiple calls within same request
+
 /**
  * Read the user's inventory/meta from the profile row and KV, returning safe
- * defaults when columns are empty or the profile row is missing.
+ * defaults when columns are empty or the profile row is missing. Results are
+ * cached per userId for INVENTORY_CACHE_TTL ms to avoid redundant DB/KV reads
+ * within a single request (4+ calls per game round).
  */
 export async function loadInventoryState(userId: string): Promise<ProfileInventoryState> {
+  const cached = inventoryCache.get(userId);
+  if (cached && Date.now() - cached.ts < INVENTORY_CACHE_TTL) return cached.state;
+
   const profile = await userRepo.getUserProfile(userId);
   const meta = await loadChestMeta(userId, profile);
-  return {
+  const state = {
     inventory: coerceRecord(profile?.inventory),
     ownedAvatars: coerceStringArray(profile?.ownedAvatars),
     ownedTitles: coerceStringArray(profile?.ownedTitles),
@@ -148,9 +157,12 @@ export async function loadInventoryState(userId: string): Promise<ProfileInvento
     chestPity: meta.chestPity,
     lastFreeChestAt: meta.lastFreeChestAt,
   };
+  inventoryCache.set(userId, { state, ts: Date.now() });
+  return state;
 }
 
 export async function persistInventoryState(userId: string, next: ProfileInventoryState): Promise<void> {
+  inventoryCache.delete(userId);
   await Promise.all([
     userRepo.saveUserProfile(userId, {
       inventory: next.inventory,
@@ -639,15 +651,13 @@ export async function creditItemValue(
 ): Promise<string | null> {
   if (!outcome.currencyGranted || outcome.currencyGranted <= 0) return null;
   const token = outcome.currencyType || "zhixi";
-  // lazy-import to avoid circular dependency
-  const { gameSettlement } = await import("./game-settlement.js");
   const { WalletRepository } = await import("@repo/infrastructure");
   const walletRepo = new WalletRepository();
 
   try {
-    const current = parseFloat(await gameSettlement.getBalance(address, token)) || 0;
-    const updated = (current + outcome.currencyGranted).toString();
-    await gameSettlement.setBalance(address, token, updated);
+    const updated = await walletRepo.adjustBalanceAtomic(address, `+${outcome.currencyGranted}`, token);
+    if (updated === null) throw new Error("adjustBalanceAtomic returned null");
+    const current = (parseFloat(updated) - outcome.currencyGranted).toFixed(4);
     // Record in wallet ledger so it appears in transaction history
     await walletRepo.saveLedgerEntry({
       id: crypto.randomUUID(),
@@ -656,7 +666,7 @@ export async function creditItemValue(
       token,
       type: "item_use",
       amount: String(outcome.currencyGranted),
-      balanceBefore: current.toString(),
+      balanceBefore: current,
       balanceAfter: updated,
       meta: { itemId: outcome.item.id, itemName: outcome.item.name },
       createdAt: new Date(),

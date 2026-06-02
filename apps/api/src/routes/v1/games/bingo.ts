@@ -59,7 +59,7 @@ export async function bingoRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const roundId = `bingo_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const roundId = `bingo_${crypto.randomUUID().slice(0, 8)}`;
     const amountStr = betAmount.toString();
 
     // 1. Validate and deduct balance

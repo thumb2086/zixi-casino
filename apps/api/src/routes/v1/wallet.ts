@@ -34,7 +34,7 @@ function tokenToSymbol(token: WalletTokenKey): "ZXC" | "YJC" {
 
 function parseAmountText(rawAmount: unknown): string {
   const amount = String(rawAmount ?? "").replace(/,/g, "").trim();
-  if (!/^\d+(\.\d+)?$/.test(amount)) throw new Error("Invalid amount");
+  if (!/^\d+(\.\d{1,4})?$/.test(amount)) throw new Error("Invalid amount");
   if (Number(amount) <= 0) throw new Error("Amount must be greater than 0");
   return amount;
 }
@@ -337,6 +337,18 @@ export async function walletRoutes(fastify: FastifyInstance) {
     try {
       const address = ctx.session.address;
       const now = Date.now();
+
+      // Midnight reset: compare date strings, not 24h
+      const todayDate = new Date().toISOString().slice(0, 10);
+
+      // Atomic lock to prevent concurrent airdrop claim race condition
+      const lockKey = `airdrop:lock:${address}:${todayDate}`;
+      // TTL until next midnight (or 86400 as safe upper bound)
+      const acquired = await kv.claimSlot(lockKey, 86400, now.toString());
+      if (!acquired) {
+        return createApiEnvelope({ error: { code: "COOLDOWN", message: "今日已簽到，請明天再來" } }, request.id);
+      }
+
       const [lastAirdropRaw, distributedTotalRaw, streakRaw, historyRaw] = await Promise.all([
         kv.get<number>(`last_airdrop:${address}`),
         kv.get<string | number>(AIRDROP_DISTRIBUTED_TOTAL_KEY),
@@ -345,8 +357,6 @@ export async function walletRoutes(fastify: FastifyInstance) {
       ]);
       const lastAirdrop = lastAirdropRaw || 0;
 
-      // Midnight reset: compare date strings, not 24h
-      const todayDate = new Date().toISOString().slice(0, 10);
       const lastDate = lastAirdrop > 0 ? new Date(lastAirdrop).toISOString().slice(0, 10) : null;
       if (lastDate === todayDate) {
         return createApiEnvelope({ error: { code: "COOLDOWN", message: "今日已簽到，請明天再來" } }, request.id);
@@ -372,9 +382,10 @@ export async function walletRoutes(fastify: FastifyInstance) {
 
       // Fast direct-credit path (async settlement — balance credited immediately, chain tx queued)
       const rewardAmount = String(streakFallback);
-      const prevBalance = await gameSettlement.getBalance(address, token);
-      const newBalance = (parseFloat(prevBalance || "0") + parseFloat(rewardAmount)).toString();
-      await gameSettlement.setBalance(address, token, newBalance);
+      const newBalance = await walletRepo.adjustBalanceAtomic(address, `+${rewardAmount}`, token);
+      if (newBalance === null) {
+        return createApiEnvelope({ error: { message: "餘額更新失敗" } }, request.id);
+      }
 
       const airdropIntent: any = walletManager.createTxIntent(ctx.user.id, "ZXC", "admin_credit", rewardAmount);
       airdropIntent.address = address;
@@ -388,7 +399,7 @@ export async function walletRoutes(fastify: FastifyInstance) {
         token,
         type: "airdrop",
         amount: rewardAmount,
-        balanceBefore: prevBalance || "0",
+        balanceBefore: newBalance ? (parseFloat(newBalance) - parseFloat(rewardAmount)).toFixed(4) : "0",
         balanceAfter: newBalance,
         txIntentId: airdropIntent.id,
         txHash: null,
@@ -434,7 +445,7 @@ export async function walletRoutes(fastify: FastifyInstance) {
         sessionId: z.string(),
         to: z.string(),
         amount: z.string(),
-        signature: z.string().optional(),
+        signature: z.string(),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
       }),
     },
@@ -445,12 +456,10 @@ export async function walletRoutes(fastify: FastifyInstance) {
     try {
       const { to, token, signature } = request.body;
 
-      // Signature verification
-      if (signature) {
-        const msg = `transfer:${to}:${request.body.amount}`;
-        if (!verifySignature(ctx.session.address, msg, signature)) {
-          return createApiEnvelope({ error: { code: "SIGNATURE_MISMATCH", message: "Signature does not match session address" } }, request.id);
-        }
+      // Signature verification (mandatory)
+      const msg = `transfer:${to}:${request.body.amount}:${token}`;
+      if (!verifySignature(ctx.session.address, msg, signature)) {
+        return createApiEnvelope({ error: { code: "SIGNATURE_MISMATCH", message: "Signature does not match session address" } }, request.id);
       }
       const amount = parseAmountText(request.body.amount);
       const fromAddress = ctx.session.address;
@@ -703,19 +712,17 @@ export async function walletRoutes(fastify: FastifyInstance) {
       body: z.object({
         sessionId: z.string(),
         zxcAmount: z.string(),
-        signature: z.string().optional(),
+        signature: z.string(),
       }),
     },
   }, async (request) => {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED", message: "Invalid session" } }, request.id);
 
-    // Signature verification
-    if (request.body.signature) {
-      const msg = `convert:${request.body.zxcAmount}`;
-      if (!verifySignature(ctx.session.address, msg, request.body.signature)) {
-        return createApiEnvelope({ error: { code: "SIGNATURE_MISMATCH", message: "Signature does not match session address" } }, request.id);
-      }
+    // Signature verification (mandatory)
+    const msg = `convert:${request.body.zxcAmount}:zhixi`;
+    if (!verifySignature(ctx.session.address, msg, request.body.signature)) {
+      return createApiEnvelope({ error: { code: "SIGNATURE_MISMATCH", message: "Signature does not match session address" } }, request.id);
     }
 
     const conversionId = randomUUID();

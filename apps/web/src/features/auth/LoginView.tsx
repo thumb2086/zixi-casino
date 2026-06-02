@@ -34,8 +34,8 @@ export default function LoginView() {
 
   // Load saved username and rememberMe preference
   useEffect(() => {
-    const savedUsername = localStorage.getItem('custody_username');
-    const savedRememberMe = localStorage.getItem('custody_remember_me');
+    const savedUsername = sessionStorage.getItem('custody_username');
+    const savedRememberMe = sessionStorage.getItem('custody_remember_me');
     if (savedUsername) setUsername(savedUsername);
     if (savedRememberMe === 'true') setRememberMe(true);
   }, []);
@@ -87,8 +87,7 @@ export default function LoginView() {
               poll();
             }
           })
-          .catch(err => {
-            console.error("Poll error:", err);
+          .catch(() => {
             delay = Math.min(delay * 2, 10000);
             poll();
           });
@@ -113,11 +112,11 @@ export default function LoginView() {
       } else {
         // Save remember me preference
         if (rememberMe) {
-          localStorage.setItem('custody_username', username);
-          localStorage.setItem('custody_remember_me', 'true');
+          sessionStorage.setItem('custody_username', username);
+          sessionStorage.setItem('custody_remember_me', 'true');
         } else {
-          localStorage.removeItem('custody_username');
-          localStorage.setItem('custody_remember_me', 'false');
+          sessionStorage.removeItem('custody_username');
+          sessionStorage.setItem('custody_remember_me', 'false');
         }
         setAuth(payload.address, payload.sessionId, payload.publicKey || '0x');
         setGlobalUsername(payload.user?.displayName || username);
@@ -142,7 +141,7 @@ export default function LoginView() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.post('/api/v1/auth/custody/register', { username, password, platform: 'web', clientType: 'web', bonusAmount: '1000' });
+      const res = await api.post('/api/v1/auth/custody/register', { username, password, platform: 'web', clientType: 'web' });
       const data = res.data;
       const payload = data?.data;
       if (!data.success || !payload?.success || !payload?.sessionId || !payload?.address) {
@@ -150,8 +149,8 @@ export default function LoginView() {
       } else {
         // Auto-login after registration
         if (rememberMe) {
-          localStorage.setItem('custody_username', username);
-          localStorage.setItem('custody_remember_me', 'true');
+          sessionStorage.setItem('custody_username', username);
+          sessionStorage.setItem('custody_remember_me', 'true');
         }
         setAuth(payload.address, payload.sessionId, payload.publicKey || '0x');
         setGlobalUsername(payload.user?.displayName || username);

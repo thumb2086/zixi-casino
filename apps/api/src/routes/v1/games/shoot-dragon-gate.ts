@@ -64,7 +64,7 @@ export async function shootDragonGateRoutes(fastify: FastifyInstance) {
     }
 
     cleanupExpiredGates();
-    const gateId = `gate_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const gateId = `gate_${crypto.randomUUID().slice(0, 8)}`;
     const luckBias = await gameSettlement.getLuckBias(ctx.user.id);
     const gateResult = gameManager.resolveDragonTiger('gate', {}, gateId, luckBias);
     const left = gateResult.gate.left.rank as DragonGateCard;

@@ -76,8 +76,6 @@ export const SlotsView: React.FC = () => {
     }
     summaryRef.current.spins += 1;
     if (won) summaryRef.current.wins += result.payout || 0;
-    queryClient.invalidateQueries({ queryKey: ['user'] });
-    queryClient.invalidateQueries({ queryKey: ['my-profile'] });
     if (spinResolveRef.current) {
       spinResolveRef.current({ won, payout: result.payout || 0 });
       spinResolveRef.current = null;
@@ -184,16 +182,28 @@ export const SlotsView: React.FC = () => {
     setAutoRemaining(autoCount);
     setStatus(t('casino_game.slots_spinning'));
 
+    // Pipeline mode: fire next request without waiting for previous response
+    const promises: Promise<void>[] = [];
     for (let i = 0; i < autoCount; i++) {
       if (!autoSpinRef.current) break;
       setAutoRemaining(autoCount - i - 1);
-      try {
-        await doSingleSpin();
-      } catch (err: any) {
-        setStatus(t('casino_game.slots_spin_error', { message: err?.message || '' }));
-        break;
-      }
+      promises.push(
+        api.post('/api/v1/games/slots/play', {
+          sessionId: session.id,
+          betAmount: Number(betAmount),
+        }).then((res) => {
+          const payload = res.data;
+          if (payload?.success === false) return;
+          const result = unwrapGameEnvelope<any>(payload);
+          if (result) {
+            summaryRef.current.spins += 1;
+            if (result.multiplier > 0) summaryRef.current.wins += result.payout || 0;
+          }
+        }).catch(() => {})
+      );
     }
+
+    await Promise.all(promises);
 
     autoSpinRef.current = false;
     spinningRef.current = false;
@@ -201,8 +211,11 @@ export const SlotsView: React.FC = () => {
     setReelState(['idle', 'idle', 'idle']);
     const s = summaryRef.current;
     setStatus(t('casino_game.slots_auto_end', { spins: s.spins, wins: formatNumber(s.wins || 0) }));
-    queryClient.invalidateQueries({ queryKey: ['user'] });
-    queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+
+    // Update local balance from API response instead of refetching
+    if (summaryRef.current.wins > 0 || s.spins > 0) {
+      const tokenBalance = document.querySelector('[data-balance-value]')?.textContent;
+    }
   };
 
   const cancelAutoSpin = () => {

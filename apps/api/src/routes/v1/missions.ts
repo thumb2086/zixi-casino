@@ -150,6 +150,11 @@ export async function missionRoutes(fastify: FastifyInstance) {
     const today = new Date().toISOString().slice(0, 10);
     const addr = ctx.address.toLowerCase();
 
+    // Atomic lock to prevent concurrent claim race condition
+    const lockKey = `mission:claim-lock:${addr}:${missionId}:${today}`;
+    const acquired = await kv.claimSlot(lockKey, 10, Date.now().toString());
+    if (!acquired) return createApiEnvelope({ error: { message: "正在處理中，請稍後再試" } }, request.id);
+
     const claimedRaw = await kv.get<string[]>(`mission:claimed:${addr}:${today}`);
     const claimed = claimedRaw || [];
     if (claimed.includes(missionId)) return createApiEnvelope({ error: { message: "已領取" } }, request.id);
@@ -162,17 +167,17 @@ export async function missionRoutes(fastify: FastifyInstance) {
     else if (PER_GAME_TRACKS.has(mission.track)) progress = await kv.get<number>(`mission:game:${mission.track}:${addr}:${today}`) || 0;
     if (progress < mission.target) return createApiEnvelope({ error: { message: `進度不足 (${progress}/${mission.target})` } }, request.id);
 
-    const prev = await gameSettlement.getBalance(addr, "zhixi");
-    await gameSettlement.setBalance(addr, "zhixi", (parseFloat(prev || "0") + mission.reward).toString());
+    const walletRepo = new WalletRepository();
+    const newBalance = await walletRepo.adjustBalanceAtomic(addr, `+${mission.reward}`, "zhixi");
 
     claimed.push(missionId);
     await kv.set(`mission:claimed:${addr}:${today}`, claimed);
 
-    const walletRepo = new WalletRepository();
     await walletRepo.saveLedgerEntry({
       id: randomUUID(), userId: ctx.userId, address: addr,
       token: "zhixi", type: "mission_reward", amount: String(mission.reward),
-      balanceBefore: prev || "0", balanceAfter: (parseFloat(prev || "0") + mission.reward).toFixed(4),
+      balanceBefore: newBalance ? (parseFloat(newBalance) - mission.reward).toFixed(4) : "0",
+      balanceAfter: newBalance || "0",
       meta: { missionId, date: today }, createdAt: new Date(),
     });
 

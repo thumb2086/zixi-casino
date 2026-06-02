@@ -66,7 +66,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Get auto-round info (统�??��?)
+    // Get auto-round info (统�??��?)
     const roundInfo = getRoundInfo('roulette');
     if (!roundInfo.isBettingOpen) {
       return createApiEnvelope(
@@ -78,7 +78,7 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
         },
         request.id,
         false,
-        "?��?开奖中，请等�?下�?局"
+        "?��?开奖中，请等�?下�?局"
       );
     }
 
@@ -147,60 +147,10 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
         betAmount
       );
 
-      // 5. Update total bet
-      await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
-
-      // 6. Record game session
-      const db = await requireDb();
-      const sessionManager = new GameSessionManager(db);
-      const session = await sessionManager.recordGame({
-        userId,
-        address,
-        game: "roulette",
-        betAmount,
-        gameResult: {
-          result: settlement.isWin ? "win" : "lose",
-          payout: settlement.finalPayout,
-          meta: { 
-            winningNumber, 
-            color,
-            bets,
-            betTxHash: settlement.betTxHash,
-            payoutTxHash: settlement.payoutTxHash,
-            fee: settlement.feeAmount,
-            roundId: roundInfo.roundId,
-            closesAt: roundInfo.closesAt,
-          },
-        },
-      });
-
-      // 7. Log event
-      await gameSettlement.logGameEvent({
-        game: "roulette",
-        userId,
-        address,
-        amount: amountStr,
-        payout: settlement.finalPayout.toString(),
-        fee: settlement.feeAmount.toString(),
-        isWin: settlement.isWin,
-        multiplier: totalPayoutMultiplier,
-        betTxHash: settlement.betTxHash,
-        payoutTxHash: settlement.payoutTxHash,
-        roundId,
-      });
-
-      // 8. Save round
-      await gameSettlement.saveRound("roulette", roundId, {
-        winningNumber,
-        color,
-        isWin,
-        roundInfo,
-      });
-
-      return createApiEnvelope({
+      // Respond immediately — remaining work fires in background
+      const responsePayload = {
         success: true,
         data: {
-          sessionId: session.id,
           roundId: roundInfo.roundId,
           winningNumber,
           color,
@@ -215,7 +165,34 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
           closesAt: roundInfo.closesAt,
           bettingClosesAt: roundInfo.bettingClosesAt,
         }
-      }, request.id);
+      };
+
+      // 5-8. Background: updateTotalBet, recordGame, logEvent, saveRound
+      void (async () => {
+        try {
+          await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
+          const db = await requireDb();
+          const sessionManager = new GameSessionManager(db);
+          await sessionManager.recordGame({
+            userId, address, game: "roulette", betAmount,
+            gameResult: {
+              result: settlement.isWin ? "win" : "lose",
+              payout: settlement.finalPayout,
+              meta: { winningNumber, color, bets, betTxHash: settlement.betTxHash, payoutTxHash: settlement.payoutTxHash, fee: settlement.feeAmount, roundId: roundInfo.roundId, closesAt: roundInfo.closesAt },
+            },
+          });
+          await gameSettlement.logGameEvent({
+            game: "roulette", userId, address, amount: amountStr, payout: settlement.finalPayout.toString(),
+            fee: settlement.feeAmount.toString(), isWin: settlement.isWin, multiplier: totalPayoutMultiplier,
+            betTxHash: settlement.betTxHash, payoutTxHash: settlement.payoutTxHash, roundId,
+          });
+          await gameSettlement.saveRound("roulette", roundId, { winningNumber, color, isWin, roundInfo });
+        } catch (bgErr) {
+          console.error(`[roulette] background processing failed for round ${roundId}:`, bgErr);
+        }
+      })();
+
+      return createApiEnvelope(responsePayload, request.id);
 
     } catch (err: any) {
       await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);

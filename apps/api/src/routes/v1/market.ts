@@ -134,9 +134,9 @@ export async function marketRoutes(fastify: FastifyInstance) {
       if (Math.abs(cashDelta) > 0) {
         const userId = ctx.user.id;
         const address = ctx.session.address;
-        const currentBalance = Number(await gameSettlement.getBalance(address, "zhixi"));
-        const newBalance = Number(Math.max(0, currentBalance + cashDelta).toFixed(2));
-        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+        const deltaSign = cashDelta >= 0 ? `+${cashDelta}` : `${cashDelta}`;
+        const newBalStr = await walletRepo.adjustBalanceAtomic(address, deltaSign, "zhixi");
+        const newBalance = Number(parseFloat(newBalStr || "0").toFixed(2));
 
         const walletAction = new WalletManager();
         const isCredit = cashDelta > 0;
@@ -147,14 +147,15 @@ export async function marketRoutes(fastify: FastifyInstance) {
         intent.meta = { source: "market_liquidation", eventCount: liqEvents.length };
         await walletRepo.saveTxIntent(intent);
 
+        const balBefore = (newBalance - cashDelta).toFixed(4);
         await walletRepo.saveLedgerEntry({
           id: randomUUID(),
           userId,
           address,
           token: "zhixi",
-          type: "market_settlement",
-          amount: cashDelta.toString(),
-          balanceBefore: currentBalance.toString(),
+          type: "market_liquidation",
+          amount: String(cashDelta),
+          balanceBefore: balBefore,
           balanceAfter: newBalance.toString(),
           meta: { events: liqEvents.map(e => ({ type: e.type, symbol: e.symbol, side: e.side, pnl: e.pnl ?? e.estimatedPnl, margin: e.margin ?? e.marginLost, fee: e.fee, closePrice: e.closePrice ?? e.markPrice })) },
           createdAt: new Date(),
@@ -252,14 +253,14 @@ export async function marketRoutes(fastify: FastifyInstance) {
       const walletAbs = Math.abs(Number(walletAmount));
       if (walletAbs > 0) {
         const intentType = isCostAction ? "admin_debit" : "admin_credit";
-        const currentBalance = parseFloat(await gameSettlement.getBalance(address, "zhixi"));
-        const newBalance = isCostAction ? Math.max(0, currentBalance - walletAbs) : currentBalance + walletAbs;
-
-        await gameSettlement.setBalance(address, "zhixi", newBalance.toString());
+        const delta = isCostAction ? `-${walletAbs}` : `+${walletAbs}`;
+        const newBalStr = await walletRepo.adjustBalanceAtomic(address, delta, "zhixi");
+        const newBalance = parseFloat(newBalStr || "0");
         const intent = walletAction.createTxIntent(userId, "ZXC", intentType, String(walletAbs));
         intent.address = address;
         intent.meta = { source: "market", action: type, symbol: symbol || null };
         await walletRepo.saveTxIntent(intent);
+        const balBefore = (isCostAction ? newBalance + walletAbs : newBalance - walletAbs).toFixed(4);
         await walletRepo.saveLedgerEntry({
           id: randomUUID(),
           userId,
@@ -267,10 +268,9 @@ export async function marketRoutes(fastify: FastifyInstance) {
           token: "zhixi",
           type: `market_${type}`,
           amount: (isCostAction ? -walletAbs : walletAbs).toString(),
-          balanceBefore: currentBalance.toString(),
+          balanceBefore: balBefore,
           balanceAfter: newBalance.toString(),
-          meta: { symbol: symbol || null, result },
-          createdAt: new Date(),
+          meta: { action: type, symbol: symbol || null },
         });
 
         // Fire async on-chain transfer with proper error logging

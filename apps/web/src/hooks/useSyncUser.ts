@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { api } from '../store/api';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { resolvePreferredBalance } from '../utils/balance';
 
 type SyncUserData = {
@@ -14,12 +14,19 @@ type SyncUserData = {
 export function useSyncUser() {
   const { address, sessionId } = useAuthStore();
   const { setBalance, setUsername } = useUserStore();
+  const queryClient = useQueryClient();
 
   const { data: userData, isLoading } = useQuery<SyncUserData>({
-    queryKey: ['user-wallet', address, sessionId],
+    queryKey: ['user-sync', address, sessionId],
     queryFn: async () => {
+      // Read wallet summary from the shared wallet-summary query if already cached
+      const cachedWallet = queryClient.getQueryData<any>(['wallet-summary', sessionId]);
+      const walletPromise = cachedWallet
+        ? Promise.resolve({ data: { data: cachedWallet } })
+        : api.get('/api/v1/wallet/summary', { params: { sessionId } }).catch(() => ({ data: { data: {} } }));
+
       const [walletResult, profileResult] = await Promise.all([
-        api.get('/api/v1/wallet/summary', { params: { sessionId } }).catch(() => ({ data: { data: {} } })),
+        walletPromise,
         api.get('/api/v1/me/profile', { params: { sessionId } }).catch(() => ({ data: { data: {} } })),
       ]);
 

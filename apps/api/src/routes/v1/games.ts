@@ -153,6 +153,13 @@ export async function gameRoutes(fastify: FastifyInstance) {
 
   const mgr = new MultiplayerGameManager();
 
+  // Validate that ctx.user.id is a member of the given room
+  async function assertRoomMembership(roomId: string, userId: string): Promise<boolean> {
+    const room = await roomManager.getRoom(roomId);
+    if (!room) return false;
+    return room.players.some((p: any) => p.userId === userId);
+  }
+
   typedFastify.post("/rooms/poker/action", {
     schema: {
       body: z.object({
@@ -166,6 +173,11 @@ export async function gameRoutes(fastify: FastifyInstance) {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { roomId, action, amount } = request.body;
+
+    // Validate room membership
+    if (!await assertRoomMembership(roomId, ctx.user.id)) {
+      return createApiEnvelope({ error: { code: "NOT_IN_ROOM", message: "You are not a member of this room" } }, request.id);
+    }
 
     const stateKey = `room:game:${roomId}`;
     let state = await kv.get<any>(stateKey);
@@ -209,6 +221,12 @@ export async function gameRoutes(fastify: FastifyInstance) {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { roomId, action, quantity, value } = request.body;
+
+    // Validate room membership
+    if (!await assertRoomMembership(roomId, ctx.user.id)) {
+      return createApiEnvelope({ error: { code: "NOT_IN_ROOM", message: "You are not a member of this room" } }, request.id);
+    }
+
     const stateKey = `room:game:${roomId}`;
 
     if (action === "new_round") {

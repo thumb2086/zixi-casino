@@ -21,7 +21,7 @@ export async function playShootDragonGateRound(params: {
 }) {
   const { userId, address, betAmount, token, requestId, openCards, seed, bias } = params;
   const amountStr = betAmount.toString();
-  const roundId = seed || `dragon_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const roundId = seed || `dragon_${crypto.randomUUID().slice(0, 8)}`;
 
   const validation = await gameSettlement.validateAndDeductBalance(
     address, token, amountStr, `total_bet:${address}`

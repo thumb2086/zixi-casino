@@ -79,7 +79,7 @@ export async function bluffdiceRoutes(fastify: FastifyInstance) {
       );
     }
 
-    const roundId = `bluffdice_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const roundId = `bluffdice_${crypto.randomUUID().slice(0, 8)}`;
 
     // 1. Validate and deduct balance
     const validation = await gameSettlement.validateAndDeductBalance(
