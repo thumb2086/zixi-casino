@@ -80,7 +80,7 @@ export async function walletRoutes(fastify: FastifyInstance) {
     if (!runtime.rpcUrl || !runtime.adminPrivateKey) {
       throw new Error("On-chain runtime is not configured");
     }
-    return { runtime, client: new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey) };
+    return { runtime, client: new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey) };
   };
 
   const loadCompatibleMarketAccount = async (address: string, userId: string) => {

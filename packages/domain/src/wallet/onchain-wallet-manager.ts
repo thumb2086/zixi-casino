@@ -15,6 +15,7 @@ export interface OnchainTokenRuntime {
 export interface OnchainRuntimeConfig {
   rpcUrl: string;
   adminPrivateKey: string;
+  minterPrivateKey: string;
   tokens: Record<OnchainTokenKey, OnchainTokenRuntime>;
 }
 
@@ -55,6 +56,7 @@ export function tokenSymbolToOnchainKey(token: TokenSymbol): OnchainTokenKey {
 export class OnchainWalletManager {
   getRuntimeConfig(): OnchainRuntimeConfig {
     const adminPrivateKey = normalizePrivateKey(String(process.env.ADMIN_PRIVATE_KEY || ""));
+    const minterPrivateKey = normalizePrivateKey(String(process.env.MINTER_PRIVATE_KEY || process.env.ADMIN_PRIVATE_KEY || ""));
     const rpcUrl = String(
       process.env.RPC_URL ||
       process.env.PRC ||
@@ -81,6 +83,7 @@ export class OnchainWalletManager {
     return {
       rpcUrl,
       adminPrivateKey,
+      minterPrivateKey,
       tokens: {
         zhixi: {
           key: "zhixi",

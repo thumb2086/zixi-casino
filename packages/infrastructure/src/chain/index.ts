@@ -3,10 +3,14 @@ import { ethers } from "ethers";
 export class ChainClient {
   private provider: ethers.JsonRpcProvider;
   private signer: ethers.Wallet;
+  private minter: ethers.Wallet | null;
 
-  constructor(rpcUrl: string, privateKey: string) {
+  constructor(rpcUrl: string, privateKey: string, minterPrivateKey?: string) {
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
     this.signer = new ethers.Wallet(privateKey, this.provider);
+    this.minter = minterPrivateKey
+      ? new ethers.Wallet(minterPrivateKey, this.provider)
+      : null;
   }
 
   getWalletAddress(): string {
@@ -52,10 +56,11 @@ export class ChainClient {
   }
 
   async mint(to: string, amount: bigint, contractAddress: string): Promise<ethers.TransactionResponse> {
+    const mintSigner = this.minter || this.signer;
     const contract = new ethers.Contract(
       contractAddress,
       ["function mint(address to, uint256 amount) public"],
-      this.signer
+      mintSigner
     );
     return await contract.mint(to, amount);
   }

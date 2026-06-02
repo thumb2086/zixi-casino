@@ -112,7 +112,7 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
                 { key: "yjc" as const, config: runtime.tokens?.yjc },
               ].filter((t) => t.config?.enabled && t.config?.contractAddress);
               if (runtime.rpcUrl && runtime.adminPrivateKey && tokens.length > 0) {
-                const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+                const client = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey);
                 const tokenMeta = await Promise.all(tokens.map(async (t) => ({
                   key: t.key,
                   contractAddress: t.config!.contractAddress,
