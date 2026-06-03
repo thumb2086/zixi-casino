@@ -9,7 +9,7 @@ import { SicboView } from './SicboView';
 import { BingoView } from './BingoView';
 import { DuelView } from './DuelView';
 import { BlackjackView } from './BlackjackView';
-import { DragonTigerView } from './DragonTigerView';
+import DragonTigerView from './DragonTigerView';
 import { PokerView } from './PokerView';
 import { BluffDiceView } from './BluffDiceView';
 import { CrashView } from './CrashView';

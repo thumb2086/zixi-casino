@@ -21,6 +21,7 @@ export const GAMES = {
   POKER: "poker",
   BLUFFDICE: "bluffdice",
   SHOOT_DRAGON_GATE: "shoot_dragon_gate",
+  DRAGON_TIGER: "dragon_tiger",
 } as const;
 export type Game = (typeof GAMES)[keyof typeof GAMES];
 
@@ -37,6 +38,7 @@ export const GAME_LABELS: Record<Game, string> = {
   poker: "德州撲克",
   bluffdice: "吹牛骰子",
   shoot_dragon_gate: "射龍門",
+  dragon_tiger: "射龍門",
 };
 
 export const SUPPORTED_GAMES = Object.values(GAMES);

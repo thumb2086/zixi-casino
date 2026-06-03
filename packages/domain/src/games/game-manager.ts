@@ -24,6 +24,7 @@ export interface GameDomain {
   resolveDuel(p1Selection: string, p2Selection: string, seed: string): { winner: 1 | 2 | 0 };
   resolveBlackjack(action: 'start' | 'hit' | 'stand', state: any, seed: string, bias?: number): any;
   resolveDragonTiger(action: 'gate' | 'shoot', state: any, seed: string, bias?: number): any;
+  resolveDragonTigerSingle(seed: string, bias?: number): { left: any; right: any; mid: any; lo: number; hi: number; range: number; multiplier: number; result: 'win' | 'lose' | 'draw'; isWin: boolean; payoutMultiplier: number };
   resolveCrash(elapsedSeconds: number, seed: string, bias?: number): { multiplier: number; crashed: boolean; crashPoint: number };
   resolvePoker(action: 'deal' | 'hold', state: any, seed: string, betAmount?: number): { hand: string; handRank: number; isWin: boolean; multiplier: number; payout: number; cards: any[] };
   resolveBluffdice(action: 'bet' | 'call', state: any, seed: string, betAmount?: number): { dice: number[]; total: number; isWin: boolean; multiplier: number; payout: number };
@@ -401,6 +402,49 @@ export class GameManager implements GameDomain {
             isWin: resultType === 'win'
         };
     }
+  }
+
+  resolveDragonTigerSingle(seed: string, bias: number = 0) {
+    const suits = ['♠', '♥', '♦', '♣'];
+    const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const getRankValue = (rank: string) => ranks.indexOf(rank) + 1;
+
+    const drawCard = (index: number) => {
+        const hash = this._fnv1a32(`${seed}:${index}`);
+        return {
+            rank: ranks[(hash >>> 0) % ranks.length],
+            suit: suits[((hash >>> 0) / ranks.length) % suits.length]
+        };
+    };
+
+    const left = drawCard(0);
+    const right = drawCard(1);
+    const mid = drawCard(2);
+    const lv = getRankValue(left.rank);
+    const rv = getRankValue(right.rank);
+    const mv = getRankValue(mid.rank);
+    const lo = Math.min(lv, rv);
+    const hi = Math.max(lv, rv);
+    const range = hi - lo;
+    const multiplier = range === 0 ? 1 : Math.max(2, Math.floor(12 / range));
+
+    let result: 'win' | 'lose' | 'draw';
+    if (lo === hi) {
+      result = 'draw';
+    } else if (mv > lo && mv < hi) {
+      result = 'win';
+    } else {
+      result = 'lose';
+    }
+
+    if (bias > 0 && result !== 'win') {
+      if (((this._fnv1a32(`${seed}:bias`) >>> 0) % 100) < bias * 100) {
+        result = 'win';
+      }
+    }
+
+    const payoutMultiplier = result === 'win' ? multiplier : result === 'draw' ? 1 : 0;
+    return { left, right, mid, lo, hi, range, multiplier, result, isWin: result === 'win', payoutMultiplier };
   }
 
   resolveCrash(elapsedSeconds: number, seed: string, bias: number = 0) {

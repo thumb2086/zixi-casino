@@ -33,6 +33,7 @@ import { crashRoutes } from "./routes/v1/games/crash.js";
 import { pokerRoutes } from "./routes/v1/games/poker.js";
 import { bluffdiceRoutes } from "./routes/v1/games/bluffdice.js";
 import { shootDragonGateRoutes } from "./routes/v1/games/shoot-dragon-gate.js";
+import { dragonTigerRoutes } from "./routes/v1/games/dragon-tiger.js";
 // v1.1.0: Company simulation (beta)
 import { companyRoutes } from "./routes/v1/company.js";
 // Phase 6: Chest / inventory routes
@@ -176,6 +177,7 @@ fastify.register(crashRoutes, { prefix: "/api/v1/games/crash" });
 fastify.register(pokerRoutes, { prefix: "/api/v1/games/poker" });
 fastify.register(bluffdiceRoutes, { prefix: "/api/v1/games/bluffdice" });
 fastify.register(shootDragonGateRoutes, { prefix: "/api/v1/games/shoot-dragon-gate" });
+fastify.register(dragonTigerRoutes, { prefix: "/api/v1/games/dragon-tiger" });
 // v1.1.0: Company simulation (beta)
 fastify.register(companyRoutes, { prefix: "/api/v1/company" });
 // Phase 6: Chest / inventory
