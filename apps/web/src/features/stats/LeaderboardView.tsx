@@ -258,7 +258,7 @@ export default function LeaderboardView() {
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
                     <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-slate-400 bg-elevated text-3xl">
-                      {orderedTopThree[0].avatarIcon || <img src={orderedTopThree[0].avatar} alt={orderedTopThree[0].name} />}
+                      {orderedTopThree[0].avatarIcon || <img src={orderedTopThree[0].avatar} alt={orderedTopThree[0].name} className="w-full h-full object-cover" />}
                     </div>
                     <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-lg bg-slate-400 text-xs font-bold text-black">
                       {orderedTopThree[0].rank}
@@ -286,7 +286,7 @@ export default function LeaderboardView() {
                       <Crown size={32} fill="currentColor" />
                     </div>
                     <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border-4 border-accent bg-elevated text-5xl shadow-[0_0_40px_rgba(252,192,37,0.3)]">
-                      {orderedTopThree[1].avatarIcon || <img src={orderedTopThree[1].avatar} alt={orderedTopThree[1].name} />}
+                      {orderedTopThree[1].avatarIcon || <img src={orderedTopThree[1].avatar} alt={orderedTopThree[1].name} className="w-full h-full object-cover" />}
                     </div>
                     <div className="absolute -left-3 -top-3 flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-sm font-black text-black">
                       1
@@ -311,7 +311,7 @@ export default function LeaderboardView() {
                 <div className="flex flex-col items-center space-y-4">
                   <div className="relative">
                     <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border-2 border-amber-700 bg-elevated text-3xl">
-                      {orderedTopThree[2].avatarIcon || <img src={orderedTopThree[2].avatar} alt={orderedTopThree[2].name} />}
+                      {orderedTopThree[2].avatarIcon || <img src={orderedTopThree[2].avatar} alt={orderedTopThree[2].name} className="w-full h-full object-cover" />}
                     </div>
                     <div className="absolute -left-3 -top-3 flex h-6 w-6 items-center justify-center rounded-lg bg-amber-700 text-xs font-bold text-white">
                       {orderedTopThree[2].rank}

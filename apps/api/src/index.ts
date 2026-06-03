@@ -56,11 +56,9 @@ fastify.setSerializerCompiler(serializerCompiler);
 
 fastify.register(cors, {
   origin: [
-    "https://zixi-casino.vercel.app",
-    "https://zixi-casino-beta.vercel.app",
+    /https:\/\/zixi-casino.*\.vercel\.app$/,
     "https://device-linker-api.vercel.app",
     "http://localhost:5173",
-    "https://zixi-casino-api.onrender.com",
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
