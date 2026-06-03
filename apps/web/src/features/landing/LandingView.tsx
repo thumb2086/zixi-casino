@@ -101,7 +101,7 @@ export default function LandingView() {
             <img
               src="/icon-512.png"
               alt="子熙 ZIXI · 佑戩 YJC 圖標"
-              className="mx-auto mb-6 w-28 aspect-square rounded-2xl md:w-36"
+              className="mx-auto mb-6 w-28 aspect-square rounded-full object-cover md:w-36"
             />
             <h1 className="mb-4 text-4xl font-black leading-tight tracking-tight text-white md:text-6xl">
               {t('landing.hero.title')}
