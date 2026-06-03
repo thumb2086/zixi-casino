@@ -33,7 +33,7 @@ export default function InfoView() {
   }, [location.search]);
 
   const activeLabel = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.label ?? '說?中?',
+    () => TABS.find((tab) => tab.id === activeTab)?.label ?? '說明中心',
     [activeTab],
   );
 

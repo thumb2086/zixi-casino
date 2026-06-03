@@ -235,7 +235,7 @@ export default function ChestView() {
         const parts: string[] = [];
         if (d.totalZxc > 0) parts.push(`${d.totalZxc.toLocaleString()} ZXC`);
         if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
-        showToast(`×使用 ${d.itemCount} ?物收藏 ${parts.join(' + ')}`);
+        showToast(`×使用 ${d.itemCount} 個物品獲得 ${parts.join(' + ')}`);
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
@@ -260,7 +260,7 @@ export default function ChestView() {
         } else if (d.effectSummary) {
           showToast(d.effectSummary);
         } else {
-          showToast(`×使用 ${quantity} ?物?`);
+          showToast(`×使用 ${quantity} 個物品`);
         }
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
