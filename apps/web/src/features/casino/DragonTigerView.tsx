@@ -59,9 +59,12 @@ export const DragonTigerView: React.FC = () => {
       setResult(null);
       setOpenGate(null);
       setIsOpening(true);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       const res = await api.post("/api/v1/games/shoot-dragon-gate/open", {
         sessionId: session.id
-      });
+      }, { signal: controller.signal });
+      clearTimeout(timeoutId);
       const payload = res.data;
       if (!res.status || payload?.success === false) {
         throw new Error(extractGameError(payload));
@@ -69,7 +72,11 @@ export const DragonTigerView: React.FC = () => {
       const opened = unwrapGameEnvelope<OpenGateData>(payload);
       setOpenGate(opened);
     } catch (e: any) {
-      setError(extractGameError(e?.response?.data || e));
+      if (e?.name === 'CanceledError' || e?.code === 'ERR_CANCELED') {
+        setError("請求超時，請檢查連線後重試");
+      } else {
+        setError(extractGameError(e?.response?.data || e));
+      }
     } finally {
       setIsOpening(false);
     }
