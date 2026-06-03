@@ -100,7 +100,7 @@ class AudioManager {
     }
 
     this.initialized = true;
-    this.preloadSfx();
+    // Don't preload all SFX on init — lazy-load on play instead
     this.applyAllSoundStates();
   }
 
