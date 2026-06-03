@@ -258,7 +258,7 @@ export default function LobbyView() {
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-caption text-secondary mt-0.5">下??{nf(profileData.xpNextLevel)} XP</p>
+                  <p className="text-caption text-secondary mt-0.5">下一級 {nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
@@ -276,8 +276,8 @@ export default function LobbyView() {
           <div className="card-success bg-card p-6 md:col-span-2 lg:col-span-3 border border-border/10">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <span className="text-xl">?</span>
-                <h2 className="section-title-text text-success">每日任?</h2>
+                <span className="text-xl">📋</span>
+                <h2 className="section-title-text text-success">每日任務</h2>
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
