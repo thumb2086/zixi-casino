@@ -155,7 +155,7 @@ export default function WalletView() {
           <section className="card-accent bg-card p-6 border border-border/10">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">經?等?</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">經驗等級</p>
                 <p className="text-3xl font-black italic text-accent mt-1">Lv.{profileData.level} <span className="text-sm font-bold text-secondary">{profileData.xpTierLabel || ''}</span></p>
               </div>
               <div className="text-right">

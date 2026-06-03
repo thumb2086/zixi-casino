@@ -76,10 +76,10 @@ export default function ChatRoom() {
 
       <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-4">
         {loading && (
-          <div className="text-xs text-slate-600 text-center py-8">載入?..</div>
+          <div className="text-xs text-slate-600 text-center py-8">載入中..</div>
         )}
         {!loading && messages.length === 0 && (
-          <div className="text-xs text-slate-600 text-center py-8">?無訊息</div>
+          <div className="text-xs text-slate-600 text-center py-8">暫無訊息</div>
         )}
         {[...messages].reverse().map((m: any) => {
           const isOwn = m.address?.toLowerCase() === address?.toLowerCase();

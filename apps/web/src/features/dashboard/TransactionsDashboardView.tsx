@@ -102,10 +102,10 @@ export default function TransactionsDashboardView() {
             <option value="pending">等</option>
             <option value="broadcasted"></option>
             <option value="confirmed">已確</option>
-            <option value="failed">失?</option>
+            <option value="failed">失敗</option>
           </select>
           <input value={address} onChange={(e) => { setAddress(e.target.value); setPage(1); }} placeholder="地址" className="rounded-lg bg-card p-2 text-sm" />
-          <input value={gameType} onChange={(e) => { setGameType(e.target.value); setPage(1); }} placeholder="?戲類?" className="rounded-lg bg-card p-2 text-sm" />
+          <input value={gameType} onChange={(e) => { setGameType(e.target.value); setPage(1); }} placeholder="遊戲類型" className="rounded-lg bg-card p-2 text-sm" />
           <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPage(1); }} className="rounded-lg bg-card p-2 text-sm" />
           <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPage(1); }} className="rounded-lg bg-card p-2 text-sm" />
         </section>
@@ -114,7 +114,7 @@ export default function TransactionsDashboardView() {
           <div className="rounded-xl border border-border/20 bg-gradient-to-br from-[#1e1d1d] to-[#151414] p-3 text-sm">總計 <b>{nf(summary?.total ?? 0)}</b></div>
           <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/20 to-[#151414] p-3 text-sm">已確認 <b>{summary?.confirmed ?? 0}</b></div>
           <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-900/20 to-[#151414] p-3 text-sm">待處理 <b>{summary?.pending ?? 0}</b></div>
-          <div className="rounded-xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 to-[#151414] p-3 text-sm">收藏 <b>{((summary?.successRate ?? 0) * 100).toFixed(2)}%</b></div>
+           <div className="rounded-xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 to-[#151414] p-3 text-sm">成功率 <b>{((summary?.successRate ?? 0) * 100).toFixed(2)}%</b></div>
         </section>
 
         <section className="grid gap-2 md:grid-cols-4">
@@ -129,19 +129,19 @@ export default function TransactionsDashboardView() {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-border/20 text-left text-secondary">
-                <th className="p-3 text-xs">×</th>
-                <th className="p-3 text-xs">×</th>
-                <th className="p-3 text-xs">×</th>
-                <th className="p-3 text-xs">類?</th>
-                <th className="p-3 text-xs">×</th>
-                <th className="p-3 text-xs"></th>
+                <th className="p-3 text-xs">時間</th>
+                <th className="p-3 text-xs">Round</th>
+                <th className="p-3 text-xs">地址</th>
+                <th className="p-3 text-xs">類型</th>
+                <th className="p-3 text-xs">金額</th>
+                <th className="p-3 text-xs">狀態</th>
                 <th className="p-3 text-xs">TxHash</th>
-                <th className="p-3 text-xs">?戲</th>
+                <th className="p-3 text-xs">遊戲</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td className="p-3" colSpan={8}>載入?..</td></tr>
+                <tr><td className="p-3" colSpan={8}>載入中..</td></tr>
               ) : (data?.items || []).map((row) => (
                 <tr key={row.id} className="border-b border-border/10">
                   <td className="p-3 text-xs">{new Date(row.createdAt).toLocaleString('zh-TW')}</td>

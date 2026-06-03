@@ -36,7 +36,7 @@ export default function StatusView() {
         <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6">
           <div className="text-5xl shrink-0">{avatarItem?.icon || '遊戲'}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-black text-white truncate">{username || '?設?}</p>
+            <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
             {titleItem && <p className="text-xs font-bold text-secondary">{titleItem.icon} {titleItem.name}</p>}
             <p className="text-xs font-bold text-secondary truncate mt-1">{address || ''}</p>
           </div>
@@ -47,7 +47,7 @@ export default function StatusView() {
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">ZXC 餘?</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">ZXC 餘額</span>
             </div>
             <p className="text-xl font-black italic text-accent">{nf(Number(balance))}</p>
           </div>
@@ -71,7 +71,7 @@ export default function StatusView() {
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">設?</span>
+            <span className="text-sm font-bold">設定</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
         </section>

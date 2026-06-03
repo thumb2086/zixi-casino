@@ -115,17 +115,17 @@ export default function ItemsCatalogView() {
                 }`}
               >
                 {type === 'all' ? '全部' : 
-                 type === 'avatar' ? '遊戲' : 
+                 type === 'avatar' ? '頭像' : 
                  type === 'title' ? '稱號' : '道具'}
               </button>
             ))}
           </div>
         </section>
 
-        {/* 稀?度說? */}
+        {/* 稀有度說明 */}
         <section className="mb-6 rounded-2xl border border-border/10 bg-card p-4">
           <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            稀?度說?
+            稀有度說明
           </h2>
           <div className="flex flex-wrap gap-2">
             {Object.entries(RARITY_COLORS).map(([key, colors]) => (
@@ -182,7 +182,7 @@ export default function ItemsCatalogView() {
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="flex items-center gap-1 rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                         <TypeIcon className="h-3 w-3" />
-                        {item.type === 'avatar' ? '遊戲' : 
+                        {item.type === 'avatar' ? '頭像' : 
                          item.type === 'title' ? '稱號' : 
                          item.type === 'buff' ? '增益' : '道具'}
                       </span>
@@ -197,10 +197,10 @@ export default function ItemsCatalogView() {
           })}
         </section>
 
-        {/* 收藏總覽 */}
+        {/* 獲得方式 */}
         <section className="mt-8 rounded-2xl border border-border/10 bg-card p-6">
           <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            收藏×
+            獲得方式
           </h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
@@ -208,8 +208,8 @@ export default function ItemsCatalogView() {
                 <Gift className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">×購買</h3>
-                <p className="text-xs font-bold text-secondary">使用子熙幣(ZXC)或佑戩幣(YJC)收藏店購買?定頭×稱?</p>
+                <h3 className="text-sm font-bold text-white">商店購買</h3>
+                <p className="text-xs font-bold text-secondary">使用子熙幣(ZXC)或佑戩幣(YJC)在商店購買特定頭像或稱號</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -217,8 +217,8 @@ export default function ItemsCatalogView() {
                 <Crown className="h-4 w-4 text-purple-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">管</h3>
-                <p className="text-xs font-bold text-secondary">×活×貢?獲得收藏?</p>
+                <h3 className="text-sm font-bold text-white">管理員發放</h3>
+                <p className="text-xs font-bold text-secondary">透過活動貢獻或特殊成就獲得獎勵</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -226,8 +226,8 @@ export default function ItemsCatalogView() {
                 <Sword className="h-4 w-4 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">寶箱×</h3>
-                <p className="text-xs font-bold text-secondary">?戲?獲得?寶箱收藏×?物</p>
+                <h3 className="text-sm font-bold text-white">寶箱開啟</h3>
+                <p className="text-xs font-bold text-secondary">遊戲內獲得稀有寶箱隨機開出物品</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -235,8 +235,8 @@ export default function ItemsCatalogView() {
                 <Heart className="h-4 w-4 text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">活動</h3>
-                <p className="text-xs font-bold text-secondary">收藏活?完?任×?專屬?勵</p>
+                <h3 className="text-sm font-bold text-white">活動任務</h3>
+                <p className="text-xs font-bold text-secondary">參與活動完成任務獲得專屬獎勵</p>
               </div>
             </div>
           </div>

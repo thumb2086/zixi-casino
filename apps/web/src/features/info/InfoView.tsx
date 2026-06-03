@@ -52,7 +52,7 @@ export default function InfoView() {
             </Link>
             <Sparkles className="text-accent" />
             <div>
-              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">說?中?</h1>
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">資訊中心</h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">{activeLabel}</p>
             </div>
           </div>
