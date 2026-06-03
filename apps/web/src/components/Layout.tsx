@@ -1,7 +1,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { APP_VERSION } from '@repo/shared';
@@ -57,10 +57,13 @@ export default function Layout() {
                       <span className="text-xs font-bold uppercase tracking-widest text-info">{t('layout.global_chat')}</span>
                   </button>
                   <ChatRoom />
-                  <footer className="py-4 text-center">
+                  <footer className="py-4 text-center space-y-1">
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted">
                       {t('layout.footer', { version: APP_VERSION })}
                     </p>
+                    <Link to="/landing" className="block text-[10px] uppercase tracking-widest text-muted hover:text-accent transition-colors">
+                      關於子熙佑戩
+                    </Link>
                   </footer>
                 </div>
               </div>
