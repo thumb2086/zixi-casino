@@ -130,7 +130,7 @@ export default function PublicTransactionsView() {
       <main className="app-shell pt-24">
         <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6 mb-6">
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-black text-white truncate">{username || '?設?}</p>
+            <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
             <p className="text-xs font-bold text-secondary truncate mt-1">{displayAddress || ''}</p>
           </div>
           <div className="text-right">
@@ -142,13 +142,13 @@ export default function PublicTransactionsView() {
         <div className="flex items-center gap-3 mb-6 bg-card rounded-2xl px-5 py-3 border border-border/10">
           <Clock size={14} className="text-accent" />
           <span className="text-caption font-bold text-secondary uppercase tracking-wider">
-            伺收藏
+            伺服器
           </span>
           <span className="text-xs font-bold text-emerald-400 ml-auto">
             {serviceStats?.serverUptimeLabel || '...'}
           </span>
           <span className="text-caption font-bold text-secondary">
-            {serviceStats?.uptime ? `?用 ${serviceStats.uptime}` : ''}
+            {serviceStats?.uptime ? `運作 ${serviceStats.uptime}` : ''}
           </span>
         </div>
 
@@ -183,21 +183,21 @@ export default function PublicTransactionsView() {
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">總交</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">總交易</span>
             </div>
             <p className="text-xl font-black italic text-accent">{nf(summary?.total ?? 0)}</p>
           </div>
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-emerald-400" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">×</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">已確認</span>
             </div>
             <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
           </div>
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <HeartPulse size={14} className="text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary"></span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">成功率</span>
             </div>
             <p className="text-xl font-black italic text-accent">{summary?.total ? `${successRatePct}%` : '0%'}</p>
           </div>
@@ -205,7 +205,7 @@ export default function PublicTransactionsView() {
 
         <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl mb-6">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
-            收藏收藏?
+            最新交易
           </p>
           <div className="mt-4 space-y-3">
             {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}

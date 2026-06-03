@@ -334,7 +334,7 @@ export default function MarketView() {
           )}
           {summary && (
             <div className="flex items-center justify-between rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-xs">
-              <span className="text-secondary">?行</span>
+              <span className="text-secondary">銀行</span>
               <span className="font-black text-emerald-400">{nf(summary.bankBalance)} ZXC</span>
             </div>
           )}
@@ -342,9 +342,9 @@ export default function MarketView() {
             <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
               placeholder={t('market.amount')} className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none" />
             <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.cash || 0))))}
-              className="text-xs font-bold text-secondary px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10">?部存入</button>
+              className="text-xs font-bold text-secondary px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10">全部存入</button>
             <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.bankBalance || 0))))}
-              className="text-xs font-bold text-emerald-400 px-3 py-1 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10">?部?出</button>
+              className="text-xs font-bold text-emerald-400 px-3 py-1 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10">全部提出</button>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" disabled={execute.isPending}
@@ -355,8 +355,8 @@ export default function MarketView() {
               className="rounded-xl bg-amber-600 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
           <div className="rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-caption text-secondary leading-relaxed">
-            <p>? ?行利率 <span className="text-emerald-400 font-bold">2% APY</span>（?實收藏?複利</p>
-            <p>? 貸款年利率<span className="text-amber-400 font-bold">4% APR</span>（?實每月×計息</p>
+            <p>銀行利率 <span className="text-emerald-400 font-bold">2% APY</span>（每日複利計算）</p>
+            <p>貸款年利率<span className="text-amber-400 font-bold">4% APR</span>（每月還款計息）</p>
           </div>
           <div className="border-t border-border/10 pt-3">
             <p className="text-xs font-bold text-secondary mb-2">貸款</p>
