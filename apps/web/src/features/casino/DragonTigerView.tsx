@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
+import { formatNumber } from '@repo/shared';
+import { usePreferencesStore } from '../../store/usePreferencesStore';
 import "./DragonTiger.css";
 import AppBottomNav from "../../components/AppBottomNav";
 
@@ -35,11 +38,24 @@ function CardView({ card, hidden, small }: { card?: { rank: string; suit: string
 export default function DragonTigerView() {
   const { t } = useTranslation();
   const { session } = useAuth();
+  const { amountDisplay } = usePreferencesStore();
+  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const [betAmount, setBetAmount] = useState("100");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PlayResult | null>(null);
   const [error, setError] = useState("");
   const [showAnimation, setShowAnimation] = useState(false);
+
+  const { data: walletData } = useQuery({
+    queryKey: ['wallet-summary'],
+    queryFn: async () => {
+      const res = await api.get('/api/v1/wallet/summary', { params: { sessionId: session?.id } });
+      return res.data?.data;
+    },
+    enabled: Boolean(session?.id),
+    refetchInterval: 30000,
+  });
+  const walletBalance = walletData?.summary?.balances?.ZXC || walletData?.assets?.walletBalance?.ZXC || '0';
 
   const handlePlay = async () => {
     if (!session || loading) return;
@@ -74,11 +90,17 @@ export default function DragonTigerView() {
       <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
           <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">射龍門</h1>
-          <span className="text-xs font-bold text-secondary">{t('casino_game.dragon_tiger')}</span>
+          <span className="text-xs font-bold text-secondary">{t('game.dragon')}</span>
         </div>
       </header>
 
       <main className="app-shell pt-24 space-y-6">
+        {/* Wallet Balance */}
+        <section className="bg-card rounded-2xl p-4 border border-border/10 flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-widest text-secondary">可用餘額</span>
+          <span className="text-sm font-black text-accent">{nf(walletBalance)} ZXC</span>
+        </section>
+
         {/* Gate Display */}
         <section className="bg-card rounded-2xl p-6 border border-border/10 text-center">
           <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">龍門</p>
