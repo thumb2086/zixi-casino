@@ -109,7 +109,7 @@ export default function WalletView() {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
-    return `?�日 ${tomorrow.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`;
+    return `?日 ${tomorrow.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`;
   }, [canClaimAirdrop, t]);
 
   return (
@@ -122,7 +122,7 @@ export default function WalletView() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/app/shop" className="text-xs font-bold uppercase tracking-[0.18em] text-info">
-              ?��?
+              ??
             </Link>
             <Link to="/app/swap" className="text-xs font-bold uppercase tracking-[0.18em] text-info">
               {t('swap.title')}
@@ -155,13 +155,13 @@ export default function WalletView() {
           <section className="card-accent bg-card p-6 border border-border/10">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">經�?等�?</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">經?等?</p>
                 <p className="text-3xl font-black italic text-accent mt-1">Lv.{profileData.level} <span className="text-sm font-bold text-secondary">{profileData.xpTierLabel || ''}</span></p>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-caption text-secondary mt-0.5">下�?�?{nf(profileData.xpNextLevel)} XP</p>
+                  <p className="text-caption text-secondary mt-0.5">下??{nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function WalletView() {
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold text-secondary">{t('vault.next_available')}{nextAirdropLabel}</p>
-                <p className="text-xs font-bold text-secondary mt-1">?�勵?��? ?{(1 + checkinStreak * 0.05).toFixed(2)}</p>
+                <p className="text-xs font-bold text-secondary mt-1">?勵?? ?{(1 + checkinStreak * 0.05).toFixed(2)}</p>
               </div>
             </div>
             {/* Calendar grid: last 30 days */}
@@ -225,13 +225,13 @@ export default function WalletView() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <History size={18} className="text-info" />
-                <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white">交�?紀??/h2>
+                <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-white">交易紀錄</h2>
               </div>
-              <Link to="/app/transactions" className="text-caption font-bold text-secondary hover:text-accent">?��??�部</Link>
+              <Link to="/app/transactions" className="text-caption font-bold text-secondary hover:text-accent">檢視全部</Link>
             </div>
             <div className="space-y-2">
-              {summary.isLoading && <div className="text-xs text-secondary">載入�?..</div>}
-              {!summary.isLoading && (!walletSummary?.recentTransactions || walletSummary.recentTransactions.length === 0) && <div className="text-xs text-secondary">?�無交�?</div>}
+              {summary.isLoading && <div className="text-xs text-secondary">載入中...</div>}
+              {!summary.isLoading && (!walletSummary?.recentTransactions || walletSummary.recentTransactions.length === 0) && <div className="text-xs text-secondary">暫無交易</div>}
               {(walletSummary?.recentTransactions || []).slice(0, 10).map((tx: any) => {
                 const amt = Number(tx.amount);
                 const isCredit = amt >= 0;
@@ -245,7 +245,7 @@ export default function WalletView() {
                       <p className={`text-xs font-bold ${isCredit ? 'text-emerald-400' : 'text-danger'}`}>
                         {isCredit ? '+' : ''}{formatNumber(amt, numberMode)} {(tx.token === 'zhixi' ? 'ZXC' : tx.token === 'yjc' ? 'YJC' : tx.token || tx.tokenSymbol || 'ZXC')}
                       </p>
-                      <p className="text-caption text-secondary">{tx.status ? t('txStatus.' + tx.status, tx.status) : '已確�?}</p>
+                      <p className="text-caption text-secondary">{tx.status ? t('txStatus.' + tx.status, tx.status) : '已確認'}</p>
                     </div>
                   </div>
                 );

@@ -90,31 +90,31 @@ export default function TransactionsDashboardView() {
     <div className="min-h-screen bg-surface pb-28 text-white">
       <header className="fixed top-0 z-50 w-full border-b border-border/20 bg-surface/90 backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-4">
-          <h1 className="text-lg font-black uppercase tracking-[0.1em] text-secondary">‰∫§Ê?Á¥Ä??/h1>
-          <Link to="/app" className="text-xs font-bold text-secondary hover:text-accent">ËøîÂ?</Link>
+          <h1 className="text-lg font-black uppercase tracking-[0.1em] text-secondary">‰∫§ÊòìÁ¥ÄÈåÑ</h1>
+          <Link to="/app" className="text-xs font-bold text-secondary hover:text-accent">ËøîÂõû</Link>
         </div>
       </header>
 
       <main className="app-shell pt-24 space-y-4">
         <section className="grid gap-3 md:grid-cols-5">
           <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="rounded-lg bg-card p-2 text-sm">
-            <option value="">?®ÈÉ®?Ä??/option>
-            <option value="pending">Á≠âÂ?‰∏?/option>
-            <option value="broadcasted">Âª?í≠‰∏?/option>
-            <option value="confirmed">Â∑≤Á¢∫Ë™?/option>
-            <option value="failed">Â§±Ê?</option>
+            <option value="">?ÈÉ®</option>
+            <option value="pending">Á≠â</option>
+            <option value="broadcasted"></option>
+            <option value="confirmed">Â∑≤Á¢∫</option>
+            <option value="failed">Â§±?</option>
           </select>
-          <input value={address} onChange={(e) => { setAddress(e.target.value); setPage(1); }} placeholder="?∞Â?" className="rounded-lg bg-card p-2 text-sm" />
-          <input value={gameType} onChange={(e) => { setGameType(e.target.value); setPage(1); }} placeholder="?äÊà≤È°ûÂ?" className="rounded-lg bg-card p-2 text-sm" />
+          <input value={address} onChange={(e) => { setAddress(e.target.value); setPage(1); }} placeholder="??" className="rounded-lg bg-card p-2 text-sm" />
+          <input value={gameType} onChange={(e) => { setGameType(e.target.value); setPage(1); }} placeholder="?Êà≤È°û?" className="rounded-lg bg-card p-2 text-sm" />
           <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setPage(1); }} className="rounded-lg bg-card p-2 text-sm" />
           <input type="date" value={endDate} onChange={(e) => { setEndDate(e.target.value); setPage(1); }} className="rounded-lg bg-card p-2 text-sm" />
         </section>
 
         <section className="grid gap-3 md:grid-cols-4">
-          <div className="rounded-xl border border-border/20 bg-gradient-to-br from-[#1e1d1d] to-[#151414] p-3 text-sm">Á∏ΩÁ??? <b>{nf(summary?.total ?? 0)}</b></div>
-          <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/20 to-[#151414] p-3 text-sm">Â∑≤Á¢∫Ë™? <b>{summary?.confirmed ?? 0}</b></div>
-          <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-900/20 to-[#151414] p-3 text-sm">Á≠âÂ?‰∏? <b>{summary?.pending ?? 0}</b></div>
-          <div className="rounded-xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 to-[#151414] p-3 text-sm">?êÂ??? <b>{((summary?.successRate ?? 0) * 100).toFixed(2)}%</b></div>
+          <div className="rounded-xl border border-border/20 bg-gradient-to-br from-[#1e1d1d] to-[#151414] p-3 text-sm">Á∏Ω??? <b>{nf(summary?.total ?? 0)}</b></div>
+          <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-900/20 to-[#151414] p-3 text-sm">Â∑≤Á¢∫? <b>{summary?.confirmed ?? 0}</b></div>
+          <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-900/20 to-[#151414] p-3 text-sm">Á≠â?? <b>{summary?.pending ?? 0}</b></div>
+          <div className="rounded-xl border border-sky-500/20 bg-gradient-to-br from-sky-900/20 to-[#151414] p-3 text-sm">???? <b>{((summary?.successRate ?? 0) * 100).toFixed(2)}%</b></div>
         </section>
 
         <section className="grid gap-2 md:grid-cols-4">
@@ -129,23 +129,23 @@ export default function TransactionsDashboardView() {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-border/20 text-left text-secondary">
-                <th className="p-3 text-xs">?ÇÈ?</th>
-                <th className="p-3 text-xs">?ûÂ?</th>
-                <th className="p-3 text-xs">?∞Â?</th>
-                <th className="p-3 text-xs">È°ûÂ?</th>
-                <th className="p-3 text-xs">?ëÈ?</th>
-                <th className="p-3 text-xs">?Ä??/th>
+                <th className="p-3 text-xs">??</th>
+                <th className="p-3 text-xs">??</th>
+                <th className="p-3 text-xs">??</th>
+                <th className="p-3 text-xs">È°û?</th>
+                <th className="p-3 text-xs">??</th>
+                <th className="p-3 text-xs"></th>
                 <th className="p-3 text-xs">TxHash</th>
-                <th className="p-3 text-xs">?äÊà≤</th>
+                <th className="p-3 text-xs">?Êà≤</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td className="p-3" colSpan={8}>ËºâÂÖ•‰∏?..</td></tr>
+                <tr><td className="p-3" colSpan={8}>ËºâÂÖ•?..</td></tr>
               ) : (data?.items || []).map((row) => (
                 <tr key={row.id} className="border-b border-border/10">
                   <td className="p-3 text-xs">{new Date(row.createdAt).toLocaleString('zh-TW')}</td>
-                  <td className="p-3 text-xs">{String(row.roundId).length > 16 ? String(row.roundId).slice(0,16)+'?? : String(row.roundId)}</td>
+                  <td className="p-3 text-xs">{String(row.roundId).length > 16 ? String(row.roundId).slice(0,16)+'...' : String(row.roundId)}</td>
                   <td className="p-3 text-xs">{row.userAddress}</td>
                   <td className="p-3 text-xs">{t('txType.' + row.type, row.type)}</td>
                   <td className="p-3">{nf(Number(row.amount))} {row.tokenSymbol || ''}</td>
@@ -167,9 +167,9 @@ export default function TransactionsDashboardView() {
         </section>
 
         <div className="flex items-center justify-between text-sm text-secondary">
-          <button className="rounded border border-border/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>‰∏ä‰???/button>
-          <span>Á¨?{page} / {totalPages} ??/span>
-          <button className="rounded border border-border/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>‰∏ã‰???/button>
+          <button className="rounded border border-border/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>‰∏ä</button>
+          <span>?{page} / {totalPages} </span>
+          <button className="rounded border border-border/30 px-3 py-1 disabled:opacity-40" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>‰∏ã</button>
         </div>
       </main>
 

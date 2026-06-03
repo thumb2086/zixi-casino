@@ -216,10 +216,10 @@ export default function ChestView() {
         await refreshInventory();
         await refreshStatus();
       } else {
-        showToast(res.data?.error || '?��?失�?');
+        showToast(res.data?.error || '??失?');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '網路?�誤');
+      showToast(err?.response?.data?.error || '網路?誤');
     } finally {
       setOpening(false);
     }
@@ -227,7 +227,7 @@ export default function ChestView() {
 
   const useAllTokens = async () => {
     setUsingAllTokens(true);
-    setUseStatusMessage('�?��?��??�部�?��...');
+    setUseStatusMessage('????部?...');
     try {
       const res = await api.post('/api/v1/inventory/use-all-tokens', {});
       if (res.data?.success) {
@@ -235,14 +235,14 @@ export default function ChestView() {
         const parts: string[] = [];
         if (d.totalZxc > 0) parts.push(`${d.totalZxc.toLocaleString()} ZXC`);
         if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
-        showToast(`?��?使用 ${d.itemCount} ?�物?��??��? ${parts.join(' + ')}`);
+        showToast(`??使用 ${d.itemCount} ?物???? ${parts.join(' + ')}`);
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
-        showToast(res.data?.error || '?��?失�?');
+        showToast(res.data?.error || '??失?');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '?��?失�?');
+      showToast(err?.response?.data?.error || '??失?');
     } finally {
       setUsingAllTokens(false);
       setUseStatusMessage(null);
@@ -250,25 +250,25 @@ export default function ChestView() {
   };
 
   const useItem = async (itemId: string, quantity: number = 1) => {
-    setUseStatusMessage('�?��?��?...');
+    setUseStatusMessage('???...');
     try {
       const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
         const d = res.data.data;
         if (d.currencyGranted > 0) {
-          showToast(`?��? ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
+          showToast(`?? ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
         } else if (d.effectSummary) {
           showToast(d.effectSummary);
         } else {
-          showToast(`?��?使用 ${quantity} ?�物?�`);
+          showToast(`??使用 ${quantity} ?物?`);
         }
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
-        showToast(res.data?.error || '使用失�?');
+        showToast(res.data?.error || '使用失?');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '使用失�?');
+      showToast(err?.response?.data?.error || '使用失?');
     } finally {
       setUseStatusMessage(null);
     }
@@ -281,12 +281,12 @@ export default function ChestView() {
   }, {} as Record<string, InventoryEntry[]>);
 
   const itemTypeLabels: Record<string, string> = {
-    chest_key: '?��?',
-    token: '�?��',
-    buff: '?��?',
-    avatar: '?��?',
-    title: '稱�?',
-    collectible: '?��???,
+    chest_key: '??',
+    token: '代幣',
+    buff: '增益',
+    avatar: '頭像',
+    title: '稱號',
+    collectible: '收藏品',
   };
 
   return (
@@ -297,15 +297,15 @@ export default function ChestView() {
             <Package className="text-accent" />
             <div>
               <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
-                ?��?中�?
+                ??中?
               </h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-                ?��??��?�?
+                ?????
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-caption font-bold uppercase tracking-widest text-secondary">空�?</p>
+            <p className="text-caption font-bold uppercase tracking-widest text-secondary">空?</p>
             <p className="text-sm font-black text-white">
               {status?.inventorySlotsUsed || 0}
               <span className="mx-1 text-muted">/</span>
@@ -352,7 +352,7 @@ export default function ChestView() {
                 invTab === tab ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary hover:bg-[#494847]/30'
               }`}
             >
-              {{ chests: '寶箱', tokens: '�?��', buffs: '?��?', collection: '?��?' }[tab]}
+              {{ chests: '寶箱', tokens: '?', buffs: '??', collection: '??' }[tab]}
             </button>
           ))}
         </div>
@@ -360,7 +360,7 @@ export default function ChestView() {
         {/* Tab: Chests */}
         {invTab === 'chests' && (
         <section className="space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">?��??�寶�?/h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">???寶</h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {chests.map((chest) => {
@@ -377,16 +377,16 @@ export default function ChestView() {
                       <h3 className="text-lg font-black text-white">{chest.name}</h3>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="rounded bg-accent/10 px-2 py-0.5 text-caption font-bold uppercase tracking-wider text-accent">
-                          {keys} ?�鑰??
+                          {keys} ?鑰??
                         </span>
                       </div>
                     </div>
-                    <div className="text-4xl">?��</div>
+                    <div className="text-4xl">?</div>
                   </div>
 
                   <div className="mb-4 space-y-2">
                     <div className="flex justify-between text-caption font-bold uppercase tracking-widest text-secondary">
-                      <span>保�??�度</span>
+                      <span>保??度</span>
                       <span className="text-accent">{currentPity} / {chest.pityThreshold}</span>
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
@@ -418,7 +418,7 @@ export default function ChestView() {
                         : 'bg-[#494847]/20 text-muted cursor-not-allowed border border-border/10'
                     }`}
                   >
-                    {opening ? '�??�?..' : `?��? ${openQtyNum} ?�`}
+                    {opening ? '???..' : `?? ${openQtyNum} ?`}
                   </button>
                 </div>
               );
@@ -431,7 +431,7 @@ export default function ChestView() {
         {invTab === 'tokens' && (
           <section className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">�?��</h2>
+              <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">?</h2>
               {(() => {
                 const tokenItems = groupedItems['token'] || [];
                 const totalTokens = tokenItems.reduce((sum, i) => sum + (i.effect?.value || 0) * i.quantity, 0);
@@ -441,13 +441,13 @@ export default function ChestView() {
                     disabled={usingAllTokens}
                     className="text-xs font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
                   >
-                    {usingAllTokens ? '?��?�?..' : `?�部使用 (??{totalTokens.toLocaleString()} ZXC)`}
+                    {usingAllTokens ? '???..' : `?部使用 (??{totalTokens.toLocaleString()} ZXC)`}
                   </button>
                 ) : null;
               })()}
             </div>
             {(!groupedItems['token'] || groupedItems['token'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?�無�?��?��?</p>
+              <p className="text-sm text-secondary text-center py-8">?無???</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['token'].map((item) => (
@@ -474,7 +474,7 @@ export default function ChestView() {
                       <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
                         className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈�?/button>
+                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈</button>
                     </div>
                   </div>
                 ))}
@@ -486,9 +486,9 @@ export default function ChestView() {
         {/* Tab: Buffs */}
         {invTab === 'buffs' && (
           <section className="space-y-4">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">?��??��?</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">????</h2>
             {(!groupedItems['buff'] || groupedItems['buff'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?�無?��??��?</p>
+              <p className="text-sm text-secondary text-center py-8">?無????</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['buff'].map((item) => (
@@ -513,7 +513,7 @@ export default function ChestView() {
                       <button onClick={() => useItem(item.id, parseInt(useQty[item.id] || '1', 10) || 1)}
                         className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg hover:bg-[#e6ad03]">使用</button>
                       <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈�?/button>
+                        className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈</button>
                     </div>
                   </div>
                 ))}
@@ -525,7 +525,7 @@ export default function ChestView() {
         {/* Tab: Collection */}
         {invTab === 'collection' && (
           <section className="space-y-6">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">?��?</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">??</h2>
             {(['avatar', 'title', 'collectible', 'chest_key'] as const).map((type) => {
               const items = groupedItems[type] || [];
               if (items.length === 0) return null;
@@ -546,9 +546,9 @@ export default function ChestView() {
                         {(type === 'avatar' || type === 'title') && (
                           <div className="mt-auto flex gap-2">
                             <button onClick={() => useItem(item.id)}
-                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent hover:text-black">裝�?</button>
+                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent hover:text-black">裝?</button>
                             <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
-                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈�?/button>
+                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈</button>
                           </div>
                         )}
                       </div>
@@ -558,16 +558,13 @@ export default function ChestView() {
               );
             })}
             {['avatar', 'title', 'collectible', 'chest_key'].every(t => !groupedItems[t]?.length) && (
-              <p className="text-sm text-secondary text-center py-8">?�無?��??��?</p>
+              <p className="text-sm text-secondary text-center py-8">暫無物品</p>
             )}
           </section>
         )}
       </main>
 
       <AppBottomNav current="none" />
-
-      {/* Toast ??handled globally by ToastProvider */}
-      </AnimatePresence>
 
       {/* Result Modal */}
       <AnimatePresence>
@@ -584,7 +581,7 @@ export default function ChestView() {
               className="max-w-3xl w-full max-h-[75vh] flex flex-col"
             >
               <h2 className="text-3xl font-black italic text-center text-accent mb-6">
-                ?��??��?!
+                ????!
               </h2>
 
               <div className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 pr-1 scrollbar-thin">
@@ -636,10 +633,10 @@ export default function ChestView() {
                 <div className="text-center mb-4">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-br from-[#fcc025]/20 to-[#e6ad03]/10 border border-accent/40 rounded-2xl px-6 py-4 shadow-lg shadow-[#fcc025]/5">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#fcc025] to-[#e6ad03] flex items-center justify-center shadow-lg">
-                       <span className="text-lg">?��</span>
+                       <span className="text-lg">?</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">?��?補�?</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">??補?</p>
                       <p className="text-lg font-black italic text-accent">+{nf(openCompensation)} ZXC</p>
                     </div>
                   </div>
@@ -655,7 +652,7 @@ export default function ChestView() {
                   className="bg-[#494847] hover:bg-[#5a5858] text-white font-bold px-8 py-3
                     rounded-xl transition-colors inline-flex items-center gap-2"
                 >
-                  繼�?
+                  繼?
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
@@ -682,20 +679,20 @@ export default function ChestView() {
               className="bg-card rounded-2xl p-6 max-w-sm w-full border border-border/30"
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-black">贈�?{giftDialog.name}</h2>
+                <h2 className="text-lg font-black">贈?{giftDialog.name}</h2>
                 <button onClick={() => setGiftDialog(null)}>
                   <X className="w-5 h-5 text-secondary" />
                 </button>
               </div>
 
-              <label className="block text-sm font-bold text-secondary mb-1">?�收??/label>
+              <label className="block text-sm font-bold text-secondary mb-1">?收</label>
               <select
                 value={giftAddress}
                 onChange={(e) => setGiftAddress(e.target.value)}
                 className="w-full bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-sm
                   focus:outline-none focus:border-accent mb-4"
               >
-                <option value="">?��??�收??..</option>
+                <option value="">???收??..</option>
                 {recipients.map(r => (
                   <option key={r.address} value={r.address}>
                     {r.displayName} ({r.address.slice(0, 6)}...{r.address.slice(-4)})
@@ -703,7 +700,7 @@ export default function ChestView() {
                 ))}
               </select>
 
-              <label className="block text-sm font-bold text-secondary mb-1">?��?</label>
+              <label className="block text-sm font-bold text-secondary mb-1">??</label>
               <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => setGiftQty(String(Math.max(1, (parseInt(giftQty || '1', 10) || 1) - 1)))}
@@ -744,7 +741,7 @@ export default function ChestView() {
                   onClick={() => setGiftDialog(null)}
                   className="flex-1 border border-border/40 text-secondary font-bold text-sm py-2 rounded-lg hover:bg-[#494847]/20"
                 >
-                  ?��?
+                  ??
                 </button>
                 <button
                   disabled={giftSending || !giftAddress.trim()}
@@ -758,16 +755,16 @@ export default function ChestView() {
                         quantity: parseInt(giftQty || '1', 10) || 1,
                       });
                       if (res.data?.success) {
-                        showToast('贈送�??��?');
+                        showToast('贈送???');
                         setGiftDialog(null);
                         setGiftAddress('');
                         setGiftQty('1');
                         await refreshInventory();
                       } else {
-                        showToast(res.data?.error || '贈送失??);
+                        showToast(res.data?.error || '贈送失敗');
                       }
                     } catch (err: any) {
-                      showToast(err?.response?.data?.data?.error || err?.response?.data?.error || '贈送失??);
+                      showToast(err?.response?.data?.data?.error || err?.response?.data?.error || '贈送失敗');
                     } finally {
                       setGiftSending(false);
                     }
@@ -775,7 +772,7 @@ export default function ChestView() {
                   className="flex-1 bg-accent text-black font-black text-sm py-2 rounded-lg
                     disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#e6ad03]"
                 >
-                  {giftSending ? '?�送中...' : '確�?贈�?}
+                  {giftSending ? '贈送中...' : '確認贈送'}
                 </button>
               </div>
             </motion.div>

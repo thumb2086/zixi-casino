@@ -27,18 +27,18 @@ export default function RoomLobbyView() {
   const { session } = useAuth();
 
   const games: GameCard[] = [
-    { id: 'coinflip', name: 'Coinflip', nameZh: '?œç¡¬å¹?, icon: '?Ÿ¡' },
-    { id: 'slots', name: 'Slots', nameZh: '?è?æ©?, icon: '?°' },
-    { id: 'roulette', name: 'Roulette', nameZh: 'è¼ªç›¤', icon: '?¡' },
-    { id: 'blackjack', name: 'Blackjack', nameZh: '21 é»?, icon: '??' },
-    { id: 'horse', name: 'Horse Racing', nameZh: 'è³½é¦¬', icon: '??' },
-    { id: 'dragon', name: 'Shoot Dragon Gate', nameZh: 'å°„é??€', icon: ['é¾?, '?€'] },
-    { id: 'sicbo', name: 'Sicbo', nameZh: 'éª°å¯¶', icon: '?²' },
-    { id: 'bingo', name: 'Bingo', nameZh: 'è³“æ?', icon: '?±' },
-    { id: 'crash', name: 'Crash', nameZh: '?´è?', icon: '??' },
-    { id: 'duel', name: 'Duel', nameZh: 'å°æ±º', icon: '?”ï?' },
-    { id: 'poker', name: 'Poker', nameZh: '?²å?', icon: '??', vipOnly: true },
-    { id: 'bluffdice', name: 'Bluff Dice', nameZh: '?¹ç?', icon: '?²', vipOnly: true },
+    { id: 'coinflip', name: 'Coinflip', nameZh: 'æ“²ç¡¬å¹£', icon: 'ğŸª™' },
+    { id: 'slots', name: 'Slots', nameZh: 'è€è™æ©Ÿ', icon: 'ğŸ°' },
+    { id: 'roulette', name: 'Roulette', nameZh: 'è¼ªç›¤', icon: 'ğŸ¡' },
+    { id: 'blackjack', name: 'Blackjack', nameZh: '21é»', icon: 'ğŸƒ' },
+    { id: 'horse', name: 'Horse Racing', nameZh: 'è³½é¦¬', icon: 'ğŸ‡' },
+    { id: 'dragon', name: 'Shoot Dragon Gate', nameZh: 'å°„é¾é–€', icon: ['ğŸ‰', 'ğŸ¯'] },
+    { id: 'sicbo', name: 'Sicbo', nameZh: 'éª°å¯¶', icon: 'ğŸ²' },
+    { id: 'bingo', name: 'Bingo', nameZh: 'è³“æœ', icon: 'ğŸ¯' },
+    { id: 'crash', name: 'Crash', nameZh: 'çˆ†æ“Š', icon: 'ğŸ’¥' },
+    { id: 'duel', name: 'Duel', nameZh: 'å°æ±º', icon: 'âš”ï¸' },
+    { id: 'poker', name: 'Poker', nameZh: 'æ’²å…‹', icon: 'â™ ï¸', vipOnly: true },
+    { id: 'bluffdice', name: 'Bluff Dice', nameZh: 'å¹ç‰›éª°', icon: 'ğŸ²', vipOnly: true },
   ];
 
   const roomsQuery = useQuery({

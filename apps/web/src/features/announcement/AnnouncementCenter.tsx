@@ -34,21 +34,47 @@ interface Campaign {
 }
 
 const REWARD_NAMES: Record<string, string> = {
-  title_newbie: '?��???, title_gambler: '賭�?', title_highroller: '豪客',
-  title_god: '賭�?', title_member_1: '?�通�???, title_member_2: '?��??�員',
-  title_member_3: '?�?��???, title_member_4: '?��??�員', title_member_5: '?��??�員',
-  title_member_6: '?�石?�員', title_member_7: '?�辰?�員', title_member_8: '?��??�員',
-  title_member_9: '驕陽?�員', title_member_10: '?��??�員', title_member_11: '天選之人',
-  title_member_12: '不朽?��?', title_member_13: '永�?神話', title_member_14: '深淵?��?',
-  title_member_15: '?�空行�?, title_member_16: '混�?主宰', title_member_17: '?��?編�???,
-  title_member_18: '?��?守護??, title_member_19: '?��?之�?', title_member_20: '終�?審判',
-  title_member_21: '輪迴之主', title_member_22: '太�?之�?', title_member_23: '?�極之�?',
-  title_member_24: '大�?歸�?', title_member_25: '鴻�??�人', title_member_26: '天�??�身',
-  title_member_27: '規�??��???, title_member_28: '宇�?之�?', title_member_29: '?�物之�?',
-  title_member_30: '超�???, title_member_31: '?��?神座', title_member_32: '神諭?��???,
-  chest_key_common: '?�通寶箱鑰??, chest_key_rare: '稀?�寶箱鑰??,
-  chest_key_epic: '?�詩寶箱?��?', chest_key_legendary: '?��?寶箱?��?',
-  chest_key_mythic: '神話寶箱?��?',
+  title_newbie: '新手',
+  title_gambler: '賭徒',
+  title_highroller: '豪客',
+  title_god: '賭神',
+  title_member_1: '普通會員',
+  title_member_2: '普通菁英',
+  title_member_3: '青銅會員',
+  title_member_4: '白銀會員',
+  title_member_5: '黃金會員',
+  title_member_6: '白金會員',
+  title_member_7: '鑽石一階',
+  title_member_8: '鑽石二階',
+  title_member_9: '黑鑽一階',
+  title_member_10: '黑鑽二階',
+  title_member_11: '菁英一階',
+  title_member_12: '菁英二階',
+  title_member_13: '宗師一階',
+  title_member_14: '宗師二階',
+  title_member_15: '王者一階',
+  title_member_16: '王者二階',
+  title_member_17: '至尊一階',
+  title_member_18: '至尊二階',
+  title_member_19: '蒼穹一階',
+  title_member_20: '蒼穹二階',
+  title_member_21: '寰宇一階',
+  title_member_22: '寰宇二階',
+  title_member_23: '星穹一階',
+  title_member_24: '星穹二階',
+  title_member_25: '萬界一階',
+  title_member_26: '萬界二階',
+  title_member_27: '創世一階',
+  title_member_28: '創世二階',
+  title_member_29: '永恆一階',
+  title_member_30: '永恆二階',
+  title_member_31: '深淵一階',
+  title_member_32: '深淵二階',
+  chest_key_common: '普通寶箱鑰匙',
+  chest_key_rare: '稀有寶箱鑰匙',
+  chest_key_epic: '史詩寶箱鑰匙',
+  chest_key_legendary: '傳說寶箱鑰匙',
+  chest_key_mythic: '神話寶箱鑰匙',
 };
 
 function formatRelativeTime(value: string, t: (key: string, opts?: any) => string) {
@@ -68,21 +94,21 @@ function resolveRewardName(id: string): string {
 }
 
 function formatRewardSummary(r: any, t: (k: string, d?: string) => string): string {
-  if (!r || typeof r !== 'object') return t('rewardName.reward', '?�勵');
+  if (!r || typeof r !== 'object') return t('rewardName.reward', '獎勵');
   const parts: string[] = [];
   if (typeof r.zxc === 'number' && r.zxc > 0) parts.push(`${formatNumber(r.zxc)} ZXC`);
   if (typeof r.yjc === 'number' && r.yjc > 0) parts.push(`${formatNumber(r.yjc)} YJC`);
   if (Array.isArray(r.items) && r.items.length > 0) {
     const labels = r.items.map((it: any) => {
-      const name = it.name || resolveRewardName(it.id || '') || it.id || t('rewardName.item', '?�具');
+      const name = it.name || resolveRewardName(it.id || '') || it.id || t('rewardName.item', '道具');
       const qty = it.qty || 1;
       return qty > 1 ? `${name} x${qty}` : name;
     });
     parts.push(labels.join(', '));
   }
-  if (Array.isArray(r.avatars) && r.avatars.length) parts.push(`${t('rewardName.avatar', '?��?')}: ${r.avatars.map((a: string) => resolveRewardName(a)).join(', ')}`);
-  if (Array.isArray(r.titles) && r.titles.length) parts.push(`${t('rewardName.title', '稱�?')}: ${r.titles.map((tl: string) => resolveRewardName(tl)).join(', ')}`);
-  return parts.length ? parts.join(' + ') : t('rewardName.reward', '?�勵');
+  if (Array.isArray(r.avatars) && r.avatars.length) parts.push(`${t('rewardName.avatar', '頭像')}: ${r.avatars.map((a: string) => resolveRewardName(a)).join(', ')}`);
+  if (Array.isArray(r.titles) && r.titles.length) parts.push(`${t('rewardName.title', '稱號')}: ${r.titles.map((tl: string) => resolveRewardName(tl)).join(', ')}`);
+  return parts.length ? parts.join(' + ') : t('rewardName.reward', '獎勵');
 }
 
 
@@ -195,7 +221,7 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
     <>
       <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6">
         <div className="flex-1 min-w-0">
-          <p className="text-lg font-black text-white truncate">{username || '?�設�?}</p>
+          <p className="text-lg font-black text-white truncate">{username || '未設定'}</p>
           <p className="text-xs font-bold text-secondary truncate mt-1">{displayAddress || ''}</p>
         </div>
         <div className="text-right">
@@ -206,13 +232,13 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
       <div className="flex items-center gap-3 bg-card rounded-2xl px-5 py-3 border border-border/10">
         <Clock size={14} className="text-accent" />
         <span className="text-caption font-bold text-secondary uppercase tracking-wider">
-          伺�??��?�?
+          伺????
         </span>
         <span className="text-xs font-bold text-emerald-400 ml-auto">
           {serviceStats?.serverUptimeLabel || '...'}
         </span>
         <span className="text-caption font-bold text-secondary">
-          {serviceStats?.uptime ? `?�用 ${serviceStats.uptime}` : ''}
+          {serviceStats?.uptime ? `?用 ${serviceStats.uptime}` : ''}
         </span>
       </div>
 
@@ -220,21 +246,21 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
         <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <Coins size={14} className="text-accent" />
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary">總交??/span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">總交</span>
           </div>
           <p className="text-xl font-black italic text-accent">{nf(summary?.total ?? 0)}</p>
         </div>
         <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={14} className="text-emerald-400" />
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary">?��?</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">??</span>
           </div>
           <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
         </div>
         <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <HeartPulse size={14} className="text-accent" />
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary">?��???/span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary"></span>
           </div>
           <p className="text-xl font-black italic text-accent">{summary?.total ? `${successRatePct}%` : '0%'}</p>
         </div>
@@ -242,7 +268,7 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
 
       <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
-          ?�?��??��??��??��?
+          ?????????
         </p>
         <div className="mt-4 space-y-3">
           {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}
@@ -256,10 +282,10 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-bold tracking-[0.14em] text-white">
-                    {`${t('txType.' + item.type, item.type)} ??${nf(Number(item.amount))} ${item.tokenSymbol || 'ZXC'}`}
+                    {`${t('txType.' + item.type, item.type)} ${nf(Number(item.amount))} ${item.tokenSymbol || 'ZXC'}`}
                   </p>
                   <p className="mt-1 text-xs font-bold tracking-[0.12em] text-secondary">
-                    {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'?? : String(item.roundId)}
+                    {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'...' : String(item.roundId)}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
@@ -327,18 +353,18 @@ export default function AnnouncementCenter() {
   };
 
   async function claim(campaignId: string) {
-    if (!sessionId) { setClaimMsg('請�??�入'); return; }
+    if (!sessionId) { setClaimMsg('請先登入'); return; }
     setClaimMsg(null);
     try {
       const res = await api.post(`/api/v1/rewards/campaigns/${encodeURIComponent(campaignId)}/claim`, { sessionId });
       const payload = res?.data?.data;
-      if (payload?.error) { setClaimMsg(payload.error.message || payload.error.code || '?��?失�?'); return; }
+      if (payload?.error) { setClaimMsg(payload.error.message || payload.error.code || '請求失敗'); return; }
       setSuccessBundle(payload?.bundle || null);
-      setClaimMsg('?��??��?');
+      setClaimMsg('領取成功');
       const refreshed = await api.get('/api/v1/rewards/campaigns');
       setCampaigns(refreshed?.data?.data?.campaigns || []);
     } catch (err: any) {
-      setClaimMsg(err?.response?.data?.data?.error?.message || err?.response?.data?.error?.message || err?.message || '?��?失�?');
+      setClaimMsg(err?.response?.data?.data?.error?.message || err?.response?.data?.error?.message || err?.message || '請求失敗');
     }
   }
 
@@ -348,7 +374,7 @@ export default function AnnouncementCenter() {
         <div className="flex items-center justify-between px-6 py-4 ">
           <div className="flex items-center gap-4">
             <Megaphone className="text-accent" />
-            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">?��??�活??/h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">???活</h1>
           </div>
         </div>
       </header>
@@ -360,7 +386,7 @@ export default function AnnouncementCenter() {
             <button key={entry} type="button" onClick={() => setFilter(entry)}
               className={`flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filter === entry ? 'bg-accent text-black shadow-lg' : 'text-secondary hover:text-white'}`}
             >
-              {entry === 'ANNOUNCEMENT' ? '?��?' : entry === 'EVENTS' ? '活�?' : '?��?'}
+              {entry === 'ANNOUNCEMENT' ? '公告' : entry === 'EVENTS' ? '活動' : '交易'}
             </button>
           ))}
         </div>
@@ -446,7 +472,7 @@ export default function AnnouncementCenter() {
               <div className="flex items-center justify-center py-12"><Loader2 className="animate-spin text-accent" size={24} /></div>
             ) : campaigns.length === 0 ? (
               <div className="rounded-2xl border border-border/20 bg-card px-4 py-8 text-center text-sm text-secondary">
-                ?��?沒�??��?中�?活�?
+                ??沒???中?活?
               </div>
             ) : (
               campaigns.map((c) => (
@@ -463,14 +489,14 @@ export default function AnnouncementCenter() {
                   </div>
                   {(c.startAt || c.endAt) && (
                     <p className="mt-2 text-sm text-secondary">
-                      {c.startAt ? new Date(c.startAt).toLocaleString() : '?�刻'} ~ {c.endAt ? new Date(c.endAt).toLocaleString() : '?��???}
+                      {c.startAt ? new Date(c.startAt).toLocaleString() : '即刻'} ~ {c.endAt ? new Date(c.endAt).toLocaleString() : '永久有效'}
                     </p>
                   )}
                   <button type="button" disabled={Boolean(c.claimed) || !sessionId}
                     onClick={() => claim(c.campaignId)}
                     className="mt-3 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black disabled:cursor-not-allowed disabled:opacity-50 hover:brightness-110"
                   >
-                    {c.claimed ? '已�??? : !sessionId ? '請�??�入' : '?��??�勵'}
+                    {c.claimed ? '已領取' : !sessionId ? '請先登入' : '領取獎勵'}
                   </button>
                 </section>
               ))
@@ -483,23 +509,23 @@ export default function AnnouncementCenter() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={() => setSuccessBundle(null)}>
           <div className="w-full max-w-sm rounded-2xl border border-border/20 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-accent">?? ?��??��?</h3>
+              <h3 className="text-base font-black text-accent">?? ????</h3>
               <button type="button" onClick={() => setSuccessBundle(null)} className="rounded-lg p-1 hover:bg-white/10"><X size={16} /></button>
             </div>
             <div className="mt-4 space-y-2 text-sm text-white">
               {successBundle.zxc > 0 && <p>+ {nf(Number(successBundle.zxc))} ZXC</p>}
               {successBundle.yjc > 0 && <p>+ {nf(Number(successBundle.yjc))} YJC</p>}
               {Array.isArray(successBundle.items) && successBundle.items.map((it: any, i: number) => (
-                <p key={i}>?�具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `?${it.qty}` : ''}</p>
+                <p key={i}>?具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `?${it.qty}` : ''}</p>
               ))}
               {Array.isArray(successBundle.avatars) && successBundle.avatars.map((a: any, i: number) => (
-                <p key={i}>?��?：{a.name || resolveRewardName(a.id || a) || a.id || a}</p>
+                <p key={i}>??：{a.name || resolveRewardName(a.id || a) || a.id || a}</p>
               ))}
               {Array.isArray(successBundle.titles) && successBundle.titles.map((t: any, i: number) => (
-                <p key={i}>稱�?：{t.name || resolveRewardName(t.id || t) || t.id || t}</p>
+                <p key={i}>稱?：{t.name || resolveRewardName(t.id || t) || t.id || t}</p>
               ))}
             </div>
-            <button type="button" onClick={() => setSuccessBundle(null)} className="mt-4 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black">確�?</button>
+            <button type="button" onClick={() => setSuccessBundle(null)} className="mt-4 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black">確?</button>
           </div>
         </div>
       )}

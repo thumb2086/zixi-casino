@@ -100,7 +100,7 @@ export default function LandingView() {
             </div>
             <img
               src="/icon-512.png"
-              alt="å­ç?å¹?ZIXI Â· ä½‘æˆ©å¹?YJC ?­å?"
+              alt="å­??ZIXI Â· ä½‘æˆ©?YJC ??"
               width="120"
               height="120"
               className="mx-auto mb-6 rounded-2xl"

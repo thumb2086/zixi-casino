@@ -32,12 +32,12 @@ export default function PerformanceView() {
   const stats = healthData?.stats;
 
   const metrics = [
-    { icon: Clock, label: '伺�??��?�?, value: perfData?.uptimeLabel || '...', color: 'text-emerald-400' },
-    { icon: Users, label: '註�??�戶', value: nf(perfData?.users || 0), color: 'text-info' },
-    { icon: Activity, label: '活�????', value: nf(perfData?.activeSessions || 0), color: 'text-accent' },
-    { icon: Database, label: '24h 交�???, value: nf(perfData?.tx24h || 0), color: 'text-warning' },
+    { icon: Clock, label: '伺服器', value: perfData?.uptimeLabel || '...', color: 'text-emerald-400' },
+    { icon: Users, label: '註冊用戶', value: nf(perfData?.users || 0), color: 'text-info' },
+    { icon: Activity, label: '活躍會話', value: nf(perfData?.activeSessions || 0), color: 'text-accent' },
+    { icon: Database, label: '24h 交易', value: nf(perfData?.tx24h || 0), color: 'text-warning' },
     { icon: Server, label: 'UPTIME', value: stats?.uptime ?? '...', color: 'text-emerald-400' },
-    { icon: Zap, label: '失�???, value: stats?.failureRate ?? '...', color: stats?.failureRate && parseFloat(stats.failureRate) > 5 ? 'text-danger' : 'text-accent' },
+    { icon: Zap, label: '失敗率', value: stats?.failureRate ?? '...', color: stats?.failureRate && parseFloat(stats.failureRate) > 5 ? 'text-danger' : 'text-accent' },
   ];
 
   return (
@@ -46,7 +46,7 @@ export default function PerformanceView() {
         <div className="app-shell flex items-center justify-between py-4">
           <div className="flex items-center gap-4">
             <Activity className="text-accent" />
-            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">?�能??��</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">效能儀表板</h1>
           </div>
         </div>
       </header>
@@ -66,14 +66,14 @@ export default function PerformanceView() {
 
         {stats?.nodes && (
           <section className="bg-card rounded-2xl p-6 border border-border/10">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">節點�???/h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">節點</h2>
             <div className="text-sm text-white font-bold">{stats.nodes}</div>
           </section>
         )}
 
         {stats?.logs && stats.logs.length > 0 && (
           <section className="bg-card rounded-2xl p-6 border border-border/10 mt-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">近�?事件</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">近期事件</h2>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {stats.logs.slice(0, 20).map((log: any, i: number) => (
                 <div key={i} className="text-xs text-secondary border-b border-border/10 pb-1 last:border-0">

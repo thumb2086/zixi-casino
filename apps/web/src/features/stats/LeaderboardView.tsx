@@ -49,7 +49,7 @@ function getPeriodEnd(filter: string): Date {
 }
 
 function formatTimeRemaining(ms: number): string {
-  if (ms <= 0) return '??;
+    if (ms <= 0) return '';
   const days = Math.floor(ms / 86400000);
   const hours = Math.floor((ms % 86400000) / 3600000);
   if (days > 0) return `${days}d ${hours}h`;
@@ -69,16 +69,16 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Crown size={16} className="text-accent" />
-          <span className="text-xs font-bold uppercase tracking-widest text-secondary">?? 榜�??��?</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-secondary">?? 榜???</span>
         </div>
         <div className="flex items-center gap-3">
           {remainingTime ? (
             <span className="text-sm font-bold text-accent/60">{remainingTime}</span>
           ) : totalCount !== undefined ? (
-            <span className="text-sm font-bold text-secondary">??{totalCount} �?/span>
+            <span className="text-sm font-bold text-secondary">??{totalCount} </span>
           ) : null}
           {kings.length === 0 && (
-            <span className="text-caption text-secondary">?�無資�?</span>
+            <span className="text-caption text-secondary">?無資?</span>
           )}
         </div>
       </div>
@@ -96,7 +96,7 @@ function KingPodium({ kings, nf, totalCount, remainingTime }: { kings: any[]; nf
             </div>
             <div className={`flex flex-col items-center justify-center rounded-t-xl border-t p-2 text-center ${p.cls}`}>
               <p className="w-full truncate text-xs font-bold text-white">{p.item.name}</p>
-              <p className="mt-0.5 text-xs font-bold text-secondary">{nf(p.item.amount)} �?/p>
+              <p className="mt-0.5 text-xs font-bold text-secondary">{nf(p.item.amount)} </p>
             </div>
           </div>
         ) : null)}
@@ -141,11 +141,11 @@ export default function LeaderboardView() {
   }, [kingsData]);
 
   const categoryTabs = [
-    { id: 'xp' as LeaderboardCategory, icon: Trophy, label: '經�?�? },
-    { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產�? },
+    { id: 'xp' as LeaderboardCategory, icon: Trophy, label: '經驗榜' },
+    { id: 'asset' as LeaderboardCategory, icon: Wallet, label: '資產榜' },
   ];
 
-  const metricLabels: Record<LeaderboardCategory, string> = { xp: '經�?', asset: '資產' };
+  const metricLabels: Record<LeaderboardCategory, string> = { xp: '經驗', asset: '資產' };
   const units: Record<LeaderboardCategory, string> = { xp: 'XP', asset: 'ZXC' };
   const metricLabel = metricLabels[category];
   const unit = units[category];
@@ -247,7 +247,7 @@ export default function LeaderboardView() {
                       filter === entry ? 'bg-accent text-black shadow-lg' : 'text-secondary hover:text-white'
                     }`}
                   >
-                    {entry === 'ALL-TIME' ? '總累�? : entry}
+                    {entry === 'ALL-TIME' ? '總累積' : entry}
                   </button>
                 ))}
               </div>

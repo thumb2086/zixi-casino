@@ -50,12 +50,12 @@ function PlayerSeat({ player, isMe, isTurn, communityCards, isDealer }: {
       </div>
       <div className="text-center">
         <p className={`text-xs font-bold ${isMe ? 'text-accent' : 'text-white'} truncate max-w-20`}>
-          {player.displayName} {isMe ? '(‰Ω?' : ''}
+          {player.displayName} {isMe ? '(?' : ''}
         </p>
         <p className="text-[9px] text-secondary">${player.stack}</p>
         {player.bet > 0 && <p className="text-[9px] text-accent font-black">${player.bet}</p>}
         {player.allIn && <p className="text-[9px] text-warning font-black">ALL IN</p>}
-        {player.folded && <p className="text-[9px] text-muted">?ãÁ?</p>}
+        {player.folded && <p className="text-[9px] text-muted">??</p>}
         {!player.folded && bestHand && (
           <p className="text-[8px] text-info font-bold">{bestHand.name}</p>
         )}
@@ -85,7 +85,7 @@ export default function PokerRoomView() {
 
   const me = useMemo(() => ({
     userId: session?.id || 'local',
-    displayName: '‰Ω?,
+    displayName: '?,
     stack: 1000,
     isBot: false,
     hand: [
@@ -96,9 +96,9 @@ export default function PokerRoomView() {
   }), [session]);
 
   const botPlayers = useMemo(() => [
-    { userId: 'bot1', displayName: 'AI_?∑Â???, stack: 800, isBot: true, hand: [{ rank: 'Q', suit: '?? }, { rank: 'Q', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot2', displayName: 'AI_?ºÈêµ', stack: 1200, isBot: true, hand: [{ rank: '10', suit: '?? }, { rank: 'J', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot3', displayName: 'AI_?óÂΩ±', stack: 950, isBot: true, hand: [{ rank: '2', suit: '?? }, { rank: '7', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot1', displayName: 'AI_????, stack: 800, isBot: true, hand: [{ rank: 'Q', suit: '?? }, { rank: 'Q', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot2', displayName: 'AI_?Èêµ', stack: 1200, isBot: true, hand: [{ rank: '10', suit: '?? }, { rank: 'J', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot3', displayName: 'AI_?ÂΩ±', stack: 950, isBot: true, hand: [{ rank: '2', suit: '?? }, { rank: '7', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
     { userId: 'bot4', displayName: 'AI_È≥≥Âá∞', stack: 1100, isBot: true, hand: [{ rank: 'A', suit: '?? }, { rank: '3', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
   ], []);
 
@@ -218,12 +218,12 @@ export default function PokerRoomView() {
       <header className="fixed top-0 z-50 w-full border-b border-accent/20 bg-gradient-to-r from-[#0a0a0f] via-[#14141f] to-[#0a0a0f] backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <div className="text-gradient-diamond text-sm font-black uppercase tracking-widest">??VIP ?≤Â?</div>
+            <div className="text-gradient-diamond text-sm font-black uppercase tracking-widest">??VIP ??</div>
             <span className="text-caption text-secondary">{roomId}</span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-secondary">Â∫ïÊ? ${pot}</span>
-            <span className="text-xs text-secondary">{allPlayers.filter(p => !p.folded).length}/{allPlayers.length} ‰∫?/span>
+            <span className="text-xs font-bold text-secondary">Â∫ï? ${pot}</span>
+            <span className="text-xs text-secondary">{allPlayers.filter(p => !p.folded).length}/{allPlayers.length} </span>
           </div>
         </div>
       </header>
@@ -257,7 +257,7 @@ export default function PokerRoomView() {
             {winner && (
               <div className="mt-6 text-center">
                 <span className="text-gradient-diamond text-sm font-black uppercase tracking-widest">
-                  ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} Ë¥èÂ? ${pot}Ôº?
+                  ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} Ë¥è? ${pot}?
                 </span>
               </div>
             )}
@@ -268,11 +268,11 @@ export default function PokerRoomView() {
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button onClick={() => doAction('fold')}
                 className="px-6 py-3 rounded-xl bg-danger/20 text-danger border border-danger/30 text-xs font-bold uppercase tracking-widest hover:bg-danger/30 transition-all">
-                ?ãÁ?
+                ??
               </button>
               <button onClick={() => doAction('check')}
                 className="px-6 py-3 rounded-xl bg-accent/10 text-accent border border-accent/30 text-xs font-bold uppercase tracking-widest hover:bg-accent/20 transition-all">
-                ?éÁ?
+                ??
               </button>
               <button onClick={() => doAction('call')}
                 className="px-6 py-3 rounded-xl bg-accent text-black text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-[0_0_20px_rgba(245,166,35,0.3)]">
@@ -283,7 +283,7 @@ export default function PokerRoomView() {
                   className="w-20 rounded-xl bg-surface border border-border px-3 py-2.5 text-xs font-bold text-white text-center" />
                 <button onClick={() => doAction('raise', parseInt(betInput) || 40)}
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-accent to-warning text-black text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all">
-                ?†Ê≥® ${betInput}
+                ?Ê≥® ${betInput}
                 </button>
               </div>
             </div>
@@ -291,7 +291,7 @@ export default function PokerRoomView() {
 
           {!isMyTurn && !winner && currentPlayer?.isBot && (
             <div className="mt-6 text-center text-xs text-secondary">
-              ?? {currentPlayer?.displayName} ?ùËÄÉ‰∏≠...
+              ?? {currentPlayer?.displayName} ?ËÄÉ‰∏≠...
             </div>
           )}
         </div>
