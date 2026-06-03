@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
@@ -37,7 +38,7 @@ export async function dragonTigerRoutes(fastify: FastifyInstance) {
     },
   }, async (request) => {
     const { betAmount, token } = request.body as { sessionId: string; betAmount: number; token: RequestTokenKey };
-    const roundId = `dt_${crypto.randomUUID().slice(0, 8)}`;
+    const roundId = `dt_${randomUUID().slice(0, 8)}`;
 
     const ctx = await getContext(request);
     if (!ctx || !ctx.user) {
@@ -55,7 +56,7 @@ export async function dragonTigerRoutes(fastify: FastifyInstance) {
     // 1. Validate & deduct balance
     const validation = await gameSettlement.validateAndDeductBalance(address, token, amountStr, `total_bet:${address}`);
     if (!validation.success) {
-      return createApiEnvelope({ success: false }, request.id, false, validation.error?.message || "Insufficient balance");
+      return createApiEnvelope({ success: false, error: validation.error }, request.id, false, validation.error?.message || "Insufficient balance");
     }
 
     try {
