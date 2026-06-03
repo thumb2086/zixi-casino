@@ -151,7 +151,7 @@ export default function BluffDiceRoomView() {
               </div>
             ) : (
               <div className="text-center py-4">
-                <span className="text-xs text-secondary animate-pulse">等? {allPlayers[currentTurn]?.displayName} 叫骰...</span>
+                <span className="text-xs text-secondary animate-pulse">等待 {allPlayers[currentTurn]?.displayName} 叫骰...</span>
               </div>
             )}
           </section>
