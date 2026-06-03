@@ -9,8 +9,17 @@ interface SSEClient {
 }
 
 const clients: SSEClient[] = [];
+const MAX_CLIENTS = 50;
 
 export function addSSEClient(id: string, reply: FastifyReply) {
+  // Enforce max connections
+  if (clients.length >= MAX_CLIENTS) {
+    const oldest = clients.shift();
+    if (oldest) {
+      try { oldest.reply.raw.end(); } catch {}
+    }
+  }
+
   reply.raw.setHeader("Content-Type", "text/event-stream");
   reply.raw.setHeader("Cache-Control", "no-cache");
   reply.raw.setHeader("Connection", "keep-alive");
@@ -29,6 +38,8 @@ export function addSSEClient(id: string, reply: FastifyReply) {
   const heartbeat = setInterval(() => {
     try { reply.raw.write(":heartbeat\n\n"); } catch {
       clearInterval(heartbeat);
+      const idx = clients.findIndex((c) => c.id === id);
+      if (idx >= 0) clients.splice(idx, 1);
     }
   }, 10000);
 
@@ -42,11 +53,11 @@ export function addSSEClient(id: string, reply: FastifyReply) {
 
 export function broadcastChatMessage(msg: any) {
   const data = `data: ${JSON.stringify(msg)}\n\n`;
-  for (const client of clients) {
+  for (let i = clients.length - 1; i >= 0; i--) {
     try {
-      client.reply.raw.write(data);
+      clients[i].reply.raw.write(data);
     } catch {
-      // Client disconnected, will be cleaned up on close
+      clients.splice(i, 1);
     }
   }
 }
