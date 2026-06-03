@@ -4,7 +4,7 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "@repo/infrastructure/db/schema.js";
 
 // ── Types ──────────────────────────────────────────────────────────
-export type GameName = "slots" | "coinflip" | "roulette" | "horse" | "sicbo" | "bingo" | "duel" | "blackjack" | "crash" | "poker" | "bluffdice" | "shoot_dragon_gate";
+export type GameName = "slots" | "coinflip" | "roulette" | "horse" | "sicbo" | "bingo" | "duel" | "blackjack" | "crash" | "poker" | "bluffdice" | "shoot_dragon_gate" | "dragon_tiger";
 
 export interface GameResult {
   result: "win" | "lose" | "draw";

@@ -222,7 +222,7 @@ export default function PublicTransactionsView() {
                       {`${t('txType.' + item.type, item.type)} ×${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
                     </p>
                     <p className="mt-1 text-xs font-bold tracking-[0.12em] text-secondary">
-                      {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'× : String(item.roundId)}
+                      {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'...' : String(item.roundId)}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
