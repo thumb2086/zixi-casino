@@ -103,7 +103,7 @@ export default function LandingView() {
               alt="子熙 ZIXI · 佑戩 YJC 圖標"
               width="120"
               height="120"
-              className="mx-auto mb-6 rounded-2xl"
+              className="mx-auto mb-6 h-28 w-28 rounded-2xl object-cover md:h-36 md:w-36"
             />
             <h1 className="mb-4 text-4xl font-black leading-tight tracking-tight text-white md:text-6xl">
               {t('landing.hero.title')}
