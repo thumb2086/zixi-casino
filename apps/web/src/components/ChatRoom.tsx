@@ -52,10 +52,10 @@ export default function ChatRoom() {
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
       const res = await api.post('/api/v1/support/chat/messages', { sessionId, text, displayName: username });
-      if (!res.data.success) throw new Error(res.data.data?.error?.message || '?�送失??);
+      if (!res.data.success) throw new Error(res.data.data?.error?.message || '發送失敗');
     },
     onError: (_err) => {
-      // Message failed to send ??SSE won't confirm it either
+      // Message failed to send - SSE won't confirm it either
     },
   });
 
@@ -76,10 +76,10 @@ export default function ChatRoom() {
 
       <div ref={scrollRef} className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-4">
         {loading && (
-          <div className="text-xs text-slate-600 text-center py-8">載入�?..</div>
+          <div className="text-xs text-slate-600 text-center py-8">載入?..</div>
         )}
         {!loading && messages.length === 0 && (
-          <div className="text-xs text-slate-600 text-center py-8">?�無訊息</div>
+          <div className="text-xs text-slate-600 text-center py-8">?無訊息</div>
         )}
         {[...messages].reverse().map((m: any) => {
           const isOwn = m.address?.toLowerCase() === address?.toLowerCase();

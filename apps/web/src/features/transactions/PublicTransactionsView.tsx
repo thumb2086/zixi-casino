@@ -130,7 +130,7 @@ export default function PublicTransactionsView() {
       <main className="app-shell pt-24">
         <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6 mb-6">
           <div className="flex-1 min-w-0">
-            <p className="text-lg font-black text-white truncate">{username || '?™Ë®≠ÂÆ?}</p>
+            <p className="text-lg font-black text-white truncate">{username || '?Ë®≠?}</p>
             <p className="text-xs font-bold text-secondary truncate mt-1">{displayAddress || ''}</p>
           </div>
           <div className="text-right">
@@ -142,13 +142,13 @@ export default function PublicTransactionsView() {
         <div className="flex items-center gap-3 mb-6 bg-card rounded-2xl px-5 py-3 border border-border/10">
           <Clock size={14} className="text-accent" />
           <span className="text-caption font-bold text-secondary uppercase tracking-wider">
-            ‰º∫Ê??®È?Ë°?
+            ‰º∫????
           </span>
           <span className="text-xs font-bold text-emerald-400 ml-auto">
             {serviceStats?.serverUptimeLabel || '...'}
           </span>
           <span className="text-caption font-bold text-secondary">
-            {serviceStats?.uptime ? `?ØÁî® ${serviceStats.uptime}` : ''}
+            {serviceStats?.uptime ? `?Áî® ${serviceStats.uptime}` : ''}
           </span>
         </div>
 
@@ -156,7 +156,7 @@ export default function PublicTransactionsView() {
         {serviceStats?.last24h?.success && (
           <div className="bg-card rounded-2xl p-5 border border-border/10 mb-6">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-caption font-bold text-secondary uppercase tracking-wider">24h ?çÂ??Ä??/span>
+              <span className="text-caption font-bold text-secondary uppercase tracking-wider">24h </span>
               <span className="text-caption font-bold text-secondary">{serviceStats.uptime || ''}</span>
             </div>
             <div className="flex items-end gap-[2px] h-16">
@@ -174,7 +174,7 @@ export default function PublicTransactionsView() {
             </div>
             <div className="flex justify-between mt-1 text-[8px] text-muted">
               <span>-24h</span>
-              <span>?æÂú®</span>
+              <span>?Âú®</span>
             </div>
           </div>
         )}
@@ -183,21 +183,21 @@ export default function PublicTransactionsView() {
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Coins size={14} className="text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">Á∏Ω‰∫§??/span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">Á∏Ω‰∫§</span>
             </div>
             <p className="text-xl font-black italic text-accent">{nf(summary?.total ?? 0)}</p>
           </div>
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-emerald-400" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">?êÂ?</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">??</span>
             </div>
             <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
           </div>
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <HeartPulse size={14} className="text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">?êÂ???/span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary"></span>
             </div>
             <p className="text-xl font-black italic text-accent">{summary?.total ? `${successRatePct}%` : '0%'}</p>
           </div>
@@ -205,7 +205,7 @@ export default function PublicTransactionsView() {
 
         <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl mb-6">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
-            ?Ä?∞Â??¥Ë??¢Â??ïÊ?
+            ?????????
           </p>
           <div className="mt-4 space-y-3">
             {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}
@@ -237,15 +237,15 @@ export default function PublicTransactionsView() {
 
         <section className="mb-6 rounded-2xl border border-border/20 bg-card divide-y divide-[#494847]/10">
           <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">?ìÂÖ∑?åÂ?</span>
+            <span className="text-sm font-bold">?ÂÖ∑??</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">?©Â??ñÈ?</span>
+            <span className="text-sm font-bold">????</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">Ë®≠Â?</span>
+            <span className="text-sm font-bold">Ë®≠?</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
         </section>

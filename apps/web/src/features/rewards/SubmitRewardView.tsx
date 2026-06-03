@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<string, { cls: string; Icon: typeof Clock }> = {
   rejected: { cls: 'text-red-400', Icon: X },
 };
 
-const EMOJI_SUGGESTIONS = ['?é±', '?é≤', '??', '?é∞', '??', '??', '??, '?î•', '?éØ', '??', '??', '?õ°Ô∏?, '?ó°Ô∏?, '??', '??Ô∏?, '?é©', '?¶æ', '??', '??', '?ê∫'];
+const EMOJI_SUGGESTIONS = ['üéâ', 'üî•', 'üíé', 'üëë', 'üåü', 'üí∞', 'üéä', '‚ú®', 'üèÜ', 'üí´', '‚≠ê', 'üéØ', 'üöÄ', 'üíµ', 'üÉè', 'üé≤', 'üèÖ', 'üí™', 'üé∞', 'ü§ë'];
 
 export default function SubmitRewardView() {
   const navigate = useNavigate();
@@ -184,7 +184,7 @@ export default function SubmitRewardView() {
                   value={icon}
                   onChange={(e) => setIcon(e.target.value)}
                   maxLength={8}
-                  placeholder="?î•"
+                  placeholder="?"
                   className="mb-2 w-full rounded-lg border border-border/30 bg-elevated px-3 py-2 text-2xl text-white placeholder:text-muted focus:border-accent focus:outline-none"
                 />
                 <div className="flex flex-wrap gap-1">
@@ -270,7 +270,7 @@ export default function SubmitRewardView() {
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-card text-2xl">
-                        {sub.icon || (sub.type === 'avatar' ? '?ë§' : '?è∑')}
+                        {sub.icon || (sub.type === 'avatar' ? '?' : '?')}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">

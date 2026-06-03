@@ -9,9 +9,9 @@ import XpTab from './tabs/XpTab';
 type TabId = 'items' | 'odds' | 'xp';
 
 const TABS = [
-  { id: 'items' as TabId, label: '?©å??–é?', icon: Package },
-  { id: 'xp' as TabId, label: 'ç¶“é?ç­‰ç?', icon: TrendingUp },
-  { id: 'odds' as TabId, label: '?Šæˆ²æ©Ÿç?', icon: Calculator },
+  { id: 'items' as TabId, label: '????', icon: Package },
+  { id: 'xp' as TabId, label: 'ç¶“?ç­‰?', icon: TrendingUp },
+  { id: 'odds' as TabId, label: '?æˆ²æ©Ÿ?', icon: Calculator },
 ];
 
 export default function InfoView() {
@@ -33,7 +33,7 @@ export default function InfoView() {
   }, [location.search]);
 
   const activeLabel = useMemo(
-    () => TABS.find((tab) => tab.id === activeTab)?.label ?? 'èªªæ?ä¸­å?',
+    () => TABS.find((tab) => tab.id === activeTab)?.label ?? 'èªª?ä¸­?',
     [activeTab],
   );
 
@@ -52,7 +52,7 @@ export default function InfoView() {
             </Link>
             <Sparkles className="text-accent" />
             <div>
-              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">èªªæ?ä¸­å?</h1>
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">èªª?ä¸­?</h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">{activeLabel}</p>
             </div>
           </div>

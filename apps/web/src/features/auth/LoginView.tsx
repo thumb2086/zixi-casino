@@ -205,7 +205,7 @@ export default function LoginView() {
                   </p>
                 </div>
                 <div className="rounded-xl bg-surface p-4 border border-border/10">
-                  <p className="text-xs font-bold text-white">?�� {t('announcement.quick_tips')}</p>
+                  <p className="text-xs font-bold text-white">? {t('announcement.quick_tips')}</p>
                   <p className="text-xs text-secondary mt-1 leading-relaxed">
                     {t('announcement.tips_desc')}
                   </p>

@@ -5,7 +5,7 @@ import { useAuth } from '../auth/useAuth';
 import { formatNumber } from '@repo/shared';
 import AppBottomNav from '../../components/AppBottomNav';
 
-const DICE_ICONS = ['?Ä', '??, '??, '??, '??, '??];
+const DICE_ICONS = ['?', '??, '??, '??, '??, '??];
 
 function DiceIcon({ value }: { value: number }) {
   return <span className="text-2xl">{DICE_ICONS[value - 1] || '?'}</span>;
@@ -26,13 +26,13 @@ export default function BluffDiceRoomView() {
   const [lastCall, setLastCall] = useState('');
 
   const botPlayers = useMemo(() => [
-    { userId: 'bot_b1', displayName: 'AI_Ë©êÊ¨∫Â∏?, avatar: '?é≠' },
-    { userId: 'bot_b2', displayName: 'AI_Ê©üÁ?', avatar: '??' },
-    { userId: 'bot_b3', displayName: 'AI_Ë≥≠Â?', avatar: '?é≤' },
+    { userId: 'bot_b1', displayName: 'AI_Ë©êÊ¨∫?, avatar: '?' },
+    { userId: 'bot_b2', displayName: 'AI_Ê©ü?', avatar: '??' },
+    { userId: 'bot_b3', displayName: 'AI_Ë≥≠?', avatar: '?' },
   ], []);
 
   const allPlayers = useMemo(() => [
-    { userId: session?.id || 'me', displayName: '‰Ω?, isMe: true },
+    { userId: session?.id || 'me', displayName: '?, isMe: true },
     ...botPlayers,
   ], [session, botPlayers]);
 
@@ -84,11 +84,11 @@ export default function BluffDiceRoomView() {
       <header className="fixed top-0 z-50 w-full border-b border-accent/20 bg-gradient-to-r from-[#0a0a0f] via-[#14141f] to-[#0a0a0f] backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <span className="text-gradient-diamond text-sm font-black uppercase tracking-widest">?é≤ VIP ?πÁ?È™?/span>
+            <span className="text-gradient-diamond text-sm font-black uppercase tracking-widest">? VIP </span>
             <span className="text-caption text-secondary">{roomId}</span>
           </div>
           <button onClick={startRound} className="text-xs font-bold bg-accent text-black px-4 py-2 rounded-xl hover:brightness-110 transition-all">
-            {phase === 'result' ? '?∞‰?Â±Ä' : '?ãÂ?'}
+            {phase === 'result' ? '??Â±Ä' : '??'}
           </button>
         </div>
       </header>
@@ -103,21 +103,21 @@ export default function BluffDiceRoomView() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-secondary">Á∏ΩÈ??∏Ô?{dice.reduce((a, b) => a + b, 0)}</p>
+          <p className="text-xs text-secondary">Á∏Ω???{dice.reduce((a, b) => a + b, 0)}</p>
         </section>
 
         {/* Betting area */}
         {phase === 'betting' && (
           <section className="card-accent bg-card p-6 mb-6 border border-border/10">
             <p className="text-xs text-secondary mb-3">
-              {allPlayers[currentTurn]?.isMe ? '‰Ω†Á??ûÂ? ???äÈ™∞?ñÊ?' : `?? ${allPlayers[currentTurn]?.displayName} ?ùËÄÉ‰∏≠...`}
+              {allPlayers[currentTurn]?.isMe ? '‰Ω†??? ???È™∞??' : `?? ${allPlayers[currentTurn]?.displayName} ?ËÄÉ‰∏≠...`}
             </p>
 
             {bets.length > 0 && (
               <div className="mb-4 space-y-1">
                 {bets.map((b, i) => (
                   <div key={i} className="text-xs text-secondary">
-                    <span className="font-bold text-accent">{b.displayName}</span> ?ä‰? <span className="font-bold text-white">{b.quantity} ??{b.value}</span>
+                    <span className="font-bold text-accent">{b.displayName}</span> ?? <span className="font-bold text-white">{b.quantity} ??{b.value}</span>
                   </div>
                 ))}
               </div>
@@ -126,7 +126,7 @@ export default function BluffDiceRoomView() {
             {allPlayers[currentTurn]?.isMe ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-secondary">?∏È?</span>
+                  <span className="text-xs text-secondary">??</span>
                   <input type="range" min={1} max={10} value={myBet.quantity}
                     onChange={e => setMyBet(prev => ({ ...prev, quantity: Number(e.target.value) }))}
                     className="flex-1 accent-accent" />
@@ -141,17 +141,17 @@ export default function BluffDiceRoomView() {
                 </div>
                 <div className="flex gap-3">
                   <button onClick={placeBet} className="flex-1 bg-accent text-black py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all">
-                    ?äÈ™∞
+                    ?È™∞
                   </button>
                   <button onClick={callBluff} className="flex-1 bg-danger/20 text-danger border border-danger/30 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-danger/30 transition-all">
-                    ?ìÔ?
+                    ??
                   </button>
                 </div>
-                <p className="text-xs text-center text-secondary mt-2">‰∏ä‰??ãÂ?È™∞Ô?{lastCall || '??}</p>
+                <p className="text-xs text-center text-secondary mt-2">‰∏ä???È™∞?{lastCall || '??}</p>
               </div>
             ) : (
               <div className="text-center py-4">
-                <span className="text-xs text-secondary animate-pulse">Á≠âÂ? {allPlayers[currentTurn]?.displayName} ?äÈ™∞...</span>
+                <span className="text-xs text-secondary animate-pulse">Á≠â? {allPlayers[currentTurn]?.displayName} ?È™∞...</span>
               </div>
             )}
           </section>
@@ -161,22 +161,22 @@ export default function BluffDiceRoomView() {
         {phase === 'result' && (
           <section className="card-accent bg-card p-6 mb-6 border border-border/10 text-center">
             <p className="text-gradient-diamond text-lg font-black mb-2">
-              ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} Ë¥è‰?Ôº?
+              ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} Ë¥è??
             </p>
             <p className="text-xs text-secondary">
-              È™∞Â?Ôºö{dice.join(', ')} ÔΩ??ÄÂæåÂ?È™∞Ô?{lastCall}
+              È™∞?Ôºö{dice.join(', ')} ??Âæå?È™∞?{lastCall}
             </p>
           </section>
         )}
 
         {/* Players */}
         <section className="card-accent bg-card p-4 border border-border/10">
-          <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3">?©ÂÆ∂</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3">?ÂÆ∂</p>
           <div className="space-y-2">
             {allPlayers.map((p, i) => (
               <div key={p.userId} className={`flex items-center justify-between p-2 rounded-xl ${i === currentTurn ? 'bg-accent/10 ring-1 ring-accent' : ''}`}>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{p.isMe ? '?ë§' : '??'}</span>
+                  <span className="text-lg">{p.isMe ? '?' : '??'}</span>
                   <span className={`text-xs font-bold ${p.isMe ? 'text-accent' : 'text-white'}`}>{p.displayName}</span>
                 </div>
                 {i === currentTurn && <span className="text-[9px] text-accent font-black">Ëº™Âà∞</span>}

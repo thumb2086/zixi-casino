@@ -161,11 +161,11 @@ export default function AdminView() {
   const [userResults, setUserResults] = useState<Array<{ address: string; displayName?: string; username?: string }>>([]);
 
   const CHEST_KEY_ITEMS = [
-    { id: 'chest_key_common', name: t('admin.chest_key_common_name'), icon: '??Ô∏?, rarity: 'common', type: 'chest_key' },
-    { id: 'chest_key_rare', name: t('admin.chest_key_rare_name'), icon: '??Ô∏?, rarity: 'rare', type: 'chest_key' },
-    { id: 'chest_key_epic', name: t('admin.chest_key_epic_name'), icon: '??Ô∏?, rarity: 'epic', type: 'chest_key' },
-    { id: 'chest_key_legendary', name: t('admin.chest_key_legendary_name'), icon: '??Ô∏?, rarity: 'legendary', type: 'chest_key' },
-    { id: 'chest_key_mythic', name: t('admin.chest_key_mythic_name'), icon: '??Ô∏?, rarity: 'mythic', type: 'chest_key' },
+    { id: 'chest_key_common', name: t('admin.chest_key_common_name'), icon: 'üîë', rarity: 'common', type: 'chest_key' },
+    { id: 'chest_key_rare', name: t('admin.chest_key_rare_name'), icon: 'üîë', rarity: 'rare', type: 'chest_key' },
+    { id: 'chest_key_epic', name: t('admin.chest_key_epic_name'), icon: 'üîë', rarity: 'epic', type: 'chest_key' },
+    { id: 'chest_key_legendary', name: t('admin.chest_key_legendary_name'), icon: 'üîë', rarity: 'legendary', type: 'chest_key' },
+    { id: 'chest_key_mythic', name: t('admin.chest_key_mythic_name'), icon: 'üîë', rarity: 'mythic', type: 'chest_key' },
   ];
 
   useEffect(() => {
@@ -982,8 +982,8 @@ export default function AdminView() {
               {userInspectErr && <p className="text-xs text-red-400">{userInspectErr}</p>}
               {userInspect && (
                 <div className="space-y-3 rounded-lg border border-border/20 bg-elevated p-4">
-                  <div className="text-xs text-secondary"><span className="text-muted">{t('admin.address')}Ôº?/span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
-                  {userInspect.user.displayName && <div className="text-xs text-secondary"><span className="text-muted">{t('admin.display_name')}Ôº?/span><span className="text-white">{userInspect.user.displayName}</span></div>}
+                  <div className="text-xs text-secondary"><span className="text-muted">{t('admin.address')}</span><span className="font-mono text-white break-all">{userInspect.user.address}</span></div>
+                  {userInspect.user.displayName && <div className="text-xs text-secondary"><span className="text-muted">{t('admin.display_name')}</span><span className="text-white">{userInspect.user.displayName}</span></div>}
                   {userInspect.balances && (
                     <div className="grid grid-cols-3 gap-2 rounded-lg bg-card p-3">
                       <div><p className="text-xs text-muted">{t('admin.zxc_balance')}</p><p className="mt-1 font-mono text-xs text-white">{nf(Number(userInspect.balances.zxc) || 0)}</p></div>
@@ -1022,7 +1022,7 @@ export default function AdminView() {
                 {blacklist.length === 0 ? <p className="text-xs text-secondary">{t('admin.no_blacklist_records')}</p> : (
                   <ul className="space-y-2 max-h-64 overflow-y-auto">{blacklist.map((b: any, i: number) => (
                     <li key={b.address || b.key || i} className="flex items-center justify-between bg-surface rounded-lg px-3 py-2 text-xs">
-                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}??/div>{b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}</div>
+                      <div><div className="text-white font-mono">{String(b.address || b.key || '').slice(0, 10)}</div>{b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}</div>
                       <button type="button" onClick={async () => { try { await api.post('/api/v1/admin/blacklist', { sessionId, action: 'remove', address: b.address }); show(t('admin.removed_from_blacklist')); refreshBlacklist(); } catch (err: any) { show(errMsg(err)); } }} className="text-xs text-red-400 hover:text-red-300">{t('admin.remove')}</button>
                     </li>
                   ))}</ul>
@@ -1168,12 +1168,12 @@ export default function AdminView() {
             {userInspect && (
               <div className="space-y-3 rounded-lg border border-border/20 bg-elevated p-4">
                 <div className="text-xs text-secondary">
-                  <span className="text-muted">{t('admin.address')}Ôº?/span>
+                  <span className="text-muted">{t('admin.address')}</span>
                   <span className="font-mono text-white break-all">{userInspect.user.address}</span>
                 </div>
                 {userInspect.user.displayName && (
                   <div className="text-xs text-secondary">
-                    <span className="text-muted">{t('admin.display_name')}Ôº?/span>
+                    <span className="text-muted">{t('admin.display_name')}</span>
                     <span className="text-white">{userInspect.user.displayName}</span>
                   </div>
                 )}
@@ -1346,7 +1346,7 @@ export default function AdminView() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-lg">{item.icon || (item.type === 'avatar' ? '?ë§' : '?è∑Ô∏?)}</span>
+                            <span className="text-lg">{item.icon || (item.type === 'avatar' ? 'üë§' : 'üì¶')}</span>
                             <p className={`text-sm font-bold ${item.isActive ? 'text-white' : 'text-muted line-through'}`}>
                               {item.name}
                             </p>
@@ -1399,7 +1399,7 @@ export default function AdminView() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card text-2xl">
-                          {sub.icon || (sub.type === 'avatar' ? '?ë§' : '?è∑')}
+                          {sub.icon || (sub.type === 'avatar' ? '?' : '?')}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -1841,7 +1841,7 @@ export default function AdminView() {
                       <div>
                         <p className="text-sm font-black text-white">{t.title || t('admin.no_title')}</p>
                         <p className="text-xs text-secondary">
-                          {t.category || t('admin.other')} ¬∑ {t.address ? `${String(t.address).slice(0, 10)}?¶` : t('admin.anonymous')}
+                          {t.category || t('admin.other')} ¬∑ {t.address ? `${String(t.address).slice(0, 10)}?` : t('admin.anonymous')}
                           {t.createdAt && ` ¬∑ ${new Date(t.createdAt).toLocaleString()}`}
                         </p>
                       </div>

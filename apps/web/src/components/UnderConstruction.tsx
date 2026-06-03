@@ -11,8 +11,8 @@ interface UnderConstructionProps {
 }
 
 export default function UnderConstruction({ 
-  title = '?‹ç™¼ä¸?,
-  description = 'æ­¤å??½æ­£?¨é??¼ä¸­ï¼Œæ•¬è«‹æ?å¾…ï?',
+  title = '?ç™¼?,
+  description = 'æ­¤??æ­£???ä¸­ï¼Œæ•¬è«‹?å¾…?',
   current = 'none'
 }: UnderConstructionProps) {
   return (
@@ -37,7 +37,7 @@ export default function UnderConstruction({
         </div>
 
         <h2 className="mt-8 text-2xl font-black uppercase italic tracking-tight text-white">
-          ?‹ç™¼ä¸?
+          ?ç™¼?
         </h2>
         <p className="mt-4 text-center text-sm font-bold text-secondary">
           {description}
@@ -45,20 +45,20 @@ export default function UnderConstruction({
 
         <div className="mt-8 rounded-xl border border-border/20 bg-card p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">
-            ?è?ä¸Šç??Ÿèƒ½
+            ??ä¸Š??èƒ½
           </p>
           <ul className="mt-4 space-y-2 text-sm font-bold text-secondary">
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              å®Œæ•´?¸æ?ä¸²æ¥
+              å®Œæ•´??ä¸²æ¥
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              ?³æ?äº’å??Ÿèƒ½
+              ??äº’??èƒ½
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              æ­·å²è¨˜é??¥è©¢
+              æ­·å²è¨˜??è©¢
             </li>
           </ul>
         </div>
@@ -67,7 +67,7 @@ export default function UnderConstruction({
           to="/app"
           className="mt-8 rounded-xl bg-accent px-8 py-4 text-sm font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
         >
-          è¿”å?é¦–é?
+          è¿”?é¦–?
         </Link>
       </main>
 

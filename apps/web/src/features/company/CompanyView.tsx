@@ -203,7 +203,7 @@ export default function CompanyView() {
                     <div>
                       <p className="text-xs font-bold">{emp.name}</p>
                       <p className="text-caption text-secondary">{t("role_" + emp.role)} · {t("productivity")} {emp.productivity.toFixed(2)} · {t("salary")} {emp.salary}</p>
-                      <p className="text-[9px] text-secondary">{t("leadership")} {emp.leadership.toFixed(2)} · {t("traits")} {emp.traits?.join("??)}</p>
+                      <p className="text-[9px] text-secondary">{t("leadership")} {emp.leadership.toFixed(2)} · {t("traits")} {emp.traits?.join(", ")}</p>
                     </div>
                     <button onClick={() => fire.mutate(emp.id)} className="text-caption text-red-400">{t("fire")}</button>
                   </div>
@@ -298,7 +298,7 @@ export default function CompanyView() {
                   <div><span className="text-secondary">{t("productivity")}</span><p className="font-black">{candidate.productivity.toFixed(2)}</p></div>
                   <div><span className="text-secondary">{t("leadership")}</span><p className="font-black">{candidate.leadership.toFixed(2)}</p></div>
                   <div><span className="text-secondary">{t("salary")}</span><p className="font-black">{candidate.salary}</p></div>
-                  <div><span className="text-secondary">{t("traits")}</span><p className="font-black">{candidate.traits?.join("??)}</p></div>
+                  <div><span className="text-secondary">{t("traits")}</span><p className="font-black">{candidate.traits?.join(", ")}</p></div>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => setCandidate(null)} className="flex-1 border border-border/30 py-3 rounded-xl text-xs">{t("discard")}</button>

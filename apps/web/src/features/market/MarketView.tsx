@@ -85,7 +85,7 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
         {t('market.position_detail', { entry: nf(pos.entryPrice), mark: nf(pos.markPrice ?? 0), liquidation: nf(pos.liquidationPrice) })}
       </p>
       <p className="text-sm text-secondary mt-1">
-        ‰øùË??? <span className="text-white font-bold text-base">{nf(pos.margin)} ZXC</span>
+        ‰øù??? <span className="text-white font-bold text-base">{nf(pos.margin)} ZXC</span>
       </p>
       <div className="flex items-center gap-3 mt-1.5">
         <div className="flex-1">
@@ -94,13 +94,13 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
               <input type="number" step={0.01} value={tpVal} onChange={(e) => setTpVal(e.target.value)}
                 className="w-20 bg-surface border border-emerald-500/30 rounded px-1.5 py-0.5 text-xs text-emerald-400 outline-none" />
               <button onClick={() => { const v = Number(tpVal); if (tpVal === '' || v <= 0) { pos.takeProfitPrice = undefined; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, takeProfitPrice: undefined }, ''); } else { pos.takeProfitPrice = v; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, takeProfitPrice: v }, ''); } setEditTP(false); }}
-                disabled={execute.isPending} className="text-xs font-bold text-emerald-400">??/button>
-              <button onClick={() => setEditTP(false)} className="text-xs text-secondary">??/button>
+                disabled={execute.isPending} className="text-xs font-bold text-emerald-400"></button>
+              <button onClick={() => setEditTP(false)} className="text-xs text-secondary"></button>
             </div>
           ) : (
             <button onClick={() => { setTpVal(pos.takeProfitPrice ?? ''); setEditTP(true); }}
               className="text-xs font-bold text-emerald-400">
-              {t('market.take_profit')}{pos.takeProfitPrice ? ` ${nf(pos.takeProfitPrice)}` : ' ??}
+                {t('market.take_profit')}{pos.takeProfitPrice ? ` ${nf(pos.takeProfitPrice)}` : ''}
             </button>
           )}
         </div>
@@ -110,13 +110,13 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
               <input type="number" step={0.01} value={slVal} onChange={(e) => setSlVal(e.target.value)}
                 className="w-20 bg-surface border border-red-500/30 rounded px-1.5 py-0.5 text-xs text-red-400 outline-none" />
               <button onClick={() => { const v = Number(slVal); if (slVal === '' || v <= 0) { pos.stopLossPrice = undefined; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, stopLossPrice: undefined }, ''); } else { pos.stopLossPrice = v; runAction({ type: 'futures_modify_tp_sl', positionId: pos.id, stopLossPrice: v }, ''); } setEditSL(false); }}
-                disabled={execute.isPending} className="text-xs font-bold text-red-400">??/button>
-              <button onClick={() => setEditSL(false)} className="text-xs text-secondary">??/button>
+                disabled={execute.isPending} className="text-xs font-bold text-red-400"></button>
+              <button onClick={() => setEditSL(false)} className="text-xs text-secondary"></button>
             </div>
           ) : (
             <button onClick={() => { setSlVal(pos.stopLossPrice ?? ''); setEditSL(true); }}
               className="text-xs font-bold text-red-400">
-              {t('market.stop_loss')}{pos.stopLossPrice ? ` ${nf(pos.stopLossPrice)}` : ' ??}
+              {t('market.stop_loss')}{pos.stopLossPrice ? ` ${nf(pos.stopLossPrice)}` : ''}
             </button>
           )}
         </div>
@@ -328,13 +328,13 @@ export default function MarketView() {
         <div className="space-y-3">
           {summary && (
             <div className="flex items-center justify-between rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-xs">
-              <span className="text-secondary">?ØÁî®?æÈ?</span>
+              <span className="text-secondary">?Áî®??</span>
               <span className="font-black text-white">{nf(summary.cash)} ZXC</span>
             </div>
           )}
           {summary && (
             <div className="flex items-center justify-between rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-xs">
-              <span className="text-secondary">?ÄË°åÈ?È°?/span>
+              <span className="text-secondary">?Ë°å</span>
               <span className="font-black text-emerald-400">{nf(summary.bankBalance)} ZXC</span>
             </div>
           )}
@@ -342,9 +342,9 @@ export default function MarketView() {
             <input type="number" min="1" value={cashMoveAmount} onChange={(e) => setCashMoveAmount(e.target.value)}
               placeholder={t('market.amount')} className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none" />
             <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.cash || 0))))}
-              className="text-xs font-bold text-secondary px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10">?®ÈÉ®Â≠òÂÖ•</button>
+              className="text-xs font-bold text-secondary px-3 py-1 rounded-lg border border-accent/30 hover:bg-accent/10">?ÈÉ®Â≠òÂÖ•</button>
             <button type="button" onClick={() => setCashMoveAmount(String(Math.floor(Number(summary?.bankBalance || 0))))}
-              className="text-xs font-bold text-emerald-400 px-3 py-1 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10">?®ÈÉ®?òÂá∫</button>
+              className="text-xs font-bold text-emerald-400 px-3 py-1 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10">?ÈÉ®?Âá∫</button>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button type="button" disabled={execute.isPending}
@@ -355,8 +355,8 @@ export default function MarketView() {
               className="rounded-xl bg-amber-600 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
           <div className="rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-caption text-secondary leading-relaxed">
-            <p>?è¶ ?ÄË°åÂπ¥?©Á? <span className="text-emerald-400 font-bold">2% APY</span>ÔºàÊ?ÂØ¶È??ÅÊ??ÇÈ?Ë§áÂà©Ôº?/p>
-            <p>?í∞ Ë≤∏Ê¨æÂπ¥Âà©??<span className="text-amber-400 font-bold">4% APR</span>ÔºàÊ?ÂØ¶È??üÊ¨æ?ÇÈ?Ë®àÊÅØÔº?/p>
+            <p>? ?Ë°åÂπ¥?? <span className="text-emerald-400 font-bold">2% APY</span>Ôºà?ÂØ¶?????Ë§áÂà©</p>
+            <p>? Ë≤∏Ê¨æÂπ¥Âà©??<span className="text-amber-400 font-bold">4% APR</span>Ôºà?ÂØ¶??Ê¨æ??Ë®àÊÅØ</p>
           </div>
           <div className="border-t border-border/10 pt-3">
             <p className="text-xs font-bold text-secondary mb-2">Ë≤∏Ê¨æ</p>
@@ -372,10 +372,10 @@ export default function MarketView() {
                 className="rounded-xl bg-amber-600 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.repay_all_label')}</button>
             </div>
             {summary && summary.loanPrincipal > 0 && (
-              <p className="text-xs text-secondary mt-2">?∂Â?Ë≤∏Ê¨æ: {nf(summary.loanPrincipal)} ZXC</p>
+              <p className="text-xs text-secondary mt-2">??Ë≤∏Ê¨æ: {nf(summary.loanPrincipal)} ZXC</p>
             )}
             {summary && summary.maxBorrow > 0 && (
-              <p className="text-xs text-secondary">?ØÂÄü‰??? {nf(summary.maxBorrow)} ZXC</p>
+              <p className="text-xs text-secondary">?ÂÄü??? {nf(summary.maxBorrow)} ZXC</p>
             )}
           </div>
         </div>
@@ -415,7 +415,7 @@ export default function MarketView() {
             <div className="hidden lg:flex items-center gap-2">
               <button onClick={() => setShowActivity(!showActivity)}
                 className="text-xs font-bold uppercase tracking-[0.18em] text-secondary hover:text-white">
-                <Clock size={14} className="inline mr-1" />Ê¥ªÂ?
+                <Clock size={14} className="inline mr-1" />Ê¥ª?
               </button>
             </div>
           </div>
@@ -469,7 +469,7 @@ export default function MarketView() {
               <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">{t('market.market_pulse')}</h2>
               <button onClick={() => setShowIndexChart(!showIndexChart)}
                 className="ml-auto text-xs font-bold text-secondary bg-accent/10 px-2.5 py-1 rounded-lg hover:bg-accent/20 transition-colors">
-                <LineChart size={14} className="inline mr-1" />{showIndexChart ? '?±Ë?' : '?ñË°®'}
+                <LineChart size={14} className="inline mr-1" />{showIndexChart ? '??' : '?Ë°®'}
               </button>
             </div>
 
@@ -541,14 +541,14 @@ export default function MarketView() {
                 <p className="mt-1 text-xl font-black text-white">{nf(summary?.bankBalance || 0)}</p>
               </div>
               <div className="rounded-xl border border-border/10 bg-surface p-4">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">?°Á•®</p>
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">?Á•®</p>
                 <p className="mt-1 text-xl font-black text-white">{nf(summary?.stockValue || 0)}</p>
               </div>
             </div>
             {summary && (summary.loanPrincipal > 0 || summary.maxBorrow > 0) && (
               <div className="mt-3 flex items-center gap-4 text-xs text-secondary">
                 <span>Ë≤∏Ê¨æ: {nf(summary.loanPrincipal)}</span>
-                <span>?ÄÂ§ßÂèØ?? {nf(summary.maxBorrow)}</span>
+                <span>?Â§ßÂèØ?? {nf(summary.maxBorrow)}</span>
               </div>
             )}
           </section>
@@ -705,7 +705,7 @@ export default function MarketView() {
             })()}
           </div>
           <button onClick={() => setShowFloatingChart(false)}
-            className="absolute top-1 right-2 text-xs text-secondary hover:text-white">??/button>
+            className="absolute top-1 right-2 text-xs text-secondary hover:text-white"></button>
         </div>
       )}
 

@@ -16,12 +16,12 @@ interface CatalogItem {
 }
 
 const RARITY_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  common: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', label: '?®é€? },
-  rare: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', label: 'ç¨€?? },
-  epic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: '?²è©©' },
-  legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', label: '?³èªª' },
+  common: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', label: 'æ™®é€š' },
+  rare: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', label: 'ç¨€æœ‰' },
+  epic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: 'å²è©©' },
+  legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', label: 'å‚³èªª' },
   mythic: { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: 'ç¥è©±' },
-  chaos: { bg: 'bg-fuchsia-500/20', text: 'text-fuchsia-400', border: 'border-fuchsia-500/30', label: 'æ··æ?' },
+  chaos: { bg: 'bg-fuchsia-500/20', text: 'text-fuchsia-400', border: 'border-fuchsia-500/30', label: 'æ··æ²Œ' },
   abyss: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30', label: 'æ·±æ·µ' },
   oracle: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', label: 'ç¥è«­' },
   vip: { bg: 'bg-accent/20', text: 'text-accent', border: 'border-accent/30', label: 'VIP' },
@@ -41,7 +41,7 @@ export default function ItemsCatalogView() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    // å¾?API ?²å??®é??¸æ?
+    // ?API ??????
     Promise.all([
       api.get('/api/v1/rewards/avatars/catalog').catch(() => ({ data: { data: [] } })),
       api.get('/api/v1/rewards/titles/catalog').catch(() => ({ data: { data: [] } })),
@@ -50,16 +50,16 @@ export default function ItemsCatalogView() {
         const avatars = (avatarsRes.data.data || []).map((item: any) => ({
           ...item,
           type: 'avatar' as const,
-          howToGet: item.source === 'shop' ? '?†å?è³¼è²·' : 
-                   item.source === 'admin' ? 'ç®¡ç??¡æ?äº? : 
-                   item.source === 'chest' ? 'å¯¶ç®±?‹å?' : 'æ´»å??²å?',
+          howToGet: item.source === 'shop' ? 'å•†åº—è³¼è²·' : 
+                   item.source === 'admin' ? 'ç®¡ç†å“¡ç™¼æ”¾' : 
+                   item.source === 'chest' ? 'å¯¶ç®±ç²å¾—' : 'æ´»å‹•ç²å¾—',
         }));
         const titles = (titlesRes.data.data || []).map((item: any) => ({
           ...item,
           type: 'title' as const,
-          howToGet: item.source === 'shop' ? '?†å?è³¼è²·' : 
-                   item.source === 'admin' ? 'ç®¡ç??¡æ?äº? : 
-                   item.source === 'chest' ? 'å¯¶ç®±?‹å?' : 'æ´»å??²å?',
+          howToGet: item.source === 'shop' ? 'å•†åº—è³¼è²·' : 
+                   item.source === 'admin' ? 'ç®¡ç†å“¡ç™¼æ”¾' : 
+                   item.source === 'chest' ? 'å¯¶ç®±ç²å¾—' : 'æ´»å‹•ç²å¾—',
         }));
         setItems([...avatars, ...titles]);
       })
@@ -83,14 +83,14 @@ export default function ItemsCatalogView() {
             </Link>
             <Package className="text-accent" />
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
-              ?©å??–é?
+              ????
             </h1>
           </div>
         </div>
       </header>
 
       <main className="px-6 pt-24">
-        {/* ?œå??Œç¯©??*/}
+        {/* ???ç¯©??*/}
         <section className="mb-6 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
@@ -98,7 +98,7 @@ export default function ItemsCatalogView() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="?œå??©å??ç¨±..."
+              placeholder="?????ç¨±..."
               className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:outline-none focus:border-accent/40"
             />
           </div>
@@ -114,18 +114,18 @@ export default function ItemsCatalogView() {
                     : 'bg-card text-secondary border border-border/20'
                 }`}
               >
-                {type === 'all' ? '?¨éƒ¨' : 
-                 type === 'avatar' ? '?­å?' : 
-                 type === 'title' ? 'ç¨±è?' : '?“å…·'}
+                {type === 'all' ? '?éƒ¨' : 
+                 type === 'avatar' ? '??' : 
+                 type === 'title' ? 'ç¨±?' : '?å…·'}
               </button>
             ))}
           </div>
         </section>
 
-        {/* ç¨€?‰åº¦èªªæ? */}
+        {/* ç¨€?åº¦èªª? */}
         <section className="mb-6 rounded-2xl border border-border/10 bg-card p-4">
           <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            ç¨€?‰åº¦èªªæ?
+            ç¨€?åº¦èªª?
           </h2>
           <div className="flex flex-wrap gap-2">
             {Object.entries(RARITY_COLORS).map(([key, colors]) => (
@@ -140,19 +140,19 @@ export default function ItemsCatalogView() {
           </div>
         </section>
 
-        {/* ?©å??—è¡¨ */}
+        {/* ???è¡¨ */}
         <section className="space-y-3">
           {loading && (
             <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
               <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-border border-t-[#fcc025]" />
-              <p className="text-sm font-bold text-secondary">è¼‰å…¥?©å??®é?...</p>
+              <p className="text-sm font-bold text-secondary">è¼‰å…¥????...</p>
             </div>
           )}
 
           {!loading && filteredItems.length === 0 && (
             <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
               <Package className="mx-auto mb-3 h-12 w-12 text-muted" />
-              <p className="text-sm font-bold text-secondary">?«ç„¡ç¬¦å?æ¢ä»¶?„ç‰©??/p>
+              <p className="text-sm font-bold text-secondary">?ç„¡ç¬¦?æ¢ä»¶?ç‰©</p>
             </div>
           )}
 
@@ -182,9 +182,9 @@ export default function ItemsCatalogView() {
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="flex items-center gap-1 rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                         <TypeIcon className="h-3 w-3" />
-                        {item.type === 'avatar' ? '?­å?' : 
-                         item.type === 'title' ? 'ç¨±è?' : 
-                         item.type === 'buff' ? 'å¢ç?' : '?“å…·'}
+                        {item.type === 'avatar' ? '??' : 
+                         item.type === 'title' ? 'ç¨±?' : 
+                         item.type === 'buff' ? 'å¢?' : '?å…·'}
                       </span>
                       <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                         {item.howToGet}
@@ -197,10 +197,10 @@ export default function ItemsCatalogView() {
           })}
         </section>
 
-        {/* ?²å??¹å?ç¸½è¦½ */}
+        {/* ????ç¸½è¦½ */}
         <section className="mt-8 rounded-2xl border border-border/10 bg-card p-6">
           <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            ?©å??²å??¹å?
+            ??????
           </h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
@@ -208,8 +208,8 @@ export default function ItemsCatalogView() {
                 <Gift className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">?†å?è³¼è²·</h3>
-                <p className="text-xs font-bold text-secondary">ä½¿ç”¨å­ç?å¹?ZXC)?‡ä??©å¹£(YJC)?¨ç??µå?åº—è³¼è²·é?å®šé ­?è?ç¨±è?</p>
+                <h3 className="text-sm font-bold text-white">??è³¼è²·</h3>
+                <p className="text-xs font-bold text-secondary">ä½¿ç”¨å­??ZXC)???å¹£(YJC)????åº—è³¼è²·?å®šé ­??ç¨±?</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -217,8 +217,8 @@ export default function ItemsCatalogView() {
                 <Crown className="h-4 w-4 text-purple-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">ç®¡ç??¡æ?äº?/h3>
-                <p className="text-xs font-bold text-secondary">?¹æ?æ´»å??–è²¢?»ç²å¾—ç??å??©å?</p>
+                <h3 className="text-sm font-bold text-white">ç®¡</h3>
+                <p className="text-xs font-bold text-secondary">??æ´»??è²¢?ç²å¾—?????</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -226,8 +226,8 @@ export default function ItemsCatalogView() {
                 <Sword className="h-4 w-4 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">å¯¶ç®±?‹å?</h3>
-                <p className="text-xs font-bold text-secondary">?Šæˆ²?§ç²å¾—ç?å¯¶ç®±?‰æ??‡é??ºç??‰ç‰©??/p>
+                <h3 className="text-sm font-bold text-white">å¯¶ç®±??</h3>
+                <p className="text-xs font-bold text-secondary">?æˆ²?ç²å¾—?å¯¶ç®±???????ç‰©</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -235,8 +235,8 @@ export default function ItemsCatalogView() {
                 <Heart className="h-4 w-4 text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">æ´»å??²å?</h3>
-                <p className="text-xs font-bold text-secondary">?ƒè??æ?æ´»å?å®Œæ?ä»»å??²å?å°ˆå±¬?å‹µ</p>
+                <h3 className="text-sm font-bold text-white">æ´»???</h3>
+                <p className="text-xs font-bold text-secondary">????æ´»?å®Œ?ä»»???å°ˆå±¬?å‹µ</p>
               </div>
             </div>
           </div>

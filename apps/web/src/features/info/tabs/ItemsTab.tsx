@@ -22,17 +22,17 @@ interface CatalogItem {
 }
 
 const RARITY_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  common: { bg: 'bg-gray-500/20', text: 'text-gray-300', border: 'border-gray-500/30', label: '?®é€? },
-  rare: { bg: 'bg-blue-500/20', text: 'text-blue-300', border: 'border-blue-500/30', label: 'ç¨€?? },
-  epic: { bg: 'bg-purple-500/20', text: 'text-purple-300', border: 'border-purple-500/30', label: '?²è©©' },
-  legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-500/30', label: '?³èªª' },
+  common: { bg: 'bg-gray-500/20', text: 'text-gray-300', border: 'border-gray-500/30', label: 'æ™®é€š' },
+  rare: { bg: 'bg-blue-500/20', text: 'text-blue-300', border: 'border-blue-500/30', label: 'ç¨€æœ‰' },
+  epic: { bg: 'bg-purple-500/20', text: 'text-purple-300', border: 'border-purple-500/30', label: 'å²è©©' },
+  legendary: { bg: 'bg-yellow-500/20', text: 'text-yellow-300', border: 'border-yellow-500/30', label: 'å‚³èªª' },
   mythic: { bg: 'bg-pink-500/20', text: 'text-pink-300', border: 'border-pink-500/30', label: 'ç¥è©±' },
   vip: { bg: 'bg-accent/20', text: 'text-accent', border: 'border-accent/30', label: 'VIP' },
-  chaos: { bg: 'bg-red-500/20', text: 'text-red-300', border: 'border-red-500/30', label: 'æ··æ?' },
+  chaos: { bg: 'bg-red-500/20', text: 'text-red-300', border: 'border-red-500/30', label: 'æ··æ²Œ' },
   abyss: { bg: 'bg-indigo-500/20', text: 'text-indigo-300', border: 'border-indigo-500/30', label: 'æ·±æ·µ' },
   oracle: { bg: 'bg-cyan-500/20', text: 'text-cyan-300', border: 'border-cyan-500/30', label: 'ç¥è«­' },
-  original: { bg: 'bg-amber-500/20', text: 'text-amber-300', border: 'border-amber-500/30', label: '?Ÿå?' },
-  transcend: { bg: 'bg-white/20', text: 'text-white', border: 'border-white/30', label: 'è¶…è?' },
+  original: { bg: 'bg-amber-500/20', text: 'text-amber-300', border: 'border-amber-500/30', label: 'åŸåˆ' },
+  transcend: { bg: 'bg-white/20', text: 'text-white', border: 'border-white/30', label: 'è¶…è¶Š' },
 };
 
 const RARITY_RANK: Record<string, number> = {
@@ -47,10 +47,10 @@ const TYPE_ICONS = {
 };
 
 const getHowToGet = (source?: string) => {
-  if (source === 'shop') return '?†å??Œæ?';
-  if (source === 'admin') return 'ç®¡ç??¡ç™¼??;
-  if (source === 'chest') return 'å¯¶ç®±?‹å?';
-  return 'æ´»å??–ä»»??;
+  if (source === 'shop') return 'å•†åº—è³¼è²·';
+  if (source === 'admin') return 'ç®¡ç†å“¡ç™¼æ”¾';
+  if (source === 'chest') return 'å¯¶ç®±é–‹å•Ÿ';
+  return 'æ´»å‹•ä»»å‹™';
 };
 
 export default function ItemsTab() {
@@ -94,7 +94,7 @@ export default function ItemsTab() {
           id: item.itemId, name: item.name, label: item.name, description: item.description || '',
           icon: item.icon || '??', rarity: item.rarity || 'common', source: 'shop',
           type: item.type === 'buff' ? 'buff' : item.type === 'avatar' ? 'avatar' : item.type === 'title' ? 'title' : 'item',
-          howToGet: '?†å??Œæ?', effect: item.effect, price: Number(item.price) || 0, meta: item.meta,
+          howToGet: '????', effect: item.effect, price: Number(item.price) || 0, meta: item.meta,
         }));
       return [...avatars, ...titles, ...chestItems, ...shopItems].sort(
         (a, b) => (RARITY_RANK[a.rarity ?? 'common'] ?? 4) - (RARITY_RANK[b.rarity ?? 'common'] ?? 4)
@@ -123,8 +123,8 @@ export default function ItemsTab() {
         className="flex items-center justify-between rounded-xl border border-accent/30 bg-gradient-to-r from-[#fcc025]/15 to-[#fcc025]/5 p-4 transition-all hover:from-[#fcc025]/25 hover:to-[#fcc025]/10"
       >
         <div>
-          <p className="text-sm font-black text-white">?•ç¨¿ä½ ç?ç¨±è? / ?­å?</p>
-          <p className="mt-1 text-xs text-secondary">?å‡ºè¡¨æ?ç¬¦è??‡å?ç¨±ï??šé?ç®¡ç??¡å¯©?¸å?å°±æ?? å…¥?¨ç?æ¸…å–®</p>
+          <p className="text-sm font-black text-white">?ç¨¿ä½ ?ç¨±? / ??</p>
+          <p className="mt-1 text-xs text-secondary">?å‡ºè¡¨?ç¬¦???ç¨±???ç®¡??å¯©??å°±??å…¥??æ¸…å–®</p>
         </div>
         <PlusCircle className="h-6 w-6 text-accent" />
       </Link>
@@ -135,18 +135,18 @@ export default function ItemsTab() {
             type="text"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="?œå??­å??ç¨±?Ÿæ??¶è???
+            placeholder="æœå°‹é“å…·åç¨±..."
             className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:border-accent/40 focus:outline-none"
           />
         </div>
 
         <div className="flex gap-2">
           {([
-            ['all', '?¨éƒ¨'],
-            ['avatar', '?­å?'],
-            ['title', 'ç¨±è?'],
-            ['item', '?“å…·'],
-            ['buff', 'å¢ç?'],
+            ['all', '?éƒ¨'],
+            ['avatar', '??'],
+            ['title', 'ç¨±?'],
+            ['item', '?å…·'],
+            ['buff', 'å¢?'],
           ] as const).map(([value, label]) => (
             <button
               key={value}
@@ -162,7 +162,7 @@ export default function ItemsTab() {
           ))}
         </div>
         <div className="flex gap-1.5 flex-wrap">
-          {[['all', '?¨éƒ¨', ''], ...Object.entries(RARITY_STYLES).map(([k, v]) => [k, v.label, v.border, v.text])].map(([value, label, border, text]: string[]) => (
+          {[['all', '?éƒ¨', ''], ...Object.entries(RARITY_STYLES).map(([k, v]) => [k, v.label, v.border, v.text])].map(([value, label, border, text]: string[]) => (
             <button
               key={value}
               onClick={() => setRarityFilter(value)}
@@ -179,7 +179,7 @@ export default function ItemsTab() {
       </section>
 
       <section className="rounded-2xl border border-border/10 bg-card p-4">
-        <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">ç¨€?‰åº¦èªªæ?</h2>
+        <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-secondary">ç¨€?åº¦èªª?</h2>
         <div className="flex flex-wrap gap-2">
           {Object.values(RARITY_STYLES).map((style) => (
             <div key={style.label} className={`flex items-center gap-2 rounded-lg border px-2 py-1 ${style.border} ${style.bg}`}>
@@ -194,14 +194,14 @@ export default function ItemsTab() {
         {loading && (
           <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
             <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-border border-t-[#fcc025]" />
-            <p className="text-sm font-bold text-secondary">è¼‰å…¥?–é?ä¸?..</p>
+            <p className="text-sm font-bold text-secondary">è¼‰å…¥???..</p>
           </div>
         )}
 
         {!loading && filteredItems.length === 0 && (
           <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
             <Package className="mx-auto mb-3 h-12 w-12 text-muted" />
-            <p className="text-sm font-bold text-secondary">?®å?æ²’æ?ç¬¦å?æ¢ä»¶?„ç‰©??/p>
+            <p className="text-sm font-bold text-secondary">??æ²’?ç¬¦?æ¢ä»¶?ç‰©</p>
           </div>
         )}
 
@@ -223,20 +223,20 @@ export default function ItemsTab() {
                       {rarity.label}
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-xs font-bold text-secondary">{item.description || '?«ç„¡èªªæ?'}</p>
+                  <p className="mt-1 line-clamp-2 text-xs font-bold text-secondary">{item.description || '?ç„¡èªª?'}</p>
                   {item.effect?.type === 'currency' && (
                     <p className="mt-1 text-xs font-bold text-secondary">
-                      {item.effect.currency === 'yjc' ? `?? ${item.effect.value} YJC` : `?’° ${nf(Number(item.effect.value))} ZXC`}
+                      {item.effect.currency === 'yjc' ? `${item.effect.value} YJC` : `${nf(Number(item.effect.value))} ZXC`}
                     </p>
                   )}
                   {item.effect?.type === 'xp_boost' && (
-                    <p className="mt-1 text-xs font-bold text-secondary">??ç¶“é? ?{item.effect.value}{item.effect.duration ? ` Â· ${item.effect.duration}h` : ''}</p>
+                    <p className="mt-1 text-xs font-bold text-secondary">??ç¶“? ?{item.effect.value}{item.effect.duration ? ` Â· ${item.effect.duration}h` : ''}</p>
                   )}
                   {item.effect?.type === 'luck_boost' && (
-                    <p className="mt-1 text-xs font-bold text-secondary">?? ?‹æ°£ +{Math.round(item.effect.value * 100)}%{item.effect.duration ? ` Â· ${item.effect.duration}h` : ' Â· æ°¸ä?'}</p>
+                    <p className="mt-1 text-xs font-bold text-secondary">?? ?æ°£ +{Math.round(item.effect.value * 100)}%{item.effect.duration ? ` Â· ${item.effect.duration}h` : ' Â· æ°¸?'}</p>
                   )}
                   {item.effect?.type === 'prevent_loss' && (
-                    <p className="mt-1 text-xs font-bold text-secondary">?›¡ï¸?è­·ç›¾ ?{item.effect.value} æ¬?/p>
+                    <p className="mt-1 text-xs font-bold text-secondary">??è­·ç›¾ ?{item.effect.value} </p>
                   )}
                   {item.effect?.type === 'vip_trial' && (
                     <p className="mt-1 text-xs font-bold text-secondary">?? VIP è©¦ç”¨{item.effect.duration ? ` Â· ${item.effect.duration}h` : ''}</p>
@@ -246,7 +246,7 @@ export default function ItemsTab() {
                   )}
                   {item.meta?.bundle && (
                     <p className="mt-1 text-xs font-bold text-emerald-400">
-                      ?“¦ ?§å®¹ {item.meta.bundle.length} ?…{item.meta.totalValue ? ` Â· ~~${nf(item.meta.totalValue)} ZXC~~` : ''}
+                      ? ?å®¹ {item.meta.bundle.length} ?{item.meta.totalValue ? ` Â· ~~${nf(item.meta.totalValue)} ZXC~~` : ''}
                       {item.price && item.meta.totalValue ? ` ??${nf(item.price)} ZXC (${nf(Math.round((1 - item.price / item.meta.totalValue) * 100))}% OFF)` : ''}
                     </p>
                   )}
@@ -254,13 +254,13 @@ export default function ItemsTab() {
                     <span className="flex items-center gap-1 rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                       <TypeIcon className="h-3 w-3" />
                       {item.type === 'avatar'
-                        ? '?­å?'
+                        ? '??'
                         : item.type === 'title'
-                        ? 'ç¨±è?'
+                        ? 'ç¨±?'
                         : item.type === 'buff'
-                        ? 'å¢ç?'
+                        ? 'å¢?'
                         : item.type === 'item'
-                        ? '?“å…·'
+                        ? '?å…·'
                         : item.type}
                     </span>
                     <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">{item.howToGet}</span>
@@ -273,15 +273,15 @@ export default function ItemsTab() {
       </section>
 
       <section className="rounded-2xl border border-border/10 bg-card p-6">
-        <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-secondary">?–å??¹å?èªªæ?</h2>
+        <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-secondary">????èªª?</h2>
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
               <Gift className="h-4 w-4 text-accent" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">?†å??Œæ?</h3>
-              <p className="text-xs font-bold text-secondary">?¯ç›´?¥ä½¿?¨ä»£å¹?³¼è²·ï??©å?ç©©å??¶é?å¸¸é??…ç›®??/p>
+              <h3 className="text-sm font-bold text-white">????</h3>
+              <p className="text-xs font-bold text-secondary">?ç›´?ä½¿?ä»£?è²·???ç©©???å¸¸??ç›®</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -289,8 +289,8 @@ export default function ItemsTab() {
               <Crown className="h-4 w-4 text-purple-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">ç®¡ç??¡ç™¼??/h3>
-              <p className="text-xs font-bold text-secondary">?šå¸¸?¨æ–¼æ´»å??å‹µ?ç‰¹æ®Šæ?å°±æ?äººå·¥è£œç™¼??/p>
+              <h3 className="text-sm font-bold text-white">ç®¡??ç™¼</h3>
+              <p className="text-xs font-bold text-secondary">?å¸¸?æ–¼æ´»??å‹µ?ç‰¹æ®Š?å°±?äººå·¥è£œç™¼</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -298,8 +298,8 @@ export default function ItemsTab() {
               <Zap className="h-4 w-4 text-blue-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">å¯¶ç®±?‹å?</h3>
-              <p className="text-xs font-bold text-secondary">?é?å¯¶ç®±?¨æ??½å‡ºï¼Œé€šå¸¸?ƒæ­?ç??‰åº¦?†å???/p>
+              <h3 className="text-sm font-bold text-white">å¯¶ç®±??</h3>
+              <p className="text-xs font-bold text-secondary">??å¯¶ç®±???å‡ºï¼Œé€šå¸¸?æ­???åº¦</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -307,8 +307,8 @@ export default function ItemsTab() {
               <Shield className="h-4 w-4 text-emerald-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">æ´»å??–ä»»??/h3>
-              <p className="text-xs font-bold text-secondary">ç¯€?¶æ´»?•ã€æ?è¡Œæ??–æ??¥ä»»?™éƒ½?¯èƒ½?¼æ”¾?å??…ç›®??/p>
+              <h3 className="text-sm font-bold text-white">æ´»??ä»»</h3>
+              <p className="text-xs font-bold text-secondary">ç¯€?æ´»?ã€?è¡Œ????ä»»?éƒ½?èƒ½?æ”¾???ç›®</p>
             </div>
           </div>
         </div>
