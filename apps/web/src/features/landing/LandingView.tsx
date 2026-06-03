@@ -100,7 +100,7 @@ export default function LandingView() {
             </div>
             <img
               src="/icon-512.png"
-              alt="子??ZIXI · 佑戩?YJC ??"
+              alt="子熙 ZIXI · 佑戩 YJC 圖標"
               width="120"
               height="120"
               className="mx-auto mb-6 rounded-2xl"

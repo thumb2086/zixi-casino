@@ -41,7 +41,7 @@ export default function ItemsCatalogView() {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    // ?API ??????
+    // ?API 收藏×
     Promise.all([
       api.get('/api/v1/rewards/avatars/catalog').catch(() => ({ data: { data: [] } })),
       api.get('/api/v1/rewards/titles/catalog').catch(() => ({ data: { data: [] } })),
@@ -83,14 +83,14 @@ export default function ItemsCatalogView() {
             </Link>
             <Package className="text-accent" />
             <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
-              ????
+              收藏
             </h1>
           </div>
         </div>
       </header>
 
       <main className="px-6 pt-24">
-        {/* ???篩??*/}
+        {/* ×?篩×*/}
         <section className="mb-6 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
@@ -98,7 +98,7 @@ export default function ItemsCatalogView() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="?????稱..."
+              placeholder="搜尋名稱..."
               className="w-full rounded-xl border border-border/20 bg-card py-3 pl-10 pr-4 text-sm font-bold text-white placeholder:text-muted focus:outline-none focus:border-accent/40"
             />
           </div>
@@ -114,9 +114,9 @@ export default function ItemsCatalogView() {
                     : 'bg-card text-secondary border border-border/20'
                 }`}
               >
-                {type === 'all' ? '?部' : 
-                 type === 'avatar' ? '??' : 
-                 type === 'title' ? '稱?' : '?具'}
+                {type === 'all' ? '全部' : 
+                 type === 'avatar' ? '遊戲' : 
+                 type === 'title' ? '稱號' : '道具'}
               </button>
             ))}
           </div>
@@ -140,12 +140,12 @@ export default function ItemsCatalogView() {
           </div>
         </section>
 
-        {/* ???表 */}
+        {/* ×?表 */}
         <section className="space-y-3">
           {loading && (
             <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
               <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-border border-t-[#fcc025]" />
-              <p className="text-sm font-bold text-secondary">載入????...</p>
+              <p className="text-sm font-bold text-secondary">載入收藏...</p>
             </div>
           )}
 
@@ -182,9 +182,9 @@ export default function ItemsCatalogView() {
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="flex items-center gap-1 rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                         <TypeIcon className="h-3 w-3" />
-                        {item.type === 'avatar' ? '??' : 
-                         item.type === 'title' ? '稱?' : 
-                         item.type === 'buff' ? '增?' : '?具'}
+                        {item.type === 'avatar' ? '遊戲' : 
+                         item.type === 'title' ? '稱號' : 
+                         item.type === 'buff' ? '增益' : '道具'}
                       </span>
                       <span className="rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                         {item.howToGet}
@@ -197,10 +197,10 @@ export default function ItemsCatalogView() {
           })}
         </section>
 
-        {/* ????總覽 */}
+        {/* 收藏總覽 */}
         <section className="mt-8 rounded-2xl border border-border/10 bg-card p-6">
           <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-            ??????
+            收藏×
           </h2>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
@@ -208,8 +208,8 @@ export default function ItemsCatalogView() {
                 <Gift className="h-4 w-4 text-accent" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">??購買</h3>
-                <p className="text-xs font-bold text-secondary">使用子??ZXC)???幣(YJC)????店購買?定頭??稱?</p>
+                <h3 className="text-sm font-bold text-white">×購買</h3>
+                <p className="text-xs font-bold text-secondary">使用子熙幣(ZXC)或佑戩幣(YJC)收藏店購買?定頭×稱?</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -218,7 +218,7 @@ export default function ItemsCatalogView() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">管</h3>
-                <p className="text-xs font-bold text-secondary">??活??貢?獲得?????</p>
+                <p className="text-xs font-bold text-secondary">×活×貢?獲得收藏?</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -226,8 +226,8 @@ export default function ItemsCatalogView() {
                 <Sword className="h-4 w-4 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">寶箱??</h3>
-                <p className="text-xs font-bold text-secondary">?戲?獲得?寶箱???????物</p>
+                <h3 className="text-sm font-bold text-white">寶箱×</h3>
+                <p className="text-xs font-bold text-secondary">?戲?獲得?寶箱收藏×?物</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -235,8 +235,8 @@ export default function ItemsCatalogView() {
                 <Heart className="h-4 w-4 text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">活???</h3>
-                <p className="text-xs font-bold text-secondary">????活?完?任???專屬?勵</p>
+                <h3 className="text-sm font-bold text-white">活動</h3>
+                <p className="text-xs font-bold text-secondary">收藏活?完?任×?專屬?勵</p>
               </div>
             </div>
           </div>

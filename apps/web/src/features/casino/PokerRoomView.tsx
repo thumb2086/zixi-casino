@@ -8,14 +8,14 @@ import { useAuth } from '../auth/useAuth';
 import AppBottomNav from '../../components/AppBottomNav';
 
 const SUIT_SYMBOLS: Record<string, string> = {
-  '??: '??, '??: '??, '??: '??, '??: '??,
+  'hearts': '♥', 'diamonds': '♦', 'clubs': '♣', 'spades': '♠',
 };
 
 function CardView({ card, hidden }: { card?: any; hidden?: boolean }) {
   if (!card || hidden) {
     return <div className="flex h-16 w-12 items-center justify-center rounded-lg border-2 border-accent/40 bg-gradient-to-b from-accent/10 to-accent/5 text-accent font-black text-lg shadow-[0_0_10px_rgba(245,166,35,0.2)]">?</div>;
   }
-  const isRed = card.suit === '?? || card.suit === '??;
+  const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
   return (
     <div className="flex h-16 w-12 flex-col items-center justify-center rounded-lg border border-border bg-card text-sm font-black shadow-lg">
       <span className={isRed ? 'text-danger' : 'text-white'}>{SUIT_SYMBOLS[card.suit] || card.suit}</span>
@@ -50,12 +50,12 @@ function PlayerSeat({ player, isMe, isTurn, communityCards, isDealer }: {
       </div>
       <div className="text-center">
         <p className={`text-xs font-bold ${isMe ? 'text-accent' : 'text-white'} truncate max-w-20`}>
-          {player.displayName} {isMe ? '(?' : ''}
+          {player.displayName} {isMe ? '(我)' : ''}
         </p>
         <p className="text-[9px] text-secondary">${player.stack}</p>
         {player.bet > 0 && <p className="text-[9px] text-accent font-black">${player.bet}</p>}
         {player.allIn && <p className="text-[9px] text-warning font-black">ALL IN</p>}
-        {player.folded && <p className="text-[9px] text-muted">??</p>}
+        {player.folded && <p className="text-[9px] text-muted">蓋牌</p>}
         {!player.folded && bestHand && (
           <p className="text-[8px] text-info font-bold">{bestHand.name}</p>
         )}
@@ -85,21 +85,21 @@ export default function PokerRoomView() {
 
   const me = useMemo(() => ({
     userId: session?.id || 'local',
-    displayName: '?,
+    displayName: '我',
     stack: 1000,
     isBot: false,
     hand: [
-      { rank: 'A', suit: '?? },
-      { rank: 'K', suit: '?? },
+      { rank: 'A', suit: 'hearts' },
+      { rank: 'K', suit: 'spades' },
     ],
     bet: 0, totalBet: 0, folded: false, allIn: false,
   }), [session]);
 
   const botPlayers = useMemo(() => [
-    { userId: 'bot1', displayName: 'AI_????, stack: 800, isBot: true, hand: [{ rank: 'Q', suit: '?? }, { rank: 'Q', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot2', displayName: 'AI_?鐵', stack: 1200, isBot: true, hand: [{ rank: '10', suit: '?? }, { rank: 'J', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot3', displayName: 'AI_?影', stack: 950, isBot: true, hand: [{ rank: '2', suit: '?? }, { rank: '7', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
-    { userId: 'bot4', displayName: 'AI_鳳凰', stack: 1100, isBot: true, hand: [{ rank: 'A', suit: '?? }, { rank: '3', suit: '?? }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot1', displayName: 'AI_王牌', stack: 800, isBot: true, hand: [{ rank: 'Q', suit: 'clubs' }, { rank: 'Q', suit: 'diamonds' }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot2', displayName: 'AI_鋼鐵', stack: 1200, isBot: true, hand: [{ rank: '10', suit: 'spades' }, { rank: 'J', suit: 'hearts' }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot3', displayName: 'AI_暗影', stack: 950, isBot: true, hand: [{ rank: '2', suit: 'clubs' }, { rank: '7', suit: 'diamonds' }], bet: 0, totalBet: 0, folded: false, allIn: false },
+    { userId: 'bot4', displayName: 'AI_鳳凰', stack: 1100, isBot: true, hand: [{ rank: 'A', suit: 'diamonds' }, { rank: '3', suit: 'clubs' }], bet: 0, totalBet: 0, folded: false, allIn: false },
   ], []);
 
   const allPlayers = useMemo(() => [me, ...botPlayers], [me, botPlayers]);
@@ -195,13 +195,13 @@ export default function PokerRoomView() {
   const advancePhase = useCallback(() => {
     if (phase === 'preflop') {
       setPhase('flop');
-      setCommunity([{ rank: 'J', suit: '?? }, { rank: '7', suit: '?? }, { rank: '3', suit: '?? }]);
+      setCommunity([{ rank: 'J', suit: 'diamonds' }, { rank: '7', suit: 'clubs' }, { rank: '3', suit: 'spades' }]);
     } else if (phase === 'flop') {
       setPhase('turn');
-      setCommunity(prev => [...prev, { rank: 'K', suit: '?? }]);
+      setCommunity(prev => [...prev, { rank: 'K', suit: 'hearts' }]);
     } else if (phase === 'turn') {
       setPhase('river');
-      setCommunity(prev => [...prev, { rank: '5', suit: '?? }]);
+      setCommunity(prev => [...prev, { rank: '5', suit: 'diamonds' }]);
     } else if (phase === 'river') {
       setWinner(allPlayers[0]?.userId || '');
       setPhase('showdown');
@@ -218,7 +218,7 @@ export default function PokerRoomView() {
       <header className="fixed top-0 z-50 w-full border-b border-accent/20 bg-gradient-to-r from-[#0a0a0f] via-[#14141f] to-[#0a0a0f] backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <div className="text-gradient-diamond text-sm font-black uppercase tracking-widest">??VIP ??</div>
+            <div className="text-gradient-diamond text-sm font-black uppercase tracking-widest">👑 VIP</div>
             <span className="text-caption text-secondary">{roomId}</span>
           </div>
           <div className="flex items-center gap-3">
@@ -268,11 +268,11 @@ export default function PokerRoomView() {
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <button onClick={() => doAction('fold')}
                 className="px-6 py-3 rounded-xl bg-danger/20 text-danger border border-danger/30 text-xs font-bold uppercase tracking-widest hover:bg-danger/30 transition-all">
-                ??
+                ×
               </button>
               <button onClick={() => doAction('check')}
                 className="px-6 py-3 rounded-xl bg-accent/10 text-accent border border-accent/30 text-xs font-bold uppercase tracking-widest hover:bg-accent/20 transition-all">
-                ??
+                ×
               </button>
               <button onClick={() => doAction('call')}
                 className="px-6 py-3 rounded-xl bg-accent text-black text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all shadow-[0_0_20px_rgba(245,166,35,0.3)]">

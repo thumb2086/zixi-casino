@@ -12,7 +12,7 @@ interface UnderConstructionProps {
 
 export default function UnderConstruction({ 
   title = '?發?,
-  description = '此??正???中，敬請?待?',
+  description = '此功能正在開發中，敬請期待',
   current = 'none'
 }: UnderConstructionProps) {
   return (
@@ -45,20 +45,20 @@ export default function UnderConstruction({
 
         <div className="mt-8 rounded-xl border border-border/20 bg-card p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">
-            ??上??能
+            區塊上鏈
           </p>
           <ul className="mt-4 space-y-2 text-sm font-bold text-secondary">
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              完整??串接
+              完整合約串接
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              ??互??能
+              智能合約
             </li>
             <li className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              歷史記??詢
+              歷史記錄查詢
             </li>
           </ul>
         </div>

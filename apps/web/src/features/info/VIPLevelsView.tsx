@@ -57,7 +57,7 @@ export default function VIPLevelsView() {
           </div>
         </section>
 
-        {/* ??說? */}
+        {/* ×說? */}
         <section className="mb-6 rounded-2xl border border-border/10 bg-card p-6">
           <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
             {t('info.vip_perks_title')}
@@ -110,7 +110,7 @@ export default function VIPLevelsView() {
           </div>
         </section>
 
-        {/* 等??表 */}
+        {/* 待處理表 */}
         <section className="space-y-3">
           <h2 className="px-2 text-xs font-bold uppercase tracking-[0.2em] text-secondary">
             {t('info.full_level_list')}

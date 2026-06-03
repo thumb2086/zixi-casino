@@ -60,7 +60,7 @@ export default function ItemsTab() {
   const [rarityFilter, setRarityFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
 
-  // Cache catalog aggressively ??it rarely changes
+  // Cache catalog aggressively ?? it rarely changes
   const { data: items, isLoading: loading } = useQuery({
     queryKey: ['items-catalog'],
     queryFn: async () => {
@@ -83,7 +83,7 @@ export default function ItemsTab() {
           : 'item';
         return {
           id: item.id, name: item.name || item.label, label: item.name || item.label,
-          description: item.description, icon: item.icon || '??', rarity: item.rarity,
+          description: item.description, icon: item.icon || '遊戲', rarity: item.rarity,
           source: item.source || 'chest', type: itemType, howToGet: getHowToGet(item.source || 'chest'),
           effect: item.effect, price: item.price, meta: item.meta,
         };
@@ -92,15 +92,15 @@ export default function ItemsTab() {
         .filter((i: any) => i.source === 'shop')
         .map((item: any) => ({
           id: item.itemId, name: item.name, label: item.name, description: item.description || '',
-          icon: item.icon || '??', rarity: item.rarity || 'common', source: 'shop',
+          icon: item.icon || '遊戲', rarity: item.rarity || 'common', source: 'shop',
           type: item.type === 'buff' ? 'buff' : item.type === 'avatar' ? 'avatar' : item.type === 'title' ? 'title' : 'item',
-          howToGet: '????', effect: item.effect, price: Number(item.price) || 0, meta: item.meta,
+          howToGet: '商店購買', effect: item.effect, price: Number(item.price) || 0, meta: item.meta,
         }));
       return [...avatars, ...titles, ...chestItems, ...shopItems].sort(
         (a, b) => (RARITY_RANK[a.rarity ?? 'common'] ?? 4) - (RARITY_RANK[b.rarity ?? 'common'] ?? 4)
       );
     },
-    staleTime: 24 * 60 * 60 * 1000, // 24h ??catalog rarely changes
+    staleTime: 24 * 60 * 60 * 1000, // 24h ?? catalog rarely changes
     gcTime: 24 * 60 * 60 * 1000,
   });
 
@@ -123,8 +123,8 @@ export default function ItemsTab() {
         className="flex items-center justify-between rounded-xl border border-accent/30 bg-gradient-to-r from-[#fcc025]/15 to-[#fcc025]/5 p-4 transition-all hover:from-[#fcc025]/25 hover:to-[#fcc025]/10"
       >
         <div>
-          <p className="text-sm font-black text-white">?稿你?稱? / ??</p>
-          <p className="mt-1 text-xs text-secondary">?出表?符???稱???管??審??就??入??清單</p>
+          <p className="text-sm font-black text-white">?稿你?稱? / ×</p>
+          <p className="mt-1 text-xs text-secondary">?出表?符×?稱×?管×審×就×入×清單</p>
         </div>
         <PlusCircle className="h-6 w-6 text-accent" />
       </Link>
@@ -142,11 +142,11 @@ export default function ItemsTab() {
 
         <div className="flex gap-2">
           {([
-            ['all', '?部'],
-            ['avatar', '??'],
-            ['title', '稱?'],
-            ['item', '?具'],
-            ['buff', '增?'],
+            ['all', '全部'],
+            ['avatar', '遊戲'],
+            ['title', '稱號'],
+            ['item', '道具'],
+            ['buff', '增益'],
           ] as const).map(([value, label]) => (
             <button
               key={value}
@@ -194,14 +194,14 @@ export default function ItemsTab() {
         {loading && (
           <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
             <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-border border-t-[#fcc025]" />
-            <p className="text-sm font-bold text-secondary">載入???..</p>
+            <p className="text-sm font-bold text-secondary">載入×?..</p>
           </div>
         )}
 
         {!loading && filteredItems.length === 0 && (
           <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
             <Package className="mx-auto mb-3 h-12 w-12 text-muted" />
-            <p className="text-sm font-bold text-secondary">??沒?符?條件?物</p>
+            <p className="text-sm font-bold text-secondary">×沒?符?條件?物</p>
           </div>
         )}
 
@@ -214,7 +214,7 @@ export default function ItemsTab() {
             <div key={`${item.type}-${item.id}`} className={`rounded-xl border p-4 transition-all ${rarity.border} ${rarity.bg}`}>
               <div className="flex items-start gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-surface text-2xl">
-                  {item.icon || '??'}
+                  {item.icon || '遊戲'}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
@@ -230,31 +230,31 @@ export default function ItemsTab() {
                     </p>
                   )}
                   {item.effect?.type === 'xp_boost' && (
-                    <p className="mt-1 text-xs font-bold text-secondary">??經? ?{item.effect.value}{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
+                    <p className="mt-1 text-xs font-bold text-secondary">×經? ?{item.effect.value}{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
                   )}
                   {item.effect?.type === 'luck_boost' && (
-                    <p className="mt-1 text-xs font-bold text-secondary">?? ?氣 +{Math.round(item.effect.value * 100)}%{item.effect.duration ? ` · ${item.effect.duration}h` : ' · 永?'}</p>
+                    <p className="mt-1 text-xs font-bold text-secondary">× ?氣 +{Math.round(item.effect.value * 100)}%{item.effect.duration ? ` · ${item.effect.duration}h` : ' · 永?'}</p>
                   )}
                   {item.effect?.type === 'prevent_loss' && (
-                    <p className="mt-1 text-xs font-bold text-secondary">??護盾 ?{item.effect.value} </p>
+                    <p className="mt-1 text-xs font-bold text-secondary">×護盾 ?{item.effect.value} </p>
                   )}
                   {item.effect?.type === 'vip_trial' && (
-                    <p className="mt-1 text-xs font-bold text-secondary">?? VIP 試用{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
+                    <p className="mt-1 text-xs font-bold text-secondary">× VIP 試用{item.effect.duration ? ` · ${item.effect.duration}h` : ''}</p>
                   )}
                   {item.price && item.price > 0 && (
-                    <p className="mt-1 text-xs font-bold text-secondary">?? {nf(item.price)} ZXC</p>
+                    <p className="mt-1 text-xs font-bold text-secondary">× {nf(item.price)} ZXC</p>
                   )}
                   {item.meta?.bundle && (
                     <p className="mt-1 text-xs font-bold text-emerald-400">
                       ? ?容 {item.meta.bundle.length} ?{item.meta.totalValue ? ` · ~~${nf(item.meta.totalValue)} ZXC~~` : ''}
-                      {item.price && item.meta.totalValue ? ` ??${nf(item.price)} ZXC (${nf(Math.round((1 - item.price / item.meta.totalValue) * 100))}% OFF)` : ''}
+                      {item.price && item.meta.totalValue ? ` ×${nf(item.price)} ZXC (${nf(Math.round((1 - item.price / item.meta.totalValue) * 100))}% OFF)` : ''}
                     </p>
                   )}
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className="flex items-center gap-1 rounded bg-surface px-2 py-1 text-xs font-bold text-secondary">
                       <TypeIcon className="h-3 w-3" />
                       {item.type === 'avatar'
-                        ? '??'
+                        ? '遊戲'
                         : item.type === 'title'
                         ? '稱?'
                         : item.type === 'buff'
@@ -273,15 +273,15 @@ export default function ItemsTab() {
       </section>
 
       <section className="rounded-2xl border border-border/10 bg-card p-6">
-        <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-secondary">????說?</h2>
+        <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-secondary">收藏說?</h2>
         <div className="space-y-3">
           <div className="flex items-start gap-3">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
               <Gift className="h-4 w-4 text-accent" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">????</h3>
-              <p className="text-xs font-bold text-secondary">?直?使?代?買???穩???常??目</p>
+              <h3 className="text-sm font-bold text-white">收藏</h3>
+              <p className="text-xs font-bold text-secondary">?直?使?代?買×?穩×?常×目</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -289,8 +289,8 @@ export default function ItemsTab() {
               <Crown className="h-4 w-4 text-purple-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">管??發</h3>
-              <p className="text-xs font-bold text-secondary">?常?於活??勵?特殊?就?人工補發</p>
+              <h3 className="text-sm font-bold text-white">管×發</h3>
+              <p className="text-xs font-bold text-secondary">?常?於活×勵?特殊?就?人工補發</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -298,8 +298,8 @@ export default function ItemsTab() {
               <Zap className="h-4 w-4 text-blue-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">寶箱??</h3>
-              <p className="text-xs font-bold text-secondary">??寶箱???出，通常?搭???度</p>
+              <h3 className="text-sm font-bold text-white">寶箱×</h3>
+              <p className="text-xs font-bold text-secondary">×寶箱×?出，通常?搭×?度</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -307,8 +307,8 @@ export default function ItemsTab() {
               <Shield className="h-4 w-4 text-emerald-400" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white">活??任</h3>
-              <p className="text-xs font-bold text-secondary">節?活?、?行????任?都?能?放???目</p>
+              <h3 className="text-sm font-bold text-white">活×任</h3>
+              <p className="text-xs font-bold text-secondary">節?活?、?行收藏任?都?能?放×?目</p>
             </div>
           </div>
         </div>

@@ -95,7 +95,7 @@ export default function ShopView() {
   const [ownedTitles, setOwnedTitles] = useState<string[]>([]);
   const [purchasedBundles, setPurchasedBundles] = useState<string[]>([]);
 
-  // ?? Pawn state ???????????????????????????????????????????????????????????
+  // ?? Pawn state 收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏×?
   const [invItems, setInvItems] = useState<any[]>([]);
   const [pawnLoading, setPawnLoading] = useState(false);
   const [sellingId, setSellingId] = useState<string | null>(null);
@@ -104,7 +104,7 @@ export default function ShopView() {
   const [stockHistory, setStockHistory] = useState<Record<string, number[]>>({});
   const [sellingStock, setSellingStock] = useState<string | null>(null);
 
-  // ?? Market state ???????????????????????????????????????????????????????????
+  // ?? Market state 收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏×?
   const [listings, setListings] = useState<any[]>([]);
   const [myListings, setMyListings] = useState<any[]>([]);
   const [marketLoading, setMarketLoading] = useState(false);
@@ -116,7 +116,7 @@ export default function ShopView() {
   const [sellPrice, setSellPrice] = useState('');
   const [showSellForm, setShowSellForm] = useState(false);
 
-  // ?? YJC exchange state ????????????????????????????????????????????????????
+  // ?? YJC exchange state 收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏
   const [yjcBalance, setYjcBalance] = useState('0');
   const [convertZxc, setConvertZxc] = useState('');
   const [convertYjc, setConvertYjc] = useState('');
@@ -180,11 +180,11 @@ export default function ShopView() {
         fetchItems();
         setTimeout(() => setMsg(null), 3000);
       } else {
-        setMsg(`??${res.data?.error || '購買失?'}`);
+        setMsg(`×${res.data?.error || '購買失敗'}`);
         setTimeout(() => setMsg(null), 3000);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.data?.error || err?.message || '購買失?'}`);
+      setMsg(`×${err?.response?.data?.data?.error || err?.message || '購買失敗'}`);
       setTimeout(() => setMsg(null), 3000);
     } finally {
       setBuyingChest(null);
@@ -195,7 +195,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const yjcInput = parseFloat(convertZxc);
     if (!yjcInput || yjcInput <= 0) {
-      setMsg('??請輸?大??0 ??YJC ??');
+      setMsg('×請輸?大×0 ?? YJC ×');
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -205,14 +205,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(zxcNeeded) });
       if (res.data?.success) {
-        setMsg(`?????? ${res.data.data?.yjcAmount || yjcInput} YJC`);
+        setMsg(`收藏× ${res.data.data?.yjcAmount || yjcInput} YJC`);
         setConvertZxc('');
         fetchItems();
       } else {
-        setMsg(`??${res.data?.error?.message || res.data?.error || '??失?'}`);
+        setMsg(`×${res.data?.error?.message || res.data?.error || '操作失敗'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.error?.message || err?.message || '??失?'}`);
+      setMsg(`×${err?.response?.data?.error?.message || err?.message || '操作失敗'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -224,7 +224,7 @@ export default function ShopView() {
     if (!sessionId || converting) return;
     const yjcNum = parseFloat(convertYjc);
     if (!yjcNum || yjcNum <= 0) {
-      setMsg('??請輸?大??0 ??YJC ??');
+      setMsg('×請輸?大×0 ?? YJC ×');
       setTimeout(() => setMsg(null), 3000);
       return;
     }
@@ -233,14 +233,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', { sessionId, yjcAmount: String(yjcNum) });
       if (res.data?.success) {
-        setMsg(`?????? ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
+        setMsg(`收藏× ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
         setConvertYjc('');
         fetchItems();
       } else {
-        setMsg(`??${res.data?.error?.message || res.data?.error || '??失?'}`);
+        setMsg(`×${res.data?.error?.message || res.data?.error || '操作失敗'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.error?.message || err?.message || '??失?'}`);
+      setMsg(`×${err?.response?.data?.error?.message || err?.message || '操作失敗'}`);
     } finally {
       setConverting(false);
       setTimeout(() => setMsg(null), 5000);
@@ -254,15 +254,15 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/inventory/buy', { sessionId, itemId });
       if (res.data?.success) {
-        setMsg(`${res.data.data?.name || itemId} 購買??！`);
+        setMsg(`${res.data.data?.name || itemId} 購買×！`);
         const newBal = res.data.data?.balanceAfter;
         if (newBal) setBalance(newBal);
         fetchItems();
       } else {
-        setMsg(res.data?.error || '購買失?');
+        setMsg(res.data?.error || '購買失敗');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || '購買失?');
+      setMsg(err?.response?.data?.data?.error || err?.message || '購買失敗');
     } finally {
       setBuyingId(null);
     }
@@ -275,20 +275,20 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/sell', { sessionId, itemId, quantity });
       if (res.data?.success) {
-        setMsg(`?當??！獲?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`?當×！獲?+${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(res.data?.error || '?當失?');
+        setMsg(res.data?.error || '典當失敗');
       }
     } catch (err: any) {
-      setMsg(err?.response?.data?.data?.error || err?.message || '?當失?');
+      setMsg(err?.response?.data?.data?.error || err?.message || '典當失敗');
     } finally {
       setSellingId(null);
     }
   }
 
-  // ?? Market handlers ??????????????????????????????????????????????????????
+  // ?? Market handlers 收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏×
   const fetchListings = async () => {
     setMarketLoading(true);
     try {
@@ -321,10 +321,10 @@ export default function ShopView() {
         setShowSellForm(false);
         fetchListings();
       } else {
-        setMarketMsg(`??${res.data?.error || '?賣失?'}`);
+        setMarketMsg(`×${res.data?.error || '拍賣失敗'}`);
       }
     } catch (err: any) {
-      setMarketMsg(`??${err?.response?.data?.data?.error || err?.message || '?賣失?'}`);
+      setMarketMsg(`×${err?.response?.data?.data?.error || err?.message || '拍賣失敗'}`);
     } finally {
       setMarketLoading(false);
       setTimeout(() => setMarketMsg(null), 4000);
@@ -337,14 +337,14 @@ export default function ShopView() {
     try {
       const res = await api.post(`/api/v1/market-listings/${listingId}/buy`, { sessionId });
       if (res.data?.success) {
-        setMsg(`??購買??！`);
+        setMsg(`×購買×！`);
         fetchListings();
         fetchItems();
       } else {
-        setMsg(`??${res.data?.error || '購買失?'}`);
+        setMsg(`×${res.data?.error || '購買失敗'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.data?.error || err?.message || '購買失?'}`);
+      setMsg(`×${err?.response?.data?.data?.error || err?.message || '購買失敗'}`);
     } finally {
       setBuyingListing(null);
       setTimeout(() => setMsg(null), 4000);
@@ -373,14 +373,14 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/stock-sell', { sessionId, symbol, quantity: qty });
       if (res.data?.success) {
-        setMsg(`?????售 ${qty} ??${symbol}，獲?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`收藏?售 ${qty} ×${symbol}，獲?+${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
-        setMsg(`??${res.data?.error || '?售失?'}`);
+        setMsg(`×${res.data?.error || '出售失敗'}`);
       }
     } catch (err: any) {
-      setMsg(`??${err?.response?.data?.data?.error || err?.message || '?售失?'}`);
+      setMsg(`×${err?.response?.data?.data?.error || err?.message || '出售失敗'}`);
     } finally {
       setSellingStock(null);
       setTimeout(() => setMsg(null), 4000);
@@ -413,7 +413,7 @@ export default function ShopView() {
               <ChevronLeft size={24} />
             </Link>
             <ShoppingBag className="text-secondary" />
-            <h1 className="font-extrabold tracking-tight text-xl text-white uppercase italic">??</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-white uppercase italic">×</h1>
           </div>
         </div>
         <div className="flex app-shell gap-4">
@@ -421,13 +421,13 @@ export default function ShopView() {
             onClick={() => setTab('shop')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'shop' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
-            ??
+            ×
           </button>
           <button
             onClick={() => setTab('pawn')}
             className={`pb-2 text-sm font-black uppercase tracking-widest transition-colors ${tab === 'pawn' ? 'text-accent border-b-2 border-accent' : 'text-secondary'}`}
           >
-            ??
+            ×
           </button>
           <button
             onClick={() => setTab('market')}
@@ -439,7 +439,7 @@ export default function ShopView() {
       </header>
 
       <main className="pt-28 app-shell">
-        {/* Balance ??full width at top */}
+        {/* Balance ?? full width at top */}
         <section className="bg-card rounded-2xl p-4 border border-border flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-accent" />
@@ -452,7 +452,7 @@ export default function ShopView() {
         {/* YJC Exchange */}
         <section className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">??</span>
+            <span className="text-lg">×</span>
             <span className="text-sm font-black uppercase tracking-widest text-secondary">佑戩?YJC</span>
           </div>
           <div className="bg-surface rounded-xl p-4 mb-4">
@@ -466,24 +466,24 @@ export default function ShopView() {
             </div>
           </div>
           <div className="text-center text-caption font-bold text-secondary mb-4 tracking-wider">
-            1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXC（固定匯??
+            1 YJC = {formatNumber(CONVERSION_RATE, numberMode)} ZXC（固定匯×
           </div>
 
-          {/* ZXC ??YJC */}
+          {/* ZXC ?? YJC */}
           <div className="rounded-xl bg-surface p-4 mb-3">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-white">??ZXC 購買 YJC</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-white">×ZXC 購買 YJC</span>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="number" min="0.0001" step="0.0001"
-                placeholder="輸入 YJC ??"
+                placeholder="輸入 YJC ×"
                 value={convertZxc}
                 onChange={e => setConvertZxc(e.target.value)}
                 className="flex-1 bg-card text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-border/30 outline-none focus:border-[#4fc3f7] placeholder:text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <span className="shrink-0 text-xs font-bold text-info whitespace-nowrap">
-                ??{formatNumber(parseFloat(convertZxc || '0') * CONVERSION_RATE, numberMode)} ZXC
+                ×{formatNumber(parseFloat(convertZxc || '0') * CONVERSION_RATE, numberMode)} ZXC
               </span>
             </div>
             <button
@@ -495,21 +495,21 @@ export default function ShopView() {
             </button>
           </div>
 
-          {/* YJC ??ZXC */}
+          {/* YJC ?? ZXC */}
           <div className="rounded-xl bg-surface p-4">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold uppercase tracking-widest text-white">??YJC ?? ZXC</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-white">×YJC ?? ZXC</span>
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="number" min="0.0001" step="0.0001"
-                placeholder="YJC ??"
+                placeholder="YJC ×"
                 value={convertYjc}
                 onChange={e => setConvertYjc(e.target.value)}
                 className="flex-1 bg-card text-white text-xs font-bold rounded-lg px-3 py-2.5 border border-border/30 outline-none focus:border-accent placeholder:text-muted [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <span className="shrink-0 text-xs font-bold text-secondary whitespace-nowrap">
-                ??{formatNumber(parseFloat(convertYjc || '0') * CONVERSION_RATE, numberMode)} ZXC
+                ×{formatNumber(parseFloat(convertYjc || '0') * CONVERSION_RATE, numberMode)} ZXC
               </span>
             </div>
             <button
@@ -517,7 +517,7 @@ export default function ShopView() {
               disabled={converting || !convertYjc || !sessionId}
               className="mt-2 w-full rounded-xl bg-accent py-2.5 text-xs font-bold uppercase tracking-widest text-black transition-all disabled:opacity-40 hover:brightness-110 active:scale-[0.98]"
             >
-              {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : '確??? ZXC'}
+              {converting ? <Loader2 size={14} className="mx-auto animate-spin" /> : '確認兌換 ZXC'}
             </button>
           </div>
         </section>
@@ -573,7 +573,7 @@ export default function ShopView() {
 
         <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">????</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">收藏</h2>
             <button onClick={fetchItems} className="text-secondary hover:text-white transition-colors">
               <RefreshCw size={14} />
             </button>
@@ -586,7 +586,7 @@ export default function ShopView() {
           )}
 
           {!loading && visibleItems.length === 0 && (
-            <p className="text-sm text-secondary text-center py-8">???無??</p>
+            <p className="text-sm text-secondary text-center py-8">×?無×</p>
           )}
 
           <div className="space-y-3">
@@ -599,7 +599,7 @@ export default function ShopView() {
 
               return (
                 <div key={item.itemId} className="flex items-center gap-4 bg-surface rounded-xl p-4 border border-border/20">
-                  <div className="text-2xl shrink-0">{item.icon || '?'}</div>
+                  <div className="text-2xl shrink-0">{item.icon || '📦'}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{item.name}</p>
                     <p className="text-sm text-secondary truncate">{item.description || ''}</p>
@@ -676,7 +676,7 @@ export default function ShopView() {
         <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
             <Trash2 size={16} className="text-accent" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-white">??</h2>
+            <h2 className="text-sm font-black uppercase tracking-widest text-white">×</h2>
           </div>
           <div className="flex gap-2 mb-4">
             <button
@@ -695,9 +695,9 @@ export default function ShopView() {
 
           {pawnTab === 'items' && (
           <>
-          <p className="text-sm text-secondary mb-4">將??要??具?當?? ZXC</p>
+          <p className="text-sm text-secondary mb-4">將×要×具?當× ZXC</p>
           {invItems.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">?無?典???具</p>
+            <p className="text-sm text-secondary text-center py-8">?無?典×?具</p>
           ) : (
             <div className="space-y-3">
               {invItems.map((item: any) => {
@@ -705,7 +705,7 @@ export default function ShopView() {
                 const price = def ? getItemPawnValue(def) : 0;
                 return (
                   <div key={item.id} className="flex items-center gap-4 bg-surface rounded-xl p-4 border border-border/20">
-                    <div className="text-2xl shrink-0">{item.icon || '?'}</div>
+                    <div className="text-2xl shrink-0">{item.icon || '📦'}</div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-white truncate">{item.name}</p>
                       <p className="text-sm text-secondary truncate">{item.description || ''}</p>
@@ -736,7 +736,7 @@ export default function ShopView() {
 
           {pawnTab === 'stocks' && (
           <>
-          <p className="text-sm text-secondary mb-4">以???70% ?售?票，?????ZXC</p>
+          <p className="text-sm text-secondary mb-4">以×?70% ?售?票，收藏?ZXC</p>
           {stockHoldings.length === 0 ? (
             <p className="text-sm text-secondary text-center py-8">?無?股</p>
           ) : (
@@ -757,11 +757,11 @@ export default function ShopView() {
                         <p className="font-black text-white">{formatNumber(totalValue, numberMode)} ZXC</p>
                       </div>
                       <div>
-                        <span className="text-secondary">??變現</span>
+                        <span className="text-secondary">×變現</span>
                         <p className="font-black text-emerald-400">{formatNumber(totalPayout, numberMode)} ZXC</p>
                       </div>
                       <div>
-                        <span className="text-secondary">??</span>
+                        <span className="text-secondary">×</span>
                         <p className={`font-black ${totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {totalPnl >= 0 ? '+' : ''}{formatNumber(totalPnl, numberMode)} ZXC
                         </p>
@@ -788,7 +788,7 @@ export default function ShopView() {
                 return (
                   <div key={stock.symbol} className="bg-surface rounded-xl p-4 border border-border/20">
                     <div className="flex items-center gap-3">
-                      <div className="text-2xl shrink-0">??</div>
+                      <div className="text-2xl shrink-0">×</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-white">{stock.symbol}</p>
@@ -839,7 +839,7 @@ export default function ShopView() {
         </section>
         )}
 
-        {/* ?? Trading Market Tab ???????????????????????????????????????????????? */}
+        {/* ?? Trading Market Tab 收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏收藏 */}
         {tab === 'market' && (
         <section className="bg-card rounded-2xl p-6 border border-border/20">
           <div className="flex items-center gap-2 mb-4">
@@ -864,13 +864,13 @@ export default function ShopView() {
             <div className="bg-surface rounded-xl p-4 border border-border/20 mb-4 space-y-3">
               <select value={sellItemId} onChange={e => setSellItemId(e.target.value)}
                 className="w-full bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent">
-                <option value="">???具</option>
+                <option value="">×?具</option>
                 {invItems.map((item: any) => (
                   <option key={item.id} value={item.id}>{item.name} (x{item.quantity})</option>
                 ))}
               </select>
               <div className="flex gap-2">
-                <input type="number" min={1} placeholder="??" value={sellQty} onChange={e => setSellQty(parseInt(e.target.value) || 1)}
+                <input type="number" min={1} placeholder="地址" value={sellQty} onChange={e => setSellQty(parseInt(e.target.value) || 1)}
                   className="w-20 bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent" />
                 <input type="number" min={1} placeholder="?格 (ZXC)" value={sellPrice} onChange={e => setSellPrice(e.target.value)}
                   className="flex-1 bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-accent" />
@@ -884,7 +884,7 @@ export default function ShopView() {
           {marketLoading ? (
             <Loader2 size={16} className="animate-spin mx-auto text-accent" />
           ) : listings.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">???人?賣</p>
+            <p className="text-sm text-secondary text-center py-8">×?人?賣</p>
           ) : (
             <div className="space-y-3">
               {listings.map((l: any) => (
@@ -892,7 +892,7 @@ export default function ShopView() {
                   <span className="text-2xl shrink-0">{l.itemIcon || '?'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{l.itemName || l.itemId}</p>
-                    <p className="text-xs text-secondary">{l.quantity} ??· {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
+                    <p className="text-xs text-secondary">{l.quantity} ×· {l.sellerAddress?.slice(0, 6)}...{l.sellerAddress?.slice(-4)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="text-sm font-black text-accent">{formatNumber(Number(l.price), numberMode)} ZXC</span>
@@ -910,7 +910,7 @@ export default function ShopView() {
 
           {marketTab === 'mine' && (
           <>
-          <p className="text-sm text-secondary mb-4">你可以在?裡管?你??賣??</p>
+          <p className="text-sm text-secondary mb-4">你可以在?裡管?你×賣×</p>
           {myListings.length === 0 ? (
             <p className="text-sm text-secondary text-center py-8">尚無?賣</p>
           ) : (
@@ -920,12 +920,12 @@ export default function ShopView() {
                   <span className="text-2xl shrink-0">?</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white">{l.itemId}</p>
-                    <p className="text-xs text-secondary">{l.quantity} ??· {formatNumber(Number(l.price), numberMode)} ZXC</p>
+                    <p className="text-xs text-secondary">{l.quantity} ×· {formatNumber(Number(l.price), numberMode)} ZXC</p>
                     <span className={`text-caption font-bold uppercase ${l.status === 'active' ? 'text-emerald-400' : 'text-secondary'}`}>{l.status}</span>
                   </div>
                   {l.status === 'active' && (
                     <button onClick={() => handleCancelListing(l.id)}
-                      className="text-xs font-bold uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg">??</button>
+                      className="text-xs font-bold uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg">×</button>
                   )}
                 </div>
               ))}

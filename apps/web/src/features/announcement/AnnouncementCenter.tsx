@@ -232,7 +232,7 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
       <div className="flex items-center gap-3 bg-card rounded-2xl px-5 py-3 border border-border/10">
         <Clock size={14} className="text-accent" />
         <span className="text-caption font-bold text-secondary uppercase tracking-wider">
-          伺????
+          伺收藏
         </span>
         <span className="text-xs font-bold text-emerald-400 ml-auto">
           {serviceStats?.serverUptimeLabel || '...'}
@@ -253,7 +253,7 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
         <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={14} className="text-emerald-400" />
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary">??</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">×</span>
           </div>
           <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
         </div>
@@ -268,7 +268,7 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
 
       <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
-          ?????????
+          收藏收藏?
         </p>
         <div className="mt-4 space-y-3">
           {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}
@@ -374,7 +374,7 @@ export default function AnnouncementCenter() {
         <div className="flex items-center justify-between px-6 py-4 ">
           <div className="flex items-center gap-4">
             <Megaphone className="text-accent" />
-            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">???活</h1>
+            <h1 className="font-extrabold tracking-tight text-xl text-accent uppercase italic">×?活</h1>
           </div>
         </div>
       </header>
@@ -472,7 +472,7 @@ export default function AnnouncementCenter() {
               <div className="flex items-center justify-center py-12"><Loader2 className="animate-spin text-accent" size={24} /></div>
             ) : campaigns.length === 0 ? (
               <div className="rounded-2xl border border-border/20 bg-card px-4 py-8 text-center text-sm text-secondary">
-                ??沒???中?活?
+                ×沒×?中?活?
               </div>
             ) : (
               campaigns.map((c) => (
@@ -509,7 +509,7 @@ export default function AnnouncementCenter() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={() => setSuccessBundle(null)}>
           <div className="w-full max-w-sm rounded-2xl border border-border/20 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-accent">?? ????</h3>
+              <h3 className="text-base font-black text-accent">× 收藏</h3>
               <button type="button" onClick={() => setSuccessBundle(null)} className="rounded-lg p-1 hover:bg-white/10"><X size={16} /></button>
             </div>
             <div className="mt-4 space-y-2 text-sm text-white">
@@ -519,7 +519,7 @@ export default function AnnouncementCenter() {
                 <p key={i}>?具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `?${it.qty}` : ''}</p>
               ))}
               {Array.isArray(successBundle.avatars) && successBundle.avatars.map((a: any, i: number) => (
-                <p key={i}>??：{a.name || resolveRewardName(a.id || a) || a.id || a}</p>
+                <p key={i}>×：{a.name || resolveRewardName(a.id || a) || a.id || a}</p>
               ))}
               {Array.isArray(successBundle.titles) && successBundle.titles.map((t: any, i: number) => (
                 <p key={i}>稱?：{t.name || resolveRewardName(t.id || t) || t.id || t}</p>

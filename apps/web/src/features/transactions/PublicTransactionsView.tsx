@@ -142,7 +142,7 @@ export default function PublicTransactionsView() {
         <div className="flex items-center gap-3 mb-6 bg-card rounded-2xl px-5 py-3 border border-border/10">
           <Clock size={14} className="text-accent" />
           <span className="text-caption font-bold text-secondary uppercase tracking-wider">
-            伺????
+            伺收藏
           </span>
           <span className="text-xs font-bold text-emerald-400 ml-auto">
             {serviceStats?.serverUptimeLabel || '...'}
@@ -190,7 +190,7 @@ export default function PublicTransactionsView() {
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-emerald-400" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">??</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">×</span>
             </div>
             <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
           </div>
@@ -205,7 +205,7 @@ export default function PublicTransactionsView() {
 
         <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl mb-6">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
-            ?????????
+            收藏收藏?
           </p>
           <div className="mt-4 space-y-3">
             {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}
@@ -219,10 +219,10 @@ export default function PublicTransactionsView() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-bold tracking-[0.14em] text-white">
-                      {`${t('txType.' + item.type, item.type)} ??${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
+                      {`${t('txType.' + item.type, item.type)} ×${nf(Number(item.amount))} ${item.tokenSymbol === 'zhixi' ? 'ZXC' : item.tokenSymbol === 'yjc' ? 'YJC' : item.tokenSymbol || 'ZXC'}`}
                     </p>
                     <p className="mt-1 text-xs font-bold tracking-[0.12em] text-secondary">
-                      {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'?? : String(item.roundId)}
+                      {item.userAddress?.slice(0, 10)}... / {item.gameType || item.type} {String(item.roundId).length > 20 ? String(item.roundId).slice(0,20)+'× : String(item.roundId)}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
@@ -237,11 +237,11 @@ export default function PublicTransactionsView() {
 
         <section className="mb-6 rounded-2xl border border-border/20 bg-card divide-y divide-[#494847]/10">
           <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">?具??</span>
+            <span className="text-sm font-bold">道具</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">????</span>
+            <span className="text-sm font-bold">收藏</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">

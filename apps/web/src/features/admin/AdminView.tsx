@@ -307,7 +307,7 @@ export default function AdminView() {
       const res = await api.get('/api/v1/admin/blacklist', { params: { sessionId } });
       if (res?.data?.data?.blacklist) setBlacklist(res.data.data.blacklist);
     } catch {
-      // swallow ??UI shows empty list
+      // swallow ?? UI shows empty list
     }
   }
 
@@ -675,7 +675,7 @@ export default function AdminView() {
 
   async function handleCampaignToggle(c: any) {
     try {
-      // Preserve startAt / endAt / requiredLevel when toggling isActive ??without
+      // Preserve startAt / endAt / requiredLevel when toggling isActive ?? without
       // these the backend upsert stores null and wipes the time window.
       await api.post('/api/v1/admin/campaigns', {
         sessionId,
@@ -1111,7 +1111,7 @@ export default function AdminView() {
                     >
                       <div>
                         <div className="text-white font-mono">
-                          {String(b.address || b.key || '').slice(0, 10)}??
+                          {String(b.address || b.key || '').slice(0, 10)}×
                         </div>
                         {b.reason && <div className="text-secondary text-xs mt-1">{b.reason}</div>}
                       </div>

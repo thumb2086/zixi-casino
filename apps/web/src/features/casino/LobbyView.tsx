@@ -289,8 +289,8 @@ export default function LobbyView() {
                   <div key={m.id} className={`rounded-xl border ${locked ? 'border-border/10 opacity-50' : done ? 'border-accent/40' : 'border-border/20'} bg-surface p-4`}>
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-xs font-bold text-white">{locked ? '?? ' : ''}{m.name}</p>
-                        <p className="text-caption text-secondary mt-0.5">{locked ? `??VIP ${m.vip} 以?` : m.desc}</p>
+                        <p className="text-xs font-bold text-white">{locked ? '× ' : ''}{m.name}</p>
+                        <p className="text-caption text-secondary mt-0.5">{locked ? `×VIP ${m.vip} 以?` : m.desc}</p>
                       </div>
                       <span className="text-caption font-bold text-accent shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
                     </div>
@@ -300,7 +300,7 @@ export default function LobbyView() {
                     <div className="flex justify-between items-center">
                       <span className="text-caption text-secondary">{locked ? '-' : `${m.progress}/${m.target}`}</span>
                       {locked ? null : done ? (
-                        <button onClick={() => claimMission(m.id)} className="text-caption font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">??</button>
+                        <button onClick={() => claimMission(m.id)} className="text-caption font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">×</button>
                       ) : null}
                     </div>
                   </div>

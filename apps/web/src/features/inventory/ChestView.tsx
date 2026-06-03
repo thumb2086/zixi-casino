@@ -216,10 +216,10 @@ export default function ChestView() {
         await refreshInventory();
         await refreshStatus();
       } else {
-        showToast(res.data?.error || '??失?');
+        showToast(res.data?.error || '操作失敗');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '網路?誤');
+      showToast(err?.response?.data?.error || '網路錯誤');
     } finally {
       setOpening(false);
     }
@@ -227,7 +227,7 @@ export default function ChestView() {
 
   const useAllTokens = async () => {
     setUsingAllTokens(true);
-    setUseStatusMessage('????部?...');
+    setUseStatusMessage('收藏部?...');
     try {
       const res = await api.post('/api/v1/inventory/use-all-tokens', {});
       if (res.data?.success) {
@@ -235,14 +235,14 @@ export default function ChestView() {
         const parts: string[] = [];
         if (d.totalZxc > 0) parts.push(`${d.totalZxc.toLocaleString()} ZXC`);
         if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
-        showToast(`??使用 ${d.itemCount} ?物???? ${parts.join(' + ')}`);
+        showToast(`×使用 ${d.itemCount} ?物收藏 ${parts.join(' + ')}`);
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
-        showToast(res.data?.error || '??失?');
+        showToast(res.data?.error || '操作失敗');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '??失?');
+      showToast(err?.response?.data?.error || '操作失敗');
     } finally {
       setUsingAllTokens(false);
       setUseStatusMessage(null);
@@ -250,17 +250,17 @@ export default function ChestView() {
   };
 
   const useItem = async (itemId: string, quantity: number = 1) => {
-    setUseStatusMessage('???...');
+    setUseStatusMessage('使用中...');
     try {
       const res = await api.post('/api/v1/inventory/use', { itemId, quantity });
       if (res.data?.success) {
         const d = res.data.data;
         if (d.currencyGranted > 0) {
-          showToast(`?? ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
+          showToast(`× ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
         } else if (d.effectSummary) {
           showToast(d.effectSummary);
         } else {
-          showToast(`??使用 ${quantity} ?物?`);
+          showToast(`×使用 ${quantity} ?物?`);
         }
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
@@ -281,7 +281,7 @@ export default function ChestView() {
   }, {} as Record<string, InventoryEntry[]>);
 
   const itemTypeLabels: Record<string, string> = {
-    chest_key: '??',
+    chest_key: '遊戲',
     token: '代幣',
     buff: '增益',
     avatar: '頭像',
@@ -297,10 +297,10 @@ export default function ChestView() {
             <Package className="text-accent" />
             <div>
               <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">
-                ??中?
+                ×中?
               </h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
-                ?????
+                收藏?
               </p>
             </div>
           </div>
@@ -352,7 +352,7 @@ export default function ChestView() {
                 invTab === tab ? 'bg-accent text-black' : 'bg-[#494847]/20 text-secondary hover:bg-[#494847]/30'
               }`}
             >
-              {{ chests: '寶箱', tokens: '?', buffs: '??', collection: '??' }[tab]}
+              {{ chests: '寶箱', tokens: '💰', buffs: '遊戲', collection: '遊戲' }[tab]}
             </button>
           ))}
         </div>
@@ -360,7 +360,7 @@ export default function ChestView() {
         {/* Tab: Chests */}
         {invTab === 'chests' && (
         <section className="space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">???寶</h2>
+          <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary mb-4">×?寶</h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {chests.map((chest) => {
@@ -377,7 +377,7 @@ export default function ChestView() {
                       <h3 className="text-lg font-black text-white">{chest.name}</h3>
                       <div className="mt-1 flex items-center gap-2">
                         <span className="rounded bg-accent/10 px-2 py-0.5 text-caption font-bold uppercase tracking-wider text-accent">
-                          {keys} ?鑰??
+                          {keys} ?鑰×
                         </span>
                       </div>
                     </div>
@@ -386,7 +386,7 @@ export default function ChestView() {
 
                   <div className="mb-4 space-y-2">
                     <div className="flex justify-between text-caption font-bold uppercase tracking-widest text-secondary">
-                      <span>保??度</span>
+                      <span>保×度</span>
                       <span className="text-accent">{currentPity} / {chest.pityThreshold}</span>
                     </div>
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface">
@@ -418,7 +418,7 @@ export default function ChestView() {
                         : 'bg-[#494847]/20 text-muted cursor-not-allowed border border-border/10'
                     }`}
                   >
-                    {opening ? '???..' : `?? ${openQtyNum} ?`}
+                    {opening ? '開啟中..' : `× ${openQtyNum} ?`}
                   </button>
                 </div>
               );
@@ -441,13 +441,13 @@ export default function ChestView() {
                     disabled={usingAllTokens}
                     className="text-xs font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
                   >
-                    {usingAllTokens ? '???..' : `?部使用 (??{totalTokens.toLocaleString()} ZXC)`}
+                    {usingAllTokens ? '開啟中..' : `?部使用 (×{totalTokens.toLocaleString()} ZXC)`}
                   </button>
                 ) : null;
               })()}
             </div>
             {(!groupedItems['token'] || groupedItems['token'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?無???</p>
+              <p className="text-sm text-secondary text-center py-8">?無×?</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['token'].map((item) => (
@@ -486,9 +486,9 @@ export default function ChestView() {
         {/* Tab: Buffs */}
         {invTab === 'buffs' && (
           <section className="space-y-4">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">????</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">收藏</h2>
             {(!groupedItems['buff'] || groupedItems['buff'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?無????</p>
+              <p className="text-sm text-secondary text-center py-8">?無收藏</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['buff'].map((item) => (
@@ -525,7 +525,7 @@ export default function ChestView() {
         {/* Tab: Collection */}
         {invTab === 'collection' && (
           <section className="space-y-6">
-            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">??</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.2em] text-secondary">×</h2>
             {(['avatar', 'title', 'collectible', 'chest_key'] as const).map((type) => {
               const items = groupedItems[type] || [];
               if (items.length === 0) return null;
@@ -581,7 +581,7 @@ export default function ChestView() {
               className="max-w-3xl w-full max-h-[75vh] flex flex-col"
             >
               <h2 className="text-3xl font-black italic text-center text-accent mb-6">
-                ????!
+                收藏!
               </h2>
 
               <div className="overflow-y-auto overflow-x-hidden flex-1 min-h-0 pr-1 scrollbar-thin">
@@ -636,7 +636,7 @@ export default function ChestView() {
                        <span className="text-lg">?</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">??補?</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">×補?</p>
                       <p className="text-lg font-black italic text-accent">+{nf(openCompensation)} ZXC</p>
                     </div>
                   </div>
@@ -692,7 +692,7 @@ export default function ChestView() {
                 className="w-full bg-surface border border-border/40 rounded-lg px-3 py-2 text-white text-sm
                   focus:outline-none focus:border-accent mb-4"
               >
-                <option value="">???收??..</option>
+                <option value="">×?收×..</option>
                 {recipients.map(r => (
                   <option key={r.address} value={r.address}>
                     {r.displayName} ({r.address.slice(0, 6)}...{r.address.slice(-4)})
@@ -700,7 +700,7 @@ export default function ChestView() {
                 ))}
               </select>
 
-              <label className="block text-sm font-bold text-secondary mb-1">??</label>
+              <label className="block text-sm font-bold text-secondary mb-1">×</label>
               <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => setGiftQty(String(Math.max(1, (parseInt(giftQty || '1', 10) || 1) - 1)))}
@@ -709,7 +709,7 @@ export default function ChestView() {
                     flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed
                     hover:bg-[#494847]/60 transition-colors"
                 >
-                  ??
+                  ×
                 </button>
                 <input
                   type="text"
@@ -741,7 +741,7 @@ export default function ChestView() {
                   onClick={() => setGiftDialog(null)}
                   className="flex-1 border border-border/40 text-secondary font-bold text-sm py-2 rounded-lg hover:bg-[#494847]/20"
                 >
-                  ??
+                  ×
                 </button>
                 <button
                   disabled={giftSending || !giftAddress.trim()}
@@ -755,7 +755,7 @@ export default function ChestView() {
                         quantity: parseInt(giftQty || '1', 10) || 1,
                       });
                       if (res.data?.success) {
-                        showToast('贈送???');
+                        showToast('贈送成功');
                         setGiftDialog(null);
                         setGiftAddress('');
                         setGiftQty('1');

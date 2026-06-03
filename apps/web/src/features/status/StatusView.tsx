@@ -34,7 +34,7 @@ export default function StatusView() {
       <main className="pt-20 px-6 space-y-6">
         {/* Avatar + Title */}
         <section className="bg-card rounded-2xl p-6 border border-border/20 flex items-center gap-6">
-          <div className="text-5xl shrink-0">{avatarItem?.icon || '??'}</div>
+          <div className="text-5xl shrink-0">{avatarItem?.icon || '遊戲'}</div>
           <div className="flex-1 min-w-0">
             <p className="text-lg font-black text-white truncate">{username || '?設?}</p>
             {titleItem && <p className="text-xs font-bold text-secondary">{titleItem.icon} {titleItem.name}</p>}
@@ -54,7 +54,7 @@ export default function StatusView() {
           <div className="bg-card rounded-2xl p-5 border border-border/20">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles size={14} className="text-accent" />
-              <span className="text-xs font-bold uppercase tracking-widest text-secondary">活???</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-secondary">活動</span>
             </div>
             <p className="text-sm font-bold text-white truncate">{avatarItem?.name || activeAvatar}</p>
           </div>
@@ -63,11 +63,11 @@ export default function StatusView() {
         {/* Quick Links */}
         <section className="bg-card rounded-2xl border border-border/20 divide-y divide-[#494847]/10">
           <Link to="/app/inventory" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">?具??</span>
+            <span className="text-sm font-bold">道具</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/info?tab=items" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">????</span>
+            <span className="text-sm font-bold">收藏</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
