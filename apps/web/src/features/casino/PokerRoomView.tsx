@@ -167,42 +167,6 @@ export default function PokerRoomView() {
     }
   }, [turnIdx, winner, allPlayers]);
 
-  const doAction = useCallback((action: string, amount?: number) => {
-    if (winner) return;
-    const p = allPlayers[turnIdx];
-    if (p.folded || p.allIn) return;
-
-    if (action === 'fold') {
-      const newPlayers = [...allPlayers];
-      newPlayers[turnIdx] = { ...p, folded: true };
-      const active = newPlayers.filter(x => !x.folded);
-      if (active.length <= 1) {
-        setWinner(active[0]?.userId || '');
-        setPhase('showdown');
-        return;
-      }
-    } else if (action === 'call') {
-      const callAmt = lastRaise - (playerBets[turnIdx] || 0);
-      const actual = Math.min(callAmt, p.stack);
-      const newBets = [...playerBets];
-      newBets[turnIdx] = (newBets[turnIdx] || 0) + actual;
-      setPlayerBets(newBets);
-      setPot(prev => prev + actual);
-      allPlayers[turnIdx] = { ...p, stack: p.stack - actual, bet: (p.bet || 0) + actual, allIn: p.stack - actual <= 0 };
-    } else if (action === 'raise' && amount) {
-      const addAmt = amount - (playerBets[turnIdx] || 0);
-      const actual = Math.min(addAmt, p.stack);
-      const newBets = [...playerBets];
-      newBets[turnIdx] = (newBets[turnIdx] || 0) + actual;
-      setPlayerBets(newBets);
-      setPot(prev => prev + actual);
-      setLastRaise(amount);
-      allPlayers[turnIdx] = { ...p, stack: p.stack - actual, bet: amount, allIn: p.stack - actual <= 0 };
-    }
-    // check, just advance
-    advanceTurn();
-  }, [turnIdx, allPlayers, playerBets, pot, lastRaise, winner]);
-
   const advanceTurn = useCallback(() => {
     let next = turnIdx;
     const active = allPlayers.filter(p => !p.folded && !p.allIn);
