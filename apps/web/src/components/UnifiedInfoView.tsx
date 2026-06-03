@@ -15,7 +15,7 @@ export default function UnifiedInfoView() {
             </a>
             <Sparkles className="text-accent" />
             <div>
-              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">說?中?</h1>
+              <h1 className="text-xl font-extrabold uppercase italic tracking-tight text-accent">說明中心</h1>
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">總覽</p>
             </div>
           </div>
@@ -23,7 +23,7 @@ export default function UnifiedInfoView() {
       </header>
 
       <main className="mx-auto max-w-2xl px-6 pt-20 space-y-8">
-        {/* VIP 等?系統×*/}
+        {/* VIP 等級系統 */}
         <section className="relative overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-2xl">
           <div className="absolute right-0 top-0 h-32 w-32 translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/5 blur-[50px]" />
           
@@ -32,12 +32,12 @@ export default function UnifiedInfoView() {
               <Sparkles className="h-6 w-6 text-accent" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold uppercase tracking-tight text-accent">VIP 等?系統</h2>
+              <h2 className="text-xl font-extrabold uppercase tracking-tight text-accent">VIP 等級系統</h2>
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">32 等級 · 專屬獎勵 · 累積下注</p>
             </div>
             <div className="ml-auto">
               <span className="inline-block rounded border border-accent/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-secondary">
-                32 ×?
+                32 等級
               </span>
             </div>
           </div>
@@ -47,7 +47,7 @@ export default function UnifiedInfoView() {
           </div>
         </section>
 
-        {/* ?戲機×?*/}
+        {/* 遊戲機率 */}
         <section className="relative overflow-hidden rounded-2xl border border-emerald-400/20 bg-gradient-to-br from-[#1a1919] to-[#0e0e0e] p-6 shadow-2xl">
           <div className="absolute right-0 top-0 h-32 w-32 translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/5 blur-[50px]" />
           
@@ -56,13 +56,13 @@ export default function UnifiedInfoView() {
               <Calculator className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold uppercase tracking-tight text-emerald-400">?戲機?</h2>
+              <h2 className="text-xl font-extrabold uppercase tracking-tight text-emerald-400">遊戲機率</h2>
               <p className="text-xs font-bold uppercase tracking-widest text-secondary">9 款遊戲 · RTP 說明 · 公平驗證</p>
             </div>
             <div className="ml-auto flex items-center gap-2">
               <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
               <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                9 款×?
+                9 款遊戲
               </span>
             </div>
           </div>

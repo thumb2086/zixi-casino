@@ -227,7 +227,7 @@ export default function ChestView() {
 
   const useAllTokens = async () => {
     setUsingAllTokens(true);
-    setUseStatusMessage('收藏部?...');
+    setUseStatusMessage('正在使用全部...');
     try {
       const res = await api.post('/api/v1/inventory/use-all-tokens', {});
       if (res.data?.success) {
@@ -235,7 +235,7 @@ export default function ChestView() {
         const parts: string[] = [];
         if (d.totalZxc > 0) parts.push(`${d.totalZxc.toLocaleString()} ZXC`);
         if (d.totalYjc > 0) parts.push(`${d.totalYjc} YJC`);
-        showToast(`×使用 ${d.itemCount} 個物品獲得 ${parts.join(' + ')}`);
+        showToast(`✅ 使用 ${d.itemCount} 個物品獲得 ${parts.join(' + ')}`);
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
@@ -256,19 +256,19 @@ export default function ChestView() {
       if (res.data?.success) {
         const d = res.data.data;
         if (d.currencyGranted > 0) {
-          showToast(`× ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
+          showToast(`✅ ${nf(d.currencyGranted)} ${d.currencyToken === 'yjc' ? 'YJC' : 'ZXC'}`);
         } else if (d.effectSummary) {
           showToast(d.effectSummary);
         } else {
-          showToast(`×使用 ${quantity} 個物品`);
+          showToast(`✅ 使用 ${quantity} 個物品`);
         }
         await refreshInventory();
         queryClient.invalidateQueries({ queryKey: ['wallet-summary'] });
       } else {
-        showToast(res.data?.error || '使用失?');
+        showToast(res.data?.error || '使用失敗');
       }
     } catch (err: any) {
-      showToast(err?.response?.data?.error || '使用失?');
+      showToast(err?.response?.data?.error || '使用失敗');
     } finally {
       setUseStatusMessage(null);
     }

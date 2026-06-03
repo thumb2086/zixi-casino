@@ -11,7 +11,7 @@ interface UnderConstructionProps {
 }
 
 export default function UnderConstruction({ 
-  title = '?發?,
+  title = '開發中',
   description = '此功能正在開發中，敬請期待',
   current = 'none'
 }: UnderConstructionProps) {

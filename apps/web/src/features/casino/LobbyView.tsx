@@ -289,8 +289,8 @@ export default function LobbyView() {
                   <div key={m.id} className={`rounded-xl border ${locked ? 'border-border/10 opacity-50' : done ? 'border-accent/40' : 'border-border/20'} bg-surface p-4`}>
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-xs font-bold text-white">{locked ? '× ' : ''}{m.name}</p>
-                        <p className="text-caption text-secondary mt-0.5">{locked ? `×VIP ${m.vip} 以?` : m.desc}</p>
+                        <p className="text-xs font-bold text-white">{locked ? '🔒 ' : ''}{m.name}</p>
+                        <p className="text-caption text-secondary mt-0.5">{locked ? `需 VIP ${m.vip} 以上` : m.desc}</p>
                       </div>
                       <span className="text-caption font-bold text-accent shrink-0 ml-2">{m.reward.toLocaleString()} ZXC</span>
                     </div>
@@ -312,7 +312,7 @@ export default function LobbyView() {
             to="/app/announcement"
             icon={CalendarClock}
             title={t('lobby.events')}
-            subtitle={pinnedCount > 0 ? `${pinnedCount} ?置?` : t('lobby.events_subtitle')}
+            subtitle={pinnedCount > 0 ? `${pinnedCount} 則置頂` : t('lobby.events_subtitle')}
           >
             <div className="mt-4 space-y-2 text-xs font-bold uppercase tracking-wider text-secondary">
               {!recentTxs || recentTxs.length === 0 ? (

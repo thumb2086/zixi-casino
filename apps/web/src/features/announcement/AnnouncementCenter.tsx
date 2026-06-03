@@ -516,16 +516,16 @@ export default function AnnouncementCenter() {
               {successBundle.zxc > 0 && <p>+ {nf(Number(successBundle.zxc))} ZXC</p>}
               {successBundle.yjc > 0 && <p>+ {nf(Number(successBundle.yjc))} YJC</p>}
               {Array.isArray(successBundle.items) && successBundle.items.map((it: any, i: number) => (
-                <p key={i}>?具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `?${it.qty}` : ''}</p>
+                <p key={i}>道具：{it.name || resolveRewardName(it.id) || it.id} {it.qty > 1 ? `x${it.qty}` : ''}</p>
               ))}
               {Array.isArray(successBundle.avatars) && successBundle.avatars.map((a: any, i: number) => (
-                <p key={i}>×：{a.name || resolveRewardName(a.id || a) || a.id || a}</p>
+                <p key={i}>頭像：{a.name || resolveRewardName(a.id || a) || a.id || a}</p>
               ))}
               {Array.isArray(successBundle.titles) && successBundle.titles.map((t: any, i: number) => (
-                <p key={i}>稱?：{t.name || resolveRewardName(t.id || t) || t.id || t}</p>
+                <p key={i}>稱號：{t.name || resolveRewardName(t.id || t) || t.id || t}</p>
               ))}
             </div>
-            <button type="button" onClick={() => setSuccessBundle(null)} className="mt-4 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black">確?</button>
+            <button type="button" onClick={() => setSuccessBundle(null)} className="mt-4 w-full rounded-lg bg-accent px-3 py-2 text-sm font-black text-black">確定</button>
           </div>
         </div>
       )}

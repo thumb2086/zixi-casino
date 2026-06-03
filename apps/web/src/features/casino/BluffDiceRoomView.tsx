@@ -147,7 +147,7 @@ export default function BluffDiceRoomView() {
                     ×
                   </button>
                 </div>
-                <p className="text-xs text-center text-secondary mt-2">上次叫骰?{lastCall || '×}</p>
+                <p className="text-xs text-center text-secondary mt-2">上次叫骰：{lastCall || '無'}</p>
               </div>
             ) : (
               <div className="text-center py-4">
@@ -160,12 +160,12 @@ export default function BluffDiceRoomView() {
         {/* Result */}
         {phase === 'result' && (
           <section className="card-accent bg-card p-6 mb-6 border border-border/10 text-center">
-            <p className="text-gradient-diamond text-lg font-black mb-2">
-              ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} 贏×
-            </p>
-            <p className="text-xs text-secondary">
-              骰?：{dice.join(', ')} ×後叫骰?{lastCall}
-            </p>
+              <p className="text-gradient-diamond text-lg font-black mb-2">
+                勝者：{allPlayers.find(p => p.userId === winner)?.displayName || winner}
+              </p>
+              <p className="text-xs text-secondary">
+                骰子：{dice.join(', ')} 最後叫骰：{lastCall}
+              </p>
           </section>
         )}
 
