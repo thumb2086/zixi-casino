@@ -245,7 +245,7 @@ export default function PublicTransactionsView() {
             <ChevronRight size={16} className="text-secondary" />
           </Link>
           <Link to="/app/settings" className="flex items-center justify-between px-6 py-4 hover:bg-white/5 transition-colors">
-            <span className="text-sm font-bold">設?</span>
+            <span className="text-sm font-bold">設定</span>
             <ChevronRight size={16} className="text-secondary" />
           </Link>
         </section>

@@ -305,7 +305,7 @@ export default function ChestView() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-caption font-bold uppercase tracking-widest text-secondary">空?</p>
+            <p className="text-caption font-bold uppercase tracking-widest text-secondary">空間</p>
             <p className="text-sm font-black text-white">
               {status?.inventorySlotsUsed || 0}
               <span className="mx-1 text-muted">/</span>
@@ -447,7 +447,7 @@ export default function ChestView() {
               })()}
             </div>
             {(!groupedItems['token'] || groupedItems['token'].length === 0) ? (
-              <p className="text-sm text-secondary text-center py-8">?無×?</p>
+              <p className="text-sm text-secondary text-center py-8">暫無代幣</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {groupedItems['token'].map((item) => (
@@ -546,7 +546,7 @@ export default function ChestView() {
                         {(type === 'avatar' || type === 'title') && (
                           <div className="mt-auto flex gap-2">
                             <button onClick={() => useItem(item.id)}
-                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent hover:text-black">裝?</button>
+                              className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent hover:text-black">裝備</button>
                             <button onClick={() => setGiftDialog({ itemId: item.id, name: item.name, maxQty: item.quantity })}
                               className="flex-1 border border-accent text-accent font-black text-sm py-2 rounded-lg hover:bg-accent/10">贈</button>
                           </div>
@@ -636,7 +636,7 @@ export default function ChestView() {
                        <span className="text-lg">?</span>
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">×補?</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-secondary">補償</p>
                       <p className="text-lg font-black italic text-accent">+{nf(openCompensation)} ZXC</p>
                     </div>
                   </div>
@@ -679,7 +679,7 @@ export default function ChestView() {
               className="bg-card rounded-2xl p-6 max-w-sm w-full border border-border/30"
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-black">贈?{giftDialog.name}</h2>
+                <h2 className="text-lg font-black">贈送{giftDialog.name}</h2>
                 <button onClick={() => setGiftDialog(null)}>
                   <X className="w-5 h-5 text-secondary" />
                 </button>

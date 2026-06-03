@@ -152,7 +152,7 @@ export default function ItemsCatalogView() {
           {!loading && filteredItems.length === 0 && (
             <div className="rounded-xl border border-border/10 bg-card p-8 text-center">
               <Package className="mx-auto mb-3 h-12 w-12 text-muted" />
-              <p className="text-sm font-bold text-secondary">?無符?條件?物</p>
+              <p className="text-sm font-bold text-secondary">暫無符合條件的物品</p>
             </div>
           )}
 

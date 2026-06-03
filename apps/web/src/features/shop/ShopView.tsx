@@ -205,7 +205,7 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert', { sessionId, zxcAmount: String(zxcNeeded) });
       if (res.data?.success) {
-        setMsg(`收藏× ${res.data.data?.yjcAmount || yjcInput} YJC`);
+        setMsg(`✅ ${res.data.data?.yjcAmount || yjcInput} YJC`);
         setConvertZxc('');
         fetchItems();
       } else {
@@ -233,7 +233,7 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/wallet/convert/yjc-to-zxc', { sessionId, yjcAmount: String(yjcNum) });
       if (res.data?.success) {
-        setMsg(`收藏× ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
+        setMsg(`✅ ${res.data.data?.zxcAmount || formatNumber(yjcNum * CONVERSION_RATE, numberMode)} ZXC`);
         setConvertYjc('');
         fetchItems();
       } else {
@@ -275,7 +275,7 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/sell', { sessionId, itemId, quantity });
       if (res.data?.success) {
-        setMsg(`?當×！獲?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`典當成功！獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
@@ -373,7 +373,7 @@ export default function ShopView() {
     try {
       const res = await api.post('/api/v1/pawn/stock-sell', { sessionId, symbol, quantity: qty });
       if (res.data?.success) {
-        setMsg(`收藏?售 ${qty} ×${symbol}，獲?+${formatNumber(Number(res.data.data.payout))} ZXC`);
+        setMsg(`出售 ${qty} 股 ${symbol}，獲得 +${formatNumber(Number(res.data.data.payout))} ZXC`);
         setBalance(res.data.data.balanceAfter);
         await fetchItems();
       } else {
@@ -443,7 +443,7 @@ export default function ShopView() {
         <section className="bg-card rounded-2xl p-4 border border-border flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-accent" />
-            <span className="text-sm font-black uppercase tracking-widest text-secondary">ZXC 餘?</span>
+            <span className="text-sm font-black uppercase tracking-widest text-secondary">ZXC 餘額</span>
           </div>
             <span className="text-lg font-black italic text-accent">{formatBalance(balance, numberMode)}</span>
         </section>
@@ -453,7 +453,7 @@ export default function ShopView() {
         <section className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-lg">🪙</span>
-            <span className="text-sm font-black uppercase tracking-widest text-secondary">佑戩?YJC</span>
+            <span className="text-sm font-black uppercase tracking-widest text-secondary">佑戩 YJC</span>
           </div>
           <div className="bg-surface rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between mb-1">
@@ -695,9 +695,9 @@ export default function ShopView() {
 
           {pawnTab === 'items' && (
           <>
-          <p className="text-sm text-secondary mb-4">將×要×具?當× ZXC</p>
+           <p className="text-sm text-secondary mb-4">將想要道具典當為 ZXC</p>
           {invItems.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">?無?典×?具</p>
+            <p className="text-sm text-secondary text-center py-8">尚無可典當物品</p>
           ) : (
             <div className="space-y-3">
               {invItems.map((item: any) => {
@@ -736,9 +736,9 @@ export default function ShopView() {
 
           {pawnTab === 'stocks' && (
           <>
-          <p className="text-sm text-secondary mb-4">以×?70% ?售?票，收藏?ZXC</p>
+           <p className="text-sm text-secondary mb-4">以約 70% 變現股票，獲得 ZXC</p>
           {stockHoldings.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">?無?股</p>
+            <p className="text-sm text-secondary text-center py-8">尚無持股</p>
           ) : (
             <>
             {/* ?? Portfolio Summary ?? */}
@@ -884,7 +884,7 @@ export default function ShopView() {
           {marketLoading ? (
             <Loader2 size={16} className="animate-spin mx-auto text-accent" />
           ) : listings.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">×?人?賣</p>
+            <p className="text-sm text-secondary text-center py-8">暫無人出售</p>
           ) : (
             <div className="space-y-3">
               {listings.map((l: any) => (
@@ -910,9 +910,9 @@ export default function ShopView() {
 
           {marketTab === 'mine' && (
           <>
-          <p className="text-sm text-secondary mb-4">你可以在?裡管?你×賣×</p>
+          <p className="text-sm text-secondary mb-4">你可以在這裡管理你的出售</p>
           {myListings.length === 0 ? (
-            <p className="text-sm text-secondary text-center py-8">尚無?賣</p>
+            <p className="text-sm text-secondary text-center py-8">尚無出售</p>
           ) : (
             <div className="space-y-3">
               {myListings.map((l: any) => (
