@@ -72,7 +72,7 @@ export default function WalletView() {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      /* ignore ??clipboard API may be blocked in some environments */
+      /* ignore ?? clipboard API may be blocked in some environments */
     }
   };
 
@@ -122,7 +122,7 @@ export default function WalletView() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/app/shop" className="text-xs font-bold uppercase tracking-[0.18em] text-info">
-              ??
+              ×
             </Link>
             <Link to="/app/swap" className="text-xs font-bold uppercase tracking-[0.18em] text-info">
               {t('swap.title')}
@@ -161,7 +161,7 @@ export default function WalletView() {
               <div className="text-right">
                 <p className="text-xs font-bold text-white">{nf(profileData.xp || 0)} XP</p>
                 {profileData.xpNextLevel > 0 && (
-                  <p className="text-caption text-secondary mt-0.5">下??{nf(profileData.xpNextLevel)} XP</p>
+                  <p className="text-caption text-secondary mt-0.5">下一級 {nf(profileData.xpNextLevel)} XP</p>
                 )}
               </div>
             </div>
@@ -182,11 +182,11 @@ export default function WalletView() {
             <div className="flex items-center gap-3 mb-3">
               <div className="flex flex-col items-center bg-surface rounded-xl px-4 py-2">
                 <span className="text-2xl font-black italic text-accent">{checkinStreak}</span>
-                <span className="text-caption font-bold text-secondary">???天數</span>
+                <span className="text-caption font-bold text-secondary">簽到天數</span>
               </div>
               <div className="flex-1">
                 <p className="text-xs font-bold text-secondary">{t('vault.next_available')}{nextAirdropLabel}</p>
-                <p className="text-xs font-bold text-secondary mt-1">?勵?? ?{(1 + checkinStreak * 0.05).toFixed(2)}</p>
+                <p className="text-xs font-bold text-secondary mt-1">獎勵 {((1 + checkinStreak * 0.05)).toFixed(2)}</p>
               </div>
             </div>
             {/* Calendar grid: last 30 days */}

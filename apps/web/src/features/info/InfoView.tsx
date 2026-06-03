@@ -9,9 +9,9 @@ import XpTab from './tabs/XpTab';
 type TabId = 'items' | 'odds' | 'xp';
 
 const TABS = [
-  { id: 'items' as TabId, label: '????', icon: Package },
-  { id: 'xp' as TabId, label: '經?等?', icon: TrendingUp },
-  { id: 'odds' as TabId, label: '?戲機?', icon: Calculator },
+  { id: 'items' as TabId, label: '道具圖鑑', icon: Package },
+  { id: 'xp' as TabId, label: '經驗等級', icon: TrendingUp },
+  { id: 'odds' as TabId, label: '遊戲機率', icon: Calculator },
 ];
 
 export default function InfoView() {

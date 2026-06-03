@@ -5,10 +5,10 @@ import { useAuth } from '../auth/useAuth';
 import { formatNumber } from '@repo/shared';
 import AppBottomNav from '../../components/AppBottomNav';
 
-const DICE_ICONS = ['?', '??, '??, '??, '??, '??];
+const DICE_ICONS = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
 function DiceIcon({ value }: { value: number }) {
-  return <span className="text-2xl">{DICE_ICONS[value - 1] || '?'}</span>;
+  return <span className="text-2xl">{DICE_ICONS[value - 1] || '⚀'}</span>;
 }
 
 export default function BluffDiceRoomView() {
@@ -26,13 +26,13 @@ export default function BluffDiceRoomView() {
   const [lastCall, setLastCall] = useState('');
 
   const botPlayers = useMemo(() => [
-    { userId: 'bot_b1', displayName: 'AI_詐欺?, avatar: '?' },
-    { userId: 'bot_b2', displayName: 'AI_機?', avatar: '??' },
-    { userId: 'bot_b3', displayName: 'AI_賭?', avatar: '?' },
+    { userId: 'bot_b1', displayName: 'AI_詐欺師', avatar: '🃏' },
+    { userId: 'bot_b2', displayName: 'AI_機器人', avatar: '🤖' },
+    { userId: 'bot_b3', displayName: 'AI_賭徒', avatar: '🎲' },
   ], []);
 
   const allPlayers = useMemo(() => [
-    { userId: session?.id || 'me', displayName: '?, isMe: true },
+    { userId: session?.id || 'me', displayName: '我', isMe: true },
     ...botPlayers,
   ], [session, botPlayers]);
 
@@ -54,7 +54,7 @@ export default function BluffDiceRoomView() {
   const placeBet = () => {
     const newBet = { userId: allPlayers[currentTurn].userId, displayName: allPlayers[currentTurn].displayName, quantity: myBet.quantity, value: myBet.value };
     setBets(prev => [...prev, newBet]);
-    setLastCall(`${myBet.quantity} ??${myBet.value}`);
+    setLastCall(`${myBet.quantity} 個 ${myBet.value}`);
     const nextTurn = (currentTurn + 1) % allPlayers.length;
     setCurrentTurn(nextTurn);
   };
@@ -88,7 +88,7 @@ export default function BluffDiceRoomView() {
             <span className="text-caption text-secondary">{roomId}</span>
           </div>
           <button onClick={startRound} className="text-xs font-bold bg-accent text-black px-4 py-2 rounded-xl hover:brightness-110 transition-all">
-            {phase === 'result' ? '??局' : '??'}
+            {phase === 'result' ? '結局' : '遊戲'}
           </button>
         </div>
       </header>
@@ -103,21 +103,21 @@ export default function BluffDiceRoomView() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-secondary">總???{dice.reduce((a, b) => a + b, 0)}</p>
+          <p className="text-xs text-secondary">總計{dice.reduce((a, b) => a + b, 0)}</p>
         </section>
 
         {/* Betting area */}
         {phase === 'betting' && (
           <section className="card-accent bg-card p-6 mb-6 border border-border/10">
             <p className="text-xs text-secondary mb-3">
-              {allPlayers[currentTurn]?.isMe ? '你??? ???骰??' : `?? ${allPlayers[currentTurn]?.displayName} ?考中...`}
+              {allPlayers[currentTurn]?.isMe ? '輪到你叫骰' : `等待 ${allPlayers[currentTurn]?.displayName} 思考中...`}
             </p>
 
             {bets.length > 0 && (
               <div className="mb-4 space-y-1">
                 {bets.map((b, i) => (
                   <div key={i} className="text-xs text-secondary">
-                    <span className="font-bold text-accent">{b.displayName}</span> ?? <span className="font-bold text-white">{b.quantity} ??{b.value}</span>
+                    <span className="font-bold text-accent">{b.displayName}</span> 叫 <span className="font-bold text-white">{b.quantity} 個 {b.value}</span>
                   </div>
                 ))}
               </div>
@@ -126,7 +126,7 @@ export default function BluffDiceRoomView() {
             {allPlayers[currentTurn]?.isMe ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-secondary">??</span>
+                  <span className="text-xs text-secondary">數量</span>
                   <input type="range" min={1} max={10} value={myBet.quantity}
                     onChange={e => setMyBet(prev => ({ ...prev, quantity: Number(e.target.value) }))}
                     className="flex-1 accent-accent" />
@@ -141,17 +141,17 @@ export default function BluffDiceRoomView() {
                 </div>
                 <div className="flex gap-3">
                   <button onClick={placeBet} className="flex-1 bg-accent text-black py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:brightness-110 transition-all">
-                    ?骰
+                    叫骰
                   </button>
                   <button onClick={callBluff} className="flex-1 bg-danger/20 text-danger border border-danger/30 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-danger/30 transition-all">
-                    ??
+                    ×
                   </button>
                 </div>
-                <p className="text-xs text-center text-secondary mt-2">上???骰?{lastCall || '??}</p>
+                <p className="text-xs text-center text-secondary mt-2">上次叫骰?{lastCall || '×}</p>
               </div>
             ) : (
               <div className="text-center py-4">
-                <span className="text-xs text-secondary animate-pulse">等? {allPlayers[currentTurn]?.displayName} ?骰...</span>
+                <span className="text-xs text-secondary animate-pulse">等? {allPlayers[currentTurn]?.displayName} 叫骰...</span>
               </div>
             )}
           </section>
@@ -161,22 +161,22 @@ export default function BluffDiceRoomView() {
         {phase === 'result' && (
           <section className="card-accent bg-card p-6 mb-6 border border-border/10 text-center">
             <p className="text-gradient-diamond text-lg font-black mb-2">
-              ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} 贏??
+              ?? {allPlayers.find(p => p.userId === winner)?.displayName || winner} 贏×
             </p>
             <p className="text-xs text-secondary">
-              骰?：{dice.join(', ')} ??後?骰?{lastCall}
+              骰?：{dice.join(', ')} ×後叫骰?{lastCall}
             </p>
           </section>
         )}
 
         {/* Players */}
         <section className="card-accent bg-card p-4 border border-border/10">
-          <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3">?家</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-3">玩家</p>
           <div className="space-y-2">
             {allPlayers.map((p, i) => (
               <div key={p.userId} className={`flex items-center justify-between p-2 rounded-xl ${i === currentTurn ? 'bg-accent/10 ring-1 ring-accent' : ''}`}>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{p.isMe ? '?' : '??'}</span>
+                  <span className="text-lg">{p.isMe ? '?' : '遊戲'}</span>
                   <span className={`text-xs font-bold ${p.isMe ? 'text-accent' : 'text-white'}`}>{p.displayName}</span>
                 </div>
                 {i === currentTurn && <span className="text-[9px] text-accent font-black">輪到</span>}

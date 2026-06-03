@@ -85,7 +85,7 @@ function PositionCard({ pos, runAction, execute, t, nf, onSelect }: { pos: any; 
         {t('market.position_detail', { entry: nf(pos.entryPrice), mark: nf(pos.markPrice ?? 0), liquidation: nf(pos.liquidationPrice) })}
       </p>
       <p className="text-sm text-secondary mt-1">
-        保??? <span className="text-white font-bold text-base">{nf(pos.margin)} ZXC</span>
+        保證金 <span className="text-white font-bold text-base">{nf(pos.margin)} ZXC</span>
       </p>
       <div className="flex items-center gap-3 mt-1.5">
         <div className="flex-1">
@@ -237,7 +237,7 @@ export default function MarketView() {
         <select value={selectedSymbol} onChange={(e) => setSelectedSymbol(e.target.value)}
           className="w-full rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold outline-none">
           {stockSymbols.map((q) => (
-            <option key={q.symbol} value={q.symbol}>{q.symbol} ??{q.name}</option>
+            <option key={q.symbol} value={q.symbol}>{q.symbol} - {q.name}</option>
           ))}
         </select>
       )}
@@ -328,7 +328,7 @@ export default function MarketView() {
         <div className="space-y-3">
           {summary && (
             <div className="flex items-center justify-between rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-xs">
-              <span className="text-secondary">?用??</span>
+              <span className="text-secondary">費用</span>
               <span className="font-black text-white">{nf(summary.cash)} ZXC</span>
             </div>
           )}
@@ -355,8 +355,8 @@ export default function MarketView() {
               className="rounded-xl bg-amber-600 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.bank_withdraw')}</button>
           </div>
           <div className="rounded-xl bg-surface border border-border/10 px-4 py-2.5 text-caption text-secondary leading-relaxed">
-            <p>? ?行年?? <span className="text-emerald-400 font-bold">2% APY</span>（?實?????複利</p>
-            <p>? 貸款年利??<span className="text-amber-400 font-bold">4% APR</span>（?實??款??計息</p>
+            <p>? ?行利率 <span className="text-emerald-400 font-bold">2% APY</span>（?實收藏?複利</p>
+            <p>? 貸款年利率<span className="text-amber-400 font-bold">4% APR</span>（?實每月×計息</p>
           </div>
           <div className="border-t border-border/10 pt-3">
             <p className="text-xs font-bold text-secondary mb-2">貸款</p>
@@ -372,10 +372,10 @@ export default function MarketView() {
                 className="rounded-xl bg-amber-600 py-3 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50 hover:bg-amber-500">{t('market.repay_all_label')}</button>
             </div>
             {summary && summary.loanPrincipal > 0 && (
-              <p className="text-xs text-secondary mt-2">??貸款: {nf(summary.loanPrincipal)} ZXC</p>
+              <p className="text-xs text-secondary mt-2">當前貸款: {nf(summary.loanPrincipal)} ZXC</p>
             )}
             {summary && summary.maxBorrow > 0 && (
-              <p className="text-xs text-secondary">?借??? {nf(summary.maxBorrow)} ZXC</p>
+              <p className="text-xs text-secondary">可借額度 {nf(summary.maxBorrow)} ZXC</p>
             )}
           </div>
         </div>
@@ -427,7 +427,7 @@ export default function MarketView() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileDrawerOpen(false)} />
           <div className="absolute left-0 top-16 bottom-24 w-80 max-w-[85vw] bg-card border-r border-border/10 p-5 overflow-y-auto shadow-2xl">
             <div className="flex justify-end mb-3">
-              <button onClick={() => setMobileDrawerOpen(false)} className="text-xs text-secondary">??{t('market.close')}</button>
+              <button onClick={() => setMobileDrawerOpen(false)} className="text-xs text-secondary">{t('market.close')}</button>
             </div>
             {executionPanel}
           </div>
@@ -458,7 +458,7 @@ export default function MarketView() {
             <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl bg-card border shadow-lg shadow-black/50 text-sm font-bold animate-[fadeIn_0.3s_ease-out] whitespace-nowrap ${
               actionNotice.type === 'success' ? 'border-emerald-400/40 text-emerald-300' : 'border-red-400/40 text-red-400'
             }`}>
-              {actionNotice.type === 'success' ? '??' : '??'}{actionNotice.message}
+              {actionNotice.type === 'success' ? '遊戲' : '遊戲'}{actionNotice.message}
             </div>
           )}
 
@@ -469,7 +469,7 @@ export default function MarketView() {
               <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">{t('market.market_pulse')}</h2>
               <button onClick={() => setShowIndexChart(!showIndexChart)}
                 className="ml-auto text-xs font-bold text-secondary bg-accent/10 px-2.5 py-1 rounded-lg hover:bg-accent/20 transition-colors">
-                <LineChart size={14} className="inline mr-1" />{showIndexChart ? '??' : '?表'}
+                <LineChart size={14} className="inline mr-1" />{showIndexChart ? '遊戲' : '?表'}
               </button>
             </div>
 
@@ -486,7 +486,7 @@ export default function MarketView() {
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-secondary">{t('market.fear_greed')}</p>
-                <p className="mt-1 text-2xl font-black italic tracking-tight text-white">{marketSnapshot?.fearGreedIndex ?? 0}</p>
+                <p className="mt-1 text-2xl font-black italic tracking-tight text-white">{marketSnapshot?.fearGreedIndex || 0}</p>
               </div>
             </div>
 
@@ -548,7 +548,7 @@ export default function MarketView() {
             {summary && (summary.loanPrincipal > 0 || summary.maxBorrow > 0) && (
               <div className="mt-3 flex items-center gap-4 text-xs text-secondary">
                 <span>貸款: {nf(summary.loanPrincipal)}</span>
-                <span>?大可?? {nf(summary.maxBorrow)}</span>
+                <span>最大可借 {nf(summary.maxBorrow)}</span>
               </div>
             )}
           </section>
@@ -712,7 +712,7 @@ export default function MarketView() {
       {selectedQuote && stockHistory.length > 1 && !showFloatingChart && (
         <button onClick={() => setShowFloatingChart(true)}
           className="fixed z-40 bottom-28 right-4 w-12 h-12 rounded-full bg-accent text-black shadow-xl flex items-center justify-center text-lg font-black hover:bg-[#e6ad03] active:scale-95 transition-all">
-          ??
+          ×
         </button>
       )}
 
