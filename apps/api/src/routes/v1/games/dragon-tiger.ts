@@ -56,7 +56,16 @@ export async function dragonTigerRoutes(fastify: FastifyInstance) {
     // 1. Validate & deduct balance
     const validation = await gameSettlement.validateAndDeductBalance(address, token, amountStr, `total_bet:${address}`);
     if (!validation.success) {
-      return createApiEnvelope({ success: false, error: validation.error }, request.id, false, validation.error?.message || "Insufficient balance");
+      request.log.warn({ address, token, betAmount, balanceBefore: validation.balanceBefore, error: validation.error }, "dragon-tiger validation failed");
+      return createApiEnvelope({
+        success: false,
+        error: validation.error,
+        debug: {
+          code: validation.error?.code,
+          balanceBefore: validation.balanceBefore,
+          token,
+        },
+      }, request.id, false, validation.error?.message || "Insufficient balance");
     }
 
     try {
