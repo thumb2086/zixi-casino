@@ -1,10 +1,7 @@
 import { useState } from "react";
-import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
-import { formatNumber } from '@repo/shared';
-import { usePreferencesStore } from '../../store/usePreferencesStore';
 import "./DragonTiger.css";
 import AppBottomNav from "../../components/AppBottomNav";
 
@@ -22,15 +19,13 @@ type PlayResult = {
   balance: number;
 };
 
-function CardView({ card, hidden, small }: { card?: { rank: string; suit: string }; hidden?: boolean; small?: boolean }) {
-  if (!card || hidden) {
-    return <div className={`rounded-xl border-2 border-dashed border-accent/30 bg-accent/5 ${small ? 'h-14 w-10' : 'h-20 w-14'} flex items-center justify-center`}>?</div>;
-  }
+function CardView({ card }: { card?: { rank: string; suit: string } }) {
+  if (!card) return <div className="h-20 w-14 rounded-xl border-2 border-dashed border-accent/30 bg-accent/5 flex items-center justify-center text-accent">?</div>;
   const isRed = card.suit === '♥' || card.suit === '♦';
   return (
-    <div className={`rounded-xl border border-border/40 bg-card shadow-lg ${small ? 'h-14 w-10' : 'h-20 w-14'} flex flex-col items-center justify-center`}>
-      <span className={`${small ? 'text-xs' : 'text-base'} font-black ${isRed ? 'text-danger' : 'text-white'}`}>{card.rank}</span>
-      <span className={`${small ? 'text-sm' : 'text-xl'} ${isRed ? 'text-danger' : 'text-white'}`}>{card.suit}</span>
+    <div className="h-20 w-14 rounded-xl border border-border/40 bg-card shadow-lg flex flex-col items-center justify-center">
+      <span className={`text-base font-black ${isRed ? 'text-danger' : 'text-white'}`}>{card.rank}</span>
+      <span className={`text-xl ${isRed ? 'text-danger' : 'text-white'}`}>{card.suit}</span>
     </div>
   );
 }
@@ -38,24 +33,10 @@ function CardView({ card, hidden, small }: { card?: { rank: string; suit: string
 export default function DragonTigerView() {
   const { t } = useTranslation();
   const { session } = useAuth();
-  const { amountDisplay } = usePreferencesStore();
-  const nf = (v: number | string) => formatNumber(v, amountDisplay === 'full' ? 'full' : 'short');
   const [betAmount, setBetAmount] = useState("100");
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PlayResult | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showAnimation, setShowAnimation] = useState(false);
-
-  const { data: walletData } = useQuery({
-    queryKey: ['wallet-summary'],
-    queryFn: async () => {
-      const res = await api.get('/api/v1/wallet/summary', { params: { sessionId: session?.id } });
-      return res.data?.data;
-    },
-    enabled: Boolean(session?.id),
-    refetchInterval: 30000,
-  });
-  const walletBalance = walletData?.summary?.balances?.ZXC || walletData?.assets?.walletBalance?.ZXC || '0';
 
   const handlePlay = async () => {
     if (!session || loading) return;
@@ -64,22 +45,18 @@ export default function DragonTigerView() {
     setLoading(true);
     setError("");
     setResult(null);
-    setShowAnimation(false);
     try {
       const res = await api.post("/api/v1/games/dragon-tiger/play", {
         sessionId: session.id,
         betAmount: amount,
-        token: "zhixi"
       });
       const payload = res.data;
-      if (payload?.success === false) {
-        throw new Error(payload.error || "Request failed");
+      if (!payload.success) {
+        throw new Error(payload.error?.message || payload.error || "Request failed");
       }
-      const data = payload?.data?.data || payload?.data || payload;
-      setResult(data);
-      setTimeout(() => setShowAnimation(true), 100);
+      setResult(payload.data?.data || payload.data);
     } catch (e: any) {
-      setError(e?.response?.data?.error || e?.message || "Request failed");
+      setError(e?.response?.data?.error?.message || e?.response?.data?.error || e?.message || "Request failed");
     } finally {
       setLoading(false);
     }
@@ -95,49 +72,34 @@ export default function DragonTigerView() {
       </header>
 
       <main className="app-shell pt-24 space-y-6">
-        {/* Wallet Balance */}
-        <section className="bg-card rounded-2xl p-4 border border-border/10 flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-widest text-secondary">可用餘額</span>
-          <span className="text-sm font-black text-accent">{nf(walletBalance)} ZXC</span>
-        </section>
-
-        {/* Gate Display */}
+        {/* Cards Display */}
         <section className="bg-card rounded-2xl p-6 border border-border/10 text-center">
           <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">龍門</p>
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex items-center justify-center gap-6 mb-6">
             <div className="flex flex-col items-center gap-2">
               <span className="text-[10px] font-bold text-secondary uppercase">左</span>
-              <CardView card={result?.left} hidden={!result} />
+              <CardView card={result?.left} />
             </div>
             <div className="flex flex-col items-center gap-2">
               <span className="text-[10px] font-bold text-secondary uppercase">右</span>
-              <CardView card={result?.right} hidden={!result} />
+              <CardView card={result?.right} />
             </div>
           </div>
           {result && (
-            <div className="mt-3 text-xs text-secondary">
-              範圍 {result.lo} ~ {result.hi}（差 {result.range}）
-            </div>
-          )}
-        </section>
-
-        {/* Mid Card (Shot) */}
-        <section className="bg-card rounded-2xl p-6 border border-border/10 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">射門</p>
-          <div className="flex justify-center">
-            <div className={`transition-all duration-500 ${showAnimation ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`}>
-              <CardView card={result?.mid} hidden={!result || !showAnimation} />
-            </div>
-          </div>
-          {result && showAnimation && (
-            <div className="mt-4 space-y-2">
-              <p className={`text-2xl font-black ${result.isWin ? 'text-emerald-400' : result.result === 'draw' ? 'text-accent' : 'text-danger'}`}>
-                {result.result === 'win' ? `贏 ${result.payout.toLocaleString()} ZXC` : result.result === 'draw' ? '退回' : '輸了'}
-              </p>
-              <p className="text-sm text-secondary">
-                {result.isWin ? `${result.multiplier}x 賠率` : result.result === 'draw' ? '' : `${result.mid.rank} 不在 ${result.lo}~${result.hi} 內`}
-              </p>
-            </div>
+            <>
+              <div className="flex justify-center mb-4">
+                <CardView card={result.mid} />
+              </div>
+              <div className="space-y-1">
+                <p className={`text-lg font-black ${result.isWin ? 'text-emerald-400' : result.result === 'draw' ? 'text-accent' : 'text-danger'}`}>
+                  {result.result === 'win' ? `贏 ${result.payout.toLocaleString()} ZXC` : result.result === 'draw' ? '退回' : '輸了'}
+                </p>
+                <p className="text-xs text-secondary">
+                  {result.result === 'win' ? `${result.multiplier}x 賠率（${result.lo}~${result.hi}）` : result.result === 'draw' ? '' : `${result.mid.rank} 不在 ${result.lo}~${result.hi} 範圍`}
+                </p>
+                <p className="text-xs text-secondary">餘額 {Number(result.balance).toLocaleString()} ZXC</p>
+              </div>
+            </>
           )}
         </section>
 
@@ -148,8 +110,8 @@ export default function DragonTigerView() {
               type="number" min="1" value={betAmount}
               onChange={e => setBetAmount(e.target.value)}
               disabled={loading}
-              className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold text-white outline-none focus:border-accent/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               placeholder="下注金額"
+              className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-3 text-sm font-bold text-white outline-none focus:border-accent/40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             <button
               onClick={handlePlay}
