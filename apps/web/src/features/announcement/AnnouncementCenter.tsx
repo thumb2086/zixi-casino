@@ -232,7 +232,7 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
       <div className="flex items-center gap-3 bg-card rounded-2xl px-5 py-3 border border-border/10">
         <Clock size={14} className="text-accent" />
         <span className="text-caption font-bold text-secondary uppercase tracking-wider">
-          伺收藏
+          伺服器
         </span>
         <span className="text-xs font-bold text-emerald-400 ml-auto">
           {serviceStats?.serverUptimeLabel || '...'}
@@ -246,21 +246,21 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
         <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <Coins size={14} className="text-accent" />
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary">總交</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">總交易</span>
           </div>
           <p className="text-xl font-black italic text-accent">{nf(summary?.total ?? 0)}</p>
         </div>
         <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles size={14} className="text-emerald-400" />
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary">×</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">已確認</span>
           </div>
           <p className="text-xl font-black italic text-emerald-400">{nf(summary?.confirmed ?? 0)}</p>
         </div>
         <div className="bg-card rounded-2xl p-5 border border-border/20">
           <div className="flex items-center gap-2 mb-2">
             <HeartPulse size={14} className="text-accent" />
-            <span className="text-xs font-bold uppercase tracking-widest text-secondary"></span>
+            <span className="text-xs font-bold uppercase tracking-widest text-secondary">成功率</span>
           </div>
           <p className="text-xl font-black italic text-accent">{summary?.total ? `${successRatePct}%` : '0%'}</p>
         </div>
@@ -268,7 +268,7 @@ function TransactionsFeed({ nf }: { nf: (v: number | string) => string }) {
 
       <section className="rounded-2xl border border-border/10 bg-card p-6 shadow-2xl">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-secondary">
-          收藏收藏?
+          最新交易
         </p>
         <div className="mt-4 space-y-3">
           {isLoading && <div className="text-sm text-secondary">{t('common.loading')}</div>}
@@ -509,7 +509,7 @@ export default function AnnouncementCenter() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={() => setSuccessBundle(null)}>
           <div className="w-full max-w-sm rounded-2xl border border-border/20 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-accent">× 收藏</h3>
+              <h3 className="text-base font-black text-accent">領取成功</h3>
               <button type="button" onClick={() => setSuccessBundle(null)} className="rounded-lg p-1 hover:bg-white/10"><X size={16} /></button>
             </div>
             <div className="mt-4 space-y-2 text-sm text-white">
