@@ -84,7 +84,7 @@ export default function BluffDiceRoomView() {
       <header className="fixed top-0 z-50 w-full border-b border-accent/20 bg-gradient-to-r from-[#0a0a0f] via-[#14141f] to-[#0a0a0f] backdrop-blur-xl">
         <div className="app-shell flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <span className="text-gradient-diamond text-sm font-black uppercase tracking-widest">? VIP </span>
+            <span className="text-gradient-diamond text-sm font-black uppercase tracking-widest">🃏 VIP </span>
             <span className="text-caption text-secondary">{roomId}</span>
           </div>
           <button onClick={startRound} className="text-xs font-bold bg-accent text-black px-4 py-2 rounded-xl hover:brightness-110 transition-all">
@@ -144,7 +144,7 @@ export default function BluffDiceRoomView() {
                     叫骰
                   </button>
                   <button onClick={callBluff} className="flex-1 bg-danger/20 text-danger border border-danger/30 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-danger/30 transition-all">
-                    ×
+                    抓
                   </button>
                 </div>
                 <p className="text-xs text-center text-secondary mt-2">上次叫骰：{lastCall || '無'}</p>
@@ -176,7 +176,7 @@ export default function BluffDiceRoomView() {
             {allPlayers.map((p, i) => (
               <div key={p.userId} className={`flex items-center justify-between p-2 rounded-xl ${i === currentTurn ? 'bg-accent/10 ring-1 ring-accent' : ''}`}>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{p.isMe ? '?' : '遊戲'}</span>
+                  <span className="text-lg">{p.isMe ? '👤' : '🤖'}</span>
                   <span className={`text-xs font-bold ${p.isMe ? 'text-accent' : 'text-white'}`}>{p.displayName}</span>
                 </div>
                 {i === currentTurn && <span className="text-[9px] text-accent font-black">輪到</span>}

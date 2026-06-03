@@ -24,6 +24,8 @@ const AdminView = lazy(() => import('./features/admin/AdminView'));
 const ChestView = lazy(() => import('./features/inventory/ChestView'));
 const LeaderboardView = lazy(() => import('./features/stats/LeaderboardView'));
 const RoomLobbyView = lazy(() => import('./features/casino/RoomLobbyView'));
+const PokerRoomView = lazy(() => import('./features/casino/PokerRoomView'));
+const BluffDiceRoomView = lazy(() => import('./features/casino/BluffDiceRoomView'));
 const SupportView = lazy(() => import('./features/support/SupportView'));
 const ProfileSetup = lazy(() => import('./features/profile/ProfileSetup'));
 const AnnouncementCenter = lazy(() => import('./features/announcement/AnnouncementCenter'));
@@ -175,6 +177,8 @@ function AppContent() {
               <Route index element={<LobbyView />} />
               <Route path="casino/:game" element={<CasinoView />} />
               <Route path="casino/lobby" element={<RoomLobbyView />} />
+              <Route path="room/:roomId/poker" element={<PokerRoomView />} />
+              <Route path="room/:roomId/bluffdice" element={<BluffDiceRoomView />} />
               <Route path="wallet" element={<WalletView />} />
               <Route path="swap" element={<SwapView />} />
               <Route path="shop" element={<ShopView />} />
