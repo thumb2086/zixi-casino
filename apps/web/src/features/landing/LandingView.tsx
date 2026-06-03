@@ -98,11 +98,18 @@ export default function LandingView() {
               <Sparkles className="h-4 w-4 text-accent" />
               <span className="text-sm font-medium text-accent">{t('landing.hero.badge')}</span>
             </div>
-            <img
-              src="/icon-512.png"
-              alt="子熙 ZIXI · 佑戩 YJC 圖標"
-              className="mx-auto mb-6 w-28 aspect-square rounded-full object-cover md:w-36"
-            />
+            <div className="mx-auto mb-6 flex items-center justify-center gap-4">
+              <img
+                src="/icon-512.png"
+                alt="子熙 ZIXI"
+                className="w-24 aspect-square rounded-full object-cover md:w-32"
+              />
+              <img
+                src="/youjian.png"
+                alt="佑戩 YJC"
+                className="w-24 aspect-square rounded-full object-cover md:w-32"
+              />
+            </div>
             <h1 className="mb-4 text-4xl font-black leading-tight tracking-tight text-white md:text-6xl">
               {t('landing.hero.title')}
             </h1>
