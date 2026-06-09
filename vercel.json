@@ -2,7 +2,8 @@
   "buildCommand": "pnpm install && pnpm build:web",
   "installCommand": "pnpm install",
   "outputDirectory": "apps/web/dist",
-  "rewrites": [
+  "routes": [
+    { "handle": "filesystem" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
