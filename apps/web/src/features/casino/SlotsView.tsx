@@ -182,44 +182,41 @@ export const SlotsView: React.FC = () => {
     setAutoRemaining(autoCount);
     setStatus(t('casino_game.slots_spinning'));
 
-    // Pipeline mode: fire next request without waiting for previous response
-    const promises: Promise<void>[] = [];
     for (let i = 0; i < autoCount; i++) {
       if (!autoSpinRef.current) break;
       setAutoRemaining(autoCount - i - 1);
-      promises.push(
-        api.post('/api/v1/games/slots/play', {
+      try {
+        const res = await api.post('/api/v1/games/slots/play', {
           sessionId: session.id,
           betAmount: Number(betAmount),
-        }).then((res) => {
-          const payload = res.data;
-          if (payload?.success === false) return;
-          const result = unwrapGameEnvelope<any>(payload);
-          if (result) {
-            summaryRef.current.spins += 1;
-            if (result.multiplier > 0) summaryRef.current.wins += result.payout || 0;
-          }
-        }).catch(() => {})
-      );
+        });
+        const payload = res.data;
+        if (payload?.success === false) continue;
+        const result = unwrapGameEnvelope<any>(payload);
+        if (result) {
+          summaryRef.current.spins += 1;
+          if (result.multiplier > 0) summaryRef.current.wins += result.payout || 0;
+          setGrid(result.symbols || []);
+          if (result.multiplier > 0) setWinSymbols(result.winLines?.flat() || []);
+        }
+      } catch {}
     }
-
-    await Promise.all(promises);
 
     autoSpinRef.current = false;
     spinningRef.current = false;
     setAutoRemaining(0);
     setReelState(['idle', 'idle', 'idle']);
+    setWinSymbols([]);
     const s = summaryRef.current;
     setStatus(t('casino_game.slots_auto_end', { spins: s.spins, wins: formatNumber(s.wins || 0) }));
-
-    // Update local balance from API response instead of refetching
-    if (summaryRef.current.wins > 0 || s.spins > 0) {
-      const tokenBalance = document.querySelector('[data-balance-value]')?.textContent;
-    }
   };
 
   const cancelAutoSpin = () => {
     autoSpinRef.current = false;
+    spinningRef.current = false;
+    setAutoRemaining(0);
+    setReelState(['idle', 'idle', 'idle']);
+    setStatus(t('casino_game.slots_auto_end', { spins: summaryRef.current.spins, wins: formatNumber(summaryRef.current.wins || 0) }));
   };
 
   return (
