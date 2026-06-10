@@ -791,14 +791,14 @@ export class WalletRepository implements IWalletRepository {
         drizzleSql`UPDATE wallet_accounts SET balance = (CAST(balance AS numeric) + ${String(deltaNum)}), updated_at = NOW()
             WHERE address = ${addr} AND token = ${token} RETURNING balance`
       );
-      return result?.rows?.[0]?.balance || null;
+      return result?.[0]?.balance ?? null;
     } else {
       const result = await db.execute(
         drizzleSql`UPDATE wallet_accounts SET balance = (CAST(balance AS numeric) - ${String(absDelta)}), updated_at = NOW()
             WHERE address = ${addr} AND token = ${token} AND CAST(balance AS numeric) >= ${String(absDelta)}
             RETURNING balance`
       );
-      return result?.rows?.[0]?.balance || null;
+      return result?.[0]?.balance ?? null;
     }
   }
 
