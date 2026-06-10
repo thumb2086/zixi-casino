@@ -300,7 +300,7 @@ export default function LobbyView() {
                     <div className="flex justify-between items-center">
                       <span className="text-caption text-secondary">{locked ? '-' : `${m.progress}/${m.target}`}</span>
                       {locked ? null : done ? (
-                        <button onClick={() => claimMission(m.id)} className="text-caption font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">×</button>
+                        <button onClick={() => claimMission(m.id)} className="text-caption font-bold text-black bg-accent px-2 py-1 rounded-lg hover:brightness-110">領取</button>
                       ) : null}
                     </div>
                   </div>
