@@ -77,6 +77,7 @@ export default function WalletView() {
   };
 
   const numberMode = amountDisplay === 'full' ? 'full' : 'short';
+  const nf = (v: number | string) => formatNumber(v, numberMode);
 
   const walletSummary = summary.data?.summary;
   const assets = summary.data?.assets;

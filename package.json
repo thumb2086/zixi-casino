@@ -8,7 +8,7 @@
     "start": "node apps/api/dist/index.js",
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter @repo/api... build && pnpm --filter web build",
-    "build:web": "pnpm --filter @repo/shared build && pnpm --filter web build",
+    "build:web": "pnpm --filter @repo/shared build && pnpm --filter web build && (pnpm --filter web build:prerender || echo prerender skipped)",
     "preview": "pnpm --filter web preview"
   },
   "devDependencies": {
@@ -20,6 +20,9 @@
     "shx": "^0.4.0",
     "tsx": "^4.7.0",
     "typescript": "^5.4.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["puppeteer"]
   },
   "dependencies": {
     "ethers": "^6.16.0"
