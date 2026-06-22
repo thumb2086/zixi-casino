@@ -130,7 +130,7 @@ function useKeepAlive() {
   useEffect(() => {
     const ping = () => { api.get('/health').catch(() => {}); };
     ping();
-    const interval = setInterval(ping, 4 * 60 * 1000); // every 4 minutes
+    const interval = setInterval(ping, 60 * 60 * 1000); // every 1h (keep within 750h/mo)
     return () => clearInterval(interval);
   }, []);
 }
