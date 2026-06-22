@@ -1,8 +1,8 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from './useAuthStore';
 
-const PRIMARY = 'https://zixi-casino-6s1r.onrender.com';
-const FALLBACK = 'https://zixi-casino-api.onrender.com';
+const PRIMARY = 'https://zixi-dev-tool.vercel.app/api/zixi';
+const FALLBACK = 'https://zixi-casino-6s1r.onrender.com';
 
 const envUrl = (import.meta as any).env?.VITE_API_URL;
 
