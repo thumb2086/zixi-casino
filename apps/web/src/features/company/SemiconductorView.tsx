@@ -18,6 +18,18 @@ export default function SemiconductorView({ company, sessionId }: { company: any
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === "full" ? "full" : "short");
   const { produce, claim, research, craft, assemble } = useSemiconductor();
+  const qc = useQueryClient();
+  const [depositAmount, setDepositAmount] = useState("");
+
+  const deposit = useMutation({
+    mutationFn: (amount: number) => api.post("/api/v1/company/deposit", { sessionId, amount }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
+  });
+
+  const withdraw = useMutation({
+    mutationFn: (amount: number) => api.post("/api/v1/company/withdraw", { sessionId, amount }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
+  });
 
   const [tab, setTab] = useState<"fab" | "rd" | "team" | "assembly">("fab");
 
@@ -154,9 +166,9 @@ export default function SemiconductorView({ company, sessionId }: { company: any
               <Zap size={14} className="text-accent" />
             </div>
             <p className="text-caption text-secondary">{t("breakthrough_desc")}</p>
-            {sum?.breakthroughOptions?.map((opt: any) => (
-              <div key={opt.targetNode} className="bg-surface rounded-xl p-3 space-y-2">
-                <p className="text-xs font-bold">{sum.nodeName} → {opt.description}</p>
+              {sum?.breakthroughOptions?.map((opt: any) => (
+                  <div key={opt.targetNode} className="bg-surface rounded-xl p-3 space-y-2">
+                    <p className="text-xs font-bold">{opt.description}</p>
                 <div className="flex flex-wrap gap-1">
                   {(Object.entries(opt.chipRequirements) as [string, number][]).map(([chipId, qty]) => (
                     <span key={chipId} className="text-caption text-secondary">
@@ -329,9 +341,24 @@ function TeamPanel({ company, sessionId }: { company: any; sessionId: string }) 
               <button onClick={() => setCandidate(null)} className="flex-1 border border-border/30 py-3 rounded-xl text-xs">{t("discard")}</button>
               <button onClick={() => hireConfirm.mutate(candidate.id)} disabled={hireConfirm.isPending}
                 className="flex-1 bg-accent text-black font-black py-3 rounded-xl text-xs">{t("hire_confirm")}</button>
+          </div>
+
+          {/* Deposit / Withdraw */}
+          <div className="rounded-2xl bg-card p-4 border border-border/10">
+            <p className="text-xs font-bold text-secondary mb-2">{t("operating_cash")} {nf(sum?.cash || 0)} ZXC</p>
+            <div className="flex gap-2">
+              <input type="number" min={1} value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
+                placeholder="ZXC" className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-2 text-sm" />
+              <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) deposit.mutate(a); setDepositAmount(""); }}
+                disabled={deposit.isPending || !depositAmount}
+                className="bg-emerald-600 text-white font-black px-3 py-2 rounded-xl text-xs">{t("deposit_label")}</button>
+              <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) withdraw.mutate(a); setDepositAmount(""); }}
+                disabled={withdraw.isPending || !depositAmount}
+                className="bg-red-600 text-white font-black px-3 py-2 rounded-xl text-xs">{t("withdraw_label")}</button>
             </div>
           </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );
