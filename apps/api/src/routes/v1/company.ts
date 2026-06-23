@@ -5,8 +5,13 @@ import { createApiEnvelope } from "@repo/shared";
 import { SessionRepository, UserRepository, WalletRepository, requireDb } from "@repo/infrastructure";
 import { sql } from "drizzle-orm";
 import { WalletManager } from "@repo/domain";
-import { rollEmployee, createDefaultCompany, processTicks, computeSummary, checkUnlocks,
-  upgradeLevelCost, upgradeFabCost, researchCost, EQUIPMENT_COST, STARTUP_FEE, appendHistory } from "@repo/domain/company/company-manager.js";
+import { rollEmployee as aiRollEmployee, createDefaultCompany, processTicks as aiProcessTicks, computeSummary as aiComputeSummary,
+  upgradeLevelCost, researchCost, EQUIPMENT_COST, STARTUP_FEE, checkUnlocks } from "@repo/domain/company/company-manager.js";
+import {
+  createDefaultSemiconductorData, processTicks as semiProcessTicks, computeSummary as semiComputeSummary,
+  startProduction, claimProduction, researchTech, craftBreakthrough,
+  assembleComputer, rollEmployee as semiRollEmployee,
+} from "@repo/domain/semiconductor/index.js";
 
 export async function companyRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
@@ -36,17 +41,20 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const row = rows[0];
     if (!row) return createApiEnvelope({ company: null }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    try {
-      processTicks(data, row.company_type);
-    } catch (err) {
-      console.error("[Company] processTicks error:", err);
+
+    if (row.company_type === "semiconductor") {
+      try { semiProcessTicks(data); } catch (err) { console.error("[Company] semiProcessTicks error:", err); }
+      await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+      return createApiEnvelope({ company: { ...row, data: semiComputeSummary(data) } }, request.id);
     }
+
+    try { aiProcessTicks(data); } catch (err) { console.error("[Company] aiProcessTicks error:", err); }
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
-    return createApiEnvelope({ company: { ...row, data: computeSummary(data, row.company_type) } }, request.id);
+    return createApiEnvelope({ company: { ...row, data: aiComputeSummary(data, "ai") } }, request.id);
   });
 
   typedFastify.post("/create", {
-    schema: { body: z.object({ sessionId: z.string(), companyType: z.enum(["ai", "chip"]), companyName: z.string().min(1).max(30) }) },
+    schema: { body: z.object({ sessionId: z.string(), companyType: z.enum(["ai", "semiconductor"]), companyName: z.string().min(1).max(30) }) },
   }, async (request) => {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
@@ -58,13 +66,23 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", STARTUP_FEE.toString());
     intent.address = ctx.session.address; intent.meta = { source: "company_create" };
     await walletRepo.saveTxIntent(intent);
-    const data = createDefaultCompany(companyType, companyName);
+
+    let data: any;
+    let summary: any;
+    if (companyType === "semiconductor") {
+      data = createDefaultSemiconductorData();
+      summary = semiComputeSummary(data);
+    } else {
+      data = createDefaultCompany("ai", companyName);
+      summary = aiComputeSummary(data, "ai");
+    }
+
     const rows = await pgQuery`
       INSERT INTO company_accounts (user_id, company_type, company_name, level, data)
       VALUES (${ctx.user.id}, ${companyType}, ${companyName}, 1, ${JSON.stringify(data)}) RETURNING *
     `;
     const row = rows[0];
-    return createApiEnvelope({ company: { ...row, data: computeSummary(data, companyType) } }, request.id);
+    return createApiEnvelope({ company: { ...row, data: summary } }, request.id);
   });
 
   typedFastify.get("/hire-preview", async (request) => {
@@ -74,7 +92,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const candidate = rollEmployee(row.company_type);
+    const candidate = row.company_type === "semiconductor" ? semiRollEmployee() : aiRollEmployee("ai");
     data.pendingHire = candidate;
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
     return createApiEnvelope({ candidate }, request.id);
@@ -99,7 +117,9 @@ export async function companyRoutes(fastify: FastifyInstance) {
     data.employees = data.employees || [];
     data.employees.push(candidate);
     delete data.pendingHire;
-    appendHistory(data, "hire", `僱用 ${candidate.name}（${candidate.role}），押金 ${deposit} ZXC`);
+    const history = data.history || [];
+    history.unshift({ at: new Date().toISOString(), type: "hire", summary: `僱用 ${candidate.name}（${candidate.role}），押金 ${deposit} ZXC` });
+    data.history = history;
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
     return createApiEnvelope({ success: true, employee: candidate, deposit }, request.id);
   });
@@ -119,6 +139,84 @@ export async function companyRoutes(fastify: FastifyInstance) {
     return createApiEnvelope({ success: true }, request.id);
   });
 
+  // ─── Semiconductor-only routes ──────────────────────────────────────
+
+  typedFastify.post("/hardware/produce", async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const result = startProduction(data);
+    if (!result.success) return createApiEnvelope({ error: { code: "PRODUCTION_FAILED", message: result.message } }, request.id);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, endTime: result.endTime }, request.id);
+  });
+
+  typedFastify.post("/hardware/claim", async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const result = claimProduction(data);
+    if (!result.success) return createApiEnvelope({ error: { code: "CLAIM_FAILED", message: (result as any).message } }, request.id);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, result }, request.id);
+  });
+
+  typedFastify.post("/hardware/research", {
+    schema: { body: z.object({ sessionId: z.string(), techId: z.string() }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { techId } = request.body;
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const result = researchTech(data, techId);
+    if (!result.success) return createApiEnvelope({ error: { code: "RESEARCH_FAILED", message: result.message } }, request.id);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, newLevel: result.newLevel }, request.id);
+  });
+
+  typedFastify.post("/hardware/craft", {
+    schema: { body: z.object({ sessionId: z.string(), targetNode: z.string() }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { targetNode } = request.body;
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const result = craftBreakthrough(data, targetNode);
+    if (!result.success) return createApiEnvelope({ error: { code: "CRAFT_FAILED", message: result.message } }, request.id);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, message: result.message, nodeId: data.nodeId }, request.id);
+  });
+
+  typedFastify.post("/hardware/assemble", {
+    schema: { body: z.object({ sessionId: z.string(), computerId: z.string() }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { computerId } = request.body;
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const result = assembleComputer(data, computerId);
+    if (!result.success) return createApiEnvelope({ error: { code: "ASSEMBLE_FAILED", message: result.message } }, request.id);
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, message: result.message }, request.id);
+  });
+
+  // ─── AI-only routes ─────────────────────────────────────────────────
+
   typedFastify.post("/set-price", {
     schema: { body: z.object({ sessionId: z.string(), productId: z.string(), multiplier: z.number().min(0.3).max(5.0) }) },
   }, async (request) => {
@@ -128,6 +226,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    if (row.company_type !== "ai") return createApiEnvelope({ error: { code: "AI_ONLY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
     if (data.products?.[productId]) data.products[productId].priceMultiplier = multiplier;
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
@@ -140,6 +239,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    if (row.company_type !== "ai") return createApiEnvelope({ error: { code: "AI_ONLY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
     const cost = upgradeLevelCost(data.level);
     if (data.cash < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
@@ -148,23 +248,48 @@ export async function companyRoutes(fastify: FastifyInstance) {
     return createApiEnvelope({ success: true, level: data.level }, request.id);
   });
 
-  typedFastify.post("/upgrade-fab", async (request) => {
+  typedFastify.post("/research", async (request) => {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
-    if (row.company_type !== "chip") return createApiEnvelope({ error: { code: "CHIP_ONLY" } }, request.id);
+    if (row.company_type !== "ai") return createApiEnvelope({ error: { code: "AI_ONLY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const cost = upgradeFabCost(data.fabLevel || 1);
-    if ((data.cash || 0) < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
-    data.cash -= cost;
-    data.fabLevel = (data.fabLevel || 1) + 1;
-    checkUnlocks(data, "chip");
-    appendHistory(data, "upgrade_fab", `Fab 升級至 Lv.${data.fabLevel}，花費 ${cost} ZXC`);
+    const cost = researchCost();
+    const result = await walletRepo.adjustBalanceAtomic(ctx.session.address, `-${cost}`, "zhixi");
+    if (result === null) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
+    const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", cost.toString());
+    intent.address = ctx.session.address; intent.meta = { source: "company_research" };
+    await walletRepo.saveTxIntent(intent);
+    data.research = Math.min(100, (data.research || 0) + 10);
+    if (data.research >= 100) { data.patents = (data.patents || 0) + 1; data.research = 0; checkUnlocks(data); }
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
-    return createApiEnvelope({ success: true, fabLevel: data.fabLevel, cash: data.cash }, request.id);
+    return createApiEnvelope({ success: true, research: data.research, patents: data.patents }, request.id);
   });
+
+  typedFastify.post("/buy-equipment", {
+    schema: { body: z.object({ sessionId: z.string(), equipmentType: z.enum(["gpu", "supercomputer"]) }) },
+  }, async (request) => {
+    const ctx = await getContext(request);
+    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
+    const { equipmentType } = request.body;
+    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
+    const row = rows[0];
+    if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    if (row.company_type !== "ai") return createApiEnvelope({ error: { code: "AI_ONLY" } }, request.id);
+    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+    const cost = EQUIPMENT_COST[equipmentType];
+    if (!cost) return createApiEnvelope({ error: { code: "INVALID_EQUIPMENT" } }, request.id);
+    if ((data.cash || 0) < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
+    data.equipment = data.equipment || { gpu: 0, supercomputer: 0 };
+    data.equipment[equipmentType] = (data.equipment[equipmentType] || 0) + 1;
+    data.cash -= cost;
+    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
+    return createApiEnvelope({ success: true, equipment: data.equipment, cash: data.cash }, request.id);
+  });
+
+  // ─── Shared routes ──────────────────────────────────────────────────
 
   typedFastify.post("/deposit", {
     schema: { body: z.object({ sessionId: z.string(), amount: z.number().min(1) }) },
@@ -182,48 +307,11 @@ export async function companyRoutes(fastify: FastifyInstance) {
     intent.address = ctx.session.address; intent.meta = { source: "company_deposit" };
     await walletRepo.saveTxIntent(intent);
     data.cash = (data.cash || 0) + amount;
-    appendHistory(data, "deposit", `存入 ${amount} ZXC 至公司營運資金`);
+    const history = data.history || [];
+    history.unshift({ at: new Date().toISOString(), type: "deposit", summary: `存入 ${amount} ZXC 至公司營運資金` });
+    data.history = history;
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
     return createApiEnvelope({ success: true, cash: data.cash }, request.id);
-  });
-
-  typedFastify.post("/research", async (request) => {
-    const ctx = await getContext(request);
-    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
-    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
-    const row = rows[0];
-    if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
-    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const cost = researchCost();
-    const result = await walletRepo.adjustBalanceAtomic(ctx.session.address, `-${cost}`, "zhixi");
-    if (result === null) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
-    const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", cost.toString());
-    intent.address = ctx.session.address; intent.meta = { source: "company_research" };
-    await walletRepo.saveTxIntent(intent);
-    data.research = Math.min(100, (data.research || 0) + 10);
-    if (data.research >= 100) { data.patents = (data.patents || 0) + 1; data.research = 0; checkUnlocks(data, row.company_type); }
-    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
-    return createApiEnvelope({ success: true, research: data.research, patents: data.patents }, request.id);
-  });
-
-  typedFastify.post("/buy-equipment", {
-    schema: { body: z.object({ sessionId: z.string(), equipmentType: z.enum(["gpu", "supercomputer"]) }) },
-  }, async (request) => {
-    const ctx = await getContext(request);
-    if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
-    const { equipmentType } = request.body;
-    const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
-    const row = rows[0];
-    if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
-    const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const cost = EQUIPMENT_COST[equipmentType];
-    if (!cost) return createApiEnvelope({ error: { code: "INVALID_EQUIPMENT" } }, request.id);
-    if ((data.cash || 0) < cost) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
-    data.equipment = data.equipment || { gpu: 0, supercomputer: 0 };
-    data.equipment[equipmentType] = (data.equipment[equipmentType] || 0) + 1;
-    data.cash -= cost;
-    await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
-    return createApiEnvelope({ success: true, equipment: data.equipment, cash: data.cash }, request.id);
   });
 
   typedFastify.post("/withdraw", {
@@ -250,10 +338,16 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const rows = await pgQuery`SELECT id, company_name, company_type, level, data FROM company_accounts WHERE user_id != ${ctx.user.id} LIMIT 50`;
-    const list = (rows || []).map((r: any) => ({
-      id: r.id, companyName: r.company_name, companyType: r.company_type, level: r.level,
-      data: computeSummary(typeof r.data === "string" ? JSON.parse(r.data) : r.data, r.company_type),
-    }));
+    const list = (rows || []).map((r: any) => {
+      const parsed = typeof r.data === "string" ? JSON.parse(r.data) : r.data;
+      let summary: any;
+      if (r.company_type === "semiconductor") {
+        summary = semiComputeSummary(parsed);
+      } else {
+        summary = aiComputeSummary(parsed, "ai");
+      }
+      return { id: r.id, companyName: r.company_name, companyType: r.company_type, level: r.level, data: summary };
+    });
     return createApiEnvelope({ companies: list }, request.id);
   });
 

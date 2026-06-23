@@ -23,3 +23,4 @@ export * from "./settlement/settlement-manager.js";
 export * from "./settlement/onchain-settlement-manager.js";
 export * from "./support/support-manager.js";
 export * from "./meta-manager.js";
+export * from "./semiconductor/index.js";

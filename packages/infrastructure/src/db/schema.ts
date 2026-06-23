@@ -514,7 +514,7 @@ export const marketListings = pgTable("market_listings", {
 export const companyAccounts = pgTable("company_accounts", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => users.id).unique(),
-  companyType: text("company_type").notNull(), // 'ai' | 'chip'
+  companyType: text("company_type").notNull(), // 'ai' | 'semiconductor'
   companyName: text("company_name").notNull(),
   level: integer("level").notNull().default(1),
   data: jsonb("data").notNull().default({}),

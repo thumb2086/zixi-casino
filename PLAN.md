@@ -1,318 +1,282 @@
-# ZIXI CASINO — 開發計劃
+# ZIXI CASINO — 半導體帝國開發計劃
 
-## 分支策略
-
-```
-master: v1.0.5（穩定版，5 層寶箱原始結構）
-dev:    逐步疊加小版本 → v1.1.0 最終合併至 master
-```
-
-## 版本路線圖
-
-| 版本 | 範圍 | 內容 | 狀態 |
-|------|------|------|------|
-| **v1.0.6** | 寶箱 + XP | 8 層寶箱平衡、物品/當舖值調整、保底修正、經驗加成系統 | ✅ 開發完成 |
-| **v1.0.7** | Coinflip | Route 統一使用 GameManager 賠率 | ✅ |
-| **v1.0.8** | Slots（前端） | 補齊遺失常數 REEL_CELLS/SYMBOLS/reelDelay 等 | ✅ |
-| **v1.0.9** | Roulette + 每日任務 | Roulette 數字賠 35x 應為 36x；新增每日任務系統，午夜刷新 | ✅ |
-| **v1.0.10** | 賽馬系統 | RTP_SCALE=2.0 導致玩家優勢 → GameManager 統一邏輯、HE ~4%；統一開獎流程、多筆押注、勝率統計圖表、長期數據 localStorage、未下注也播動畫 | ✅ 開發完成 |
-| **v1.0.11** | Bingo | RTP 修正：20 開獎號 + 新賠率表 + 逐顆開獎動畫 + hash 負數修復 | ✅ |
-| **v1.0.12** | Dragon Tiger | FNV hash 負數修復、動態賠率 2~12x（route 改用 domain multiplier） | ✅ |
-| **v1.0.13** | BluffDice | 固定預測 18 導致 -39% 玩家優勢；已修：FNV hash、玩家自選預測 5~30、新賠率表 | ✅ |
-| **v1.0.14** | Sicbo | 賠率調整、HE 檢查；圍骰大/小自動判輸、依點數機率動態賠率 | ✅ |
-| **v1.0.15** | Duel | 賠率 1.96x 與實際 HE 對齊檢查；修復 p2 可由 client 控制導致無限退款的漏洞 | ✅ |
-| **v1.0.16** | Crash | 賠率/機率微調；FNV hash 負數修復 | ✅ |
-| **v1.0.17** | Poker | 賠率/機率微調；FNV hash 負數修復 | ✅ |
-| **v1.0.18** | Blackjack | 賠率/機率微調；FNV hash 負數修復 | ✅ |
-| **v1.0.19** | VIP 遊戲 + 色彩系統 + RWD 排版 | 德州撲克/吹牛骰多人房間（牌型判定、52 張牌庫、盲注/下注輪）；CSS 變數色彩系統、Tailwind 自訂色、card-accent/info/success 卡片系統、section-title 區塊標題；SettingsView/排行榜/商城 app-shell RWD；榜王前三 banner + 結算機制 | ✅ |
-| **v1.0.20** | 全站效能 + 監控 + VIP 遊戲補完 | 效能監控頁 `/app/performance` + `GET /api/v1/stats/performance`；React.lazy 懶載入 19 頁（bundle 1.1MB→695kB）；VIP 撲克房/吹牛房前端畫面；Bot AI 自動下單；多人房間 API（poker/bluffdice action）；Admin 市場端點（price/volatility/rate/shock）；全站數字簡寫修正；12 頁 RWD `max-w-2xl`→`app-shell` | ✅ |
-| **v1.0.21** | 上鏈系統 | 上鏈排隊佇列、上鏈公開頁面 | ⏳ |
-| **v1.0.22** | 交易紀錄 + 動態重構 | 交易紀錄系統完善、公開動態保留市場與錢包、移除重複錢包動態 | ⏳ |
-| **v1.0.23** | 全站快取 + 監控 | 管理頁面載入優化、伺服器運行時間、重新登入時間反饋圖表 | ⏳ |
-| **v1.0.24** | 公司系統 | `/upgrade-fab`、`/deposit`、招聘押金、export、測試 | ⏳ |
-| **v1.0.25** | 排版檢查 + 色彩設計語言 | 全站頁面 UI 排列、文字溢出、RWD 斷點、元件間距一致性檢查與修正；導入新色彩系統（會員漸層、暗色主題色票、CSS 變數） | ✅（合併至 v1.0.19） |
-| **v1.0.26** | 全站浮點修正 + 市場功能補強 | `round()` 預設 2dp、`formatNumber` 最大 2dp、全站 `.toFixed()` 統一為 2dp；市場新增 TP/SL 即時修改、一次還清貸款、全部賣出/全額買入、持倉點擊選股、浮動圖表放大拖曳、銀行利率顯示、slots auto-skip | ✅ |
-| **v1.0.27** | 管理員工具全面升級 (zixi-dev-tool) | 後台管理 SPA（儀表板/維護/用戶/目錄/審核/活動/工單 7 標籤頁）+ 全站 i18n 重構（800+ locale key） | ✅ |
-| **v1.1.0** | 正式版 | 全部合併至 master，穩定化 | 🎯 |
+> 單位換算：**1 子熙幣 (ZXC) = 1 新台幣 (TWD)**
+> 所有設備/材料/研發成本皆以真實半導體產業價格為基準等比縮放。
+> 越後期，成本與收入都是指數級成長，但門檻也極高。
+>
+> 🚫 **半導體系統與賭場完全獨立**，晶片不影響任何博弈機制。
+> 晶片的唯一作用：**組裝電腦 → 加速半導體自身生產**。
 
 ---
 
-## 遊戲修正細節
+## 🏢 公司系統總覽
 
-### v1.0.7 — Coinflip
-- Route 自行計算結果（`hashInt` + 2.0x）→ 改呼叫 `gameManager.resolveCoinflip()`，賠率 1.96x（2% HE）
-- **檔案**: `apps/api/src/routes/v1/games/coinflip.ts`
+### 公司類型
 
-### v1.0.8 — Slots（前端修復）
-- 補上遺失的前端常數：`REEL_CELLS`、`randomSymbol`、`REEL_DELAY_MS`、`REEL_STOP_INTERVAL`
-- **檔案**: `apps/web/src/features/casino/SlotsView.tsx`
-
-### v1.0.9 — Roulette + 靶心任務
-- **Roulette**: Domain `resolveRoulette` 中數字賠 35x → 36x
-- **檔案**: `packages/domain/src/games/game-manager.ts`
-- **靶心任務**: 新增每日/每週靶心任務系統，玩家達成指定目標（累計押注、勝場數、連勝等）可領取獎勵
-- **檔案**: `packages/domain/src/missions/`、`apps/api/src/routes/v1/missions.ts`、`apps/web/src/features/missions/`
-
-### v1.0.10 — Horse Racing
-- **問題**: Route 自訂 HORSES 陣列 + RTP_SCALE=2.0 使 EV=1.055（玩家優勢）
-- **修正**: Route 改用 GameManager 統一邏輯（FNV 哈希 + 權重），HE 調整至 ~4%
-- **附加**: 統一開獎流程（下注→等封盤→開跑）、多筆押注/不同金額、勝率統計圖表（去重 roundId）、localStorage 長期數據、未下注也播動畫、UI 大改（🐎 emoji、配色、選擇器位置、方向修正）
-- **檔案**: `apps/api/src/routes/v1/games/horse.ts`, `packages/domain/src/games/game-manager.ts`, `apps/web/src/features/casino/HorseRacingView.tsx`
-
-### v1.0.11 — Bingo
-- **問題**: 5/75 匹配率極低，RTP 僅 0.74%
-- **修正**: 提高基礎命中率（擴大可選數字範圍或增加中獎組合），調整 payout 倍率
-- **檔案**: `packages/domain/src/games/game-manager.ts`
-
-### v1.0.12 — Dragon Tiger
-- **問題**: ① `Math.random()` 不可驗證 ② flat 2x 賠率 ③ HE 40%
-- **修正**: ① 改用 FNV 哈希 ② 採用 domain 的 `12/range` 變動賠率 ③ 重新計算平衡賠率
-- **檔案**: `apps/api/src/routes/v1/games/shoot-dragon-gate*.ts`, `packages/domain/src/games/game-manager.ts`
-
-### v1.0.13 — BluffDice
-- **問題**: Route 硬編碼 `predictedTotal=18`（接近 5d6 期望值 17.5），導致 EV≈1.39
-- **修正**: 讓玩家自選預測總和，調整賠率表使 HE 落在合理範圍
-- **檔案**: `apps/api/src/routes/v1/games/bluffdice.ts`, `packages/domain/src/games/game-manager.ts`
-
-### v1.0.14 — Sicbo
-- 賠率調整、HE 檢查，確保與其他遊戲一致
-- **檔案**: `packages/domain/src/games/game-manager.ts`
-
-### v1.0.15 — Duel
-- 賠率 1.96x 與實際 HE 的對齊檢查
-- **檔案**: `packages/domain/src/games/game-manager.ts`
-
-### v1.0.16 — Crash
-- 賠率/機率微調，確保 HE 落在合理範圍
-- **檔案**: `packages/domain/src/games/game-manager.ts`
-
-### v1.0.17 — Poker
-- 賠率/機率微調，確保 HE 落在合理範圍
-- **檔案**: `packages/domain/src/games/game-manager.ts`
-
-### v1.0.18 — Blackjack
-- 賠率/機率微調，確保 HE 落在合理範圍
-- **檔案**: `packages/domain/src/games/game-manager.ts`
-
----
-
-## VIP 遊戲（v1.0.19）
-
-| 項目 | 優先級 | 說明 |
-|------|--------|------|
-| Poker VIP 房間入口 | **高** | Room `poker_vip` 已定義（vipLevel=1），需在 poker route 增加 VIP 房間分流、加入房間 API 串接、前端大廳顯示 VIP 房入口 |
-| BluffDice VIP 房間入口 | **高** | Room `bluffdice_vip` 已定義（vipLevel=1），同上需 route + 前端整合 |
-| 多人配對機制 | **高** | 等候佇列、湊滿人數自動開局、Bot 補位邏輯完善（`fillWithBots` 僅 70% 門檻，需確認穩定） |
-| 牌型判定實作 | **高** | `MultiplayerGameManager.resolvePokerHand`（`room-manager.ts:134`）目前為 mock，需完成真實牌型比對（同花順、鐵支、葫蘆等） |
-| 骰子比對實作 | **高** | `MultiplayerGameManager.resolveBluffDice`（`room-manager.ts:139`）目前為 mock，需完成真實吹牛骰判定 |
-| 即時狀態同步 | **中** | 目前 `advancePoker` 純記憶體操作，需設計 SSE/WebSocket 推送玩家輪次、公共牌、獎池變化 |
-| VIP 權限檢查 | **中** | `joinRoom` 已檢查 `vipLevel`，但前端需顯示鎖定狀態與升級引導 |
-| 對局歷史查詢 | **低** | 記錄每局結果、底池、參與玩家，提供歷史查詢 |
-
----
-
-## 股市調整 + 交易效能（v1.0.20）
-
-| 項目 | 優先級 | 說明 |
-|------|--------|------|
-| 背景市場 tick | **高** | 定時器統一推進價格，避免每 request 各自算 |
-| Admin 干預端點 | **高** | 調整 symbol 價格/波動率、注入 shock、改利率 |
-| futures_close tick | **中** | API 補上 tick 參數傳遞 |
-| futures_open 遺漏 TP/SL 參數 | **高** | API `apps/api/src/routes/v1/market.ts:141,171` 未將 `takeProfitPrice`/`stopLossPrice` 從 request body 傳入 domain `openFutures()`，導致開倉永遠沒有停利停損價 |
-| 持倉 TP/SL 即時調整 UI | **高** | 現有倉位無法事後修改停利停損點。需在持倉卡片內新增可直接編輯的 TP/SL 輸入框（類似開倉表單），並新增 API action 如 `futures_modify_tp_sl` 即時更新倉位的 `takeProfitPrice`/`stopLossPrice` |
-| 清算檢查一致性 | **中** | PnL 99% 閾值與 liquidationPrice 公式對齊 |
-| 前端極速反饋 | **高** | 股市/賭場操作先顯示結果再等後端/上鏈確認（optimistic UI） |
-| 後端非阻塞 | **中** | 交易操作立即回傳，上鏈等慢操作背景排隊處理 |
-| 股利/分割 | **低** | 長期功能 |
-
-**交易效能優化原則**:
-```
-玩家操作 → 前端立即顯示結果（樂觀更新）
-         → 後端快速驗證 + 記帳（ms 級）
-         → 上鏈排隊慢慢跑（非阻塞）
-```
-
----
-
-## 上鏈系統（v1.0.21）
-
-| 項目 | 優先級 | 說明 |
-|------|--------|------|
-| 上鏈排隊佇列 | **高** | 目前有 TxIntent 但排隊狀態不透明。需佇列儀表板顯示 pending/broadcasted/confirmed/failed |
-| 上鏈公開頁面 | **高** | 公開頁面查詢 tx hash、狀態、確認數、gas 用量。類似 etherscan 精簡版 |
-| 佇列重試機制 | **中** | failed tx 自動重試，超過次數告警 |
-| 佇列優先級 | **低** | 高價值交易優先處理 |
-
----
-
-## 交易紀錄 + 動態重構（v1.0.22）
-
-| 項目 | 優先級 | 說明 |
-|------|--------|------|
-| 交易紀錄系統完善 | **高** | 完整查詢：時間範圍、類型篩選、分頁、匯出 |
-| 公開交易動態 | **高** | 保留最新市場動態（大額交易/爆倉）與錢包動態（儲值/提領） |
-| 移除錢包動態 | **高** | 錢包動態與交易紀錄功能重複，移除重複部分 |
-| 動態 feed 效能 | **中** | 限制顯示筆數、只保留最近 N 筆 |
-
----
-
-## 全站快取 + 監控（v1.0.23）
-
-| 項目 | 優先級 | 說明 |
-|------|--------|------|
-| 管理頁面載入優化 | **高** | 目前管理頁面載入慢，找出慢查詢 + 加入快取 |
-| 全站快取策略 | **高** | API response cache（KV/Redis），靜態資源 CDN，資料庫查詢快取 |
-| 伺服器運行時間 | **中** | server uptime 端點，前端顯示運行狀態 |
-| 重新登入時間反饋 | **中** | 圖表記錄每次重新登入的響應時間，方便追蹤效能趨勢 |
-| 快取失效機制 | **中** | 寫入操作時主動失效相關快取 |
-
----
-
-## 公司系統（v1.0.24）
-
-### 已完成
-| 項目 | 說明 | 狀態 |
-|------|------|:----:|
-| `/upgrade-fab` 路由 | Chip 公司 Fab Level 升級，支援 `checkUnlocks` 解鎖 memory_chip | ✅ |
-| `/deposit` 路由 | 錢包 ZXC → 公司營運資金，含 TxIntent | ✅ |
-| 招聘押金 | `/hire` 扣 `salary × 10` 押金，現金不足拒僱 | ✅ |
-| 破產系統 | `cash < -5000` 時自動遣散全員 + 重置等級 | ✅ |
-| Fab 升級前端 | 互動按鈕（扣除成本後升級） | ✅ |
-
-### 剩餘項目
-| 項目 | 優先級 | 說明 |
-|------|--------|------|
-| 前端存入/提領 UI | **高** | CompanyView 加入存款按鈕（錢包→公司） |
-| 公司事件歷史顯示 | **低** | `data.history` 有累積但前端沒展示 |
-
-### 公司規則完整設計
-
-#### 二種公司類型
-| 類型 | AI 公司 | Chip 公司 |
-|------|---------|----------|
-| 起始產品 | ChatBot API（營收 10/tick） | 處理器晶片（營收 15/tick） |
-| 員工角色 | data_scientist / engineer / researcher | chip_designer / process_engineer / materials_scientist |
-| 設備 | GPU（5,000 ZXC）+ 超級電腦（50,000 ZXC） | Fab Level（升級費 = level × 10,000 ZXC） |
-| 產品解鎖 | 2 engineer → 圖片生成器；3 researcher + 1 專利 → 企業 AI 套件 | fabLevel≥3 → 記憶體晶片；2 專利 → 客製化 ASIC |
-
-#### 經濟運作（每 tick = 30 秒）
-1. **薪資支出**: 每 tick 扣除所有員工 `salary` 總和
-2. **產品營收**: `baseRevenue × level × qualityMult × researchMult × priceMult × demand`
-3. **研究進度**: 每 tick + `engineerCount × 0.1 × teamMult × equipMult`（累積 100 → 1 專利）
-4. **聲譽漂移**: 每 tick 向 50 收斂 ±0.1
-
-#### 員工系統
-- **招聘流程**: 抽卡 → 預覽 → 確認（扣 `salary × 10` 押金）
-- **解僱**: 直接移除（不返還押金）
-- **團隊加成**: 協同（同角色加分）+ 領導力（管理職加分）- 衝突（異角色減分）
-
-#### 破產
-- 當 `cash < -5000`：自動遣散所有員工，重置等級/產品/研究，歸零現金
-
----
-
-## 顏色設計語言（v1.0.25）
-
-### 當前問題
-目前全站僅使用黃色（`#ffd700`）與黑色，缺乏層次感與會員辨識度。
-
-### 新色彩系統
-
-#### 會員等級身份色
-| 等級 | 漸層 | 用途 |
+| 類型 | 狀態 | 說明 |
 |------|------|------|
-| **鑽石** | `linear-gradient(90deg, #ff4fff, #fcc025)` 粉金漸層 | 鑽石會員徽章、專屬房間邊框、頭像光暈 |
-| **黃金** | `linear-gradient(90deg, #ffd700, #fcc025)` 金金漸層 | 黃金會員徽章、VIP 入口按鈕、等級標籤 |
-| **青銅** | `linear-gradient(90deg, #cd7f32, #fcc025)` 古銅金漸層 | 一般會員徽章、預設等級標示 |
+| **AI 公司** | ⏳ 待重構 | 未來以 OpenAI 起源故事為範本，員工/R&D/模型訓練玩法 |
+| **半導體公司** | 🎯 **開發中** | 從 1971 手繪晶片到先進封裝的完整科技樹 |
 
-#### UI 元件配色原則
-| 元件 | 顏色 | 說明 |
+### 核心設計原則
+
+1. **階梯式成本** — 每個階段的設備/研發成本對應真實半導體產業價格
+2. **指數級收益** — 越先進的晶片，售價呈指數成長
+3. **員工驅動** — 沒有員工無法運作，員工素質決定效率與良率
+4. **掛機 + 操作** — 生產是計時器掛機，科技樹/突破是手動操作
+5. **晶片閉環** — 生產晶片 → 組裝電腦 → 電腦加速生產 → 生產更先進晶片
+
+---
+
+## 📈 成本與收益曲線
+
+```
+階段           設備成本        每片晶片價值      基礎生產時間
+────────────────────────────────────────────────────────────
+手繪 10μm     500 ZXC         15-50 ZXC          4 小時
+手繪 5μm      3,000 ZXC       50-150 ZXC         2 小時
+黃光 G-line   50,000 ZXC      200-800 ZXC        45 分鐘
+Stepper 1μm   10,000,000 ZXC  50K-200K ZXC      30 分鐘
+DUV 248nm     100,000,000 ZXC 500K-2M ZXC       20 分鐘
+ArF 193nm     500,000,000 ZXC 2M-10M ZXC        15 分鐘
+EUV 13.5nm    5,000,000,000 ZXC 50M-200M ZXC   10 分鐘
+先進封裝      另計            晶片價值 x2-5x    另計
+```
+
+---
+
+## 🟢 Phase 1：CPU 時代（手繪 → 微米微影）1971-1989
+
+> 玩家從一間破舊工作室起步，用美工刀和紅膠膜手工刻劃電路。
+
+### 製程節點
+
+> 早期無自動化設備，每次生產就是一次「手工曝光」循環。
+> 沒有員工時生產時間最長，雇用 fab_worker 可逐步縮短。
+
+| 節點 | 解鎖條件 | 基礎良率 | 基礎產量 | 基礎耗時 | 每 fab_worker 減時 | 晶片產出 |
+|------|----------|----------|----------|----------|-------------------|----------|
+| `hand_drawn_10um` | 初始自帶 | 23% | 3-8 片 | 4 小時 | -30 min | 子熙-4004 |
+| `hand_drawn_5um` | camera_lens Lv.1 | 28% | 2-6 片 | 2 小時 | -15 min | 子熙-8086 |
+| `yellow_room_g_line` | 突破瓶頸（10x 子熙-4004 + 5,000 ZXC） | 35% | 2-5 片 | 45 分鐘 | -5 min | 子熙-486 |
+
+### 晶片價值與用途
+
+| 晶片 | 對應真實晶片 | 每片價值 | 組裝用途 |
+|------|-------------|----------|----------|
+| 子熙-4004 | Intel 4004 (1971) | 15-50 ZXC | 可組裝「初階計算機」 |
+| 子熙-8086 | Intel 8086 (1978) | 50-150 ZXC | 可組裝「第二代計算機」 |
+| 子熙-486 | Intel 486 (1989) | 200-800 ZXC | 可組裝「工作站」 |
+
+### 電腦組裝（晶片的主要用途）
+
+| 電腦 | 需求晶片 | 效果 | 說明 |
+|------|----------|------|------|
+| 初階計算機 | 5x 子熙-4004 | 生產時間 -10% | 第一台能輔助計算的機器 |
+| 第二代計算機 | 3x 子熙-8086 | 生產時間 -15%，良率 +3% | 更快的計算輔助 |
+| 工作站 | 2x 子熙-486 | 生產時間 -20%，良率 +5% | 專業級工程工作站 |
+
+> 每台電腦佔用 1 個機架位，機架位 = factoryTier × 3 + 1。
+> 晶片也可直接賣給系統回收，回收價 = 基礎價值 × 0.5。
+
+### 科技樹
+
+| id | 名稱 | 最大等級 | 每級成本 | 每級效果 |
+|----|------|----------|----------|----------|
+| `blade_quality` | 優化鎢鋼刀片 | Lv.3 | 800 ZXC | 良率 +3% |
+| `air_filtration` | 加裝排風扇 | Lv.1 | 1,500 ZXC | 落塵報廢率 -5% |
+| `camera_lens` | 改進大相機鏡頭 | Lv.2 | 3,000 ZXC | Lv.1 解鎖 5μm，Lv.2 提升良率 +2% |
+| `exposure_accuracy` | 曝光對準精度 | Lv.2 | 2,000 ZXC | 良率 +2%/Lv.（黃光室解鎖） |
+
+### 員工
+
+| 角色 | 基本薪資/tick | 核心影響 |
+|------|--------------|----------|
+| `fab_worker` 晶圓作業員 | 3 | 每名 +0.5 基礎產量 |
+| `process_engineer` 製程工程師 | 5 | 良率 +2%/名（依 productivity 加權） |
+| `chip_designer` 晶片設計師 | 6 | 研發速度 +10%/名，突破成本 -5%/名 |
+| `research_scientist` 研究科學家 | 8 | 科技升級成本 -8%/名 |
+
+### 公司營運成本（每 tick = 30 秒）
+
+- 員工薪資：所有員工 salary 總和
+- 水電租金：base 1 ZXC/tick（隨 factoryTier 增加）
+- 材料消耗：每次生產消耗 base 50 ZXC 材料費
+
+### 收益來源
+
+- 晶片回收賣給系統（回收價 = 基礎價值 × 0.5）
+- 晶片可掛賣場賣給其他玩家（自由定價）
+- 電腦間接提升生產效率 = 更高產出
+
+### 瓶頸突破
+
+當科技樹點滿、晶片庫存足夠時，可進行時代瓶頸突破：
+
+| 突破項目 | 消耗 | 結果 |
+|----------|------|------|
+| 微處理器架構革新 | 10x 子熙-4004 + 5,000 ZXC | 解鎖 `hand_drawn_5um` |
+| 進入黃光時代 | 8x 子熙-8086 + 20,000 ZXC | 解鎖 `yellow_room_g_line` |
+
+---
+
+## 🟡 Phase 2：CPU / GPU 雙線分叉（微米 → DUV 奈米）1990-2020
+
+> 科技樹正式分岔為 CPU 與 GPU 兩條獨立產線，玩家需分配資源雙線營運。
+
+### CPU 產線
+
+| 節點 | 成本 | 良率 | 晶片 | 每片價值 |
+|------|------|------|------|----------|
+| `i_line_stepper` | 500,000 ZXC | 45% | Pentium | 2K-8K ZXC |
+| `duv_248nm` | 10,000,000 ZXC | 55% | Core i7 (Nehalem) | 50K-200K ZXC |
+| `finfet_22nm` | 100,000,000 ZXC | 60% | Core i7 (Haswell) | 500K-2M ZXC |
+| `duv_14nm` | 500,000,000 ZXC | 65% | AMD Ryzen | 2M-10M ZXC |
+
+### GPU 產線（需 CPU 產線達 i_line 後解鎖）
+
+| 節點 | 成本 | 良率 | 晶片 | 每片價值 |
+|------|------|------|------|----------|
+| `gpu_raster` | 300,000 ZXC | 40% | GeForce 256 | 5K-20K ZXC |
+| `gpu_shader` | 8,000,000 ZXC | 48% | GTX 980 | 100K-500K ZXC |
+| `gpu_cuda` | 80,000,000 ZXC | 52% | Tesla V100 | 1M-5M ZXC |
+| `gpu_tensor` | 600,000,000 ZXC | 55% | RTX 3090 | 5M-20M ZXC |
+
+### 新科技樹
+
+| 科技 | 分類 | 每級成本 | 效果 |
+|------|------|----------|------|
+| `stepper_alignment` | CPU | 50,000 ZXC/Lv | 良率 +2%/Lv（Max 5） |
+| `cuda_core_arch` | GPU | 100,000 ZXC/Lv | GPU 產量 +10%/Lv（Max 5） |
+| `multi_core_design` | CPU | 200,000 ZXC/Lv | CPU 產量 +15%/Lv（Max 3） |
+| `hbm_memory` | GPU | 500,000 ZXC/Lv | GPU 良率 +3%/Lv（Max 3） |
+
+### 設備成本（真實價格）
+
+| 設備 | 成本 | 真實參考價格 |
+|------|------|-------------|
+| I-line Stepper | 500,000 ZXC | ~50 萬 USD (Nikon NSR) |
+| DUV 248nm Scanner | 10,000,000 ZXC | ~1,000 萬 USD (ASML PAS 5500) |
+| ArF 193nm Immersion | 500,000,000 ZXC | ~5,000 萬 USD (ASML NXT) |
+| EUV 13.5nm | 5,000,000,000 ZXC | ~3.5 億 USD (ASML NXE:3600D) |
+
+---
+
+## 🔴 Phase 3：先進封裝車間（Chiplet + CoWoS）2020-2025
+
+> 摩爾定律逼近物理極限，光縮小製程已無法提升效能。玩家必須進入**先進封裝（Advanced Packaging）**時代——將多顆小晶片（Chiplet）異質整合為一顆超級處理器。
+
+### 解鎖條件
+
+- CPU 產線達到 `duv_14nm` 且擁有 **10 片以上 Ryzen** 等級晶片
+- 消耗 1,000,000,000 ZXC 建立封裝車間
+
+### 封裝技術
+
+#### 1. AMD Infinity Fabric — Chiplet 拼裝
+
+| 項目 | 需求 | 產出 |
 |------|------|------|
-| 背景底色 | `#0a0a0f`（深黑帶紫） | 取代純黑，增加質感 |
-| 卡片/面板 | `#14141f` | 略亮於背景，區分層級 |
-| 主要文字 | `#f0f0f0` | 高對比閱讀 |
-| 次要文字 | `#888899` | 輔助資訊、提示 |
-| 重點高亮 | `#ffd700` | 按鈕、連結、活躍狀態 |
-| 成功/獲利 | `#00e676` | 遊戲勝利、正 PnL |
-| 失敗/虧損 | `#ff5252` | 遊戲失敗、負 PnL |
-| 警示/中立 | `#ffab40` | 等待中、部分完成 |
-| 資訊/連結 | `#40c4ff` | 可點擊文字、說明圖示 |
-| 邊框/分隔 | `#2a2a3a` | 卡片邊框、分隔線 |
+| CCD 小晶片 | 8x CPU 計算晶片（duv_14nm 產出） | AMD EPYC 64 核 |
+| I/O Die | 1x 成熟製程 I/O 晶片 | |
+| Infinity Fabric | 消耗 50,000,000 ZXC 啟動封裝 | |
+| **結果** | 封裝良率 60% | **EPYC 伺服器晶片**（價值 50M-200M ZXC） |
+| **組裝用途** | 1x EPYC → 組裝「伺服器節點」 | 生產時間 -30%，可並行生產 |
 
-#### 實作優先級
-| 項目 | 優先級 | 說明 |
-|------|--------|------|
-| 會員等級漸層標籤 | **高** | 大廳、個人檔案、排行榜會員名稱使用對應漸層 |
-| CSS 變數統一 | **高** | 抽取為 `--color-*` CSS custom properties，集中管理 |
-| 按鈕、輸入框配色 | **高** | 按鈕使用金色主色，禁用態 / hover 態定義明確 |
-| 卡片陰影與邊框 | **中** | 使用 `#2a2a3a` 邊框 + `rgba(255, 215, 0, 0.05)` 微光暈 |
-| 暗色主題一致性 | **中** | 確保所有頁面背景/卡片統一使用新色票 |
-| 成功/失敗色導入 | **中** | 遊戲結果、交易盈虧、通知使用綠/紅區分 |
-| Tailwind 主題擴充 | **中** | 若使用 Tailwind，擴充 `theme.extend.colors` 涵蓋新色票 |
+#### 2. NVIDIA CoWoS — 晶圓級封裝
 
----
+| 項目 | 需求 | 產出 |
+|------|------|------|
+| GPU Core | 1x 頂級 GPU 晶片（gpu_tensor 產出） | NVIDIA H100 / Blackwell B200 |
+| HBM 記憶體 | 4-8x 極難生產的高頻寬記憶體 | |
+| 矽中介層 | 1x Silicon Interposer（特殊材料） | |
+| CoWoS 封裝 | 消耗 200,000,000 ZXC | |
+| **結果** | **基礎封裝良率 40%**（可透過科技提升至 95%） | **H100/Blackwell**（價值 200M-1B ZXC） |
+| **組裝用途** | 1x H100 → 組裝「AI 算力櫃」 | 所有生產節點良率 +15% |
 
-## v1.0.27 — 管理員工具全面升級 (zixi-dev-tool)
+### 封裝科技樹
 
-### 新增功能
-
-#### 後台管理 SPA (`/admin`，7 標籤頁)
-- **儀表板** — 用戶數、商店物品數、24h 交易數、組合包數即時面板 + 操作事件記錄
-- **維護** — 公告 CRUD（新增/編輯/刪除/置頂/啟用停用）
-- **用戶** — 地址搜尋、餘額查詢、Win Bias 設定/清除、總下注重置、黑名單加入/移除
-- **目錄** — 商店物品 CRUD（頭像、稱號、加成、收藏品、寶箱、鑰匙）
-- **審核** — 用戶投稿核准/拒絕，核准後自動上架目錄並發放道具
-- **活動** — 活動 CRUD，支援 ZXC/YJC/道具/頭像/稱號獎勵設定
-- **工單** — 狀態過濾、關鍵字搜尋、管理員回覆更新
-
-#### 持有物品分析頁 (`/inventory`)
-- 3 個 Chart.js 圖表：道具類型分布（圓餅圖）、稀有度分布（圓餅圖）、持有價值排行（橫條圖，前 20 名）
-- 用戶列表附展開檢視詳細持有物、鑰匙、頭像、稱號、啟用中加成
-
-#### 組合包管理改進 (`/bundles`)
-- 道具選擇器改為下拉選單（依稀有度分組）
-- 支援調整數量、刪除已選道具
-
-#### UI 統一
-- 所有頁面（打錢、查餘額、建立帳號）加上側邊導航欄
-- 側邊欄新增「後台管理」入口
-- 使用 Chart.js CDN 提供圖表功能
-- 延遲載入（lazy load）各標籤頁，改善啟動速度
-
-### 技術細節
-- 後台 API 直接透過 SQL 操作資料庫，繞過 Casino API 認證層
-- 支援 `support_tickets` 等選用資料表不存在時優雅降級
-- 使用 `[System.IO.File]::WriteAllText` UTF-8 確保中文編碼正確
+| 科技 | 成本 | 效果 |
+|------|------|------|
+| `underfill_optimization` | 50M ZXC/Lv（Max 3） | 封裝良率 +10%/Lv |
+| `ultrasonic_inspection` | 100M ZXC | 提前檢出缺陷，報廢率 -15% |
+| `silicon_interposer` | 200M ZXC | 解鎖 CoWoS-S 大面積封裝 |
+| `hybrid_bonding` | 500M ZXC | 解鎖 3D 堆疊，頻寬 x2 |
 
 ---
 
-## 🔴 第一階段：博弈數學平衡與防套利修補（優先級：緊急）
+## 📁 檔案架構規劃
 
-| 項目 | 說明 | 狀態 |
-|------|------|:----:|
-| **1. Bingo 號碼限制 + 動態賠率** | 最少選 5 號 / 最多 10 號；依 `selectedNumbers.length` 動態查表調賠率，RTP 目標 96% | ⏳ |
-| **2. 射龍門開閘收費 + 動態賠率** | 開閘門收費（~10 ZXC）或限時 60 秒；廢除硬編碼 2x，改用 domain 動態倍率 `12/range` | ⏳ |
-| **3. Slots RTP 下調** | 廢除對子（Pair）獲勝，僅 Triple 連線才給賠率（3x/10x/50x），RTP 目標 95% | ⏳ |
-| **4. BluffDice 賠率回歸** | 後端接收 `predictedTotal`（5-30），重新平衡賠率使 EV < 96% | 🏗️ 部分完成 |
-| **5. Sicbo 圍骰 + 動態賠率** | 圍骰時大/小自動判輸；依點數機率動態設賠率（點數 4→60x，點數 10→6x） | ⏳ |
+```
+packages/domain/src/semiconductor/
+├── constants.ts              — 節點/科技/晶片/電腦/職業定義
+├── employee-gen.ts           — 半導體員工生成（含 traits/synergy）
+├── semiconductor-manager.ts  — 核心邏輯（生產/研發/突破/組裝/tick）
+└── index.ts                  — re-export
 
-## 🔒 第二階段：啟用後端簽名校驗（優先級：緊急）
+apps/api/src/routes/v1/company.ts  — 新增 semiconductor 路由（production/claim/research/craft/assemble）
+apps/web/src/features/company/
+├── CompanyView.tsx            — 修改：支援 semiconductor 類型
+├── SemiconductorView.tsx      — 新增：半導體儀表板（Fab / R&D / Team / Assembly / Chart 五 tab）
+└── useSemiconductor.ts        — 新增：React Query data hook
+```
 
-| 項目 | 說明 | 狀態 |
-|------|------|:----:|
-| **簽名驗證** | `/transfer` `/withdrawals` `/convert` 加入 `signature`/`publicKey`，對操作字串做 `verifyMessage` 校驗地址 | ⏳ |
+---
 
-## 🏢 第三階段：公司模擬 Beta 系統補完（優先級：高）
+## 🛠️ Phase 1 實作範圍
 
-| 項目 | 說明 | 狀態 |
-|------|------|:----:|
-| **補齊路由** | `/upgrade-fab` 升級 Fab Level；`/deposit` 錢包→公司充值 | ⏳ |
-| **招聘押金** | 僱用時扣 10x 月薪押金，現金不足拒僱 | ⏳ |
-| **破產系統** | `data.cash < -5000` 時自動破產、清空員工、關閉生產線 | ⏳ |
+### 包含功能
+- [x] 公司創立支援 `semiconductor` 類型（1,000 ZXC）
+- [x] CPU 時代三個節點（10μm → 5μm → G-line）
+- [x] 四項科技樹（刀片/排風/鏡頭/精度）
+- [x] 生產流程（開始 → 等待數小時 → 領取）
+- [x] 良率系統（基礎 23% + 科技 + 員工加成）
+- [x] 半導體員工招募（4 種角色）
+- [x] 瓶頸突破系統（消耗晶片解鎖下一時代）
+- [x] 電腦組裝系統（消耗晶片換取生產加成）
+- [x] 倉庫庫存管理
+- [x] 營運資金存入/提領
+- [x] 前端 Fab/R&D/Team/Assembly 四 tab UI
 
-## 🗄️ 第四階段：並發鎖與資料一致性優化（優先級：中）
+### 不包括（後續階段）
+- [ ] GPU 產線及雙線管理（Phase 2）
+- [ ] 先進封裝車間與拖拽介面（Phase 3）
+- [ ] ECharts 歷史數據折線圖（Phase 2）
+- [ ] 晶片玩家交易市場（Phase 2）
 
-| 項目 | 說明 | 狀態 |
-|------|------|:----:|
-| **行級鎖 FOR UPDATE** | 餘額扣款/充值 SQL 加入 `SELECT ... FOR UPDATE` 防止 Race Condition | ⏳ |
-| **sync-down TxIntent 緩衝** | 有 pending TxIntent 時跳過鏈上餘額覆寫 | ⏳ |
+---
+
+## ⚖️ 經濟平衡參數（Phase 1）
+
+| 項目 | 數值 |
+|------|------|
+| 創立成本 | 1,000 ZXC |
+| 生產材料費 | 50 ZXC/次 |
+| 員工薪資 | 3-8 ZXC/tick |
+| 水電租金（作坊） | 1 ZXC/tick |
+| 水電租金（黃光室） | 10 ZXC/tick |
+| 晶片回收價 | 基礎價值 × 0.5 |
+| 破產線 | cash < -5,000 ZXC |
+| 基礎生產時間（無員工） | 4 小時（10μm）→ 逐步縮短 |
+| **生產時間公式** | `baseDuration - (fabWorkerCount × timeReductionPerWorker)`，最少 30% 原時間 |
+| **機架位** | `factoryTier × 3 + 1` |
+
+---
+
+## 🔄 與現有系統關係
+
+| 現有系統 | 處理方式 |
+|----------|----------|
+| `company_accounts` 表 | 沿用，`company_type` 新增 `semiconductor` |
+| `data` JSONB 欄位 | 沿用，semiconductor 資料存入此欄位 |
+| AI 公司 | 保留現有系統（待之後重構成 OpenAI 範本玩法） |
+| 舊 chip 公司角色/產品 | **全部移除** |
+| 員工 trait/synergy 系統 | 沿用並擴充 |
+| KV claimSlot 冷卻 | 用於生產冷卻鎖 |
+| React Query 30s 輪詢 | 沿用 |
+| `api` axios instance | 沿用 |
+| 路由 `/app/company` | 沿用 |
+
+---
+
+## 2 奈米才是真競爭，而我的 EUV，才正要開始。

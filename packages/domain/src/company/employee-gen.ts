@@ -38,12 +38,9 @@ export interface Employee {
 }
 
 export const ROLE_DEFS: Record<string, { label: string; baseSalary: number; desc: string }> = {
-  data_scientist:    { label: "資料科學家", baseSalary: 5, desc: "提升模型準確度、產品品質" },
-  engineer:          { label: "工程師",     baseSalary: 3, desc: "產品開發速度、營收加成" },
-  researcher:        { label: "研究員",     baseSalary: 8, desc: "解鎖專利、新產品研發" },
-  chip_designer:     { label: "晶片設計師", baseSalary: 5, desc: "晶片效能、產品品質" },
-  process_engineer:  { label: "製程工程師", baseSalary: 3, desc: "良率提升、降低成本" },
-  materials_scientist:{ label: "材料科學家",baseSalary: 6, desc: "新材料研發、解鎖新產品" },
+  data_scientist: { label: "資料科學家", baseSalary: 5, desc: "提升模型準確度、產品品質" },
+  engineer:       { label: "工程師",     baseSalary: 3, desc: "產品開發速度、營收加成" },
+  researcher:     { label: "研究員",     baseSalary: 8, desc: "解鎖專利、新產品研發" },
 };
 
 // Box-Muller for normal distribution
@@ -58,10 +55,8 @@ function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v));
 }
 
-export function rollEmployee(companyType: "ai" | "chip"): Employee {
-  const rolePool = companyType === "ai"
-    ? ["data_scientist", "engineer", "researcher"]
-    : ["chip_designer", "process_engineer", "materials_scientist"];
+export function rollEmployee(companyType?: "ai"): Employee {
+  const rolePool = ["data_scientist", "engineer", "researcher"];
 
   const role = rolePool[Math.floor(Math.random() * rolePool.length)];
   const def = ROLE_DEFS[role];
