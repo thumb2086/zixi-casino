@@ -8,9 +8,9 @@ import { WalletManager } from "@repo/domain";
 import { rollEmployee as aiRollEmployee, createDefaultCompany, processTicks as aiProcessTicks, computeSummary as aiComputeSummary,
   upgradeLevelCost, researchCost, EQUIPMENT_COST, STARTUP_FEE, checkUnlocks } from "@repo/domain/company/company-manager.js";
 import {
-  createDefaultSemiconductorData, processTicks as semiProcessTicks, computeSummary as semiComputeSummary,
-  startProduction, claimProduction, researchTech, craftBreakthrough,
-  assembleComputer, rollEmployee as semiRollEmployee,
+  createDefaultSemiconductorData, computeSummary as semiComputeSummary,
+  startProduction, claimProduction, getResearchTechCost, applyResearchTech, craftBreakthrough,
+  assembleComputer, rollEmployee as semiRollEmployee, MATERIAL_COST,
 } from "@repo/domain/semiconductor/index.js";
 
 export async function companyRoutes(fastify: FastifyInstance) {
@@ -28,6 +28,15 @@ export async function companyRoutes(fastify: FastifyInstance) {
     return { session, user };
   };
 
+  const deductWallet = async (address: string, userId: string, amount: number, source: string) => {
+    const result = await walletRepo.adjustBalanceAtomic(address, `-${amount}`, "zhixi");
+    if (result === null) return false;
+    const intent = new WalletManager().createTxIntent(userId, "ZXC", "admin_debit", amount.toString());
+    intent.address = address; intent.meta = { source };
+    await walletRepo.saveTxIntent(intent);
+    return true;
+  };
+
   const pgQuery = async (strings: TemplateStringsArray, ...values: any[]) => {
     const conn = await requireDb();
     const res = await conn.execute(sql(strings as any, ...values));
@@ -43,7 +52,6 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
 
     if (row.company_type === "semiconductor") {
-      try { semiProcessTicks(data); } catch (err) { console.error("[Company] semiProcessTicks error:", err); }
       await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
       return createApiEnvelope({ company: { ...row, data: semiComputeSummary(data) } }, request.id);
     }
@@ -61,11 +69,9 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const { companyType, companyName } = request.body;
     const existing = await pgQuery`SELECT id FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
     if (existing[0]) return createApiEnvelope({ error: { code: "ALREADY_EXISTS" } }, request.id);
-    const result = await walletRepo.adjustBalanceAtomic(ctx.session.address, `-${STARTUP_FEE}`, "zhixi");
-    if (result === null) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
-    const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", STARTUP_FEE.toString());
-    intent.address = ctx.session.address; intent.meta = { source: "company_create" };
-    await walletRepo.saveTxIntent(intent);
+    if (!await deductWallet(ctx.session.address, ctx.user.id, STARTUP_FEE, "company_create")) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
+    }
 
     let data: any;
     let summary: any;
@@ -111,8 +117,16 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const candidate = data.pendingHire;
     if (!candidate || candidate.id !== employeeId) return createApiEnvelope({ error: { code: "NOT_FOUND", message: "employee not found or expired" } }, request.id);
     const deposit = candidate.salary * 10;
-    if ((data.cash || 0) < deposit) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS", message: `需要 ${deposit} ZXC 招聘押金` } }, request.id);
-    data.cash -= deposit;
+
+    if (row.company_type === "semiconductor") {
+      if (!await deductWallet(ctx.session.address, ctx.user.id, deposit, "semiconductor_hire")) {
+        return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `需要 ${deposit} ZXC 招聘押金` } }, request.id);
+      }
+    } else {
+      if ((data.cash || 0) < deposit) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS", message: `需要 ${deposit} ZXC 招聘押金` } }, request.id);
+      data.cash -= deposit;
+    }
+
     candidate.hiredAt = Date.now();
     data.employees = data.employees || [];
     data.employees.push(candidate);
@@ -139,7 +153,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     return createApiEnvelope({ success: true }, request.id);
   });
 
-  // ─── Semiconductor-only routes ──────────────────────────────────────
+  // ─── Semiconductor-only routes (all deduct real ZXC from wallet) ─────
 
   typedFastify.post("/hardware/produce", async (request) => {
     const ctx = await getContext(request);
@@ -148,6 +162,11 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const row = rows[0];
     if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+
+    if (!await deductWallet(ctx.session.address, ctx.user.id, MATERIAL_COST, "semiconductor_produce")) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `需要 ${MATERIAL_COST} ZXC 材料費` } }, request.id);
+    }
+
     const result = startProduction(data);
     if (!result.success) return createApiEnvelope({ error: { code: "PRODUCTION_FAILED", message: result.message } }, request.id);
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
@@ -177,10 +196,18 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const row = rows[0];
     if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const result = researchTech(data, techId);
+
+    const cost = getResearchTechCost(data, techId);
+    if (cost === null) return createApiEnvelope({ error: { code: "RESEARCH_FAILED", message: "無法升級此科技" } }, request.id);
+
+    if (!await deductWallet(ctx.session.address, ctx.user.id, cost, "semiconductor_research")) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `需要 ${cost} ZXC` } }, request.id);
+    }
+
+    const result = applyResearchTech(data, techId);
     if (!result.success) return createApiEnvelope({ error: { code: "RESEARCH_FAILED", message: result.message } }, request.id);
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
-    return createApiEnvelope({ success: true, newLevel: result.newLevel }, request.id);
+    return createApiEnvelope({ success: true, newLevel: result.newLevel, cost }, request.id);
   });
 
   typedFastify.post("/hardware/craft", {
@@ -193,6 +220,15 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const row = rows[0];
     if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+
+    const reqs = (await import("@repo/domain/semiconductor/constants.js")).NODE_BREAKTHROUGH_REQUIREMENTS;
+    const req = Object.values(reqs).find(r => r.targetNode === targetNode);
+    if (req) {
+      if (!await deductWallet(ctx.session.address, ctx.user.id, req.zixiCost, "semiconductor_craft")) {
+        return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE", message: `需要 ${req.zixiCost} ZXC` } }, request.id);
+      }
+    }
+
     const result = craftBreakthrough(data, targetNode);
     if (!result.success) return createApiEnvelope({ error: { code: "CRAFT_FAILED", message: result.message } }, request.id);
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
@@ -257,11 +293,9 @@ export async function companyRoutes(fastify: FastifyInstance) {
     if (row.company_type !== "ai") return createApiEnvelope({ error: { code: "AI_ONLY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
     const cost = researchCost();
-    const result = await walletRepo.adjustBalanceAtomic(ctx.session.address, `-${cost}`, "zhixi");
-    if (result === null) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
-    const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", cost.toString());
-    intent.address = ctx.session.address; intent.meta = { source: "company_research" };
-    await walletRepo.saveTxIntent(intent);
+    if (!await deductWallet(ctx.session.address, ctx.user.id, cost, "company_research")) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
+    }
     data.research = Math.min(100, (data.research || 0) + 10);
     if (data.research >= 100) { data.patents = (data.patents || 0) + 1; data.research = 0; checkUnlocks(data); }
     await pgQuery`UPDATE company_accounts SET data = ${JSON.stringify(data)}, updated_at = NOW() WHERE id = ${row.id}`;
@@ -289,7 +323,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     return createApiEnvelope({ success: true, equipment: data.equipment, cash: data.cash }, request.id);
   });
 
-  // ─── Shared routes ──────────────────────────────────────────────────
+  // ─── AI-only deposit/withdraw ────────────────────────────────────────
 
   typedFastify.post("/deposit", {
     schema: { body: z.object({ sessionId: z.string(), amount: z.number().min(1) }) },
@@ -297,15 +331,14 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { amount } = request.body;
-    const result = await walletRepo.adjustBalanceAtomic(ctx.session.address, `-${amount}`, "zhixi");
-    if (result === null) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
     const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    if (row.company_type !== "ai") return createApiEnvelope({ error: { code: "AI_ONLY" } }, request.id);
+    if (!await deductWallet(ctx.session.address, ctx.user.id, amount, "company_deposit")) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
+    }
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-    const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", amount.toString());
-    intent.address = ctx.session.address; intent.meta = { source: "company_deposit" };
-    await walletRepo.saveTxIntent(intent);
     data.cash = (data.cash || 0) + amount;
     const history = data.history || [];
     history.unshift({ at: new Date().toISOString(), type: "deposit", summary: `存入 ${amount} ZXC 至公司營運資金` });
@@ -323,6 +356,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const rows = await pgQuery`SELECT * FROM company_accounts WHERE user_id = ${ctx.user.id} LIMIT 1`;
     const row = rows[0];
     if (!row) return createApiEnvelope({ error: { code: "NO_COMPANY" } }, request.id);
+    if (row.company_type !== "ai") return createApiEnvelope({ error: { code: "AI_ONLY" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
     if ((data.cash || 0) < amount) return createApiEnvelope({ error: { code: "INSUFFICIENT_FUNDS" } }, request.id);
     data.cash -= amount;
@@ -357,11 +391,9 @@ export async function companyRoutes(fastify: FastifyInstance) {
     const ctx = await getContext(request);
     if (!ctx) return createApiEnvelope({ error: { code: "UNAUTHORIZED" } }, request.id);
     const { companyId, amount } = request.body;
-    const result = await walletRepo.adjustBalanceAtomic(ctx.session.address, `-${amount}`, "zhixi");
-    if (result === null) return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
-    const intent = new WalletManager().createTxIntent(ctx.user.id, "ZXC", "admin_debit", amount.toString());
-    intent.address = ctx.session.address; intent.meta = { source: "company_invest", companyId };
-    await walletRepo.saveTxIntent(intent);
+    if (!await deductWallet(ctx.session.address, ctx.user.id, amount, "company_invest")) {
+      return createApiEnvelope({ error: { code: "INSUFFICIENT_BALANCE" } }, request.id);
+    }
     const targetRows = await pgQuery`SELECT data FROM company_accounts WHERE id = ${companyId} LIMIT 1`;
     const target = targetRows[0];
     const targetData = target?.data ? (typeof target.data === "string" ? JSON.parse(target.data) : target.data) : {};

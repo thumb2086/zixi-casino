@@ -2,10 +2,10 @@ import {
   NODE_DEFS, NODE_PROGRESSION, CHIP_DEFS, TECH_TREE_DEFS,
   NODE_BREAKTHROUGH_REQUIREMENTS, ROLE_DEFS,
   COMPUTER_DEFS, getMaxRackSlots,
-  SEMICONDUCTOR_TICK_MS, MATERIAL_COST, BANKRUPTCY_THRESHOLD,
+  MATERIAL_COST,
   type NodeDef, type TechDef,
 } from "./constants.js";
-import { rollEmployee, computeTeamBonus, type SemiconductorEmployee } from "./employee-gen.js";
+import { computeTeamBonus, type SemiconductorEmployee } from "./employee-gen.js";
 
 export interface ProductionStatus {
   chipId: string;
@@ -15,16 +15,14 @@ export interface ProductionStatus {
 
 export interface SemiconductorData {
   version: number;
-  cash: number;
   nodeId: string;
   factoryTier: number;
   employees: SemiconductorEmployee[];
   pendingHire?: SemiconductorEmployee;
   inventory: Record<string, number>;
   techTree: Record<string, number>;
-  computers: string[];        // ids of assembled computers
+  computers: string[];
   production: ProductionStatus | null;
-  lastTickAt: number;
   history: CompanyEvent[];
 }
 
@@ -40,12 +38,6 @@ export interface ProductionResult {
   goodDies: number;
   chips: Record<string, number>;
   yieldRate: number;
-  events: CompanyEvent[];
-}
-
-export interface TickResult {
-  ticksProcessed: number;
-  salaryCost: number;
   events: CompanyEvent[];
 }
 
@@ -75,7 +67,6 @@ function fnv1a32(str: string): number {
 export function createDefaultSemiconductorData(nodeId?: string): SemiconductorData {
   return {
     version: 1,
-    cash: 0,
     nodeId: nodeId || "hand_drawn_10um",
     factoryTier: 0,
     employees: [],
@@ -83,7 +74,6 @@ export function createDefaultSemiconductorData(nodeId?: string): SemiconductorDa
     techTree: {},
     computers: [],
     production: null,
-    lastTickAt: Date.now(),
     history: [],
   };
 }
@@ -209,11 +199,6 @@ export function startProduction(data: SemiconductorData): { success: boolean; me
   const node = getNodeDef(data.nodeId);
   if (!node) return { success: false, message: "無效的製程節點" };
 
-  if (data.cash < MATERIAL_COST) {
-    return { success: false, message: `材料費不足，需要 ${MATERIAL_COST} ZXC` };
-  }
-
-  data.cash -= MATERIAL_COST;
   const duration = getProductionDuration(data);
   const now = Date.now();
 
@@ -238,43 +223,41 @@ export function claimProduction(data: SemiconductorData): ProductionResult | { s
     return { success: false, message: `生產尚未完成，剩餘 ${Math.ceil(remaining / 60000)} 分鐘` };
   }
 
-  const result = settleProduction(data);
-  return result;
+  return settleProduction(data);
 }
 
-export function researchTech(data: SemiconductorData, techId: string): { success: boolean; message?: string; newLevel?: number } {
+export function getResearchTechCost(data: SemiconductorData, techId: string): number | null {
   const tech = getTechDef(techId);
-  if (!tech) return { success: false, message: "無效的科技項目" };
+  if (!tech) return null;
+
+  const currentLevel = data.techTree[techId] || 0;
+  if (currentLevel >= tech.maxLevel) return null;
 
   if (tech.requiredNode) {
     const currentNodeIdx = NODE_PROGRESSION.indexOf(data.nodeId);
     const requiredNodeIdx = NODE_PROGRESSION.indexOf(tech.requiredNode);
-    if (currentNodeIdx < requiredNodeIdx) {
-      return { success: false, message: `需要先達到 ${NODE_DEFS[tech.requiredNode]?.name || tech.requiredNode} 製程` };
-    }
+    if (currentNodeIdx < requiredNodeIdx) return null;
   }
+
+  let cost = tech.costPerLevel;
+  const researchScientists = data.employees.filter(e => e.role === "research_scientist");
+  for (const emp of researchScientists) {
+    cost = Math.round(cost * (1 - 0.08 * emp.productivity));
+  }
+  return Math.max(1, cost);
+}
+
+export function applyResearchTech(data: SemiconductorData, techId: string): { success: boolean; message?: string; newLevel?: number } {
+  const tech = getTechDef(techId);
+  if (!tech) return { success: false, message: "無效的科技項目" };
 
   const currentLevel = data.techTree[techId] || 0;
   if (currentLevel >= tech.maxLevel) {
     return { success: false, message: `${tech.name} 已達最高等級` };
   }
 
-  let cost = tech.costPerLevel;
-
-  const researchScientists = data.employees.filter(e => e.role === "research_scientist");
-  for (const emp of researchScientists) {
-    cost = Math.round(cost * (1 - 0.08 * emp.productivity));
-  }
-  cost = Math.max(1, cost);
-
-  if (data.cash < cost) {
-    return { success: false, message: `需要 ${cost} ZXC，目前僅 ${data.cash} ZXC` };
-  }
-
-  data.cash -= cost;
   data.techTree[techId] = currentLevel + 1;
-
-  appendHistory(data, "research", `${tech.name} 升級至 Lv.${currentLevel + 1}，花費 ${cost} ZXC`);
+  appendHistory(data, "research", `${tech.name} 升級至 Lv.${currentLevel + 1}`);
 
   return { success: true, newLevel: currentLevel + 1 };
 }
@@ -297,7 +280,6 @@ export function getCraftRequirements(data: SemiconductorData): {
         break;
       }
     }
-    if (data.cash < req.zixiCost) canCraft = false;
 
     available.push({
       targetNode: req.targetNode,
@@ -327,15 +309,11 @@ export function craftBreakthrough(data: SemiconductorData, targetNode: string): 
     }
   }
 
-  if (data.cash < req.zixiCost) {
-    return { success: false, message: `需要 ${req.zixiCost} ZXC` };
-  }
-
   for (const [chipId, qty] of Object.entries(req.chipRequirements)) {
     data.inventory[chipId] -= qty;
     if (data.inventory[chipId] <= 0) delete data.inventory[chipId];
   }
-  data.cash -= req.zixiCost;
+
   data.nodeId = targetNode;
 
   const nodeName = NODE_DEFS[targetNode]?.name || targetNode;
@@ -416,48 +394,6 @@ export function assembleComputer(data: SemiconductorData, computerId: string): {
   return { success: true, message: `${def.name} 組裝完成！` };
 }
 
-export function processTicks(data: SemiconductorData): TickResult {
-  const now = Date.now();
-  const elapsed = now - data.lastTickAt;
-  if (elapsed < SEMICONDUCTOR_TICK_MS) return { ticksProcessed: 0, salaryCost: 0, events: [] };
-
-  const ticks = Math.floor(elapsed / SEMICONDUCTOR_TICK_MS);
-  if (ticks <= 0) return { ticksProcessed: 0, salaryCost: 0, events: [] };
-
-  const maxTicks = Math.min(ticks, 100);
-  const events: CompanyEvent[] = [];
-
-  for (let t = 0; t < maxTicks; t++) {
-    let salaryCost = 0;
-    for (const emp of data.employees) {
-      salaryCost += emp.salary;
-    }
-
-    let rentCost = 0;
-    if (data.factoryTier === 0) rentCost = 1;
-    else if (data.factoryTier >= 1) rentCost = 10;
-
-    const totalCost = salaryCost + rentCost;
-    data.cash -= totalCost;
-
-    if (data.cash < BANKRUPTCY_THRESHOLD) {
-      const empCount = data.employees.length;
-      data.employees = [];
-      data.cash = 0;
-      data.nodeId = "hand_drawn_10um";
-      data.factoryTier = 0;
-      data.production = null;
-      data.inventory = {};
-      data.techTree = {};
-      appendHistory(data, "bankruptcy", `破產！已遣散 ${empCount} 名員工，製程歸零`);
-      return { ticksProcessed: t + 1, salaryCost: totalCost, events };
-    }
-  }
-
-  data.lastTickAt += maxTicks * SEMICONDUCTOR_TICK_MS;
-  return { ticksProcessed: maxTicks, salaryCost: 0, events };
-}
-
 export function computeSummary(data: SemiconductorData) {
   const node = getNodeDef(data.nodeId);
   const production = data.production;
@@ -497,7 +433,6 @@ export function computeSummary(data: SemiconductorData) {
     nodeDescription: node?.description || "",
     factoryTier: data.factoryTier,
     factoryName: data.factoryTier === 0 ? "手工工作坊" : data.factoryTier === 1 ? "黃光無塵室" : "未知",
-    cash: Math.round(data.cash * 100) / 100,
     yieldRate: Math.round(yieldRate * 10000) / 100,
     productionDuration: duration,
     productionRemainingMs,
@@ -508,7 +443,6 @@ export function computeSummary(data: SemiconductorData) {
       roleLabel: ROLE_DEFS[e.role]?.label || e.role,
     })),
     employeeCount: data.employees.length,
-    totalSalary: data.employees.reduce((s, e) => s + e.salary, 0),
     techTree: availableTechs,
     computers: data.computers.map(id => {
       const def = COMPUTER_DEFS[id];
@@ -524,5 +458,6 @@ export function computeSummary(data: SemiconductorData) {
     teamDetails: team.details,
     history: data.history.slice(0, 20),
     breakthroughOptions: getCraftRequirements(data).available,
+    materialCost: MATERIAL_COST,
   };
 }

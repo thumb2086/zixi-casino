@@ -18,18 +18,6 @@ export default function SemiconductorView({ company, sessionId }: { company: any
   const { amountDisplay } = usePreferencesStore();
   const nf = (v: number | string) => formatNumber(v, amountDisplay === "full" ? "full" : "short");
   const { produce, claim, research, craft, assemble } = useSemiconductor();
-  const qc = useQueryClient();
-  const [depositAmount, setDepositAmount] = useState("");
-
-  const deposit = useMutation({
-    mutationFn: (amount: number) => api.post("/api/v1/company/deposit", { sessionId, amount }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
-  });
-
-  const withdraw = useMutation({
-    mutationFn: (amount: number) => api.post("/api/v1/company/withdraw", { sessionId, amount }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
-  });
 
   const [tab, setTab] = useState<"fab" | "rd" | "team" | "assembly">("fab");
 
@@ -99,7 +87,7 @@ export default function SemiconductorView({ company, sessionId }: { company: any
               )}
             </div>
           ) : (
-            <button onClick={() => produce.mutate()} disabled={produce.isPending || (sum?.cash ?? 0) < 50}
+            <button onClick={() => produce.mutate()} disabled={produce.isPending}
               className="w-full bg-accent text-black font-black py-4 rounded-2xl flex items-center justify-center gap-2 disabled:opacity-50">
               <Play size={16} />{t("start_production")}
             </button>
