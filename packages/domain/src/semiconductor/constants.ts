@@ -1,7 +1,4 @@
-export const SEMICONDUCTOR_TICK_MS = 30_000;
-export const STARTUP_FEE = 1000;
 export const MATERIAL_COST = 50;
-export const BANKRUPTCY_THRESHOLD = -5000;
 
 export interface NodeDef {
   id: string;
