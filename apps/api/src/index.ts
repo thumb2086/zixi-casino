@@ -87,9 +87,10 @@ fastify.setErrorHandler((error, request, reply) => {
     });
     return;
   }
-  reply.status(500).send({
+  const statusCode = error.statusCode || 500;
+  reply.status(statusCode).send({
     success: false,
-    error: "INTERNAL_SERVER_ERROR",
+    error: statusCode === 401 ? "UNAUTHORIZED" : "INTERNAL_SERVER_ERROR",
     message: error.message,
   });
 });
