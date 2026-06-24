@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
+import { eq, and } from "drizzle-orm";
 import { createApiEnvelope } from "@repo/shared";
 import { SupportManager, IdentityManager, OnchainWalletManager, WalletManager } from "@repo/domain";
 import {
@@ -18,6 +19,8 @@ import {
   RewardSubmissionRepository,
   RewardCampaignRepository,
 } from "@repo/infrastructure";
+import { requireDb } from "@repo/infrastructure/db/index.js";
+import { walletAccounts } from "@repo/infrastructure/db/schema.js";
 import { grantBundleToUser, ALL_ITEMS } from "../../utils/inventory.js";
 import { gameSettlement } from "../../utils/game-settlement.js";
 
@@ -38,6 +41,20 @@ export async function adminRoutes(fastify: FastifyInstance) {
   const campaignRepo = new RewardCampaignRepository();
 
   const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS ? process.env.ADMIN_ADDRESS.toLowerCase() : "";
+
+  // Fetch balance from KV with DB fallback
+  const fetchBalance = async (addr: string, token: "zhixi" | "yjc"): Promise<string> => {
+    const key = token === "yjc" ? `balance_yjc:${addr}` : `balance:${addr}`;
+    const fromKv = await kv.get<string>(key);
+    if (fromKv && fromKv !== "0") return fromKv;
+    try {
+      const db = await requireDb();
+      const row = await db.select({ balance: walletAccounts.balance }).from(walletAccounts)
+        .where(and(eq(walletAccounts.address, addr), eq(walletAccounts.token, token)))
+        .limit(1);
+      return row[0]?.balance || "0";
+    } catch { return "0"; }
+  };
 
   // Returns the admin context when the requester is an admin. Otherwise returns
   // null.
@@ -657,8 +674,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
       (users || []).map(async (u: any) => {
         const addr = String(u.address || "").toLowerCase();
         const [balance, balanceYjc, totalBet, vip, blacklisted] = await Promise.all([
-          kv.get<string>(`balance:${addr}`),
-          kv.get<string>(`balance_yjc:${addr}`),
+          fetchBalance(addr, "zhixi"),
+          fetchBalance(addr, "yjc"),
           kv.get<string>(`total_bet:${addr}`),
           kv.get<number>(`vip:${addr}`),
           kv.get<any>(`blacklist:${addr}`),
@@ -691,8 +708,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (!user) return createApiEnvelope({ error: { code: "NOT_FOUND", message: "User not found" } }, request.id);
     const profile = await userRepo.getUserProfile(user.id).catch(() => null);
     const [balance, balanceYjc, totalBet, vipLevel, blacklist] = await Promise.all([
-      kv.get<string>(`balance:${addrLower}`),
-      kv.get<string>(`balance_yjc:${addrLower}`),
+      fetchBalance(addrLower, "zhixi"),
+      fetchBalance(addrLower, "yjc"),
       kv.get<string>(`total_bet:${addrLower}`),
       kv.get<number>(`vip:${addrLower}`),
       kv.get<any>(`blacklist:${addrLower}`),
