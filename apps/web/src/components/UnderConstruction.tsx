@@ -37,7 +37,7 @@ export default function UnderConstruction({
         </div>
 
         <h2 className="mt-8 text-2xl font-black uppercase italic tracking-tight text-white">
-          ?發?
+          開發中
         </h2>
         <p className="mt-4 text-center text-sm font-bold text-secondary">
           {description}
@@ -67,7 +67,7 @@ export default function UnderConstruction({
           to="/app"
           className="mt-8 rounded-xl bg-accent px-8 py-4 text-sm font-black uppercase tracking-widest text-black transition-colors hover:bg-white"
         >
-          返?首?
+          返回首頁
         </Link>
       </main>
 
