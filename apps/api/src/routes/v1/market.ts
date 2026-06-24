@@ -121,7 +121,7 @@ export async function marketRoutes(fastify: FastifyInstance) {
     if (!sessionId || !ADMIN_ADDRESS) return null;
     const session = await sessionRepo.getSessionById(sessionId as string);
     if (!session || session.status !== "authorized") return null;
-    if (session.address.toLowerCase() !== ADMIN_ADDRESS) return null;
+    if (!session.address || session.address.toLowerCase() !== ADMIN_ADDRESS) return null;
     const user = await userRepo.getUserById(session.userId);
     return { session, user };
   };
