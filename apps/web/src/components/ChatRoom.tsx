@@ -5,7 +5,7 @@ import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { api } from '../store/api';
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'https://zixi-casino-api.onrender.com';
+const API_BASE = (import.meta as any).env?.VITE_API_URL || 'https://zixi-dev-tool.vercel.app/api/zixi';
 
 export default function ChatRoom() {
   const [inputText, setInputText] = useState('');
