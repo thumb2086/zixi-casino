@@ -11,6 +11,8 @@ dist
 .turbo
 .env*.local
 .states/
+.playwright-browsers/
+.puppeteer-cache/
 remix.config.json
 _check_*.mjs
 _fix_*.mjs

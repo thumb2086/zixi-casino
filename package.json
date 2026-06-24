@@ -8,7 +8,7 @@
     "start": "node apps/api/dist/index.js",
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter @repo/api... build && pnpm --filter web build",
-    "build:web": "pnpm --filter @repo/shared build && pnpm --filter web build && (PUPPETEER_CACHE_DIR=.puppeteer-cache pnpm --filter web exec node node_modules/puppeteer/install.mjs 2>/dev/null; PUPPETEER_CACHE_DIR=.puppeteer-cache pnpm --filter web build:prerender || echo prerender skipped)",
+    "build:web": "pnpm --filter @repo/shared build && pnpm --filter web build && (PLAYWRIGHT_BROWSERS_PATH=apps/web/.playwright-browsers npx -y playwright install chromium 2>/dev/null; PLAYWRIGHT_BROWSERS_PATH=apps/web/.playwright-browsers pnpm --filter web build:prerender || echo prerender skipped)",
     "preview": "pnpm --filter web preview"
   },
   "devDependencies": {

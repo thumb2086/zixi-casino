@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import { chromium } from "playwright";
 import http from "http";
 import fs from "fs";
 import path from "path";
@@ -37,7 +37,7 @@ async function main() {
   await new Promise((r) => server.listen(PORT, r));
   console.log(`[prerender] server on http://localhost:${PORT}`);
 
-  const browser = await puppeteer.launch({
+  const browser = await chromium.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox", "--lang=zh-TW"],
   });
@@ -46,9 +46,8 @@ async function main() {
     const url = `http://localhost:${PORT}${route}`;
     console.log(`[prerender] ${url}`);
 
-    const page = await browser.newPage();
-    await page.setExtraHTTPHeaders({ "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8" });
-    await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
+    const page = await browser.newPage({ locale: "zh-TW" });
+    await page.goto(url, { waitUntil: "networkidle", timeout: 30000 });
     try {
       await page.waitForFunction(() => !document.body.innerText.includes("正在恢復登入狀態"), { timeout: 8000 });
     } catch {}
