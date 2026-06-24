@@ -47,7 +47,7 @@ export async function adminRoutes(fastify: FastifyInstance) {
     if (!ADMIN_ADDRESS) return null;
     const session = await sessionRepo.getSessionById(sessionId as string);
     if (!session || session.status !== "authorized") return null;
-    if (session.address.toLowerCase() !== ADMIN_ADDRESS) return null;
+    if (!session.address || session.address.toLowerCase() !== ADMIN_ADDRESS) return null;
     const user = await userRepo.getUserById(session.userId);
     return { session, user };
   };
@@ -60,8 +60,8 @@ export async function adminRoutes(fastify: FastifyInstance) {
     const session = await sessionRepo.getSessionById(sessionId as string);
     if (!session) return { code: "SESSION_NOT_FOUND", message: "Session 不存在或已過期" };
     if (session.status !== "authorized") return { code: "SESSION_NOT_AUTHORIZED", message: `Session 狀態為 ${session.status}` };
-    if (session.address.toLowerCase() !== ADMIN_ADDRESS) {
-      return { code: "NOT_ADMIN", message: `登入錢包 ${session.address.slice(0, 10)}… 不是管理員地址` };
+    if (!session.address || session.address.toLowerCase() !== ADMIN_ADDRESS) {
+      return { code: "NOT_ADMIN", message: `登入錢包 ${(session.address || "").slice(0, 10)}… 不是管理員地址` };
     }
     return { code: "UNKNOWN", message: "未知錯誤" };
   };
