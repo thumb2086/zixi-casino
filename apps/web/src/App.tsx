@@ -40,6 +40,8 @@ const LandingView = lazy(() => import('./features/landing/LandingView'));
 const FAQView = lazy(() => import('./features/info/FAQView'));
 const WhitepaperView = lazy(() => import('./features/info/WhitepaperView'));
 const GuidesView = lazy(() => import('./features/info/GuidesView'));
+const PrivacyPolicy = lazy(() => import('./features/info/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./features/info/TermsOfService'));
 import { Loader2 } from 'lucide-react';
 import { useFontSizeStore } from './store/useFontSizeStore';
 
@@ -164,6 +166,8 @@ function AppContent() {
         <Route path="/faq" element={<FAQView />} />
         <Route path="/whitepaper" element={<WhitepaperView />} />
         <Route path="/guides" element={<GuidesView />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
         {!isAuthorized ? (
           <>
             <Route path="/" element={<Navigate to="/landing" replace />} />

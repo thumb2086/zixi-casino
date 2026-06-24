@@ -201,6 +201,20 @@ export default function LandingView() {
 
         {/* Footer */}
         <footer className="border-t border-border/40 py-8 text-center">
+          <div className="mx-auto mb-4 flex max-w-md items-center justify-center gap-6">
+            <Link to="/faq" className="text-xs font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors">
+              {t('nav.faq')}
+            </Link>
+            <Link to="/privacy" className="text-xs font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors">
+              {t('nav.privacy')}
+            </Link>
+            <Link to="/terms" className="text-xs font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors">
+              {t('nav.terms')}
+            </Link>
+            <Link to="/guides" className="text-xs font-bold uppercase tracking-widest text-muted hover:text-accent transition-colors">
+              {t('nav.guides')}
+            </Link>
+          </div>
           <p className="text-sm text-muted">{t('landing.footer')}</p>
         </footer>
       </div>

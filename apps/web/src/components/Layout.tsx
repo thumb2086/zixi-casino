@@ -57,13 +57,23 @@ export default function Layout() {
                       <span className="text-xs font-bold uppercase tracking-widest text-info">{t('layout.global_chat')}</span>
                   </button>
                   <ChatRoom />
-                  <footer className="py-4 text-center space-y-1">
+                  <footer className="py-4 text-center space-y-2">
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-muted">
                       {t('layout.footer', { version: APP_VERSION })}
                     </p>
-                    <Link to="/landing" className="block text-[10px] uppercase tracking-widest text-muted hover:text-accent transition-colors">
-                      關於子熙佑戩
-                    </Link>
+                    <div className="flex items-center justify-center gap-3">
+                      <Link to="/landing" className="text-[10px] uppercase tracking-widest text-muted hover:text-accent transition-colors">
+                        關於子熙佑戩
+                      </Link>
+                      <span className="text-muted">|</span>
+                      <Link to="/privacy" className="text-[10px] uppercase tracking-widest text-muted hover:text-accent transition-colors">
+                        {t('nav.privacy')}
+                      </Link>
+                      <span className="text-muted">|</span>
+                      <Link to="/terms" className="text-[10px] uppercase tracking-widest text-muted hover:text-accent transition-colors">
+                        {t('nav.terms')}
+                      </Link>
+                    </div>
                   </footer>
                 </div>
               </div>
