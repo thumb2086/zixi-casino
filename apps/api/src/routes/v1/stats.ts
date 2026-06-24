@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createApiEnvelope } from "@repo/shared";
 import { StatsRepository, WalletRepository, kv, OpsRepository } from "@repo/infrastructure";
 import { requireDb } from "@repo/infrastructure/db/index.js";
+import { sql } from "drizzle-orm";
 import { SERVER_STARTED_AT } from "../../index.js";
 
 export async function statsRoutes(fastify: FastifyInstance) {
@@ -121,20 +122,24 @@ export async function statsRoutes(fastify: FastifyInstance) {
 
       // Count recent transactions (last 24h)
       const dayAgo = new Date(now - 86400000).toISOString();
-      const recentTxCount = await db.$count(
-        (await import("@repo/infrastructure/db/schema.js")).walletLedgerEntries as any,
+      const [recentTxRow] = await db.select({ count: sql<number>`count(*)::int` }).from(
+        (await import("@repo/infrastructure/db/schema.js")).walletLedgerEntries as any
+      ).where(
         (await import("drizzle-orm")).sql`created_at >= ${dayAgo}::timestamp`
-      ).catch(() => 0);
+      );
+      const recentTxCount = recentTxRow?.count ?? 0;
 
       // Count total users
-      const userCount = await db.$count(
+      const [userRow] = await db.select({ count: sql<number>`count(*)::int` }).from(
         (await import("@repo/infrastructure/db/schema.js")).users as any
-      ).catch(() => 0);
+      );
+      const userCount = userRow?.count ?? 0;
 
       // Count total sessions
-      const sessionCount = await db.$count(
+      const [sessionRow] = await db.select({ count: sql<number>`count(*)::int` }).from(
         (await import("@repo/infrastructure/db/schema.js")).sessions as any
-      ).catch(() => 0);
+      );
+      const sessionCount = sessionRow?.count ?? 0;
 
       return createApiEnvelope({
         uptime: uptimeSec,
