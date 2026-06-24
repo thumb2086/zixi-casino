@@ -1,4 +1,4 @@
-const PRIMARY = 'https://zixi-dev-tool.vercel.app/api/zixi-dev';
+const PRIMARY = 'https://zixi-dev-tool.vercel.app/api/zixi';
 const FALLBACK = 'https://zixi-casino-api.onrender.com';
 const BACKENDS = [PRIMARY, FALLBACK];
 const TIMEOUT = 10000;
