@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Cpu, FlaskConical, Users, Monitor, Play, Timer, ChevronRight, Box, Zap } from "lucide-react";
+import { Cpu, FlaskConical, Users, Monitor, Play, Timer, ChevronRight, Box } from "lucide-react";
 import { formatNumber } from "@repo/shared";
 import { usePreferencesStore } from "../../store/usePreferencesStore";
 import { api } from "../../store/api";
 import { useSemiconductor } from "./useSemiconductor";
+import TeamPanel from "./TeamPanel";
 
 const CHIP_NAMES: Record<string, string> = {
   zixi_4004: "子熙-4004",
@@ -179,9 +179,7 @@ export default function SemiconductorView({ company, sessionId }: { company: any
       )}
 
       {tab === "team" && (
-        <div className="space-y-4">
           <TeamPanel company={company} sessionId={sessionId} />
-        </div>
       )}
 
       {tab === "assembly" && (
