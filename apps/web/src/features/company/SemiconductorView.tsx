@@ -50,7 +50,7 @@ export default function SemiconductorView({ company, sessionId }: { company: any
         <div className="space-y-4">
           <div className="rounded-2xl bg-card p-4 border border-border/10">
             <p className="text-xs font-bold text-secondary mb-1">{t("current_node")}</p>
-            <p className="text-lg font-black text-accent">{sum?.nodeName || "—"}</p>
+            <p className="text-lg font-black text-accent">{sum?.nodeName || "-"}</p>
             <p className="text-caption text-secondary">{sum?.nodeDescription || ""}</p>
           </div>
 
@@ -118,7 +118,7 @@ export default function SemiconductorView({ company, sessionId }: { company: any
         <div className="space-y-4">
           <div className="rounded-2xl bg-card p-4 border border-border/10">
             <p className="text-xs font-bold text-secondary mb-1">{t("current_node")}</p>
-            <p className="text-sm font-black text-accent">{sum?.nodeName || "—"}</p>
+            <p className="text-sm font-black text-accent">{sum?.nodeName || "-"}</p>
             <p className="text-caption text-secondary">{sum?.nodeDescription || ""}</p>
           </div>
 
@@ -172,7 +172,7 @@ export default function SemiconductorView({ company, sessionId }: { company: any
               </div>
             ))}
             {(!sum?.breakthroughOptions || sum.breakthroughOptions.length === 0) && (
-              <p className="text-xs text-muted text-center py-2">—</p>
+              <p className="text-xs text-muted text-center py-2">-</p>
             )}
           </div>
         </div>
@@ -329,8 +329,9 @@ function TeamPanel({ company, sessionId }: { company: any; sessionId: string }) 
               <button onClick={() => setCandidate(null)} className="flex-1 border border-border/30 py-3 rounded-xl text-xs">{t("discard")}</button>
               <button onClick={() => hireConfirm.mutate(candidate.id)} disabled={hireConfirm.isPending}
                 className="flex-1 bg-accent text-black font-black py-3 rounded-xl text-xs">{t("hire_confirm")}</button>
+            </div>
           </div>
-
+        )}
         </div>
       </div>
     </div>
