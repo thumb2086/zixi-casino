@@ -260,10 +260,10 @@ export default function CompanyView() {
                   <div className="flex gap-2">
                     <input type="number" min={1} value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)}
                       placeholder="ZXC" className="flex-1 rounded-xl border border-border/20 bg-surface px-4 py-2 text-sm" />
-                    <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) deposit.mutate(a); setDepositAmount("company."); }}
+                    <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) deposit.mutate(a); setDepositAmount(""); }}
                       disabled={deposit.isPending || !depositAmount}
                       className="bg-emerald-600 text-white font-black px-3 py-2 rounded-xl text-xs">{t("company.deposit_label")}</button>
-                    <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) withdraw.mutate(a); setDepositAmount("company."); }}
+                    <button onClick={() => { const a = parseInt(depositAmount); if (a >= 1) withdraw.mutate(a); setDepositAmount(""); }}
                       disabled={withdraw.isPending || !depositAmount}
                       className="bg-red-600 text-white font-black px-3 py-2 rounded-xl text-xs">{t("company.withdraw_label")}</button>
                   </div>
