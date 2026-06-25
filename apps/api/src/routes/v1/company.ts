@@ -10,7 +10,7 @@ import { rollEmployee as aiRollEmployee, createDefaultCompany, processTicks as a
 import {
   createDefaultSemiconductorData, computeSummary as semiComputeSummary,
   startProduction, claimProduction, getResearchTechCost, applyResearchTech, craftBreakthrough,
-  assembleComputer, rollEmployee as semiRollEmployee, MATERIAL_COST,
+  assembleComputer, rollEmployee as semiRollEmployee, MATERIAL_COST, NODE_BREAKTHROUGH_REQUIREMENTS,
 } from "@repo/domain/semiconductor/index.js";
 
 export async function companyRoutes(fastify: FastifyInstance) {
@@ -221,7 +221,7 @@ export async function companyRoutes(fastify: FastifyInstance) {
     if (!row || row.company_type !== "semiconductor") return createApiEnvelope({ error: { code: "NOT_SEMICONDUCTOR" } }, request.id);
     const data = typeof row.data === "string" ? JSON.parse(row.data) : row.data;
 
-    const reqs = (await import("@repo/domain/semiconductor/constants.js")).NODE_BREAKTHROUGH_REQUIREMENTS;
+    const reqs = NODE_BREAKTHROUGH_REQUIREMENTS;
     const req = Object.values(reqs).find(r => r.targetNode === targetNode);
     if (req) {
       if (!await deductWallet(ctx.session.address, ctx.user.id, req.zixiCost, "semiconductor_craft")) {
