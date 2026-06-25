@@ -26,60 +26,60 @@ export default function CompanyView() {
   const { data, isLoading } = useQuery({
     queryKey: ["company"],
     queryFn: async () => {
-      const res = await api.get("company./api/v1/company", { params: { sessionId } });
+      const res = await api.get("/api/v1/company", { params: { sessionId } });
       return res.data.data;
     },
     refetchInterval: 30000,
   });
 
   const create = useMutation({
-    mutationFn: () => api.post("company./api/v1/company/create", { sessionId, companyType, companyName }),
+    mutationFn: () => api.post("/api/v1/company/create", { sessionId, companyType, companyName }),
     onSuccess: () => { setCreateMode(false); qc.invalidateQueries({ queryKey: ["company"] }); },
   });
 
   const hirePreview = useMutation({
-    mutationFn: () => api.get("company./api/v1/company/hire-preview", { params: { sessionId } }),
+    mutationFn: () => api.get("/api/v1/company/hire-preview", { params: { sessionId } }),
     onSuccess: (res: any) => setCandidate(res.data.data?.candidate),
   });
 
   const hireConfirm = useMutation({
-    mutationFn: (employeeId: string) => api.post("company./api/v1/company/hire", { sessionId, employeeId }),
+    mutationFn: (employeeId: string) => api.post("/api/v1/company/hire", { sessionId, employeeId }),
     onSuccess: () => { setCandidate(null); qc.invalidateQueries({ queryKey: ["company"] }); },
   });
 
   const fire = useMutation({
-    mutationFn: (employeeId: string) => api.post("company./api/v1/company/fire", { sessionId, employeeId }),
+    mutationFn: (employeeId: string) => api.post("/api/v1/company/fire", { sessionId, employeeId }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
   });
 
   const setPrice = useMutation({
     mutationFn: ({ productId, multiplier }: { productId: string; multiplier: number }) =>
-      api.post("company./api/v1/company/set-price", { sessionId, productId, multiplier }),
+      api.post("/api/v1/company/set-price", { sessionId, productId, multiplier }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
   });
 
   const upgrade = useMutation({
-    mutationFn: () => api.post("company./api/v1/company/upgrade", { sessionId }),
+    mutationFn: () => api.post("/api/v1/company/upgrade", { sessionId }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
   });
 
   const research = useMutation({
-    mutationFn: () => api.post("company./api/v1/company/research", { sessionId }),
+    mutationFn: () => api.post("/api/v1/company/research", { sessionId }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
   });
 
   const buyEquipment = useMutation({
-    mutationFn: (equipmentType: string) => api.post("company./api/v1/company/buy-equipment", { sessionId, equipmentType }),
+    mutationFn: (equipmentType: string) => api.post("/api/v1/company/buy-equipment", { sessionId, equipmentType }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
   });
 
   const deposit = useMutation({
-    mutationFn: (amount: number) => api.post("company./api/v1/company/deposit", { sessionId, amount }),
+    mutationFn: (amount: number) => api.post("/api/v1/company/deposit", { sessionId, amount }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
   });
 
   const withdraw = useMutation({
-    mutationFn: (amount: number) => api.post("company./api/v1/company/withdraw", { sessionId, amount }),
+    mutationFn: (amount: number) => api.post("/api/v1/company/withdraw", { sessionId, amount }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["company"] }); qc.invalidateQueries({ queryKey: ["user"] }); },
   });
 
@@ -314,14 +314,14 @@ function InvestView({ sessionId }: { sessionId: string }) {
   const { data } = useQuery({
     queryKey: ["company-investable"],
     queryFn: async () => {
-      const res = await api.get("company./api/v1/company/investable", { params: { sessionId } });
+      const res = await api.get("/api/v1/company/investable", { params: { sessionId } });
       return res.data.data;
     },
   });
 
   const invest = useMutation({
     mutationFn: ({ companyId, amount }: { companyId: string; amount: number }) =>
-      api.post("company./api/v1/company/invest", { sessionId, companyId, amount }),
+      api.post("/api/v1/company/invest", { sessionId, companyId, amount }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["company-investable"] });
       qc.invalidateQueries({ queryKey: ["company"] });

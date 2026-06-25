@@ -257,17 +257,17 @@ function TeamPanel({ company, sessionId }: { company: any; sessionId: string }) 
   const sum = company.data;
 
   const hirePreview = useMutation({
-    mutationFn: () => api.get("company./api/v1/company/hire-preview", { params: { sessionId } }),
+    mutationFn: () => api.get("/api/v1/company/hire-preview", { params: { sessionId } }),
     onSuccess: (res: any) => setCandidate(res.data.data?.candidate),
   });
 
   const hireConfirm = useMutation({
-    mutationFn: (employeeId: string) => api.post("company./api/v1/company/hire", { sessionId, employeeId }),
+    mutationFn: (employeeId: string) => api.post("/api/v1/company/hire", { sessionId, employeeId }),
     onSuccess: () => { setCandidate(null); qc.invalidateQueries({ queryKey: ["company"] }); },
   });
 
   const fire = useMutation({
-    mutationFn: (employeeId: string) => api.post("company./api/v1/company/fire", { sessionId, employeeId }),
+    mutationFn: (employeeId: string) => api.post("/api/v1/company/fire", { sessionId, employeeId }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["company"] }),
   });
 
