@@ -286,7 +286,6 @@ function TeamPanel({ company, sessionId }: { company: any; sessionId: string }) 
           </div>
         </div>
       )}
-
       <div className="rounded-2xl bg-card p-4 border border-border/10">
         <p className="text-xs font-bold text-secondary mb-3">{t("employees", { count: sum?.employeeCount ?? 0 })}</p>
         <div className="space-y-2">
@@ -309,7 +308,6 @@ function TeamPanel({ company, sessionId }: { company: any; sessionId: string }) 
           )}
         </div>
       </div>
-
       <div className="space-y-4">
         <p className="text-xs text-secondary">{t("hire_deposit")}</p>
         {!candidate ? (
@@ -332,7 +330,6 @@ function TeamPanel({ company, sessionId }: { company: any; sessionId: string }) 
             </div>
           </div>
         )}
-        </div>
       </div>
     </div>
   );
