@@ -1406,7 +1406,12 @@
     "role_chip_designer": "晶片設計師",
     "role_research_scientist": "研究科學家",
     "semiconductor_title": "半導體事業部",
-    "semiconductor_desc": "從手繪電路到先進製程的晶圓代工帝國"
+    "semiconductor_desc": "從手繪電路到先進製程的晶圓代工帝國",
+    "fab_helper": "每次生產消耗 50 ZXC（從錢包扣除），經過數小時曝光後產出晶片。良率越高，成功晶片越多。晶片可用來組裝電腦加速生產或突破製程瓶頸。",
+    "rd_helper": "升級科技可永久提升良率或解鎖新製程。花費直接從錢包扣除。突破瓶頸需消耗庫存晶片與 ZXC，解鎖下一代製程節點。",
+    "team_helper": "員工影響生產效率與良率。招聘需支付押金（薪資 x10）從錢包扣除。不同特質組合會產生協同或衝突。",
+    "assembly_helper": "用生產的晶片組裝電腦，可永久縮短生產時間與提升良率。機架空間有限，需升級工廠才能擴充。",
+    "wallet_note": "（從錢包扣除）"
   },
   "wallet": {
     "yjc_with_zxc": "YJC（≈ {{amount}} ZXC）"
