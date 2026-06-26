@@ -133,11 +133,12 @@ export function computeTeamBonus(employees: Employee[]): {
   const leadershipBonus = Math.min(maxLeadership * 0.05, 0.3);
 
   const cappedSynergy = Math.min(synergyBonus, 0.5);
-  const effectiveMultiplier = 1 + cappedSynergy + leadershipBonus - conflictPenalty;
+  const cappedConflict = Math.min(conflictPenalty, 0.5);
+  const effectiveMultiplier = 1 + cappedSynergy + leadershipBonus - cappedConflict;
 
   return {
     synergyBonus: cappedSynergy,
-    conflictPenalty,
+    conflictPenalty: cappedConflict,
     leadershipBonus,
     effectiveMultiplier: Math.max(0.1, effectiveMultiplier),
     details,
