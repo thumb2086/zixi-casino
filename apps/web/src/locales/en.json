@@ -1407,7 +1407,12 @@
     "role_chip_designer": "Chip Designer",
     "role_research_scientist": "Research Scientist",
     "semiconductor_title": "Semiconductor Division",
-    "semiconductor_desc": "From hand-drawn circuits to advanced wafer fabrication"
+    "semiconductor_desc": "From hand-drawn circuits to advanced wafer fabrication",
+    "fab_helper": "Each production cycle costs 50 ZXC (from wallet). After several hours of exposure, chips are produced. Higher yield = more working chips. Chips can assemble computers or unlock new process nodes.",
+    "rd_helper": "Upgrade techs to permanently boost yield or unlock new nodes. Costs are deducted from your wallet. Breakthroughs consume inventory chips + ZXC to advance to the next process generation.",
+    "team_helper": "Employees affect production speed and yield. Hiring costs a deposit (salary x10) from your wallet. Trait combinations create synergy or conflict.",
+    "assembly_helper": "Use produced chips to assemble computers. Each computer permanently reduces production time and boosts yield. Rack space is limited - upgrade your factory to expand.",
+    "wallet_note": "(from wallet)"
   },
   "wallet": {
     "yjc_with_zxc": "YJC (≈ {{amount}} ZXC)"

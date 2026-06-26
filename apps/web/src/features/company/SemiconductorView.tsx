@@ -48,6 +48,9 @@ export default function SemiconductorView({ company, sessionId }: { company: any
 
       {tab === "fab" && (
         <div className="space-y-4">
+          <div className="rounded-xl bg-card/50 p-3 border border-accent/10">
+            <p className="text-[10px] text-secondary leading-relaxed">{t("company.fab_helper")}</p>
+          </div>
           <div className="rounded-2xl bg-card p-4 border border-border/10">
             <p className="text-xs font-bold text-secondary mb-1">{t("company.current_node")}</p>
             <p className="text-lg font-black text-accent">{sum?.nodeName || "-"}</p>
@@ -116,6 +119,9 @@ export default function SemiconductorView({ company, sessionId }: { company: any
 
       {tab === "rd" && (
         <div className="space-y-4">
+          <div className="rounded-xl bg-card/50 p-3 border border-accent/10">
+            <p className="text-[10px] text-secondary leading-relaxed">{t("company.rd_helper")}</p>
+          </div>
           <div className="rounded-2xl bg-card p-4 border border-border/10">
             <p className="text-xs font-bold text-secondary mb-1">{t("company.current_node")}</p>
             <p className="text-sm font-black text-accent">{sum?.nodeName || "-"}</p>
@@ -184,6 +190,9 @@ export default function SemiconductorView({ company, sessionId }: { company: any
 
       {tab === "assembly" && (
         <div className="space-y-4">
+          <div className="rounded-xl bg-card/50 p-3 border border-accent/10">
+            <p className="text-[10px] text-secondary leading-relaxed">{t("company.assembly_helper")}</p>
+          </div>
           <div className="rounded-2xl bg-card p-4 border border-border/10">
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-bold text-secondary">{t("company.computers")}</p>
