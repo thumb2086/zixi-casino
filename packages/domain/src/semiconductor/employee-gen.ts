@@ -136,16 +136,28 @@ export function computeTeamBonus(employees: SemiconductorEmployee[]): {
 
   let conflictPenalty = 0;
   for (let i = 0; i < employees.length; i++) {
-    for (const trait of employees[i].traits) {
-      const conflicts = TRAIT_CONFLICT[trait] || [];
-      for (let j = 0; j < employees.length; j++) {
-        if (i === j) continue;
+    for (let j = i + 1; j < employees.length; j++) {
+      let hasConflict = false;
+      for (const trait of employees[i].traits) {
+        const conflicts = TRAIT_CONFLICT[trait] || [];
         if (employees[j].traits.some(t => conflicts.includes(t))) {
-          conflictPenalty += 0.10;
+          hasConflict = true;
+          break;
         }
       }
+      if (!hasConflict) {
+        for (const trait of employees[j].traits) {
+          const conflicts = TRAIT_CONFLICT[trait] || [];
+          if (employees[i].traits.some(t => conflicts.includes(t))) {
+            hasConflict = true;
+            break;
+          }
+        }
+      }
+      if (hasConflict) conflictPenalty += 0.10;
     }
   }
+  conflictPenalty = Math.min(conflictPenalty, 0.5);
   if (conflictPenalty > 0) details.push(`衝突懲罰 -${Math.round(conflictPenalty * 100)}%`);
 
   const maxLeadership = Math.max(...employees.map(e => e.leadership), 0);

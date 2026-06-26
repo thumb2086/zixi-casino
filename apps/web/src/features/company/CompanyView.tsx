@@ -29,7 +29,7 @@ export default function CompanyView() {
       const res = await api.get("/api/v1/company", { params: { sessionId } });
       return res.data.data;
     },
-    refetchInterval: 30000,
+    refetchInterval: 5000,
   });
 
   const create = useMutation({
