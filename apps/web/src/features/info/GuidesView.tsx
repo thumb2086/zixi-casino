@@ -82,11 +82,6 @@ export default function GuidesView() {
                   {t('guides.vipTip')}
                 </p>
               </div>
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <p className="leading-relaxed text-secondary">
-                  {t('guides.companyTip')}
-                </p>
-              </div>
             </div>
           </section>
 

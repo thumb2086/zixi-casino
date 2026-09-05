@@ -16,7 +16,6 @@ import {
   Trophy,
   User,
   Landmark,
-  Building2,
   TrendingUp,
   CalendarClock,
 } from 'lucide-react';
@@ -406,22 +405,6 @@ export default function LobbyView() {
             </div>
           </div>
 
-          <GlassCard
-            to="/app/company"
-            icon={Building2}
-            title={t('lobby.my_company')}
-            subtitle={t('lobby.ai_chip_simulation')}>
-            <div className="absolute top-2 right-2 bg-accent text-[#0e0e0e] text-[8px] font-bold px-2 py-0.5 rounded-full">BETA</div>
-            <p className="mt-2 text-[11px] font-bold uppercase tracking-tight text-secondary">
-              {t('lobby.company_description')}
-            </p>
-            <div className="mt-2 flex items-center gap-2">
-              <TrendingUp className="h-3 w-3 text-emerald-400" />
-              <span className="text-caption font-bold uppercase tracking-widest text-emerald-400">
-                {t('lobby.simulation_label')}
-              </span>
-            </div>
-          </GlassCard>
           {isAdmin && (
             <GlassCard
               to="/app/admin"

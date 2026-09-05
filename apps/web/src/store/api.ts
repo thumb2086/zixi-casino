@@ -1,13 +1,11 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from './useAuthStore';
 
-const PRIMARY = 'https://zixi-dev-tool.vercel.app/api/zixi';
-const FALLBACK = 'https://zixi-casino-6s1r.onrender.com';
+const PRIMARY = 'https://zixi-casino-6s1r.onrender.com';
 
 const envUrl = (import.meta as any).env?.VITE_API_URL;
 
 let activeBaseUrl = envUrl || PRIMARY;
-const autoFailover = !envUrl;
 
 export const api = axios.create({
   baseURL: activeBaseUrl,
@@ -43,12 +41,6 @@ api.interceptors.response.use(
   },
   async (error) => {
     const config = error.config;
-    if (config && !config._retried && autoFailover && activeBaseUrl === PRIMARY) {
-      config._retried = true;
-      activeBaseUrl = FALLBACK;
-      config.baseURL = FALLBACK;
-      return api.request(config);
-    }
     recordTiming(config);
     return Promise.reject(error);
   }

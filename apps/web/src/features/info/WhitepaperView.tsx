@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FileText, Shield, Coins, Crown, Building2, Gamepad2, ArrowRight } from 'lucide-react';
+import { FileText, Shield, Coins, Crown, Gamepad2, ArrowRight } from 'lucide-react';
 
 const SECTIONS = [
   { key: 'overview', icon: FileText },
@@ -9,7 +9,6 @@ const SECTIONS = [
   { key: 'fairness', icon: Shield },
   { key: 'games', icon: Gamepad2 },
   { key: 'vip', icon: Crown },
-  { key: 'company', icon: Building2 },
   { key: 'roadmap', icon: FileText },
 ] as const;
 

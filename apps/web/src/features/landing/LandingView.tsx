@@ -6,7 +6,6 @@ import {
   Crown,
   Sparkles,
   Coins,
-  Building2,
   Gamepad2,
   Star,
   Gem,
@@ -35,7 +34,6 @@ const features = [
   { icon: Gamepad2, titleKey: 'landing.features.games.title', descKey: 'landing.features.games.desc' },
   { icon: Coins, titleKey: 'landing.features.token.title', descKey: 'landing.features.token.desc' },
   { icon: Crown, titleKey: 'landing.features.vip.title', descKey: 'landing.features.vip.desc' },
-  { icon: Building2, titleKey: 'landing.features.company.title', descKey: 'landing.features.company.desc' },
 ];
 
 function FeatureCard({ icon: Icon, title, description }: { icon: React.ComponentType<{ className?: string }>; title: string; description: string }) {
