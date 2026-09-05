@@ -34,17 +34,16 @@ import { pokerRoutes } from "./routes/v1/games/poker.js";
 import { bluffdiceRoutes } from "./routes/v1/games/bluffdice.js";
 import { shootDragonGateRoutes } from "./routes/v1/games/shoot-dragon-gate.js";
 import { dragonTigerRoutes } from "./routes/v1/games/dragon-tiger.js";
-// v1.1.0: Company simulation (beta)
-import { companyRoutes } from "./routes/v1/company.js";
 // Phase 6: Chest / inventory routes
 import { chestRoutes } from "./routes/v1/chests-simple.js";
 import { inventoryRoutes } from "./routes/v1/inventory.js";
 import { pawnRoutes } from "./routes/v1/pawn.js";
 import { giftRoutes } from "./routes/v1/gift.js";
 import { missionRoutes } from "./routes/v1/missions.js";
+import { oauthRoutes } from "./routes/v1/oauth.js";
 import postgres from "postgres";
 import { registerCachePlugin } from "./plugins/cache.js";
-import { SessionRepository, UserRepository } from "@repo/infrastructure";
+import { SessionRepository, UserRepository, OAuthRepository } from "@repo/infrastructure";
 
 const fastify = Fastify({
   logger: true,
@@ -95,11 +94,29 @@ fastify.setErrorHandler((error, request, reply) => {
   });
 });
 
-// Global preHandler: resolve session context for all routes
+// Global preHandler: resolve session context for all routes (supports x-session-id header, Bearer token)
 const _sessionRepo = new SessionRepository();
 const _userRepo = new UserRepository();
+const _oauthRepo = new OAuthRepository();
 fastify.addHook('preHandler', async (request: any) => {
-  const sessionId = request.headers?.["x-session-id"] || request.query?.sessionId || request.body?.sessionId;
+  let sessionId = request.headers?.["x-session-id"] || request.query?.sessionId || request.body?.sessionId;
+
+  // Support Bearer token (OAuth access tokens)
+  const authHeader = request.headers?.authorization;
+  if (!sessionId && authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const accessToken = await _oauthRepo.getAccessToken(token);
+    if (accessToken && new Date() <= accessToken.expiresAt) {
+      request.oauthToken = accessToken;
+      sessionId = `oauth_${accessToken.userId}`;
+      const user = await _userRepo.getUserById(accessToken.userId);
+      if (user) {
+        request.ctx = { session: { id: sessionId, userId: user.id, address: user.address, status: "authorized" }, user };
+        return;
+      }
+    }
+  }
+
   if (!sessionId) return;
   const session = await _sessionRepo.getSessionById(String(sessionId));
   if (!session || session.status !== "authorized") return;
@@ -180,14 +197,13 @@ fastify.register(pokerRoutes, { prefix: "/api/v1/games/poker" });
 fastify.register(bluffdiceRoutes, { prefix: "/api/v1/games/bluffdice" });
 fastify.register(shootDragonGateRoutes, { prefix: "/api/v1/games/shoot-dragon-gate" });
 fastify.register(dragonTigerRoutes, { prefix: "/api/v1/games/dragon-tiger" });
-// v1.1.0: Company simulation (beta)
-fastify.register(companyRoutes, { prefix: "/api/v1/company" });
 // Phase 6: Chest / inventory
 fastify.register(chestRoutes, { prefix: "/api/v1/chests" });
 fastify.register(inventoryRoutes, { prefix: "/api/v1/inventory" });
 fastify.register(pawnRoutes, { prefix: "/api/v1/pawn" });
 fastify.register(giftRoutes, { prefix: "/api/v1/gift" });
 fastify.register(missionRoutes, { prefix: "/api/v1/missions" });
+fastify.register(oauthRoutes, { prefix: "/api/v1/oauth" });
 
 fastify.get("/health", async () => {
   return { status: "ok", env: process.env.NODE_ENV };

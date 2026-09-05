@@ -230,6 +230,9 @@ importers:
       drizzle-kit:
         specifier: ^0.20.0
         version: 0.20.18
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@25.5.0)
 
   packages/on-chain:
     dependencies:

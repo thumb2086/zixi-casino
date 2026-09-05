@@ -33,30 +33,6 @@
     "./levels/vip-manager.js": {
       "import": "./dist/levels/vip-manager.js",
       "types": "./dist/levels/vip-manager.d.ts"
-    },
-    "./company/company-manager.js": {
-      "import": "./dist/company/company-manager.js",
-      "types": "./dist/company/company-manager.d.ts"
-    },
-    "./company/employee-gen.js": {
-      "import": "./dist/company/employee-gen.js",
-      "types": "./dist/company/employee-gen.d.ts"
-    },
-    "./semiconductor/index.js": {
-      "import": "./dist/semiconductor/index.js",
-      "types": "./dist/semiconductor/index.d.ts"
-    },
-    "./semiconductor/constants.js": {
-      "import": "./dist/semiconductor/constants.js",
-      "types": "./dist/semiconductor/constants.d.ts"
-    },
-    "./semiconductor/semiconductor-manager.js": {
-      "import": "./dist/semiconductor/semiconductor-manager.js",
-      "types": "./dist/semiconductor/semiconductor-manager.d.ts"
-    },
-    "./semiconductor/employee-gen.js": {
-      "import": "./dist/semiconductor/employee-gen.js",
-      "types": "./dist/semiconductor/employee-gen.d.ts"
     }
   },
   "scripts": {

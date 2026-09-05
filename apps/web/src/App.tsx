@@ -34,9 +34,9 @@ const ShopView = lazy(() => import('./features/shop/ShopView'));
 const TransactionsDashboardView = lazy(() => import('./features/dashboard/TransactionsDashboardView'));
 const VIPLevelsView = lazy(() => import('./features/info/VIPLevelsView'));
 const InfoView = lazy(() => import('./features/info/InfoView'));
-const CompanyView = lazy(() => import('./features/company/CompanyView'));
 const PerformanceView = lazy(() => import('./features/stats/PerformanceView'));
 const LandingView = lazy(() => import('./features/landing/LandingView'));
+const OAuthConsentView = lazy(() => import('./features/oauth/OAuthConsentView'));
 const FAQView = lazy(() => import('./features/info/FAQView'));
 const WhitepaperView = lazy(() => import('./features/info/WhitepaperView'));
 const GuidesView = lazy(() => import('./features/info/GuidesView'));
@@ -163,6 +163,7 @@ function AppContent() {
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>}>
       <Routes>
         <Route path="/landing" element={<LandingView />} />
+        <Route path="/oauth/consent" element={<OAuthConsentView />} />
         <Route path="/faq" element={<FAQView />} />
         <Route path="/whitepaper" element={<WhitepaperView />} />
         <Route path="/guides" element={<GuidesView />} />
@@ -203,7 +204,6 @@ function AppContent() {
               <Route path="info/vip-levels" element={<VIPLevelsView />} />
               <Route path="info/odds" element={<Navigate to="/app/info?tab=odds" replace />} />
               <Route path="info" element={<InfoView />} />
-              <Route path="company" element={<CompanyView />} />
             </Route>
           </>
         )}

@@ -146,7 +146,16 @@ const isCoreSchemaReady = async (sql: any) => {
         WHERE table_schema = 'public'
           AND table_name = 'user_profiles'
           AND column_name = 'sound_prefs'
-      ) AS "soundPrefsExists"
+      EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'user_profiles'
+          AND column_name = 'sound_prefs'
+      ) AS "soundPrefsExists",
+      to_regclass('public.oauth_clients') IS NOT NULL AS "oauthClientsExists",
+      to_regclass('public.oauth_authorization_codes') IS NOT NULL AS "oauthAuthorizationCodesExists",
+      to_regclass('public.oauth_access_tokens') IS NOT NULL AS "oauthAccessTokensExists"
   `;
 
   return Boolean(
@@ -171,7 +180,10 @@ const isCoreSchemaReady = async (sql: any) => {
     row?.rewardCampaignsExists &&
     row?.rewardGrantsExists &&
     row?.gameSessionsExists &&
-    row?.soundPrefsExists
+    row?.soundPrefsExists &&
+    row?.oauthClientsExists &&
+    row?.oauthAuthorizationCodesExists &&
+    row?.oauthAccessTokensExists
   );
 };
 
@@ -246,26 +258,50 @@ const ensureCoreSchema = async () => {
             updated_by TEXT,
             updated_at TIMESTAMP NOT NULL DEFAULT NOW()
           )`.catch(() => {});
-          await sql`CREATE TABLE IF NOT EXISTS company_accounts (
+          await sql`CREATE TABLE IF NOT EXISTS oauth_clients (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            user_id UUID NOT NULL REFERENCES users(id) UNIQUE,
-            company_type TEXT NOT NULL,
-            company_name TEXT NOT NULL,
-            level INTEGER NOT NULL DEFAULT 1,
-            data JSONB NOT NULL DEFAULT '{}',
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-          )`.catch(() => {});
-          await sql`CREATE TABLE IF NOT EXISTS company_investments (
-            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-            investor_id UUID NOT NULL REFERENCES users(id),
-            company_id UUID NOT NULL REFERENCES company_accounts(id),
-            amount NUMERIC NOT NULL,
-            share_pct NUMERIC NOT NULL,
-            start_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            end_at TIMESTAMP,
+            client_id TEXT NOT NULL UNIQUE,
+            client_secret TEXT NOT NULL,
+            name TEXT NOT NULL,
+            redirect_uris TEXT[] NOT NULL DEFAULT '{}',
+            scopes TEXT NOT NULL DEFAULT 'profile',
+            is_active BOOLEAN NOT NULL DEFAULT TRUE,
             created_at TIMESTAMP NOT NULL DEFAULT NOW()
           )`.catch(() => {});
+          await sql`CREATE TABLE IF NOT EXISTS oauth_authorization_codes (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            code TEXT NOT NULL UNIQUE,
+            client_id TEXT NOT NULL,
+            user_id UUID NOT NULL REFERENCES users(id),
+            redirect_uri TEXT NOT NULL,
+            scopes TEXT NOT NULL,
+            state TEXT,
+            expires_at TIMESTAMP NOT NULL,
+            used BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )`.catch(() => {});
+          await sql`CREATE TABLE IF NOT EXISTS oauth_access_tokens (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            token TEXT NOT NULL UNIQUE,
+            client_id TEXT NOT NULL,
+            user_id UUID NOT NULL REFERENCES users(id),
+            scopes TEXT NOT NULL,
+            expires_at TIMESTAMP NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT NOW()
+          )`.catch(() => {});
+          // ─── Performance indexes (added after initial schema) ─────────────
+          await sql`CREATE INDEX IF NOT EXISTS wle_address_created_at_idx ON wallet_ledger_entries (address, created_at)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS tx_intents_status_idx ON tx_intents (status)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS tx_intents_round_id_idx ON tx_intents (round_id)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS ops_events_created_at_idx ON ops_events (created_at)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS chat_messages_created_at_idx ON chat_messages (created_at)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS sessions_address_idx ON sessions (address)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS game_sessions_user_created_at_idx ON game_sessions (user_id, created_at)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS support_tickets_status_idx ON support_tickets (status)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS market_listings_status_item_idx ON market_listings (status, item_id)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS reward_grants_user_idx ON reward_grants (user_id)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS market_trades_user_idx ON market_trades (user_id)`.catch(() => {});
+          await sql`CREATE INDEX IF NOT EXISTS total_bet_ledger_address_idx ON total_bet_ledger (address)`.catch(() => {});
           return;
         }
         await sql`CREATE EXTENSION IF NOT EXISTS pgcrypto`;
@@ -1529,4 +1565,74 @@ export class RewardCampaignRepository {
   async deleteLatestClaim(campaignId: string, userId: string) { return; }
   async logGrant(data: any) { return; }
   async listGrantLogs(limit?: number) { return []; }
+}
+
+export class OAuthRepository {
+  async getClientByClientId(clientId: string) {
+    const conn = await requireDb();
+    return await conn.query.oauthClients.findFirst({ where: (c: any, { eq }: any) => eq(c.clientId, clientId) });
+  }
+
+  async saveAuthorizationCode(data: { code: string; clientId: string; userId: string; redirectUri: string; scopes: string; state?: string; expiresAt: Date }) {
+    const conn = await requireDb();
+    await conn.insert((schema as any).oauthAuthorizationCodes).values({
+      id: randomUUID(),
+      code: data.code,
+      clientId: data.clientId,
+      userId: data.userId,
+      redirectUri: data.redirectUri,
+      scopes: data.scopes,
+      state: data.state,
+      expiresAt: data.expiresAt,
+    });
+  }
+
+  async getAuthorizationCode(code: string) {
+    const conn = await requireDb();
+    return await conn.query.oauthAuthorizationCodes.findFirst({ where: (c: any, { eq }: any) => eq(c.code, code) });
+  }
+
+  async markAuthorizationCodeUsed(code: string) {
+    const conn = await requireDb();
+    await conn.update((schema as any).oauthAuthorizationCodes).set({ used: true }).where(eq((schema as any).oauthAuthorizationCodes.code, code));
+  }
+
+  async saveAccessToken(data: { token: string; clientId: string; userId: string; scopes: string; expiresAt: Date }) {
+    const conn = await requireDb();
+    await conn.insert((schema as any).oauthAccessTokens).values({
+      id: randomUUID(),
+      token: data.token,
+      clientId: data.clientId,
+      userId: data.userId,
+      scopes: data.scopes,
+      expiresAt: data.expiresAt,
+    });
+  }
+
+  async getAccessToken(token: string) {
+    const conn = await requireDb();
+    return await conn.query.oauthAccessTokens.findFirst({ where: (t: any, { eq }: any) => eq(t.token, token) });
+  }
+
+  async createClient(data: { clientId: string; clientSecret: string; name: string; redirectUris: string[]; scopes?: string }) {
+    const conn = await requireDb();
+    await conn.insert((schema as any).oauthClients).values({
+      id: randomUUID(),
+      clientId: data.clientId,
+      clientSecret: data.clientSecret,
+      name: data.name,
+      redirectUris: data.redirectUris,
+      scopes: data.scopes || 'profile',
+    });
+  }
+
+  async listClients() {
+    const conn = await requireDb();
+    return await conn.query.oauthClients.findMany({ orderBy: (c: any, { asc }: any) => [asc(c.createdAt)] });
+  }
+
+  async deleteClient(clientId: string) {
+    const conn = await requireDb();
+    await conn.delete((schema as any).oauthClients).where(eq((schema as any).oauthClients.clientId, clientId));
+  }
 }

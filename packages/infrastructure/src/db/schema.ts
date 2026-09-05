@@ -52,7 +52,9 @@ export const sessions = pgTable("sessions", {
   authorizedAt: timestamp("authorized_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   expiresAt: timestamp("expires_at").notNull(),
-});
+}, (t) => ({
+  addressIdx: index("sessions_address_idx").on(t.address),
+}));
 
 // ─── User Profile & Display ────────────────────────────────────────────────────
 
@@ -135,7 +137,9 @@ export const totalBetLedger = pgTable("total_bet_ledger", {
   token: text("token").notNull().default("zhixi"),
   roundId: uuid("round_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  addressIdx: index("total_bet_ledger_address_idx").on(t.address),
+}));
 
 // ─── Wallet ────────────────────────────────────────────────────────────────────
 
@@ -168,7 +172,9 @@ export const walletLedgerEntries = pgTable("wallet_ledger_entries", {
   requestId: text("request_id"),
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  addressCreatedAtIdx: index("wle_address_created_at_idx").on(t.address, t.createdAt),
+}));
 
 // ─── Chat Messages ─────────────────────────────────────────────────────────────
 
@@ -182,7 +188,9 @@ export const chatMessages = pgTable("chat_messages", {
   game: text("game"),
   roundId: text("round_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  createdAtIdx: index("chat_messages_created_at_idx").on(t.createdAt),
+}));
 
 export const walletBalanceSnapshots = pgTable("wallet_balance_snapshots", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -196,7 +204,7 @@ export const walletBalanceSnapshots = pgTable("wallet_balance_snapshots", {
 // ─── Transactions ─────────────────────────────────────────────────────────────
 
 export const txIntents = pgTable("tx_intents", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id),
   address: text("address").notNull(),
   token: text("token").notNull(),
@@ -214,7 +222,10 @@ export const txIntents = pgTable("tx_intents", {
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  statusIdx: index("tx_intents_status_idx").on(t.status),
+  roundIdIdx: index("tx_intents_round_id_idx").on(t.roundId),
+}));
 
 export const txAttempts = pgTable("tx_attempts", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -255,6 +266,7 @@ export const gameSessions = pgTable("game_sessions", {
   addressIdx: index("game_sessions_address_idx").on(t.address),
   gameIdx: index("game_sessions_game_idx").on(t.game),
   createdAtIdx: index("game_sessions_created_at_idx").on(t.createdAt),
+  userCreatedAtIdx: index("game_sessions_user_created_at_idx").on(t.userId, t.createdAt),
 }));
 
 export type GameSession = typeof gameSessions.$inferSelect;
@@ -378,7 +390,9 @@ export const rewardGrants = pgTable("reward_grants", {
   expiresAt: timestamp("expires_at"),
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  userIdx: index("reward_grants_user_idx").on(t.userId),
+}));
 
 // ─── Market Simulation ─────────────────────────────────────────────────────────
 
@@ -404,7 +418,9 @@ export const marketTrades = pgTable("market_trades", {
   pnl: numeric("pnl"),
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  userIdx: index("market_trades_user_idx").on(t.userId),
+}));
 
 // ─── Support & Announcements ───────────────────────────────────────────────────
 
@@ -444,7 +460,9 @@ export const supportTickets = pgTable("support_tickets", {
   adminUpdate: text("admin_update"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  statusIdx: index("support_tickets_status_idx").on(t.status),
+}));
 
 // ─── Ops & Observability ───────────────────────────────────────────────────────
 
@@ -467,7 +485,9 @@ export const opsEvents = pgTable("ops_events", {
   message: text("message").notNull(),
   meta: jsonb("meta"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  createdAtIdx: index("ops_events_created_at_idx").on(t.createdAt),
+}));
 
 export const adminActions = pgTable("admin_actions", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -507,29 +527,43 @@ export const marketListings = pgTable("market_listings", {
   cancelledAt: timestamp("cancelled_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  statusItemIdIdx: index("market_listings_status_item_idx").on(t.status, t.itemId),
+}));
 
-// ─── Company Simulation ────────────────────────────────────────────────────────
+// ─── OAuth 2.0 ────────────────────────────────────────────────────────────────
 
-export const companyAccounts = pgTable("company_accounts", {
+export const oauthClients = pgTable("oauth_clients", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().references(() => users.id).unique(),
-  companyType: text("company_type").notNull(), // 'ai' | 'semiconductor'
-  companyName: text("company_name").notNull(),
-  level: integer("level").notNull().default(1),
-  data: jsonb("data").notNull().default({}),
+  clientId: text("client_id").notNull().unique(),
+  clientSecret: text("client_secret").notNull(),
+  name: text("name").notNull(),
+  redirectUris: text("redirect_uris").array().notNull(),
+  scopes: text("scopes").notNull().default("profile"),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const companyInvestments = pgTable("company_investments", {
+export const oauthAuthorizationCodes = pgTable("oauth_authorization_codes", {
   id: uuid("id").primaryKey().defaultRandom(),
-  investorId: uuid("investor_id").notNull().references(() => users.id),
-  companyId: uuid("company_id").notNull().references(() => companyAccounts.id),
-  amount: numeric("amount").notNull(),
-  sharePct: numeric("share_pct").notNull(), // 0-100
-  startAt: timestamp("start_at").notNull().defaultNow(),
-  endAt: timestamp("end_at"),
+  code: text("code").notNull().unique(),
+  clientId: text("client_id").notNull(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  redirectUri: text("redirect_uri").notNull(),
+  scopes: text("scopes").notNull(),
+  state: text("state"),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const oauthAccessTokens = pgTable("oauth_access_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  token: text("token").notNull().unique(),
+  clientId: text("client_id").notNull(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  scopes: text("scopes").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
