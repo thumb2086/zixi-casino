@@ -7,7 +7,7 @@ import { gameSettlement } from "../../utils/game-settlement.js";
 import { getSessionContext } from "../../utils/auth.js";
 import { loadInventoryState, persistInventoryState, ALL_ITEMS } from "../../utils/inventory.js";
 import * as schema from "@repo/infrastructure/db/schema.js";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 
 const PLATFORM_FEE_RATE = 0.05;
 
@@ -215,11 +215,11 @@ export async function marketListingRoutes(fastify: FastifyInstance) {
     const { id } = request.params as { id: string };
 
     const db = await requireDb();
-    const [listing] = await db
-      .select()
-      .from(schema.marketListings)
-      .where(and(eq(schema.marketListings.id, id), eq(schema.marketListings.status, "active")))
-      .limit(1);
+
+    // Use FOR UPDATE to lock the row and prevent race condition
+    const [listing] = await db.execute(
+      sql`SELECT * FROM market_listings WHERE id = ${id} AND status = 'active' FOR UPDATE`
+    ).then((r: any) => r);
 
     if (!listing) {
       return createApiEnvelope({ success: false }, request.id, false, "LISTING_NOT_FOUND");

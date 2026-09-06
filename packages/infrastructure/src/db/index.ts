@@ -146,12 +146,6 @@ const isCoreSchemaReady = async (sql: any) => {
         WHERE table_schema = 'public'
           AND table_name = 'user_profiles'
           AND column_name = 'sound_prefs'
-      EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_schema = 'public'
-          AND table_name = 'user_profiles'
-          AND column_name = 'sound_prefs'
       ) AS "soundPrefsExists",
       to_regclass('public.oauth_clients') IS NOT NULL AS "oauthClientsExists",
       to_regclass('public.oauth_authorization_codes') IS NOT NULL AS "oauthAuthorizationCodesExists",

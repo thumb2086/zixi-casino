@@ -31,20 +31,16 @@ export async function crashRoutes(fastify: FastifyInstance) {
       body: z.object({
         sessionId: z.string(),
         betAmount: z.number().min(1),
-        elapsedSeconds: z.number().min(0).default(0),
-        cashout: z.boolean().default(false),
-        roundId: z.string().optional(),
         token: z.enum(["zhixi", "yjc"]).optional().default("zhixi"),
+        roundId: z.string().optional(),
       }),
     },
   }, async (request) => {
-    const { betAmount, elapsedSeconds, cashout, token, roundId: incomingRoundId } = request.body as {
+    const { betAmount, token, roundId: incomingRoundId } = request.body as {
       sessionId: string;
       betAmount: number;
-      elapsedSeconds: number;
-      cashout: boolean;
-      roundId?: string;
       token: "zhixi" | "yjc";
+      roundId?: string;
     };
     const amountStr = betAmount.toString();
 
@@ -71,17 +67,23 @@ export async function crashRoutes(fastify: FastifyInstance) {
 
     const roundId = incomingRoundId || `crash_${crypto.randomUUID().slice(0, 8)}`;
     const luckBias = await gameSettlement.getLuckBias(userId);
+
+    // Server generates random stop point using deterministic seed — client cannot control timing
+    const stopSeed = `${roundId}:stop`;
+    let h = 0x811c9dc5;
+    for (let i = 0; i < stopSeed.length; i++) { h ^= stopSeed.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    const stopHash = h >>> 0;
+    const stopRatio = (stopHash % 1000000) / 1000000;
+    const elapsedSeconds = Math.round(stopRatio * 30); // random 0-30s
+
     const gameResult = gameManager.resolveCrash(elapsedSeconds, roundId, luckBias);
-    
-    // Player wins if they cash out before crash
-    const isWin = cashout && !gameResult.crashed;
-    const isLose = gameResult.crashed || (!cashout && gameResult.crashed);
+    const isWin = !gameResult.crashed;
     const payout = isWin ? betAmount * gameResult.multiplier : 0;
     const payoutStr = payout.toString();
-    const result = isWin ? "win" : (isLose ? "lose" : "draw");
+    const result = isWin ? "win" : "lose";
 
-    // Only record settled games
-    if (cashout || gameResult.crashed) {
+    // Always settle — server determines outcome
+    {
       // 1. Validate and deduct balance
       const validation = await gameSettlement.validateAndDeductBalance(
         address,
@@ -153,7 +155,6 @@ export async function crashRoutes(fastify: FastifyInstance) {
               crashed: gameResult.crashed,
               crashPoint: gameResult.crashPoint,
               elapsedSeconds,
-              cashout,
               betTxHash: settlement.betTxHash,
               payoutTxHash: settlement.payoutTxHash,
               fee: settlement.feeAmount,
@@ -207,18 +208,6 @@ export async function crashRoutes(fastify: FastifyInstance) {
         );
       }
     }
-
-    // Return intermediate state
-    return createApiEnvelope({
-      success: true,
-      data: {
-        roundId,
-        multiplier: gameResult.multiplier,
-        crashed: gameResult.crashed,
-        crashPoint: gameResult.crashPoint,
-        betAmount,
-      }
-    }, request.id);
   });
 
   typedFastify.get("/history", {
