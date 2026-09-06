@@ -3,7 +3,7 @@ import { randomBytes, createHash } from "crypto";
 import { OAuthRepository, SessionRepository, UserRepository } from "@repo/infrastructure";
 
 const OAUTH_CODE_TTL = 10 * 60 * 1000;
-const OAUTH_TOKEN_TTL = 365 * 24 * 60 * 60 * 1000;
+const OAUTH_TOKEN_TTL = 30 * 24 * 60 * 60 * 1000;
 
 function generateToken(): string {
   return "zixi_oat_" + randomBytes(24).toString("hex");

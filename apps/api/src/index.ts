@@ -131,13 +131,15 @@ fastify.get("/api/diag", async (request) => {
     let dbStatus = "unknown";
 
     if (connectionString) {
+        let sql: any;
         try {
-            const sql = postgres(connectionString, { ssl: 'require', connect_timeout: 5 });
+            sql = postgres(connectionString, { ssl: 'require', connect_timeout: 5 });
             await sql`SELECT 1`;
             dbStatus = "connected";
-            await sql.end();
         } catch (e: any) {
             dbStatus = `error: ${e.message}`;
+        } finally {
+            try { await sql?.end(); } catch {}
         }
     } else {
         dbStatus = "missing_env";

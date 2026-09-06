@@ -149,6 +149,19 @@ export class GameSettlementWrapper {
       };
     }
 
+    // Blacklist check — block all bets from blacklisted users
+    try {
+      const user = await this.userRepo.getUserByAddress(address);
+      if (user?.isBlacklisted) {
+        return {
+          success: false,
+          balanceBefore: "0",
+          balanceAfter: "0",
+          error: { code: "BLACKLISTED", message: "Your account has been suspended" }
+        };
+      }
+    } catch { /* if lookup fails, allow bet to proceed */ }
+
     // VIP & Bet Limit Check (use unified VipManager tier, not legacy KV total_bet mirror)
     if (totalBetKey) {
       try {

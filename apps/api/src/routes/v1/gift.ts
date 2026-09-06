@@ -65,21 +65,46 @@ export async function giftRoutes(fastify: FastifyInstance) {
       const walletRepo = new WalletRepository();
       const bundleSummary: string[] = [];
 
+      // Phase 1: Validate all balances before any deduction
+      if (hasYjc) {
+        const bal = await walletRepo.getBalance(fromAddr, "yjc");
+        if (parseFloat(bal) < body.yjc) {
+          return createApiEnvelope({ error: { message: `YJC 餘額不足` } }, request.id);
+        }
+      }
+      if (hasZxc) {
+        const bal = await walletRepo.getBalance(fromAddr, "zhixi");
+        if (parseFloat(bal) < body.zxc) {
+          return createApiEnvelope({ error: { message: `ZXC 餘額不足` } }, request.id);
+        }
+      }
+
+      // Phase 2: Execute all deductions atomically
       if (hasYjc) {
         const newSenderYjc = await walletRepo.adjustBalanceAtomic(fromAddr, `-${body.yjc}`, "yjc");
         if (newSenderYjc === null) {
-          return createApiEnvelope({ error: { message: `YJC 餘額不足` } }, request.id);
+          return createApiEnvelope({ error: { message: `YJC 餘額不足（競態）` } }, request.id);
         }
-        await walletRepo.adjustBalanceAtomic(toAddr, `+${body.yjc}`, "yjc");
+        const newReceiver = await walletRepo.adjustBalanceAtomic(toAddr, `+${body.yjc}`, "yjc");
+        if (newReceiver === null) {
+          // Rollback sender
+          await walletRepo.adjustBalanceAtomic(fromAddr, `+${body.yjc}`, "yjc");
+          return createApiEnvelope({ error: { message: ` recipient 不存在` } }, request.id);
+        }
         bundleSummary.push(`${body.yjc.toLocaleString()} YJC`);
       }
 
       if (hasZxc) {
         const newSender = await walletRepo.adjustBalanceAtomic(fromAddr, `-${body.zxc}`, "zhixi");
         if (newSender === null) {
-          return createApiEnvelope({ error: { message: `ZXC 餘額不足` } }, request.id);
+          return createApiEnvelope({ error: { message: `ZXC 餘額不足（競態）` } }, request.id);
         }
-        await walletRepo.adjustBalanceAtomic(toAddr, `+${body.zxc}`, "zhixi");
+        const newReceiver = await walletRepo.adjustBalanceAtomic(toAddr, `+${body.zxc}`, "zhixi");
+        if (newReceiver === null) {
+          // Rollback sender
+          await walletRepo.adjustBalanceAtomic(fromAddr, `+${body.zxc}`, "zhixi");
+          return createApiEnvelope({ error: { message: ` recipient 不存在` } }, request.id);
+        }
         bundleSummary.push(`${body.zxc.toLocaleString()} ZXC`);
       }
 
