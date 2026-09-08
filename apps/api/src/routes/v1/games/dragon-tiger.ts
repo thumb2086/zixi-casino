@@ -51,25 +51,30 @@ export async function dragonTigerRoutes(fastify: FastifyInstance) {
       const finalBalance = await gameSettlement.creditPayout(address, "zhixi", validation.balanceAfter, payout, 'dragon_tiger', userId, betAmount);
 
       // 4. Background: settlement, tracking, recording
-      gameSettlement.executeSettlement({
-        userId, address, game: "dragon_tiger",
-        token: "ZXC",
-        betAmount: amountStr, payoutAmount: payout.toString(), roundId, requestId: request.id,
-      }).catch(() => {});
-      gameSettlement.updateTotalBet(address, betAmount, payout, userId, 'dragon_tiger').catch(() => {});
-      gameSettlement.logGameEvent({
-        game: "dragon_tiger", userId, address, amount: amountStr,
-        payout: payout.toString(), fee: "0", isWin: result.isWin,
-        multiplier: result.payoutMultiplier, roundId,
-      }).catch(() => {});
-      gameSettlement.saveRound("dragon_tiger", roundId, result).catch(() => {});
-
-      const db = await requireDb();
-      const sessionManager = new GameSessionManager(db);
-      sessionManager.recordGame({
-        userId, address, game: "dragon_tiger", betAmount,
-        gameResult: { result: result.result, payout, meta: { left: result.left.rank, right: result.right.rank, mid: result.mid.rank, lo: result.lo, hi: result.hi, multiplier: result.payoutMultiplier } },
-      }).catch(() => {});
+      void (async () => {
+        try {
+          await gameSettlement.executeSettlement({
+            userId, address, game: "dragon_tiger",
+            token: "ZXC",
+            betAmount: amountStr, payoutAmount: payout.toString(), roundId, requestId: request.id,
+          });
+          await gameSettlement.updateTotalBet(address, betAmount, payout, userId, 'dragon_tiger');
+          await gameSettlement.logGameEvent({
+            game: "dragon_tiger", userId, address, amount: amountStr,
+            payout: payout.toString(), fee: "0", isWin: result.isWin,
+            multiplier: result.payoutMultiplier, roundId,
+          });
+          await gameSettlement.saveRound("dragon_tiger", roundId, result);
+          const db = await requireDb();
+          const sessionManager = new GameSessionManager(db);
+          await sessionManager.recordGame({
+            userId, address, game: "dragon_tiger", betAmount,
+            gameResult: { result: result.result, payout, meta: { left: result.left.rank, right: result.right.rank, mid: result.mid.rank, lo: result.lo, hi: result.hi, multiplier: result.payoutMultiplier } },
+          });
+        } catch (bgErr) {
+          console.error(`[dragon-tiger] background processing failed for round ${roundId}:`, bgErr);
+        }
+      })();
 
       return createApiEnvelope({
         success: true,
