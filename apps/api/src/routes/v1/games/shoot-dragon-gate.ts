@@ -39,26 +39,12 @@ function clearUserPendingGates(userId: string) {
 export async function shootDragonGateRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
 
-  const getContext = async (req: any) => {
-    const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
-    if (!sessionId) return null;
-    const db = await requireDb();
-    const session = await db.query.sessions.findFirst({
-      where: (sessions: any, { eq }: any) => eq(sessions.id, sessionId)
-    });
-    if (!session || session.status !== "authorized") return null;
-    const user = await db.query.users.findFirst({
-      where: (users: any, { eq }: any) => eq(users.id, session.userId)
-    });
-    return { session, user };
-  };
-
   typedFastify.post("/open", {
     schema: {
       body: z.object({ sessionId: z.string() }),
     },
   }, async (request) => {
-    const ctx = await getContext(request);
+    const ctx = (request as any).ctx;
     if (!ctx || !ctx.user) {
       return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED: Invalid session");
     }
@@ -96,7 +82,7 @@ export async function shootDragonGateRoutes(fastify: FastifyInstance) {
       sessionId: string; betAmount: number; gateId: string; token: "zhixi" | "yjc";
     };
 
-    const ctx = await getContext(request);
+    const ctx = (request as any).ctx;
     if (!ctx || !ctx.user) {
       return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED: Invalid session");
     }
@@ -135,7 +121,7 @@ export async function shootDragonGateRoutes(fastify: FastifyInstance) {
   typedFastify.get("/history", {
     schema: { querystring: z.object({ sessionId: z.string() }) },
   }, async (request) => {
-    const ctx = await getContext(request);
+    const ctx = (request as any).ctx;
     if (!ctx || !ctx.user) {
       return createApiEnvelope({ success: false }, request.id, false, "UNAUTHORIZED: Invalid session");
     }

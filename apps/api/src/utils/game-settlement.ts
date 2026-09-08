@@ -67,6 +67,14 @@ export class GameSettlementWrapper {
   private sessionRepo: SessionRepository;
   private userRepo: UserRepository;
 
+  // In-memory cache for blacklist (120s TTL) — DB roundtrip saved per bet
+  private _blacklistCache = new Map<string, { blocked: boolean; expiresAt: number }>();
+  private static BLACKLIST_CACHE_TTL = 120_000;
+
+  // In-memory cache for VIP level (60s TTL)
+  private _vipCache = new Map<string, { level: any; expiresAt: number }>();
+  private static VIP_CACHE_TTL = 60_000;
+
   constructor() {
     this.walletManager = new WalletManager();
     this.settlementManager = new SettlementManager(this.walletManager);
@@ -86,6 +94,27 @@ export class GameSettlementWrapper {
       this.vipManager,
       this.walletRepo
     );
+  }
+
+  private async isBlacklistedCached(address: string): Promise<boolean> {
+    const cached = this._blacklistCache.get(address);
+    if (cached && cached.expiresAt > Date.now()) return cached.blocked;
+    try {
+      const user = await this.userRepo.getUserByAddress(address);
+      const blocked = user?.isBlacklisted ?? false;
+      this._blacklistCache.set(address, { blocked, expiresAt: Date.now() + GameSettlementWrapper.BLACKLIST_CACHE_TTL });
+      return blocked;
+    } catch { return false; }
+  }
+
+  private async getVipLevelCached(address: string): Promise<any> {
+    const cached = this._vipCache.get(address);
+    if (cached && cached.expiresAt > Date.now()) return cached.level;
+    try {
+      const level = await this.vipManager.getVipLevel(address);
+      this._vipCache.set(address, { level, expiresAt: Date.now() + GameSettlementWrapper.VIP_CACHE_TTL });
+      return level;
+    } catch { return null; }
   }
 
   private isAsyncSettlementEnabled(): boolean {
@@ -149,10 +178,10 @@ export class GameSettlementWrapper {
       };
     }
 
-    // Parallel: blacklist + VIP limit checks (independent)
+    // Parallel: blacklist + VIP limit checks (cached, near-instant)
     const [blacklisted, vipLevel] = await Promise.all([
-      this.userRepo.getUserByAddress(address).then(u => u?.isBlacklisted ?? false).catch(() => false),
-      totalBetKey ? this.vipManager.getVipLevel(address).catch(() => null) : Promise.resolve(null),
+      this.isBlacklistedCached(address),
+      totalBetKey ? this.getVipLevelCached(address) : Promise.resolve(null),
     ]);
 
     if (blacklisted) {

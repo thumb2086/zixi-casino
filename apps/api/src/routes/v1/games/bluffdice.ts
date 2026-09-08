@@ -14,20 +14,6 @@ export async function bluffdiceRoutes(fastify: FastifyInstance) {
   const gameManager = new GameManager();
   const vipManager = new VipManager();
 
-  const getContext = async (req: any) => {
-    const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
-    if (!sessionId) return null;
-    const db = await requireDb();
-    const session = await db.query.sessions.findFirst({
-      where: (sessions: any, { eq }: any) => eq(sessions.id, sessionId)
-    });
-    if (!session || session.status !== "authorized") return null;
-    const user = await db.query.users.findFirst({
-      where: (users: any, { eq }: any) => eq(users.id, session.userId)
-    });
-    return { session, user };
-  };
-
   typedFastify.post("/play", {
     schema: {
       body: z.object({
@@ -48,7 +34,7 @@ export async function bluffdiceRoutes(fastify: FastifyInstance) {
     };
     const amountStr = betAmount.toString();
 
-    const ctx = await getContext(request);
+    const ctx = (request as any).ctx;
     if (!ctx || !ctx.user) {
       return createApiEnvelope(
         { success: false },
@@ -212,7 +198,7 @@ export async function bluffdiceRoutes(fastify: FastifyInstance) {
   typedFastify.get("/history", {
     schema: { querystring: z.object({ sessionId: z.string() }) },
   }, async (request) => {
-    const ctx = await getContext(request);
+    const ctx = (request as any).ctx;
     if (!ctx || !ctx.user) {
       return createApiEnvelope(
         { success: false },

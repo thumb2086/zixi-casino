@@ -13,20 +13,6 @@ const gameManager = new GameManager();
 export async function dragonTigerRoutes(fastify: FastifyInstance) {
   const typedFastify = fastify.withTypeProvider<ZodTypeProvider>();
 
-  const getContext = async (req: any) => {
-    const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
-    if (!sessionId) return null;
-    const db = await requireDb();
-    const session = await db.query.sessions.findFirst({
-      where: (sessions: any, { eq }: any) => eq(sessions.id, sessionId)
-    });
-    if (!session || session.status !== "authorized") return null;
-    const user = await db.query.users.findFirst({
-      where: (users: any, { eq }: any) => eq(users.id, session.userId)
-    });
-    return { session, user };
-  };
-
   typedFastify.post("/play", {
     schema: {
       body: z.object({
@@ -37,7 +23,7 @@ export async function dragonTigerRoutes(fastify: FastifyInstance) {
   }, async (request) => {
     const { betAmount } = request.body as { sessionId: string; betAmount: number };
     const roundId = `dragon_tiger_${randomUUID()}`;
-    const ctx = await getContext(request);
+    const ctx = (request as any).ctx;
     if (!ctx || !ctx.user) {
       return createApiEnvelope({ success: false, error: "UNAUTHORIZED" }, request.id, false);
     }
