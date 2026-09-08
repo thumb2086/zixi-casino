@@ -43,7 +43,16 @@ export async function processIntents() {
     if (intents.length === 0) return;
 
     console.log(`Found ${intents.length} pending intents.`);
-    for (const intent of intents) {
+    
+    // Process intents with concurrency limit of 3
+    const CONCURRENCY = 3;
+    const chunks: typeof intents[] = [];
+    for (let i = 0; i < intents.length; i += CONCURRENCY) {
+      chunks.push(intents.slice(i, i + CONCURRENCY));
+    }
+    
+    for (const chunk of chunks) {
+      await Promise.all(chunk.map(async (intent) => {
       try {
         const retryCount = Number(intent.retryCount || 0);
         if (retryCount >= 5) {
@@ -150,6 +159,7 @@ export async function processIntents() {
             errorCode: "TX_BROADCAST_ERROR"
         });
       }
+      }));
     }
   } catch (err) {
     console.error("Worker processing fatal error:", err);

@@ -149,42 +149,31 @@ export class GameSettlementWrapper {
       };
     }
 
-    // Blacklist check — block all bets from blacklisted users
-    try {
-      const user = await this.userRepo.getUserByAddress(address);
-      if (user?.isBlacklisted) {
-        return {
-          success: false,
-          balanceBefore: "0",
-          balanceAfter: "0",
-          error: { code: "BLACKLISTED", message: "Your account has been suspended" }
-        };
-      }
-    } catch { /* if lookup fails, allow bet to proceed */ }
+    // Parallel: blacklist + VIP limit checks (independent)
+    const [blacklisted, vipLevel] = await Promise.all([
+      this.userRepo.getUserByAddress(address).then(u => u?.isBlacklisted ?? false).catch(() => false),
+      totalBetKey ? this.vipManager.getVipLevel(address).catch(() => null) : Promise.resolve(null),
+    ]);
 
-    // VIP & Bet Limit Check (use unified VipManager tier, not legacy KV total_bet mirror)
-    if (totalBetKey) {
-      try {
-        const vipLevel = await this.vipManager.getVipLevel(address);
-        if (amountNum > Number(vipLevel.maxBet || 0)) {
-          return {
-            success: false,
-            balanceBefore: "0",
-            balanceAfter: "0",
-            error: {
-              code: "LIMIT_EXCEEDED",
-              message: `目前 ${vipLevel.label} 單注上限為 ${Number(vipLevel.maxBet || 0).toLocaleString()} 子熙幣`,
-            },
-          };
-        }
-      } catch (e: any) {
-        return {
-          success: false,
-          balanceBefore: "0",
-          balanceAfter: "0",
-          error: { code: "LIMIT_EXCEEDED", message: e?.message || "VIP limit validation failed" }
-        };
-      }
+    if (blacklisted) {
+      return {
+        success: false,
+        balanceBefore: "0",
+        balanceAfter: "0",
+        error: { code: "BLACKLISTED", message: "Your account has been suspended" }
+      };
+    }
+
+    if (vipLevel && amountNum > Number(vipLevel.maxBet || 0)) {
+      return {
+        success: false,
+        balanceBefore: "0",
+        balanceAfter: "0",
+        error: {
+          code: "LIMIT_EXCEEDED",
+          message: `目前 ${vipLevel.label} 單注上限為 ${Number(vipLevel.maxBet || 0).toLocaleString()} 子熙幣`,
+        },
+      };
     }
 
     // Atomic balance deduction (prevents race conditions)
@@ -207,10 +196,18 @@ export class GameSettlementWrapper {
    * Execute on-chain settlement
    */
   async executeSettlement(ctx: SettlementContext): Promise<SettlementResult> {
-    // Idempotency guard: check if settlement already processed for this roundId
-    const existingIntents = await this.walletRepo.getTxIntentsByRoundId(ctx.roundId);
+    // Parallel: idempotency guard + inventory state (independent DB reads)
+    const [existingIntents, inventoryState] = await Promise.all([
+      this.walletRepo.getTxIntentsByRoundId(ctx.roundId),
+      ctx.userId ? (async () => {
+        try {
+          const { loadInventoryState } = await import("./inventory.js");
+          return await loadInventoryState(ctx.userId!);
+        } catch { return null; }
+      })() : Promise.resolve(null),
+    ]);
+
     if (existingIntents && existingIntents.length > 0) {
-      // Settlement already exists, return cached result
       const betIntent = existingIntents.find((i: any) => i.type === "bet");
       const payoutIntent = existingIntents.find((i: any) => i.type === "payout");
       const isConfirmed = betIntent?.status === "confirmed";
@@ -235,13 +232,11 @@ export class GameSettlementWrapper {
     let preventLossApplied = false;
 
     // Profit boost: increase payout if user has active profit_boost buffs
-    if (ctx.userId && payoutValue > 0) {
+    if (ctx.userId && payoutValue > 0 && inventoryState) {
       try {
-        const { loadInventoryState } = await import("./inventory.js");
-        const state = await loadInventoryState(ctx.userId);
         const now = Date.now();
         let profitBoostTotal = 0;
-        for (const buff of state.activeBuffs) {
+        for (const buff of inventoryState.activeBuffs) {
           if (buff.type !== "profit_boost") continue;
           if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
           profitBoostTotal += Number(buff.value || 0);
@@ -701,9 +696,11 @@ export class GameSettlementWrapper {
       `);
     }
     if (userId) {
-      await this.checkAndUnlockTitles(userId, address);
-      await this.grantGameXp(userId, betAmount, address).catch(() => {});
-      this.trackMission(address, betAmount, winAmount || 0, game).catch(() => {});
+      await Promise.all([
+        this.checkAndUnlockTitles(userId, address),
+        this.grantGameXp(userId, betAmount, address).catch(() => {}),
+        this.trackMission(address, betAmount, winAmount || 0, game).catch(() => {}),
+      ]);
     }
   }
 

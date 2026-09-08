@@ -98,6 +98,23 @@ fastify.setErrorHandler((error, request, reply) => {
 const _sessionRepo = new SessionRepository();
 const _userRepo = new UserRepository();
 const _oauthRepo = new OAuthRepository();
+
+// In-memory session cache (30s TTL) — eliminates 2 DB queries per request
+const _sessionCache = new Map<string, { session: any; user: any; expiresAt: number }>();
+const SESSION_CACHE_TTL = 30_000;
+
+function getCachedSession(sessionId: string): { session: any; user: any } | null {
+  const cached = _sessionCache.get(sessionId);
+  if (cached && cached.expiresAt > Date.now()) return cached;
+  _sessionCache.delete(sessionId);
+  return null;
+}
+
+function setCachedSession(sessionId: string, session: any, user: any) {
+  if (_sessionCache.size > 5000) _sessionCache.clear(); // prevent memory leak
+  _sessionCache.set(sessionId, { session, user, expiresAt: Date.now() + SESSION_CACHE_TTL });
+}
+
 fastify.addHook('preHandler', async (request: any) => {
   let sessionId = request.headers?.["x-session-id"] || request.query?.sessionId || request.body?.sessionId;
 
@@ -109,19 +126,28 @@ fastify.addHook('preHandler', async (request: any) => {
     if (accessToken && new Date() <= accessToken.expiresAt) {
       request.oauthToken = accessToken;
       sessionId = `oauth_${accessToken.userId}`;
+      const cached = getCachedSession(sessionId);
+      if (cached) { request.ctx = cached; return; }
       const user = await _userRepo.getUserById(accessToken.userId);
       if (user) {
-        request.ctx = { session: { id: sessionId, userId: user.id, address: user.address, status: "authorized" }, user };
+        const ctx = { session: { id: sessionId, userId: user.id, address: user.address, status: "authorized" }, user };
+        setCachedSession(sessionId, ctx.session, ctx.user);
+        request.ctx = ctx;
         return;
       }
     }
   }
 
   if (!sessionId) return;
+
+  const cached = getCachedSession(String(sessionId));
+  if (cached) { request.ctx = cached; return; }
+
   const session = await _sessionRepo.getSessionById(String(sessionId));
   if (!session || session.status !== "authorized") return;
   const user = await _userRepo.getUserById(session.userId);
   if (!user) return;
+  setCachedSession(String(sessionId), session, user);
   request.ctx = { session, user };
 });
 
