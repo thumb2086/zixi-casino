@@ -61,7 +61,8 @@ export default function LoginView() {
         setError(data.error || "SESSION_CREATION_FAILED");
       }
     } catch (err: any) {
-      setError(`CONNECTION_ERROR: ${err.message}`);
+      const isColdStart = err?.response?.status === 502 || err?.response?.status === 503;
+      setError(isColdStart ? 'SERVER_COLD_START' : `CONNECTION_ERROR: ${err.message}`);
     }
   };
 
@@ -121,8 +122,9 @@ export default function LoginView() {
         setAuth(payload.address, payload.sessionId, payload.publicKey || '0x');
         setGlobalUsername(payload.user?.displayName || username);
       }
-    } catch (err) {
-      setError('NETWORK_ERROR');
+    } catch (err: any) {
+      const isColdStart = err?.response?.status === 502 || err?.response?.status === 503;
+      setError(isColdStart ? 'SERVER_COLD_START' : 'NETWORK_ERROR');
     } finally {
       setLoading(false);
     }
@@ -155,8 +157,9 @@ export default function LoginView() {
         setAuth(payload.address, payload.sessionId, payload.publicKey || '0x');
         setGlobalUsername(payload.user?.displayName || username);
       }
-    } catch (err) {
-      setError('NETWORK_ERROR');
+    } catch (err: any) {
+      const isColdStart = err?.response?.status === 502 || err?.response?.status === 503;
+      setError(isColdStart ? 'SERVER_COLD_START' : 'NETWORK_ERROR');
     } finally {
       setLoading(false);
     }
@@ -421,9 +424,13 @@ export default function LoginView() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-danger text-xs font-bold text-center bg-[#ff7351]/10 py-4 rounded-xl border border-[#ff7351]/20 uppercase tracking-widest"
+                    className={`text-xs font-bold text-center py-4 rounded-xl uppercase tracking-widest ${
+                      error === 'SERVER_COLD_START'
+                        ? 'text-warning bg-[#ff9100]/10 border border-[#ff9100]/20'
+                        : 'text-danger bg-[#ff7351]/10 border border-[#ff7351]/20'
+                    }`}
                   >
-                    {error}
+                    {error === 'SERVER_COLD_START' ? '⏳ 伺服器啟動中，請稍候...' : error}
                   </motion.div>
                 )}
                 <motion.button
