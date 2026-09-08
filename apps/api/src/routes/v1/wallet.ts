@@ -66,21 +66,19 @@ export async function walletRoutes(fastify: FastifyInstance) {
   const opsRepo = new OpsRepository();
 
   const getContext = async (req: any) => {
-    const sessionId = req.headers["x-session-id"] || req.query?.sessionId || req.body?.sessionId;
-    if (!sessionId) return null;
-    const session = await sessionRepo.getSessionById(sessionId as string);
-    if (!session || session.status !== "authorized") return null;
-    const user = await userRepo.getUserById(session.userId);
-    if (!user) return null;
-    return { session, user };
+    return (req as any).ctx || null;
   };
 
+  let _chainClient: { key: string; runtime: any; client: ChainClient } | null = null;
   const getChainClient = () => {
     const runtime = onchainManager.getRuntimeConfig();
     if (!runtime.rpcUrl || !runtime.adminPrivateKey) {
       throw new Error("On-chain runtime is not configured");
     }
-    return { runtime, client: new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey) };
+    const key = `${runtime.rpcUrl}:${runtime.adminPrivateKey.slice(0, 8)}`;
+    if (_chainClient?.key === key) return _chainClient;
+    _chainClient = { key, runtime, client: new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey, runtime.minterPrivateKey) };
+    return _chainClient;
   };
 
   const loadCompatibleMarketAccount = async (address: string, userId: string) => {

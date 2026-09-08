@@ -47,8 +47,10 @@ export function useSyncUser() {
       } as SyncUserData;
     },
     enabled: !!sessionId,
-    staleTime: 30000,
-    refetchInterval: 30000,
+    staleTime: 60_000,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   useEffect(() => {

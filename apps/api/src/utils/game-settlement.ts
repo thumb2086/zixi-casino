@@ -544,94 +544,80 @@ export class GameSettlementWrapper {
       throw new Error("ONCHAIN_RUNTIME_NOT_CONFIGURED");
     }
 
-    const repo = new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
+    const repo = this.getViemRepository(runtime.rpcUrl, runtime.adminPrivateKey);
     const betPayoutService = new BetPayoutService(repo, this.FIXED_TREASURY_ADDRESS);
 
-    const failures: Array<{ intent: TxIntent; error: string }> = [];
+    // Process bet + payout intents in parallel (independent on-chain TXs)
+    const results = await Promise.allSettled(intents.map(async (intent) => {
+      await this.walletRepo.saveTxIntent(this.walletManager.processTxIntent(intent, "broadcasted"));
 
-    for (const intent of intents) {
-      try {
-        await this.walletRepo.saveTxIntent(this.walletManager.processTxIntent(intent, "broadcasted"));
+      const tokenKey = tokenSymbolToOnchainKey(intent.token);
+      const tokenRuntime = runtime.tokens[tokenKey];
+      if (!tokenRuntime?.contractAddress) {
+        throw new Error(`ONCHAIN_TOKEN_CONFIG_MISSING: ${intent.token}`);
+      }
 
-        const tokenKey = tokenSymbolToOnchainKey(intent.token);
-        const tokenRuntime = runtime.tokens[tokenKey];
-        if (!tokenRuntime?.contractAddress) {
-          throw new Error(`ONCHAIN_TOKEN_CONFIG_MISSING: ${intent.token}`);
-        }
-
-        let txResult;
-        if (intent.type === "bet") {
-          txResult = await betPayoutService.processBet({
-            from: userAddress,
-            amount: String(intent.amount || "0"),
-            tokenAddress: tokenRuntime.contractAddress,
-            roundId,
-            settlementId,
-            gameType: game,
-            tokenSymbol: intent.token,
-          });
-        } else if (intent.type === "payout") {
-          txResult = await betPayoutService.processPayout({
-            to: userAddress,
-            amount: String(intent.amount || "0"),
-            tokenAddress: tokenRuntime.contractAddress,
-            roundId,
-            settlementId,
-            gameType: game,
-            tokenSymbol: intent.token,
-          });
-        } else {
-          throw new Error(`Unknown intent type: ${intent.type}`);
-        }
-
-        await this.walletRepo.saveTxIntent(this.walletManager.processTxIntent(intent, "confirmed", txResult.txHash));
-        await this.opsRepo.logEvent({
-          channel: "game",
-          severity: "info",
-          source: game,
-          kind: "settlement_tx_confirmed",
-          userId,
-          address: userAddress,
-          game,
-          roundId,
-          settlementId,
-          txIntentId: intent.id,
-          txHash: txResult.txHash,
-          message: `Settlement tx confirmed: ${intent.type} ${txResult.txHash}`,
+      let txResult;
+      if (intent.type === "bet") {
+        txResult = await betPayoutService.processBet({
+          from: userAddress,
+          amount: String(intent.amount || "0"),
+          tokenAddress: tokenRuntime.contractAddress,
+          roundId, settlementId, gameType: game, tokenSymbol: intent.token,
         });
-      } catch (error: any) {
+      } else if (intent.type === "payout") {
+        txResult = await betPayoutService.processPayout({
+          to: userAddress,
+          amount: String(intent.amount || "0"),
+          tokenAddress: tokenRuntime.contractAddress,
+          roundId, settlementId, gameType: game, tokenSymbol: intent.token,
+        });
+      } else {
+        throw new Error(`Unknown intent type: ${intent.type}`);
+      }
+
+      await this.walletRepo.saveTxIntent(this.walletManager.processTxIntent(intent, "confirmed", txResult.txHash));
+      await this.opsRepo.logEvent({
+        channel: "game", severity: "info", source: game, kind: "settlement_tx_confirmed",
+        userId, address: userAddress, game, roundId, settlementId,
+        txIntentId: intent.id, txHash: txResult.txHash,
+        message: `Settlement tx confirmed: ${intent.type} ${txResult.txHash}`,
+      });
+      return { intent, txResult };
+    }));
+
+    const failures: Array<{ intent: TxIntent; error: string }> = [];
+    for (const r of results) {
+      if (r.status === "rejected") {
+        const intent = intents[results.indexOf(r)];
         await this.walletRepo.saveTxIntent(
-          this.walletManager.processTxIntent(intent, "failed", undefined, error?.message || "Settlement tx failed")
+          this.walletManager.processTxIntent(intent, "failed", undefined, r.reason?.message || "Settlement tx failed")
         );
         await this.opsRepo.logEvent({
-          channel: "game",
-          severity: "error",
-          source: game,
-          kind: "settlement_tx_failed",
-          userId,
-          address: userAddress,
-          game,
-          roundId,
-          settlementId,
+          channel: "game", severity: "error", source: game, kind: "settlement_tx_failed",
+          userId, address: userAddress, game, roundId, settlementId,
           txIntentId: intent.id,
-          errorCode: "TX_BROADCAST_ERROR",
-          message: `Settlement tx failed: ${intent.type} ${error?.message || "unknown error"}`,
+          message: `Settlement tx failed: ${intent.type} ${r.reason?.message || "unknown"}`,
         });
-        failures.push({ intent, error: error?.message || "Settlement tx failed" });
+        failures.push({ intent, error: r.reason?.message || "Settlement tx failed" });
       }
     }
 
-    // Surface any per-intent failure so the caller's `.catch()` runs — in
-    // particular so the prevent-loss buff rollback fires when a payout never
-    // lands on-chain. Without this re-throw, individual tx failures would be
-    // swallowed here (each intent is caught) and the async queue would appear
-    // to have completed successfully.
     if (failures.length > 0) {
       const summary = failures.map((f) => `${f.intent.type}:${f.error}`).join("; ");
       const err = new Error(`Settlement intent failures: ${summary}`);
       (err as any).intentFailures = failures;
       throw err;
     }
+  }
+
+  // Cached ViemRepository singleton (avoids new HTTP connection per request)
+  private _viemRepo: { key: string; repo: ViemRepository } | null = null;
+  private getViemRepository(rpcUrl: string, privateKey: string): ViemRepository {
+    const key = `${rpcUrl}:${privateKey.slice(0, 8)}`;
+    if (this._viemRepo?.key === key) return this._viemRepo.repo;
+    this._viemRepo = { key, repo: new ViemRepository(rpcUrl, privateKey) };
+    return this._viemRepo.repo;
   }
 
   /**

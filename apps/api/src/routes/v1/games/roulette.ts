@@ -99,86 +99,64 @@ export async function rouletteRoutes(fastify: FastifyInstance) {
       const payout = isWin ? betAmount * totalPayoutMultiplier : 0;
       const payoutStr = payout.toString();
 
-      // 3. Execute on-chain settlement
-      const settlement = await gameSettlement.executeSettlement({
-        userId,
-        address,
-        game: "roulette",
-        token: token === "yjc" ? "YJC" : "ZXC",
-        betAmount: amountStr,
-        payoutAmount: payoutStr,
-        roundId,
-        requestId: request.id,
-      });
-
-      if (!settlement.success) {
-        // Rollback balance on settlement error
-        await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
-        return createApiEnvelope(
-          { success: false },
-          request.id,
-          false,
-          settlement.error?.message || "Settlement failed"
-        );
-      }
-
-      // 4. Credit payout to balance
+      // 3. Credit payout directly (settlement fires in background like coinflip/slots)
       const finalBalance = await gameSettlement.creditPayout(
         address,
         token,
         validation.balanceAfter,
-        settlement.finalPayout,
+        payout,
         'roulette',
         userId,
         betAmount
       );
 
-      // Respond immediately — remaining work fires in background
-      const responsePayload = {
-        success: true,
-        data: {
-          roundId: roundInfo.roundId,
-          winningNumber,
-          color,
-          result: settlement.isWin ? "win" : "lose",
-          payout: settlement.finalPayout,
-          betAmount,
-          multiplier: totalPayoutMultiplier,
-          fee: settlement.feeAmount,
-          balance: finalBalance,
-          betTxHash: settlement.betTxHash,
-          payoutTxHash: settlement.payoutTxHash,
-          closesAt: roundInfo.closesAt,
-          bettingClosesAt: roundInfo.bettingClosesAt,
-        }
-      };
-
-      // 5-8. Background: updateTotalBet, recordGame, logEvent, saveRound
+      // 4. Background: settlement, XP, session, events
       void (async () => {
         try {
-          await gameSettlement.updateTotalBet(address, betAmount, undefined, userId);
+          await gameSettlement.executeSettlement({
+            userId, address, game: "roulette",
+            token: token === "yjc" ? "YJC" : "ZXC",
+            betAmount: amountStr, payoutAmount: payout.toString(),
+            roundId, requestId: request.id,
+          });
+          await gameSettlement.updateTotalBet(address, betAmount, payout > 0 ? payout : undefined, userId, 'roulette');
           const db = await requireDb();
           const sessionManager = new GameSessionManager(db);
           await sessionManager.recordGame({
             userId, address, game: "roulette", betAmount,
             gameResult: {
-              result: settlement.isWin ? "win" : "lose",
-              payout: settlement.finalPayout,
-              meta: { winningNumber, color, bets, betTxHash: settlement.betTxHash, payoutTxHash: settlement.payoutTxHash, fee: settlement.feeAmount, roundId: roundInfo.roundId, closesAt: roundInfo.closesAt },
+              result: payout > 0 ? "win" : "lose",
+              payout,
+              meta: { winningNumber, color, bets, betTxHash: null, payoutTxHash: null, fee: 0, roundId: roundInfo.roundId, closesAt: roundInfo.closesAt },
             },
           });
           await gameSettlement.logGameEvent({
-            game: "roulette", userId, address, amount: amountStr, payout: settlement.finalPayout.toString(),
-            fee: settlement.feeAmount.toString(), isWin: settlement.isWin, multiplier: totalPayoutMultiplier,
-            betTxHash: settlement.betTxHash, payoutTxHash: settlement.payoutTxHash, roundId,
+            game: "roulette", userId, address, amount: amountStr, payout: payout.toString(),
+            fee: "0", isWin: payout > 0, multiplier: totalPayoutMultiplier,
+            betTxHash: undefined, payoutTxHash: undefined, roundId,
           });
-          await gameSettlement.saveRound("roulette", roundId, { winningNumber, color, isWin, roundInfo });
+          await gameSettlement.saveRound("roulette", roundId, { winningNumber, color, isWin: payout > 0, roundInfo });
         } catch (bgErr) {
           console.error(`[roulette] background processing failed for round ${roundId}:`, bgErr);
         }
       })();
 
-      return createApiEnvelope(responsePayload, request.id);
+      return createApiEnvelope({
+        success: true,
+        data: {
+          roundId: roundInfo.roundId,
+          winningNumber,
+          color,
+          result: isWin ? "win" : "lose",
+          payout,
+          betAmount,
+          multiplier: totalPayoutMultiplier,
+          fee: 0,
+          balance: finalBalance,
+          closesAt: roundInfo.closesAt,
+          bettingClosesAt: roundInfo.bettingClosesAt,
+        }
+      }, request.id);
 
     } catch (err: any) {
       await gameSettlement.rollbackBalance(address, token, validation.balanceBefore);
