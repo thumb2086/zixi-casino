@@ -393,19 +393,19 @@ export class GameSettlementWrapper {
           ctx.requestId
         );
 
-        await this.walletRepo.saveTxIntent({
-          ...betIntent,
-          address: ctx.address.toLowerCase(),
-          meta: { settlementId: settlement.id, async: true },
-        });
-
-        if (payoutIntent) {
-          await this.walletRepo.saveTxIntent({
+        // Parallel: save both intents simultaneously
+        await Promise.all([
+          this.walletRepo.saveTxIntent({
+            ...betIntent,
+            address: ctx.address.toLowerCase(),
+            meta: { settlementId: settlement.id, async: true },
+          }),
+          payoutIntent ? this.walletRepo.saveTxIntent({
             ...payoutIntent,
             address: ctx.address.toLowerCase(),
             meta: { settlementId: settlement.id, async: true },
-          });
-        }
+          }) : Promise.resolve(),
+        ]);
 
         const queuedIntents: TxIntent[] = payoutIntent ? [betIntent, payoutIntent] : [betIntent];
         void this.processQueuedIntents(queuedIntents, ctx.address.toLowerCase(), ctx.game, ctx.roundId, settlement.id, ctx.userId)
@@ -712,18 +712,16 @@ export class GameSettlementWrapper {
     const db = await requireDb();
     const addr = address.toLowerCase();
 
+    // Single SQL: upsert total_bets + update total_win in one statement
     await db.execute(sql`
-      INSERT INTO total_bets (period_type, period_id, address, amount)
-      VALUES ('all', '', ${addr}, ${betAmount})
+      INSERT INTO total_bets (period_type, period_id, address, amount, total_win)
+      VALUES ('all', '', ${addr}, ${betAmount}, ${winAmount && winAmount > 0 ? winAmount : 0})
       ON CONFLICT (period_type, period_id, address)
-      DO UPDATE SET amount = total_bets.amount + ${betAmount}
+      DO UPDATE SET
+        amount = total_bets.amount + ${betAmount},
+        total_win = total_bets.total_win + ${winAmount && winAmount > 0 ? winAmount : 0}
     `);
-    if (winAmount && winAmount > 0) {
-      await db.execute(sql`
-        UPDATE total_bets SET total_win = COALESCE(total_win, 0) + ${winAmount}
-        WHERE period_type = 'all' AND period_id = '' AND address = ${addr}
-      `);
-    }
+
     if (userId) {
       await Promise.all([
         this.checkAndUnlockTitles(userId, address),
@@ -764,27 +762,23 @@ export class GameSettlementWrapper {
     const { grantXp, levelForXp } = await import("@repo/domain");
     const { loadInventoryState } = await import("./inventory.js");
 
-    const state = await loadInventoryState(userId);
+    // Parallel: inventory + VIP + event multiplier + current profile (4 independent lookups)
+    const [state, vipLevel, eventMult, [profileRow]] = await Promise.all([
+      loadInventoryState(userId).catch(() => ({ activeBuffs: [] } as any)),
+      address ? this.getVipLevelCached(address).catch(() => null) : Promise.resolve(null),
+      (async () => {
+        const { kv } = await import("@repo/infrastructure");
+        return Number(await kv.get<string>('xp_event_multiplier') || '0');
+      })(),
+      db.execute(sql`SELECT xp, level FROM user_profiles WHERE user_id = ${userId}`),
+    ]);
 
-    let vipDailyBonusMult = 1;
-    if (address) {
-      try {
-        const vipLevelTier = await this.vipManager.getVipLevel(address);
-        vipDailyBonusMult = vipLevelTier.dailyBonusMultiplier ?? 1;
-      } catch {}
-    }
-
-    const { kv } = await import("@repo/infrastructure");
-    const eventMult = Number(await kv.get<string>('xp_event_multiplier') || '0');
+    const vipDailyBonusMult = (vipLevel as any)?.dailyBonusMultiplier ?? 1;
     const eventBonus = Math.max(0, eventMult - 1);
-
     const { xpGained } = grantXp(0, 1, betAmount, state.activeBuffs, vipDailyBonusMult, eventBonus);
 
-    const [prev] = await db.execute(sql`
-      SELECT xp, level FROM user_profiles WHERE user_id = ${userId}
-    `);
-    const prevXp = Number(prev?.[0]?.xp || 0);
-    const prevLevel = Number(prev?.[0]?.level || 1);
+    const prevXp = Number(profileRow?.[0]?.xp || 0);
+    const prevLevel = Number(profileRow?.[0]?.level || 1);
     const newTotalXp = prevXp + xpGained;
     const newLevel = levelForXp(newTotalXp);
 

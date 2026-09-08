@@ -154,6 +154,17 @@ function AppContent() {
     );
   }
 
+  // Prefetch common pages after login for instant navigation
+  useEffect(() => {
+    if (!isAuthorized) return;
+    const t = setTimeout(() => {
+      import('./features/casino/CasinoView');
+      import('./features/wallet/WalletView');
+      import('./features/market/MarketView');
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [isAuthorized]);
+
   return (
     <div className="relative min-h-screen bg-[#0e0e0e]">
       <FontSizeApplier />
