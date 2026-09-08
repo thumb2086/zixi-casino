@@ -75,6 +75,14 @@ export class GameSettlementWrapper {
   private _vipCache = new Map<string, { level: any; expiresAt: number }>();
   private static VIP_CACHE_TTL = 60_000;
 
+  // In-memory cache for luckBias (30s TTL) — saves inventory load per bet
+  private _luckBiasCache = new Map<string, { bias: number; expiresAt: number }>();
+  private static LUCK_BIAS_CACHE_TTL = 30_000;
+
+  // In-memory cache for display names (5min TTL)
+  private _nameCache = new Map<string, { name: string; expiresAt: number }>();
+  private static NAME_CACHE_TTL = 300_000;
+
   constructor() {
     this.walletManager = new WalletManager();
     this.settlementManager = new SettlementManager(this.walletManager);
@@ -683,8 +691,15 @@ export class GameSettlementWrapper {
 
   private async broadcastWin(address: string, game: string, payout: number, userId: string): Promise<void> {
     try {
-      const user = await this.userRepo.getUserById(userId);
-      const displayName = user?.displayName || address.toLowerCase().slice(0, 6);
+      let displayName: string;
+      const cached = this._nameCache.get(userId);
+      if (cached && cached.expiresAt > Date.now()) {
+        displayName = cached.name;
+      } else {
+        const user = await this.userRepo.getUserById(userId);
+        displayName = user?.displayName || address.toLowerCase().slice(0, 6);
+        this._nameCache.set(userId, { name: displayName, expiresAt: Date.now() + GameSettlementWrapper.NAME_CACHE_TTL });
+      }
       const isBig = payout >= 100000;
       const msg = {
         id: crypto.randomUUID(),
@@ -735,13 +750,17 @@ export class GameSettlementWrapper {
     const { kv } = await import("@repo/infrastructure");
     const today = new Date().toISOString().slice(0, 10);
     const addr = address.toLowerCase();
-    await kv.incrby(`mission:bet:${addr}:${today}`, betAmount);
-    await kv.incr(`mission:play:${addr}:${today}`);
-    if (winAmount > 0) await kv.incr(`mission:win:${addr}:${today}`);
-    if (game) await kv.incr(`mission:game:${game}:${addr}:${today}`);
+    await Promise.all([
+      kv.incrby(`mission:bet:${addr}:${today}`, betAmount),
+      kv.incr(`mission:play:${addr}:${today}`),
+      winAmount > 0 ? kv.incr(`mission:win:${addr}:${today}`) : Promise.resolve(),
+      game ? kv.incr(`mission:game:${game}:${addr}:${today}`) : Promise.resolve(),
+    ]);
   }
 
   async getLuckBias(userId: string): Promise<number> {
+    const cached = this._luckBiasCache.get(userId);
+    if (cached && cached.expiresAt > Date.now()) return cached.bias;
     try {
       const { loadInventoryState } = await import("./inventory.js");
       const state = await loadInventoryState(userId);
@@ -752,6 +771,7 @@ export class GameSettlementWrapper {
         if (buff.expiresAt && new Date(buff.expiresAt).getTime() < now) continue;
         total += Number(buff.value || 0);
       }
+      this._luckBiasCache.set(userId, { bias: total, expiresAt: now + GameSettlementWrapper.LUCK_BIAS_CACHE_TTL });
       return total;
     } catch { return 0; }
   }
