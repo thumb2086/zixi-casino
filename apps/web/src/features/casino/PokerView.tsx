@@ -5,6 +5,7 @@ import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./Poker.css";
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
+import { useGameResultHandler } from './useGameResultHandler';
 
 interface PokerResult {
   result: string;
@@ -17,6 +18,7 @@ export const PokerView: React.FC = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -51,9 +53,10 @@ export const PokerView: React.FC = () => {
       if (!res.status || payload?.success === false) {
         throw new Error(extractGameError(payload));
       }
-      setResult(unwrapGameEnvelope<PokerResult>(payload));
+      const gameResult = unwrapGameEnvelope<PokerResult>(payload);
+      setResult(gameResult);
       setStatus("settled");
-      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+      onBetSuccess(gameResult, queryClient);
     } catch (e: unknown) {
       setError(extractGameError(e));
       setStatus("idle");

@@ -7,6 +7,7 @@ import './Roulette.css';
 import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
+import { useGameResultHandler } from './useGameResultHandler';
 
 const EUROPEAN_LAYOUT = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 
@@ -40,6 +41,7 @@ export function RouletteView() {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
 
   const OUTSIDE_BETS: { type: PlacedBet['type']; value: string; label: string; color: string }[] = [
     { type: 'color', value: 'red', label: t('casino_game.roulette_red'), color: 'bg-red-600' },
@@ -112,8 +114,7 @@ export function RouletteView() {
       if (typeof data?.winningNumber === 'number') {
         animateWheel(data.winningNumber);
       }
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+      onBetSuccess(data, queryClient);
     },
     onError: (err: Error) => {
       setError(err.message);

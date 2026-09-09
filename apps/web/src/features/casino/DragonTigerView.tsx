@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./DragonTiger.css";
 import AppBottomNav from "../../components/AppBottomNav";
+import { useGameResultHandler } from './useGameResultHandler';
 
 type PlayResult = {
   roundId: string;
@@ -33,6 +35,8 @@ function CardView({ card }: { card?: { rank: string; suit: string } }) {
 export default function DragonTigerView() {
   const { t } = useTranslation();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
   const [betAmount, setBetAmount] = useState("100");
   const [result, setResult] = useState<PlayResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,6 +59,7 @@ export default function DragonTigerView() {
         throw new Error(payload.error?.message || payload.error || "Request failed");
       }
       setResult(payload.data?.data || payload.data);
+      onBetSuccess(payload.data?.data || payload.data, queryClient);
     } catch (e: any) {
       setError(e?.response?.data?.error?.message || e?.response?.data?.error || e?.message || "Request failed");
     } finally {

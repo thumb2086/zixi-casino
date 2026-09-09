@@ -7,11 +7,13 @@ import './CasinoCommon.css';
 import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { useTranslation } from 'react-i18next';
 import { BetQuickActions } from './BetQuickActions';
+import { useGameResultHandler } from './useGameResultHandler';
 
 export const SicboView: React.FC = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { session } = useAuth();
+  const { onBetSuccess } = useGameResultHandler();
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -57,8 +59,7 @@ export const SicboView: React.FC = () => {
         setStatus(t('casino_game.sicbo_bet_result', { total: data.total, result: data.isBig ? t('casino_game.sicbo_big_label') : t('casino_game.sicbo_small_label') }));
         setStatusColor(data.result === 'win' ? '#00ff88' : '#ff4d4d');
         setIsRevealing(false);
-        queryClient.invalidateQueries({ queryKey: ['user'] });
-        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+        onBetSuccess(data, queryClient);
       }, 300);
     },
     onError: (err: Error) => {

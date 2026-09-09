@@ -7,6 +7,7 @@ import "./Blackjack.css";
 import "./CasinoCommon.css";
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
 import { BetQuickActions } from "./BetQuickActions";
+import { useGameResultHandler } from './useGameResultHandler';
 
 // Deterministic card draw (same FNV-1a as the server)
 function fnv1a32(input: string): number {
@@ -72,6 +73,7 @@ export const BlackjackView: React.FC = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
   const seedRef = useRef<string>("");
 
   const { data: profile } = useQuery({
@@ -120,7 +122,7 @@ export const BlackjackView: React.FC = () => {
           multiplier: payload.multiplier || 0,
           reason: payload.reason,
         });
-        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+        onBetSuccess(payload, queryClient);
         return;
       }
 
@@ -163,7 +165,7 @@ export const BlackjackView: React.FC = () => {
             }));
           }
           setIsAnimating(false);
-          queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+          onBetSuccess(payload, queryClient);
         }
         return;
       }
@@ -217,7 +219,7 @@ export const BlackjackView: React.FC = () => {
           reason: payload.reason,
         }));
         setIsAnimating(false);
-        queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+        onBetSuccess(payload, queryClient);
         return;
       }
     } catch (e: any) {
