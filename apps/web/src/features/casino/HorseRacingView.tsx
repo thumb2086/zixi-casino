@@ -167,7 +167,10 @@ export const HorseRacingView: React.FC = () => {
       horseId: selectedHorseId,
     }).then((res) => {
       onBetSuccess(res.data?.data, queryClient);
-    }).catch(() => {});
+    }).catch((e) => {
+      setStatusMsg(t('casino_game.horse_bet_error', { message: e?.response?.data?.error?.message || e?.message || 'Bet failed' }));
+      setStatusColor('#ff4d4d');
+    });
   };
 
   // Start race when round closes (with or without bets)

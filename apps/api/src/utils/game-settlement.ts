@@ -587,9 +587,10 @@ export class GameSettlementWrapper {
     }));
 
     const failures: Array<{ intent: TxIntent; error: string }> = [];
-    for (const r of results) {
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
       if (r.status === "rejected") {
-        const intent = intents[results.indexOf(r)];
+        const intent = intents[i];
         await this.walletRepo.saveTxIntent(
           this.walletManager.processTxIntent(intent, "failed", undefined, r.reason?.message || "Settlement tx failed")
         );

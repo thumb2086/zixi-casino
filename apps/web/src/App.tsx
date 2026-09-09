@@ -8,6 +8,7 @@ import LobbyView from './features/casino/LobbyView';
 import SoundPlayer from './components/SoundPlayer';
 import TransactionQueueIndicator from './components/TransactionQueueIndicator';
 import ToastProvider from './components/ToastProvider';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { useAuthStore } from './store/useAuthStore';
 import { useUserStore } from './store/useUserStore';
 import { useSyncUser } from './hooks/useSyncUser';
@@ -172,6 +173,7 @@ function AppContent() {
       {isAuthorized && <TransactionQueueIndicator />}
       <ToastProvider />
       <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>}>
+      <ErrorBoundary>
       <Routes>
         <Route path="/landing" element={<LandingView />} />
         <Route path="/oauth/consent" element={<OAuthConsentView />} />
@@ -219,6 +221,7 @@ function AppContent() {
           </>
         )}
       </Routes>
+      </ErrorBoundary>
       </Suspense>
     </div>
   );
