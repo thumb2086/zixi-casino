@@ -108,6 +108,7 @@ export const SlotsView: React.FC = () => {
   }, []);
 
   const doSingleSpin = async (): Promise<{ won: boolean; payout: number }> => {
+    if (!session) throw new Error('No session');
     if (autoSpinRef.current) {
       const res = await api.post('/api/v1/games/slots/play', {
         sessionId: session.id,

@@ -57,7 +57,7 @@ export async function processIntents() {
         const retryCount = Number(intent.retryCount || 0);
         if (retryCount >= 5) {
           console.warn(`Skipping intent ${intent.id}: max retries (5) reached.`);
-          continue;
+          return;
         }
 
         await opsRepo.logEvent({

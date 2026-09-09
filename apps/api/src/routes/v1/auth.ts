@@ -336,8 +336,8 @@ export async function authRoutes(fastify: FastifyInstance) {
   typedFastify.post("/custody/login", {
     schema: {
       body: z.object({
-        username: z.string(),
-        password: z.string(),
+        username: z.string().min(1),
+        password: z.string().min(6),
         platform: z.string().optional(),
         clientType: z.string().optional(),
         deviceId: z.string().optional(),
@@ -369,8 +369,8 @@ export async function authRoutes(fastify: FastifyInstance) {
   typedFastify.post("/custody/register", {
     schema: {
       body: z.object({
-        username: z.string(),
-        password: z.string(),
+        username: z.string().min(3).max(20),
+        password: z.string().min(6),
         platform: z.string().optional(),
         clientType: z.string().optional(),
         deviceId: z.string().optional(),
