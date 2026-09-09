@@ -7,6 +7,7 @@ import './CasinoCommon.css';
 import { BetQuickActions } from './BetQuickActions';
 import { formatNumber } from '@repo/shared';
 import { useTranslation } from 'react-i18next';
+import { useGameResultHandler } from './useGameResultHandler';
 
 interface Horse {
   id: number; name: string; multiplier: number; weight: number;
@@ -60,6 +61,7 @@ export const HorseRacingView: React.FC = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
   const [betAmount, setBetAmount] = useState('10');
   const [selectedHorseId, setSelectedHorseId] = useState(1);
   const [statusMsg, setStatusMsg] = useState(t('casino_game.horse_bet_prompt'));
@@ -163,8 +165,8 @@ export const HorseRacingView: React.FC = () => {
       sessionId: session.id,
       betAmount: Number(betAmount),
       horseId: selectedHorseId,
-    }).then(() => {
-      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+    }).then((res) => {
+      onBetSuccess(res.data?.data, queryClient);
     }).catch(() => {});
   };
 

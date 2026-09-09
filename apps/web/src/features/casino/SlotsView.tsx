@@ -8,6 +8,7 @@ import { extractGameError, unwrapGameEnvelope } from './gameClient';
 import { BetQuickActions } from './BetQuickActions';
 import { formatNumber } from '@repo/shared';
 import { useTranslation } from 'react-i18next';
+import { useGameResultHandler } from './useGameResultHandler';
 
 const REEL_CELLS = [[0, 3, 6], [1, 4, 7], [2, 5, 8]];
 const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎', '7️⃣'];
@@ -19,6 +20,7 @@ export const SlotsView: React.FC = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
   const spinningRef = useRef(false);
   const autoSpinRef = useRef(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -116,6 +118,7 @@ export const SlotsView: React.FC = () => {
       const result = unwrapGameEnvelope<any>(payload);
       summaryRef.current.spins += 1;
       if (result.multiplier > 0) summaryRef.current.wins += result.payout || 0;
+      onBetSuccess(result, queryClient);
       return { won: result.multiplier > 0, payout: result.payout || 0 };
     }
 
@@ -140,6 +143,7 @@ export const SlotsView: React.FC = () => {
         const payload = res.data;
         if (payload?.success === false) { reject(new Error(extractGameError(payload))); return; }
         const result = unwrapGameEnvelope<any>(payload);
+        onBetSuccess(result, queryClient);
         if (skipSpinRef.current) {
           showResult(result);
           return;
@@ -198,6 +202,7 @@ export const SlotsView: React.FC = () => {
           if (result.multiplier > 0) summaryRef.current.wins += result.payout || 0;
           setGrid(result.symbols || []);
           if (result.multiplier > 0) setWinSymbols(result.winLines?.flat() || []);
+          onBetSuccess(result, queryClient);
         }
       } catch {}
     }

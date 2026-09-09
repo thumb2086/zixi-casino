@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "../auth/useAuth";
 import { api } from "../../store/api";
 import "./Crash.css";
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
 import { useTranslation } from 'react-i18next';
+import { useGameResultHandler } from './useGameResultHandler';
 
 export const CrashView: React.FC = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
   const [betAmount, setBetAmount] = useState<string>("100");
   const [status, setStatus] = useState<"idle" | "running" | "crashed" | "cashed_out">("idle");
   const [multiplier, setMultiplier] = useState<number>(1.0);
@@ -55,6 +59,7 @@ export const CrashView: React.FC = () => {
       setMultiplier(payload.crashPoint || shownMultiplier);
       setStatus(payload.crashed ? "crashed" : "cashed_out");
       setRoundId(null);
+      onBetSuccess(payload, queryClient);
     } catch (e: any) {
       setError(extractGameError(e?.response?.data || e));
       setStatus("idle");

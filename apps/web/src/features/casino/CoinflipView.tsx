@@ -4,12 +4,14 @@ import { useAuth } from '../auth/useAuth';
 import { api } from '../../store/api';
 import { ChipAnimation } from '../../components/ChipAnimation';
 import { useTranslation } from 'react-i18next';
+import { useGameResultHandler } from './useGameResultHandler';
 import './Coinflip.css';
 
 export const CoinflipView: React.FC = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const { session } = useAuth();
+  const { onBetSuccess } = useGameResultHandler();
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -84,8 +86,7 @@ export const CoinflipView: React.FC = () => {
       const payout = Number(data.payout) || 0;
 
       showResult(data.winner, won, payout);
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+      onBetSuccess(data, queryClient);
     },
     onError: (err: Error) => {
       setStatus(t('casino_game.coinflip_error', { message: err.message }));

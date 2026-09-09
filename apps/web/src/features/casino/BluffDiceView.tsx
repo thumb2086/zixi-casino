@@ -5,6 +5,7 @@ import { api } from "../../store/api";
 import "./BluffDice.css";
 import { useTranslation } from 'react-i18next';
 import { extractGameError, unwrapGameEnvelope } from "./gameClient";
+import { useGameResultHandler } from './useGameResultHandler';
 
 interface GameResult {
   dice: number[];
@@ -17,6 +18,7 @@ export const BluffDiceView: React.FC = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const { onBetSuccess } = useGameResultHandler();
 
   const { data: profile } = useQuery({
     queryKey: ['my-profile'],
@@ -53,9 +55,10 @@ export const BluffDiceView: React.FC = () => {
       if (!res.status || payload?.success === false) {
         throw new Error(extractGameError(payload));
       }
-      setResult(unwrapGameEnvelope<GameResult>(payload));
+      const gameResult = unwrapGameEnvelope<GameResult>(payload);
+      setResult(gameResult);
       setStatus("settled");
-      queryClient.invalidateQueries({ queryKey: ['my-profile'] });
+      onBetSuccess(gameResult, queryClient);
     } catch (e: unknown) {
       setError(extractGameError(e));
       setStatus("idle");
