@@ -4,6 +4,23 @@ import { getOnChainConfig, SettlementServiceImpl, ViemRepository } from "@repo/o
 
 const FIXED_TREASURY_ADDRESS = getOnChainConfig().treasuryAddress;
 
+// Cached instances (avoid recreating provider every 5s tick)
+let cachedChainClient: ChainClient | null = null;
+let cachedSettlementService: SettlementServiceImpl | null = null;
+let cachedRpcKey = "";
+
+function getCachedServices(runtime: { rpcUrl: string; adminPrivateKey: string }) {
+  const key = `${runtime.rpcUrl}:${runtime.adminPrivateKey.slice(0, 8)}`;
+  if (key !== cachedRpcKey || !cachedChainClient || !cachedSettlementService) {
+    cachedChainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
+    cachedSettlementService = new SettlementServiceImpl(
+      new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey)
+    );
+    cachedRpcKey = key;
+  }
+  return { chainClient: cachedChainClient, settlementService: cachedSettlementService };
+}
+
 async function getPendingAndFailedIntents(walletRepo: WalletRepository) {
   const [pending, failed] = await Promise.all([
     walletRepo.getPendingIntents(),
@@ -33,10 +50,7 @@ export async function processIntents() {
     return;
   }
 
-  const chainClient = new ChainClient(runtime.rpcUrl, runtime.adminPrivateKey);
-  const settlementService = new SettlementServiceImpl(
-    new ViemRepository(runtime.rpcUrl, runtime.adminPrivateKey)
-  );
+  const { chainClient, settlementService } = getCachedServices(runtime);
 
   try {
     const intents = await getPendingAndFailedIntents(walletRepo);

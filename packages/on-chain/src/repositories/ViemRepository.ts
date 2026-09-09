@@ -31,12 +31,22 @@ export class ViemRepository implements OnChainRepository {
     const decimals = await this.getDecimals(params.tokenAddress);
     const amountWei = ethers.parseUnits(params.amount, decimals);
     const contract = new ethers.Contract(params.tokenAddress, ERC20_ABI, this.signer);
-    const tx = await contract.adminTransfer(params.from, params.to, amountWei);
-    const receipt = await tx.wait();
-    return {
-      txHash: tx.hash,
-      chainId: this.chainId || Number((await this.provider.getNetwork()).chainId),
-      confirmed: receipt?.status === 1,
-    };
+
+    let lastError: any;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const tx = await contract.adminTransfer(params.from, params.to, amountWei);
+        const receipt = await tx.wait();
+        return {
+          txHash: tx.hash,
+          chainId: this.chainId || Number((await this.provider.getNetwork()).chainId),
+          confirmed: receipt?.status === 1,
+        };
+      } catch (err: any) {
+        lastError = err;
+        if (attempt < 3) await new Promise(r => setTimeout(r, 2000 * attempt));
+      }
+    }
+    throw lastError;
   }
 }
