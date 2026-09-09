@@ -205,7 +205,7 @@ export async function walletRoutes(fastify: FastifyInstance) {
     try {
       const { runtime, client } = getChainClient();
       onchain.adminAddress = client.getWalletAddress();
-      onchain.available = Object.values(runtime.tokens).some((token) => token.enabled);
+      onchain.available = Object.values(runtime.tokens).some((t: any) => t.enabled);
 
       const tokenFetches = (["zhixi", "yjc"] as WalletTokenKey[]).map(async (token) => {
         const tokenRuntime = runtime.tokens[token];
