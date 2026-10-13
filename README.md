@@ -1,6 +1,39 @@
 # Zixi Casino 專案總覽
 
-更新日期：2026-04-30
+> # ⛔ 專案已停用（2026-10-13）
+>
+> **服務已關閉，實測確認：**
+> ```text
+> zixi-casino-api.onrender.com   → 逾時 25 秒
+> zixi-casino.vercel.app         → HTTP 404
+> ```
+>
+> 資產已於 2026-10-06~13 換算併入 **`zixi-earth`**（`twonline.dpdns.org`）。
+> 這份文件與本 repo 的其他文件**保留為歷史紀錄**，不再是操作手冊。
+>
+> ## 還有一個實用價值
+>
+> `zixi-wallet-app`（Device-Linker 硬體錢包）要重做 9 個相容端點才能重新可用，
+> **原本的實作就在這個 repo**：
+>
+> | 要重做的 | 原始碼 |
+> |---|---|
+> | 硬體授權 | `apps/api/src/routes/legacy/user-legacy.ts` |
+> | session 機制 | `apps/api/src/routes/v1/auth.ts` |
+> | 錢包查詢／轉帳／空投 | `apps/api/src/routes/legacy/wallet-legacy.ts` |
+> | 回應格式 `{success,data,...}` | `apps/api/src/index.ts` |
+>
+> 規格在 `../zixi-wallet-app/device-linker-api-integration.md`。
+> 照抄可以確保行為一致 —— app 在解析的是這套格式。
+>
+> ## 維護注意
+> - 550 個 `node_modules`（pnpm workspace），clone 後必須 `pnpm install`
+> - 只有 `@repo/shared` + `web` 能用已追蹤的檔案建置，其餘需要未追蹤的套件
+> - **沒有 lint / test 腳本，也沒有測試框架**
+
+---
+
+更新日期：2026-04-30（內容自此未更新，服務已停用）
 
 Zixi Casino 是一個 pnpm workspace 專案，前端使用 React + Vite，後端使用 Fastify API，並透過共用套件定義 schema、常數與格式化工具。產品面包含登入、錢包、鏈上代幣、娛樂場遊戲、排行榜、VIP、獎勵寶箱、市場模擬、公告、客服與管理後台。
 
