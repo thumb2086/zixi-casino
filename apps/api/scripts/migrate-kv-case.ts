@@ -1,6 +1,15 @@
 import postgres from 'postgres';
 
-const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || '***REMOVED-BY-SECURITY-FIX***';
+// ★ 2026-10-17：原本這裡有硬寫的 Neon DSN 當 fallback，已拿掉。
+//
+//   env 拿不到就明確失敗 —— 寧���腳本跑不起來，
+//   也不要讓人為了圖方便又把 DSN 貼回來（上次就是這樣進去的）。
+const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+if (!url) {
+  console.error("DATABASE_URL / POSTGRES_URL 未設定。\n" +
+    "  用法：DATABASE_URL=postgres://user:pass@host/db npx tsx apps/api/scripts/migrate-kv-case.ts");
+  process.exit(1);
+}
 const sql = postgres(url, { ssl: 'require', max: 1 });
 
 async function main() {

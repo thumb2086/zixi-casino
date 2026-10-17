@@ -10,6 +10,19 @@ dist
 .pnpm-debug.log
 .turbo
 .env*.local
+
+# ★ 2026-10-17：上面 .env.* 會把範本也擋掉，沒有這條就永遠補不起 .env.example
+!.env.example
+
+# 其他常見的憑證檔（防手滑）
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+service-account*.json
+!service-account*example*.json
 .states/
 .playwright-browsers/
 .puppeteer-cache/
